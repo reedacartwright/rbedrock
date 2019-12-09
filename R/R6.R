@@ -4,13 +4,13 @@ leveldb <- function(path,
                     paranoid_checks = NULL,
                     write_buffer_size = NULL,
                     max_open_files = NULL,
-                    cache_capacity = NULL,
                     block_size = NULL,
                     use_compression = NULL,
+                    cache_capacity = NULL,
                     bloom_filter_bits_per_key = NULL) {
   R6_leveldb$new(path, create_if_missing, error_if_exists,
                  paranoid_checks, write_buffer_size, max_open_files,
-                 cache_capacity, block_size, use_compression,
+                 block_size, use_compression, cache_capacity,
                  bloom_filter_bits_per_key)
 }
 
