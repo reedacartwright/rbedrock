@@ -3,7 +3,7 @@
 
 #include "leveldb/snappy_compressor.h"
 
-#include <snappy/snappy.h>
+#include <snappy.h>
 
 namespace leveldb {
 	void SnappyCompressor::compressImpl(const char* input, size_t length, ::std::string& output) const
