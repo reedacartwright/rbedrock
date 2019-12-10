@@ -25,25 +25,25 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-leveldb <- function(path,
+bedrockdb <- function(path,
                     create_if_missing = TRUE,
                     error_if_exists = NULL,
                     paranoid_checks = NULL,
-                    write_buffer_size = NULL,
+                    write_buffer_size = 4194304,
                     max_open_files = NULL,
                     block_size = NULL,
-                    use_compression = NULL,
-                    cache_capacity = NULL,
-                    bloom_filter_bits_per_key = NULL) {
-  R6_leveldb$new(path, create_if_missing, error_if_exists,
+                    use_compression = 4,
+                    cache_capacity = 41943040,
+                    bloom_filter_bits_per_key = 10) {
+  R6_bedrockdb$new(path, create_if_missing, error_if_exists,
                  paranoid_checks, write_buffer_size, max_open_files,
                  block_size, use_compression, cache_capacity,
                  bloom_filter_bits_per_key)
 }
 
 ##' @importFrom R6 R6Class
-R6_leveldb <- R6::R6Class(
-  "leveldb",
+R6_bedrockdb <- R6::R6Class(
+  "bedrockdb",
   public = list(
     db = NULL,
     path = NULL,
@@ -86,7 +86,7 @@ R6_leveldb <- R6::R6Class(
     exists = function(key, readoptions = NULL) {
       leveldb_exists(self$db, key, readoptions)
     },
-    keys = function(starts_with = NULL, as_raw = FALSE, readoptions = NULL) {
+    keys = function(starts_with = NULL, as_raw = TRUE, readoptions = NULL) {
       leveldb_keys(self$db, starts_with, as_raw, readoptions)
     },
     keys_len = function(starts_with = NULL, readoptions = NULL) {
@@ -109,8 +109,8 @@ R6_leveldb <- R6::R6Class(
     }
   ))
 
-R6_leveldb_iterator <- R6::R6Class(
-  "leveldb_iterator",
+R6_bedrockb_iterator <- R6::R6Class(
+  "bedrockdb_iterator",
   public = list(
     it = NULL,
     initialize = function(db, readoptions) {
@@ -150,8 +150,8 @@ R6_leveldb_iterator <- R6::R6Class(
     }
   ))
 
-R6_leveldb_writebatch <- R6::R6Class(
-  "leveldb_writebatch",
+R6_bedrockdb_writebatch <- R6::R6Class(
+  "bedrockdb_writebatch",
   public = list(
     ptr = NULL,
     db = NULL,

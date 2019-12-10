@@ -4,10 +4,18 @@
 \alias{leveldb_open}
 \title{Open a LevelDB Database}
 \usage{
-leveldb_open(path, create_if_missing = NULL, error_if_exists = NULL,
-  paranoid_checks = NULL, write_buffer_size = NULL,
-  max_open_files = NULL, block_size = NULL, use_compression = NULL,
-  cache_capacity = NULL, bloom_filter_bits_per_key = NULL)
+leveldb_open(
+  path,
+  create_if_missing = NULL,
+  error_if_exists = NULL,
+  paranoid_checks = NULL,
+  write_buffer_size = NULL,
+  max_open_files = NULL,
+  block_size = NULL,
+  use_compression = NULL,
+  cache_capacity = NULL,
+  bloom_filter_bits_per_key = NULL
+)
 }
 \arguments{
 \item{path}{The path to the database, as stored on the filesystem.
