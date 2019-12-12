@@ -17,6 +17,7 @@ Depends:
     R (>= 3.6.0)
 Imports:
     R6,
-    stringr
+    stringr,
+    rappdirs
 URL: http://github.com/reedacartwright/rbedrock/
 BugReports: http://github.com/reedacartwright/rbedrock/issues

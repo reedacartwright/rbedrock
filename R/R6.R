@@ -26,7 +26,7 @@
 
 
 bedrockdb <- function(path,
-                    create_if_missing = TRUE,
+                    create_if_missing = FALSE,
                     error_if_exists = NULL,
                     paranoid_checks = NULL,
                     write_buffer_size = 4194304,
@@ -47,9 +47,23 @@ R6_bedrockdb <- R6::R6Class(
   public = list(
     db = NULL,
     path = NULL,
+    levelname = NULL,
+    mtime = NULL,
     initialize = function(path, ...) {
-      self$path <- path
-      self$db <- bedrock_leveldb_open(path, ...)
+      if(file.exists(path)) {
+        path <- normalizePath(path)
+      } else {
+        wpath <- paste0(worldsPath(),"/",path)
+        if(file.exists(wpath)) {
+          path <- normalizePath(wpath)
+        }
+      }
+      namefile <- paste0(path, "/levelname.txt")
+      self$levelname <- readLines(namefile, 1L, warn=FALSE)
+      self$mtime <- as.character(file.mtime(namefile))
+
+      self$path <- paste0(path, "/db")
+      self$db <- bedrock_leveldb_open(self$path, ...)
     },
     close = function(error_if_closed = FALSE) {
       bedrock_leveldb_close(self$db, error_if_closed)
@@ -93,10 +107,10 @@ R6_bedrockdb <- R6::R6Class(
       bedrock_leveldb_keys_len(self$db, starts_with, readoptions)
     },
     iterator = function(readoptions = NULL) {
-      R6_leveldb_iterator$new(self$db, readoptions)
+      R6_bedrockdb_iterator$new(self$db, readoptions)
     },
     writebatch = function() {
-      R6_leveldb_writebatch$new(self$db)
+      R6_bedrockdb_writebatch$new(self$db)
     },
     snapshot = function() {
       bedrock_leveldb_snapshot(self$db)
@@ -109,7 +123,7 @@ R6_bedrockdb <- R6::R6Class(
     }
   ))
 
-R6_bedrockb_iterator <- R6::R6Class(
+R6_bedrockdb_iterator <- R6::R6Class(
   "bedrockdb_iterator",
   public = list(
     it = NULL,

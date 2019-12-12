@@ -97,3 +97,29 @@ writeBinHSA_ <- function(hsa) {
     }
     out
 }
+
+worldsPath <- function() {
+    if (.Platform$OS.type == "windows") { 
+        datadir <- rappdirs::user_data_dir("Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\LocalState")
+    } else {
+        datadir <- rappdirs::user_data_dir("mcpelauncher")
+    }
+    normalizePath(stringr::str_c(datadir, "/games/com.mojang/minecraftWorlds"))
+}
+
+listWorlds <- function(dir=worldsPath()) {
+    folders <- list.dirs(path=dir, full.names=TRUE,recursive=FALSE)
+    out <- NULL
+    for(folder in folders) {
+        levelname <- stringr::str_c(folder, "/levelname.txt")
+        if(!file.exists(levelname)) {
+            next
+        }
+        mtime <- as.character(file.mtime(levelname))
+        name <- readLines(levelname, 1L, warn=FALSE)
+
+        out <- rbind(out, c(basename(folder), name, mtime))
+    }
+    colnames(out) <- c("folder","levelname", "mtime")
+    out
+}
