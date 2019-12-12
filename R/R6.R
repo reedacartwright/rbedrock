@@ -86,8 +86,8 @@ R6_bedrockdb <- R6::R6Class(
     exists = function(key, readoptions = NULL) {
       bedrock_leveldb_exists(self$db, from_bedrockdb_key(key), readoptions)
     },
-    keys = function(starts_with = NULL, as_raw = TRUE, readoptions = NULL) {
-      to_bedrockdb_key(bedrock_leveldb_keys(self$db, starts_with, as_raw, readoptions))
+    keys = function(starts_with = NULL, readoptions = NULL) {
+      to_bedrockdb_key(bedrock_leveldb_keys(self$db, starts_with, as_raw=TRUE, readoptions))
     },
     keys_len = function(starts_with = NULL, readoptions = NULL) {
       bedrock_leveldb_keys_len(self$db, starts_with, readoptions)
@@ -142,8 +142,8 @@ R6_bedrockb_iterator <- R6::R6Class(
       bedrock_leveldb_iter_prev(self$it, error_if_invalid)
       invisible(self)
     },
-    key = function(as_raw = NULL, error_if_invalid = FALSE) {
-      to_bedrockdb_key(bedrock_leveldb_iter_key(self$it, as_raw, error_if_invalid))
+    key = function(error_if_invalid = FALSE) {
+      to_bedrockdb_key(bedrock_leveldb_iter_key(self$it, as_raw=TRUE, error_if_invalid))
     },
     value = function(as_raw = NULL, error_if_invalid = FALSE) {
       bedrock_leveldb_iter_value(self$it, as_raw, error_if_invalid)
@@ -239,17 +239,18 @@ to_bedrockdb_key <- function(key) {
 }
 
 from_bedrockdb_key <- function(key) {
-  m <- stringr::str_match(key, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$")
-  m <- cbind(key,m)
-  out <- apply(m, 1, function(k) {
+  m <- stringr::str_match(key, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$|^.*$")
+  s <- split(m,seq_len(nrow(m)))  
+  
+  out <- lapply(s, function(k) {
     if(is.na(k[2])) {
       return(charToRaw(k[1]))
     }
-    x <- as.integer(k[3])
-    z <- as.integer(k[4])
-    d <- as.integer(k[5])
-    tag <- as.integer(k[6])
-    subtag <- as.integer(k[7])
+    x <- as.integer(k[2])
+    z <- as.integer(k[3])
+    d <- as.integer(k[4])
+    tag <- as.integer(k[5])
+    subtag <- as.integer(k[6])
 
     r <- writeBin(c(x,z), raw(), size=4, endian="little")
     if(d > 0) {
@@ -261,5 +262,8 @@ from_bedrockdb_key <- function(key) {
     }
     return(r)
   })
+  if(length(out) == 1) {
+    return(out[[1]])
+  }
   return(out)
 }
