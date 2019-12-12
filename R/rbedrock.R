@@ -49,8 +49,8 @@ putHSA <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
             hx2 <- min(x[2],chunk_x*16+15)
             hz1 <- max(z[1],chunk_z*16)
             hz2 <- min(z[2],chunk_z*16+15)
-            hy1 <- y1
-            hy2 <- y2
+            hy1 <- y[1]
+            hy2 <- y[2]
 
             hsa <- matrix(c(hx1,hy1,hz1,hx2,hy2,hz2,tag),1,7)
 
@@ -90,7 +90,7 @@ readBinHSA_ <- function(val) {
 writeBinHSA_ <- function(hsa) {
     len <- nrow(hsa)
     out <- writeBin(as.integer(len), raw(), size=4, endian="little")
-    for(i in 1:len) {
+    for (i in 1:len) {
         n = as.integer(hsa[i,])
         out <- c(out, writeBin(n[1:6], raw(), size=4, endian="little"))
         out <- c(out, writeBin(n[7], raw(), size=1, endian="little"))
@@ -107,19 +107,19 @@ worldsPath <- function() {
     normalizePath(stringr::str_c(datadir, "/games/com.mojang/minecraftWorlds"))
 }
 
-listWorlds <- function(dir=worldsPath()) {
-    folders <- list.dirs(path=dir, full.names=TRUE,recursive=FALSE)
+listWorlds <- function(dir = worldsPath()) {
+    folders <- list.dirs(path = dir, full.names = TRUE, recursive = FALSE)
     out <- NULL
-    for(folder in folders) {
+    for (folder in folders) {
         levelname <- stringr::str_c(folder, "/levelname.txt")
-        if(!file.exists(levelname)) {
+        if (!file.exists(levelname)) {
             next
         }
         mtime <- as.character(file.mtime(levelname))
-        name <- readLines(levelname, 1L, warn=FALSE)
+        name <- readLines(levelname, 1L, warn = FALSE)
 
         out <- rbind(out, c(basename(folder), name, mtime))
     }
-    colnames(out) <- c("folder","levelname", "mtime")
+    colnames(out) <- c("folder", "levelname", "mtime")
     out
 }
