@@ -18,6 +18,7 @@ Depends:
 Imports:
     R6,
     stringr,
-    rappdirs
+    rappdirs,
+    bit64
 URL: http://github.com/reedacartwright/rbedrock/
 BugReports: http://github.com/reedacartwright/rbedrock/issues
