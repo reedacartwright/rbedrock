@@ -64,7 +64,7 @@ read_nbt <- function (val) {
 	
 	stopifnot(length(out) == 1L)
 
-	if(is.integer64(what)) {
+	if(integer64::is.integer64(what)) {
 		oldClass(out) <- "integer64"
 	}
 	out
@@ -78,7 +78,7 @@ read_nbt <- function (val) {
 	
 	stopifnot(length(out) == len)
 
-	if(is.integer64(what)) {
+	if(integer64::is.integer64(what)) {
 		oldClass(out) <- "integer64"
 	}
 	out
@@ -106,7 +106,7 @@ read_nbt <- function (val) {
 		# INT
 		.read_nbt_unit_payload(con, integer(), size = 4L),
 		# LONG
-		.read_nbt_unit_payload(con, integer64(), size = 8L),
+		.read_nbt_unit_payload(con, integer64::integer64(), size = 8L),
 		# FLOAT
 		.read_nbt_unit_payload(con, numeric(), size = 4L),
 		# DOUBLE
@@ -122,6 +122,6 @@ read_nbt <- function (val) {
 		# INTARRAY
 		.read_nbt_array_payload(con, integer(), size=4L),
 		# LONGARRAY
-		.read_nbt_array_payload(con, integer64(), size=8L)
+		.read_nbt_array_payload(con, integer64::integer64(), size=8L)
 	)
 }
