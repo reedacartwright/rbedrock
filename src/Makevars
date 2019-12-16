@@ -1,12 +1,11 @@
 PKG_CPPFLAGS = -pthread
-PKG_LIBS = -pthread -lmemenv -lleveldb
+PKG_LIBS = -pthread -lleveldb
 
-PKG_LIBS = -Lleveldb-mcpe/out-static -pthread -lmemenv -lleveldb
+PKG_LIBS = -Lleveldb-mcpe/build -pthread -lleveldb
 
 all: $(SHLIB)
 
-$(SHLIB): leveldb-mcpe/out-static/libleveldb.a
+$(SHLIB): leveldb-mcpe/build/libleveldb.a
 
-export 
-leveldb-mcpe/out-static/libleveldb.a:
-	$(MAKE) -C leveldb-mcpe
+leveldb-mcpe/build/libleveldb.a:
+	cmake --build leveldb-mcpe/build

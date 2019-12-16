@@ -1,0 +1,30 @@
+#!/bin/sh
+
+: ${R_HOME=`R RHOME`}
+if test -z "${R_HOME}"; then
+  echo "could not determine R_HOME"
+  exit 1
+fi
+CC=`"${R_HOME}/bin/R" CMD config CC`
+CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
+CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
+CXX=`"${R_HOME}/bin/R" CMD config CXX`
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
+LDFLAGS=`"${R_HOME}/bin/R" CMD config LDFLAGS`
+MAKE=`"${R_HOME}/bin/R" CMD config MAKE`
+
+rm -rf src/leveldb-mcpe/build
+
+export CC
+export CFLAGS
+export CPPFLAGS
+export CXX
+export CXXFLAGS
+export LDFLAGS
+export MAKE
+
+cmake -S src/leveldb-mcpe -B src/leveldb-mcpe/build \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DLEVELDB_BUILD_TESTS=OFF \
+	-DLEVELDB_BUILD_BENCHMARKS=OFF \
+	-DCMAKE_POSITION_INDEPENDENT_CODE=ON
