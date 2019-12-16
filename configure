@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env sh
 
 : ${R_HOME=`R RHOME`}
 if test -z "${R_HOME}"; then
