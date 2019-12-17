@@ -5,4 +5,41 @@ if test -z "${R_HOME}"; then
 fi
 
 
-. configure
+if ! command -v cmake ; then
+  ## download cmake for windows
+  ## solution from https://github.com/stnava/cmaker/blob/master/configure.win
+  
+  cmake_major=3.11
+  cmake_patch=4
+  
+  bit64=`${R_HOME}/bin/Rscript.exe -e "x=grepl('64', Sys.info()[['machine']])*1;cat(x)"`
+  if [ $bit64 -eq 0 ]; 
+  then
+  	bit64_app=win32-x86 ;
+  else 
+  	bit64_app=win64-x64 ;
+  fi
+  cmake_file="cmake-${cmake_major}.${cmake_patch}-${bit64_app}.zip"
+  
+  str="download.file('https://cmake.org/files/v${cmake_major}/"${cmake_file}
+  str=${str}"', destfile='"${cmake_file}"')"
+  "${R_HOME}/bin/Rscript.exe" -e "${str}"
+  
+  echo "${R_PACKAGE_DIR}"
+  ls "${R_PACKAGE_DIR}"
+  
+  str="path=gsub('[.]zip$', '', '${cmake_file}'); "
+  str=${str}"pack_dir = '"${R_PACKAGE_DIR}"';"
+  str=${str}"utils::unzip('"${cmake_file}
+  str=${str}"', exdir = pack_dir);"
+  str=${str}"file.rename(file.path(pack_dir, path),"
+  str=${str}"file.path(pack_dir, 'cmake'));"
+  echo "${str}"
+  "${R_HOME}/bin/Rscript.exe" -e "${str}"
+  
+  rm ${cmake_file}
+  
+  CMAKE="${R_PACKAGE_DIR}/cmake/bin/cmake.exe"
+fi
+
+. ./configure
