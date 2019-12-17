@@ -5,7 +5,7 @@ if test -z "${R_HOME}"; then
 fi
 
 
-if ! command -v cmake ; then
+if ! command -v cmake > /dev/null ; then
   ## download cmake for windows
   ## solution from https://github.com/stnava/cmaker/blob/master/configure.win
   
@@ -41,5 +41,9 @@ if ! command -v cmake ; then
   
   CMAKE="${R_PACKAGE_DIR}/cmake/bin/cmake.exe"
 fi
+
+MAKE=/Rtools/mingw_64/bin/mingw32-make.exe
+
+#CMAKE_ARGS="-DZLIB_INCLUDE_DIR=/Rtools/lib/libz/include -DZLIB_LIBRARY=/Rtools/lib/libz/lib/x64/libz.a"
 
 . ./configure

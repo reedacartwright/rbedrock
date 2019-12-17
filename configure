@@ -8,12 +8,18 @@ fi
 CC=`"${R_HOME}/bin/R" CMD config CC`
 CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
 CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
-CXX=`"${R_HOME}/bin/R" CMD config CXX`
-CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
+CXX11STD=`"${R_HOME}/bin/R" CMD config CXX11STD`
+CXX11=`"${R_HOME}/bin/R" CMD config CXX11`
+CXX="${CXX11}"
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
 LDFLAGS=`"${R_HOME}/bin/R" CMD config LDFLAGS`
-MAKE=`"${R_HOME}/bin/R" CMD config MAKE`
+RMAKE=`"${R_HOME}/bin/R" CMD config MAKE`
 
+: ${MAKE:="${RMAKE}"}
 : ${CMAKE:=cmake}
+: ${CMAKE_GEN:="Unix Makefiles"}
+
+echo "Using cmake from '${CMAKE}' with generator '${CMAKE_GEN}'..."
 
 rm -rf src/leveldb-mcpe/build
 
@@ -28,7 +34,8 @@ export MAKE
 mkdir src/leveldb-mcpe/build
 cd src/leveldb-mcpe/build
 
-"${CMAKE}" -G "Unix Makefiles" .. \
+"${CMAKE}" -G "${CMAKE_GEN}" .. ${CMAKE_ARGS} \
+  -DCMAKE_MAKE_PROGRAM="${MAKE}" \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DLEVELDB_BUILD_TESTS=OFF \
 	-DLEVELDB_BUILD_BENCHMARKS=OFF \
