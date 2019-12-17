@@ -1,8 +1,8 @@
 CXX_STD = CXX11
-PKG_CPPFLAGS = -pthread
+PKG_CPPFLAGS = -pthread -I./leveldb-mcpe/include -I./leveldb-mcpe/build/include
 PKG_LIBS = -pthread -lleveldb
 
-PKG_LIBS = -Lleveldb-mcpe/build -pthread -lleveldb
+PKG_LIBS = -L./leveldb-mcpe/build -pthread -lleveldb -lz
 
 all: $(SHLIB)
 

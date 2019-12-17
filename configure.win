@@ -3,7 +3,7 @@ if test -z "${R_HOME}"; then
   echo "could not determine R_HOME"
   exit 1
 fi
-
+CC=`"${R_HOME}/bin/R" CMD config CC`
 
 if ! command -v cmake > /dev/null ; then
   ## download cmake for windows
@@ -42,8 +42,9 @@ if ! command -v cmake > /dev/null ; then
   CMAKE="${R_PACKAGE_DIR}/cmake/bin/cmake.exe"
 fi
 
-MAKE=/Rtools/mingw_64/bin/mingw32-make.exe
+MAKE=`dirname $CC`/mingw32-make.exe
 
-#CMAKE_ARGS="-DZLIB_INCLUDE_DIR=/Rtools/lib/libz/include -DZLIB_LIBRARY=/Rtools/lib/libz/lib/x64/libz.a"
+CMAKE_ARGS="-DZLIB_INCLUDE_DIR=/Rtools/lib/libz/include -DZLIB_LIBRARY=/Rtools/lib/libz/lib/x64/libz.a"
+EXE=.exe
 
 . ./configure

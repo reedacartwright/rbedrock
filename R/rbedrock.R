@@ -85,7 +85,7 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
 
 worlds_path <- function() {
     if (.Platform$OS.type == "windows") {
-        datadir <- rappdirs::user_data_dir("Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\LocalState")
+        datadir <- rappdirs::user_data_dir("Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\LocalState","")
     } else {
         datadir <- rappdirs::user_data_dir("mcpelauncher")
     }

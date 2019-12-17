@@ -27,7 +27,7 @@
 #include "bedrock_leveldb.h"
 
 #include <stdbool.h>
-#include "leveldb-mcpe/include/leveldb/c.h"
+#include <leveldb/c.h>
 #include "support.h"
 
 leveldb_readoptions_t * default_readoptions;
