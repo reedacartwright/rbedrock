@@ -293,10 +293,10 @@ target_link_libraries(leveldb Threads::Threads)
 find_package(ZLIB REQUIRED)
 target_link_libraries(leveldb ZLIB::ZLIB)
 
-add_executable(leveldbutil
-  "db/leveldbutil.cc"
-)
-target_link_libraries(leveldbutil leveldb)
+# add_executable(leveldbutil
+# "db/leveldbutil.cc"
+# )
+# target_link_libraries(leveldbutil leveldb)
 
 if(LEVELDB_BUILD_TESTS)
   enable_testing()
