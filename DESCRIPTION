@@ -14,6 +14,7 @@ LazyData: true
 RoxygenNote: 7.0.2
 SystemRequirements: C++11, cmake, zlib
 NeedsCompilation: yes
+Biarch: no
 Depends:
     R (>= 3.6.0)
 Imports:

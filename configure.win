@@ -3,11 +3,11 @@ if test -z "${R_HOME}"; then
   echo "could not determine R_HOME"
   exit 1
 fi
-CC=`"${R_HOME}/bin/R" CMD config CC`
+CC=`"${R_HOME}/bin${R_ARCH_BIN}/R" CMD config CC`
 
 EXE=.exe
-MAKE=`${R_HOME}/bin/Rscript.exe -e "cat(paste0(dirname('$CC'),'/mingw32-make'))"`
-ROOT=`${R_HOME}/bin/Rscript.exe -e "cc='$CC';cat(paste0(dirname(cc),'/../',ifelse(grepl('mingw_32', cc), 'i686', 'x86_64'),'-w64-mingw32'))"`
+MAKE=`${R_HOME}/bin${R_ARCH_BIN}/Rscript -e "cat(paste0(dirname('$CC'),'/mingw32-make'))"`
+ROOT=`${R_HOME}/bin${R_ARCH_BIN}/Rscript -e "cat(paste0(dirname('$CC'),'/../',ifelse('${R_ARCH}' =='/x64', 'x86_64', 'i686'),'-w64-mingw32'))"`
 
 CMAKE_ARGS="-DZLIB_ROOT=${ROOT}"
 

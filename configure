@@ -9,12 +9,12 @@ if test -z "${R_HOME}"; then
   exit 1
 fi
 
-CC=`"${R_HOME}/bin/R" CMD config CC`
-CXX11=`"${R_HOME}/bin/R" CMD config CXX11`
-CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
-CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
+CC=`"${R_HOME}/bin${R_ARCH_BIN}/R" CMD config CC`
+CXX11=`"${R_HOME}/bin${R_ARCH_BIN}/R" CMD config CXX11`
+CFLAGS=`"${R_HOME}/bin${R_ARCH_BIN}/R" CMD config CFLAGS`
+CXXFLAGS=`"${R_HOME}/bin${R_ARCH_BIN}/R" CMD config CXX11FLAGS`
 
-RMAKE=`"${R_HOME}/bin/R" CMD config MAKE`
+RMAKE=`"${R_HOME}/bin${R_ARCH_BIN}/R" CMD config MAKE`
 
 : ${MAKE:="${RMAKE}"}
 
@@ -22,8 +22,8 @@ rm -rf src/leveldb-mcpe/build
 mkdir src/leveldb-mcpe/build
 
 # Strip flags from CC and CXX if they are there
-MCC=`"${R_HOME}/bin/Rscript"  -e "cat(gsub('\\\\\\\\s[^/]*$','','${CC}'))"`
-MCXX=`"${R_HOME}/bin/Rscript" -e "cat(gsub('\\\\\\\\s[^/]*$','','${CXX}'))"`
+MCC=`"${R_HOME}/bin${R_ARCH_BIN}/Rscript"  -e "cat(gsub('\\\\\\\\s[^/]*$','','${CC}'))"`
+MCXX=`"${R_HOME}/bin${R_ARCH_BIN}/Rscript" -e "cat(gsub('\\\\\\\\s[^/]*$','','${CXX}'))"`
 
 cd src/leveldb-mcpe/build
 
