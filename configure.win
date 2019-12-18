@@ -43,7 +43,7 @@ if ! command -v cmake > /dev/null ; then
 fi
 
 
-MAKE=`${R_HOME}/bin/Rscript.exe -e "cat(paste0(dirname('$CC'),'/mingw32-make.exe'))"`
+MAKE=`${R_HOME}/bin/Rscript.exe -e "cat(paste0(dirname('$CC'),'/mingw32-make'))"`
 
 #CMAKE_ARGS="-DZLIB_INCLUDE_DIR=/Rtools/lib/libz/include -DZLIB_LIBRARY=/Rtools/lib/libz/lib/x64/libz.a"
 EXE=.exe

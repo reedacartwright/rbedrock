@@ -21,20 +21,23 @@ echo "Using cmake from '${CMAKE}' with generator '${CMAKE_GEN}'..."
 
 rm -rf src/leveldb-mcpe/build
 mkdir src/leveldb-mcpe/build
-cd src/leveldb-mcpe/build
 
 # Strip flags from CC and CXX if they are there
-MCC=`${R_HOME}/bin/Rscript.exe  -e "cat(gsub('\\\\\\\\s[^/]*$','','${CC}'))"`
-MCXX=`${R_HOME}/bin/Rscript.exe -e "cat(gsub('\\\\\\\\s[^/]*$','','${CXX}'))"`
+MCC=`"${R_HOME}/bin/Rscript"  -e "cat(gsub('\\\\\\\\s[^/]*$','','${CC}'))"`
+MCXX=`"${R_HOME}/bin/Rscript" -e "cat(gsub('\\\\\\\\s[^/]*$','','${CXX}'))"`
+
+cd src/leveldb-mcpe/build
 
 "${CMAKE}" -G "${CMAKE_GEN}" .. ${CMAKE_ARGS} \
-  -DCMAKE_MAKE_PROGRAM="${MAKE}" \
+  -DCMAKE_MAKE_PROGRAM="${MAKE}${EXE}" \
   -DCMAKE_CXX_COMPILER="${MCXX}${EXE}" \
   -DCMAKE_C_COMPILER="${MCC}${EXE}" \
   -DCMAKE_BUILD_TYPE=Release \
   -DLEVELDB_BUILD_TESTS=OFF \
   -DLEVELDB_BUILD_BENCHMARKS=OFF \
   -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+
+cd ../../..
 
 if [ "x${CMAKE}" != "xcmake" ]; then
   sed -i "s|CMAKE=cmake|CMAKE=${CMAKE}|" src/Makevars
