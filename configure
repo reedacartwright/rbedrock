@@ -9,13 +9,8 @@ if test -z "${R_HOME}"; then
   exit 1
 fi
 CC=`"${R_HOME}/bin/R" CMD config CC`
-CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
-CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
-CXX11STD=`"${R_HOME}/bin/R" CMD config CXX11STD`
 CXX11=`"${R_HOME}/bin/R" CMD config CXX11`
 CXX="${CXX11}"
-CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
-LDFLAGS=`"${R_HOME}/bin/R" CMD config LDFLAGS`
 RMAKE=`"${R_HOME}/bin/R" CMD config MAKE`
 
 : ${MAKE:="${RMAKE}"}
@@ -25,15 +20,22 @@ RMAKE=`"${R_HOME}/bin/R" CMD config MAKE`
 echo "Using cmake from '${CMAKE}' with generator '${CMAKE_GEN}'..."
 
 rm -rf src/leveldb-mcpe/build
-
 mkdir src/leveldb-mcpe/build
 cd src/leveldb-mcpe/build
 
+# Strip flags from CC and CXX if they are there
+MCC=`${R_HOME}/bin/Rscript.exe  -e "cat(gsub('\\\\\\\\s[^/]*$','','${CC}'))"`
+MCXX=`${R_HOME}/bin/Rscript.exe -e "cat(gsub('\\\\\\\\s[^/]*$','','${CXX}'))"`
+
 "${CMAKE}" -G "${CMAKE_GEN}" .. ${CMAKE_ARGS} \
   -DCMAKE_MAKE_PROGRAM="${MAKE}" \
-  -DCMAKE_CXX_COMPILER="${CXX}${EXE}" \
-  -DCMAKE_C_COMPILER="${CC}${EXE}" \
-	-DCMAKE_BUILD_TYPE=Release \
-	-DLEVELDB_BUILD_TESTS=OFF \
-	-DLEVELDB_BUILD_BENCHMARKS=OFF \
-	-DCMAKE_POSITION_INDEPENDENT_CODE=ON
+  -DCMAKE_CXX_COMPILER="${MCXX}${EXE}" \
+  -DCMAKE_C_COMPILER="${MCC}${EXE}" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DLEVELDB_BUILD_TESTS=OFF \
+  -DLEVELDB_BUILD_BENCHMARKS=OFF \
+  -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+
+if [ "x${CMAKE}" != "xcmake" ]; then
+  sed -i "s|CMAKE=cmake|CMAKE=${CMAKE}|" src/Makevars
+fi
