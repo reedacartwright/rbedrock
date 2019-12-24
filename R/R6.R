@@ -24,7 +24,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
+##' @export
 bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, paranoid_checks = NULL, 
     write_buffer_size = 4194304, max_open_files = NULL, block_size = NULL, use_compression = 4, 
     cache_capacity = 41943040, bloom_filter_bits_per_key = 10) {
@@ -168,6 +168,7 @@ R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(ptr
         bedrock_leveldb_write(self$db, self$ptr, writeoptions)
         invisible(self)
     }))
+
 create_bedrockdb_key <- function(x, z, d, tag, subtag = NA) {
     ret <- stringr::str_c(x, z, d, tag, sep = ":")
     ret <- stringr::str_c("@", ret)
@@ -176,6 +177,7 @@ create_bedrockdb_key <- function(x, z, d, tag, subtag = NA) {
     }
     return(ret)
 }
+
 to_bedrockdb_key <- function(key) {
     if (is.character(key)) {
         key <- lapply(key, charToRaw)
@@ -217,6 +219,7 @@ to_bedrockdb_key <- function(key) {
     })
     return(out)
 }
+
 from_bedrockdb_key <- function(key) {
     m <- stringr::str_match(key, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$|^.*$")
     s <- split(m, seq_len(nrow(m)))
