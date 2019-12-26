@@ -1,0 +1,12 @@
+CXX_STD = CXX11
+PKG_CPPFLAGS = -pthread -I./leveldb-mcpe/include -I./leveldb-mcpe/build/include
+PKG_LIBS = -L./leveldb-mcpe/build -pthread -lleveldb -lz
+
+CMAKE=cmake
+
+all: $(SHLIB)
+
+$(SHLIB): leveldb-mcpe/build/libleveldb.a
+
+leveldb-mcpe/build/libleveldb.a:
+	cmake --build leveldb-mcpe/build
