@@ -35,14 +35,7 @@ bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, p
 ##' @importFrom R6 R6Class
 R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, levelname = NULL, 
     mtime = NULL, initialize = function(path, ...) {
-        if (file.exists(path)) {
-            path <- normalizePath(path)
-        } else {
-            wpath <- paste0(worlds_path(), "/", path)
-            if (file.exists(wpath)) {
-                path <- normalizePath(wpath)
-            }
-        }
+        path <- .fixup_path(path)
         namefile <- paste0(path, "/levelname.txt")
         self$levelname <- readLines(namefile, 1L, warn = FALSE)
         self$mtime <- as.character(file.mtime(namefile))
@@ -140,6 +133,7 @@ R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(it = NU
     value = function(as_raw = NULL, error_if_invalid = FALSE) {
         bedrock_leveldb_iter_value(self$it, as_raw, error_if_invalid)
     }))
+
 R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(ptr = NULL, 
     db = NULL, initialize = function(db) {
         self$db <- db

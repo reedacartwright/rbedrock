@@ -16,6 +16,9 @@ parse_chunk_keys <- function(keys) {
 
 ##' @export
 worlds_path <- function() {
+    if (!requireNamespace("rappdirs", quietly = TRUE)) {
+        stop("Package \"rappdirs\" needed for worlds_path function to work. Please install it.", call. = FALSE)
+    }
     if (.Platform$OS.type == "windows") {
         datadir <- rappdirs::user_data_dir("Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\LocalState","")
     } else {
@@ -39,4 +42,16 @@ list_worlds <- function(dir = worlds_path()) {
     }
     colnames(out) <- c("folder", "levelname", "mtime")
     out
+}
+
+.fixup_path <- function(path) {
+    if (file.exists(path)) {
+        path <- normalizePath(path)
+    } else {
+        wpath <- paste0(worlds_path(), "/", path)
+        if (file.exists(wpath)) {
+            path <- normalizePath(wpath)
+        }
+    }
+    path
 }

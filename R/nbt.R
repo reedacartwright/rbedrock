@@ -1,16 +1,13 @@
 ##' @export
-read_nbt <- function (val) {
-    stopifnot(is.raw(val))
-    # return empty list if val is empty
-    if (length(val) == 0) {
-        return(list())
+read_nbt <- function (con) {
+    if (is.character(con)) {
+        con <- file(con, "rb")
+        on.exit(close(con))
+    } else if (is.raw(con)) {
+        con <- rawConnection(con)
+        on.exit(close(con))
     }
-    con <- rawConnection(val)
-    on.exit(close(con))
-
-    out <- .read_nbt_compound_payload(con)
-
-    return(out)
+    .read_nbt_compound_payload(con)
 }
 
 # nbt_type = list(

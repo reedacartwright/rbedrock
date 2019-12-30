@@ -20,7 +20,8 @@ Depends:
 Imports:
     R6,
     stringr,
-    rappdirs,
     bit64
+Suggests:
+    rappdirs  
 URL: http://github.com/reedacartwright/rbedrock/
 BugReports: http://github.com/reedacartwright/rbedrock/issues
