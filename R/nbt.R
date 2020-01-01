@@ -1,5 +1,5 @@
 ##' @export
-read_nbt <- function (con) {
+read_nbt <- function (con, len=NULL) {
     if (is.character(con)) {
         con <- file(con, "rb")
         on.exit(close(con))
@@ -7,11 +7,11 @@ read_nbt <- function (con) {
         con <- rawConnection(con)
         on.exit(close(con))
     }
-    .read_nbt_compound_payload(con)
+    .read_nbt_compound_payload(con,len)
 }
 
 # nbt_type = list(
-#   END = 0,
+#     END = 0,
 #     BYTE = 1,
 #     SHORT = 2,
 #     INT = 3,
@@ -42,7 +42,7 @@ read_nbt <- function (con) {
     return(name)
 }
 
-.read_nbt_compound_payload <- function(con) {
+.read_nbt_compound_payload <- function(con, len=NULL) {
     nbt <- list()
     k = 1
     repeat {
@@ -54,6 +54,9 @@ read_nbt <- function (con) {
         value <- .read_nbt_payload(con, type)
         nbt[[k]] <- value
         names(nbt)[k] <- name
+        if (!is.null(len) && k == len) {
+            break
+        }
         k <- k+1
     }
     nbt
