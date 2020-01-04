@@ -9,4 +9,4 @@ all: $(SHLIB)
 $(SHLIB): leveldb-mcpe/build/libleveldb.a
 
 leveldb-mcpe/build/libleveldb.a:
-	cmake --build leveldb-mcpe/build
+	cmake --build leveldb-mcpe/build --parallel
