@@ -22,6 +22,7 @@ Imports:
     stringr,
     bit64
 Suggests:
-    rappdirs  
+    rappdirs,
+    tibble
 URL: http://github.com/reedacartwright/rbedrock/
 BugReports: http://github.com/reedacartwright/rbedrock/issues
