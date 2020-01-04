@@ -53,29 +53,29 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
         bedrock_leveldb_property(self$db, name, error_if_missing)
     },
     get = function(key, as_raw = NULL, error_if_missing = FALSE, readoptions = NULL) {
-        bedrock_leveldb_get(self$db, from_bedrockdb_key(key), as_raw, error_if_missing, 
+        bedrock_leveldb_get(self$db, .from_bedrockdb_key(key), as_raw, error_if_missing, 
             readoptions)
     },
     mget = function(key, as_raw = NULL, missing_value = NULL, missing_report = TRUE, 
         readoptions = NULL) {
-        bedrock_leveldb_mget(self$db, from_bedrockdb_key(key), as_raw, missing_value, 
+        bedrock_leveldb_mget(self$db, .from_bedrockdb_key(key), as_raw, missing_value, 
             missing_report, readoptions)
     },
     put = function(key, value, writeoptions = NULL) {
-        bedrock_leveldb_put(self$db, from_bedrockdb_key(key), value, writeoptions)
+        bedrock_leveldb_put(self$db, .from_bedrockdb_key(key), value, writeoptions)
     },
     mput = function(key, value, writeoptions = NULL) {
-        bedrock_leveldb_mput(self$db, from_bedrockdb_key(key), value, writeoptions)
+        bedrock_leveldb_mput(self$db, .from_bedrockdb_key(key), value, writeoptions)
     },
     delete = function(key, report = FALSE, readoptions = NULL, writeoptions = NULL) {
-        bedrock_leveldb_delete(self$db, from_bedrockdb_key(key), report, readoptions, 
+        bedrock_leveldb_delete(self$db, .from_bedrockdb_key(key), report, readoptions, 
             writeoptions)
     },
     exists = function(key, readoptions = NULL) {
-        bedrock_leveldb_exists(self$db, from_bedrockdb_key(key), readoptions)
+        bedrock_leveldb_exists(self$db, .from_bedrockdb_key(key), readoptions)
     },
     keys = function(starts_with = NULL, readoptions = NULL) {
-        to_bedrockdb_key(bedrock_leveldb_keys(self$db, starts_with, as_raw = TRUE, 
+        .to_bedrockdb_key(bedrock_leveldb_keys(self$db, starts_with, as_raw = TRUE, 
             readoptions))
     },
     keys_len = function(starts_with = NULL, readoptions = NULL) {
@@ -128,7 +128,7 @@ R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(it = NU
         invisible(self)
     },
     key = function(error_if_invalid = FALSE) {
-        to_bedrockdb_key(bedrock_leveldb_iter_key(self$it, as_raw = TRUE, error_if_invalid))
+        .to_bedrockdb_key(bedrock_leveldb_iter_key(self$it, as_raw = TRUE, error_if_invalid))
     },
     value = function(as_raw = NULL, error_if_invalid = FALSE) {
         bedrock_leveldb_iter_value(self$it, as_raw, error_if_invalid)
@@ -147,15 +147,15 @@ R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(ptr
         invisible(self)
     },
     put = function(key, value) {
-        bedrock_leveldb_writebatch_put(self$ptr, from_bedrockdb_key(key), value)
+        bedrock_leveldb_writebatch_put(self$ptr, .from_bedrockdb_key(key), value)
         invisible(self)
     },
     mput = function(key, value) {
-        bedrock_leveldb_writebatch_mput(self$ptr, from_bedrockdb_key(key), value)
+        bedrock_leveldb_writebatch_mput(self$ptr, .from_bedrockdb_key(key), value)
         invisible(self)
     },
     delete = function(key) {
-        bedrock_leveldb_writebatch_delete(self$ptr, from_bedrockdb_key(key))
+        bedrock_leveldb_writebatch_delete(self$ptr, .from_bedrockdb_key(key))
         invisible(self)
     },
     write = function(writeoptions = NULL) {
@@ -163,7 +163,7 @@ R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(ptr
         invisible(self)
     }))
 
-create_bedrockdb_key <- function(x, z, d, tag, subtag = NA) {
+.create_bedrockdb_key <- function(x, z, d, tag, subtag = NA) {
     ret <- stringr::str_c(x, z, d, tag, sep = ":")
     ret <- stringr::str_c("@", ret)
     if (!is.na(subtag)) {
@@ -172,7 +172,7 @@ create_bedrockdb_key <- function(x, z, d, tag, subtag = NA) {
     return(ret)
 }
 
-to_bedrockdb_key <- function(key) {
+.to_bedrockdb_key <- function(key) {
     if (is.character(key)) {
         key <- lapply(key, charToRaw)
     }
@@ -209,12 +209,12 @@ to_bedrockdb_key <- function(key) {
         } else {
             return(rawToChar(k))
         }
-        return(create_bedrockdb_key(x, z, d, tag, subtag))
+        return(.create_bedrockdb_key(x, z, d, tag, subtag))
     })
     return(out)
 }
 
-from_bedrockdb_key <- function(key) {
+.from_bedrockdb_key <- function(key) {
     m <- stringr::str_match(key, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$|^.*$")
     s <- split(m, seq_len(nrow(m)))
     out <- lapply(s, function(k) {

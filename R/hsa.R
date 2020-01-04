@@ -1,6 +1,5 @@
-
-##' @export
-get_hsa <- function(db, keys=db$keys(), fancy=TRUE) {
+#' @export
+get_hsa <- function(db, keys=db$keys(), fancy=.befancy()) {
     if (!is.character(keys)) {
         stop("'keys' must be a character vector.")
     }
@@ -11,15 +10,16 @@ get_hsa <- function(db, keys=db$keys(), fancy=TRUE) {
     if(!is.null(attr(dat,"missing"))) {
         dat[attr(dat,"missing")] <- NULL
     }
+    hsa <- lapply(dat, .read_hsa)
     out <- do.call("rbind", hsa)
     if(fancy == FALSE) {
         return(out)
     }
-    hsa <- lapply(dat, .read_hsa)
-    dimension <- as.integer(str_extract(names(hsa), "[^:]+(?=:57)"))
+
+    dimension <- as.integer(stringr::str_extract(names(hsa), "[^:]+(?=:57)"))
     n <- sapply(hsa, nrow)
 
-    out <- as_tibble(out)
+    out <- tibble::as_tibble(out)
     out$tag <- factor(out$tag, levels=1:6,
         labels=c("NetherFortress",
                  "SwampHut",
@@ -32,7 +32,7 @@ get_hsa <- function(db, keys=db$keys(), fancy=TRUE) {
     out
 }
 
-##' @export
+#' @export
 put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
     # identify all chunks that this HSA overlaps
     x <- range(x1, x2)

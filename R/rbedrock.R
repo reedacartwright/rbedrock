@@ -1,20 +1,35 @@
-##' @export
+#' Create a database key from chunk information.
+#'
+#' @param x Chunk x-coordinate.
+#' @param z Chunk z-coordinate.
+#' @param d Chunk dimension.
+#' @param tag The type of information the key holds.
+#' @param subtag The subchunk the key refers to. (Only used if \code{tag==47}).
+#' @return The database key corresponding to the inputs.
+#' @examples
+#' create_chunk_key(0, 0, 0, 47, 1)
+#' @export
 create_chunk_key <- function(x, z, d, tag, subtag = NA) {
-    create_bedrockdb_key(x, z, d, tag, subtag)
+    .create_bedrockdb_key(x, z, d, tag, subtag)
 }
 
-##' @export
+#' @export
 parse_chunk_keys <- function(keys) {
     if (!is.character(keys)) {
         stop("keys must be a character vector.")
     }
     m <- stringr::str_match(keys, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$")
     m <- m[!is.na(m[, 1]), ]
-    data.frame(key = m[, 1], x = as.integer(m[, 2]), z = as.integer(m[, 3]), dimension = as.integer(m[, 
-        4]), tag = as.integer(m[, 5]), subtag = as.integer(m[, 6]), stringsAsFactors = FALSE)
+    data.frame(key = m[, 1],
+        x = as.integer(m[, 2]),
+        z = as.integer(m[, 3]),
+        dimension = as.integer(m[, 4]),
+        tag = as.integer(m[, 5]),
+        subtag = as.integer(m[, 6]),
+        stringsAsFactors = FALSE)
 }
 
-##' @export
+#' @export
 worlds_path <- function() {
     if (!requireNamespace("rappdirs", quietly = TRUE)) {
         stop("Package \"rappdirs\" needed for worlds_path function to work. Please install it.", call. = FALSE)
@@ -27,7 +42,7 @@ worlds_path <- function() {
     normalizePath(stringr::str_c(datadir, "/games/com.mojang/minecraftWorlds"))
 }
 
-##' @export
+#' @export
 list_worlds <- function(dir = worlds_path()) {
     folders <- list.dirs(path = dir, full.names = TRUE, recursive = FALSE)
     out <- NULL
@@ -54,4 +69,8 @@ list_worlds <- function(dir = worlds_path()) {
         }
     }
     path
+}
+
+.befancy <- function() {
+    requireNamespace("tibble", quietly=TRUE)
 }
