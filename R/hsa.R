@@ -16,7 +16,7 @@ get_hsa <- function(db, keys=db$keys(), fancy=.befancy()) {
         return(out)
     }
 
-    dimension <- as.integer(stringr::str_extract(names(hsa), "[^:]+(?=:57)"))
+    dimension <- as.integer(stringr::str_extract(names(hsa), "[^:]+(?=:57$)"))
     n <- sapply(hsa, nrow)
 
     out <- tibble::as_tibble(out)
@@ -78,8 +78,10 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
         out <- rbind(out, c(aabb, tag))
     }
     colnames(out) <- c("x1", "y1", "z1", "x2", "y2", "z2", "tag")
+    y <- pmax.int(out[, "y1"], out[, "y2"]) - 
+        ifelse(out[,"tag"] == 1 || out[,"tag"] == 5, 0, 3)
     out <- cbind(out, xspot = out[, "x1"] + (out[, "x2"] - out[, "x1"] + 1) %/% 2)
-    out <- cbind(out, yspot = pmin.int(out[, "y1"], out[, "y2"]))
+    out <- cbind(out, yspot = y-1)
     out <- cbind(out, zspot = out[, "z1"] + (out[, "z2"] - out[, "z1"] + 1) %/% 2)
     rownames(out) <- NULL
     out

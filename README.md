@@ -10,7 +10,7 @@ rbedrock is an extension package for [R](https://www.r-project.org/) that suppor
 
 # Or the development version from GitHub
 if (!require(devtools)) {
-    install.packages("devtools")	
+    install.packages("devtools")
 }
 devtools::install_github("reedacartwright/rbedrock")
 ```
