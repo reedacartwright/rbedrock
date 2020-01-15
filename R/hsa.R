@@ -1,3 +1,14 @@
+#' Get HardcodedSpawnArea information from a world.
+#'
+#' @param db A bedrockdb object.
+#' @param keys A character vector of db keys to extract HSAs from.
+#'    Any keys not representing HSA data will be dropped.
+#' @return A table containing HSA and spawn-spot information.
+#' @examples
+#' db <- bedrockdb("x7fuXRc8AAA=")
+#' hsa <- get_hsa(db)
+#' db$close()
+#'
 #' @export
 get_hsa <- function(db, keys=db$keys(), fancy=.befancy()) {
     if (!is.character(keys)) {
@@ -32,8 +43,23 @@ get_hsa <- function(db, keys=db$keys(), fancy=.befancy()) {
     out
 }
 
+#' Add a HardcodedSpawnArea to a world.
+#'
+#' If the bounding box of the HSA overlaps multiple chunks, one HSA will be added per chunk.
+#'
+#' @param db A bedrockdb object.
+#' @param x1,y1,z1,x2,y2,z2 HSA bounding box coordinates.
+#' @param tag The type of HSA. 1 = NetherFortress, 2 = SwampHut, 3 = OceanMonument, 5 = PillagerOutputs.
+#'  4 and 6 are no longer used by the game.
+#' @param dimension The dimension that the HSA should be in. 0 = Overworld, 1 = Nether.
+#' @return A table containing information about the added HSAs.
+#' @examples
+#' db <- bedrockdb("x7fuXRc8AAA=")
+#' put_hsa(db, 0, 60, 0, 15, 70, 15, 2, 0)
+#' db$close()
+#'
 #' @export
-put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
+put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension=ifelse(tag == 1, 1, 0)) {
     # identify all chunks that this HSA overlaps
     x <- range(x1, x2)
     y <- range(y1, y2)

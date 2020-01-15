@@ -24,7 +24,7 @@ create_chunk_key <- function(x, z, d, tag, subtag = NA) {
 #' @param keys A character vector of database keys.
 #' @return A data.frame containing information extracted from chunk keys. Keys that do not contain chunk data are dropped.
 #' @examples
-#' parse_chunk_keys("@0:0:0:47-1")
+#' parse_chunk_keys("@@0:0:0:47-1")
 #' @export
 parse_chunk_keys <- function(keys, fancy = .befancy()) {
     if (!is.character(keys)) {
