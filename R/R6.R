@@ -1,4 +1,5 @@
 # Copyright (c) 2016, Richard G. FitzJohn
+# Copyright (c) 2020, Reed A. Cartwright
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -24,7 +25,20 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-##' @export
+#' Open a Minecraft: Bedrock Edition world for reading and writing.
+#'
+#' @param path The path to a world folder. If the path does not exist, it is 
+#'   assumed to be the base name of a world folder in the local minecraftWorlds
+#'   directory.
+#' @return On success, an R6 class of type "bedrockdb" that contains and open handle to the
+#'   leveldb database that contains the world information.
+#' @examples
+#' db <- bedrockdb("x7fuXRc8AAA=")
+#' o <- db$get("Overworld")
+#' read_nbt(o)
+#' db$close()
+#'
+#' @export
 bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, paranoid_checks = NULL, 
     write_buffer_size = 4194304, max_open_files = NULL, block_size = NULL, use_compression = 4, 
     cache_capacity = 41943040, bloom_filter_bits_per_key = 10) {
@@ -32,7 +46,7 @@ bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, p
         max_open_files, block_size, use_compression, cache_capacity, bloom_filter_bits_per_key)
 }
 
-##' @importFrom R6 R6Class
+#' @importFrom R6 R6Class
 R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, levelname = NULL, 
     mtime = NULL, initialize = function(path, ...) {
         path <- .fixup_path(path)
