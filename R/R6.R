@@ -210,6 +210,9 @@ R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(ptr
             if (len == 10) {
                 subtag <- as.integer(k[10])
             }
+            if( tag >= 65 && tag != 118 ) {
+                return(rawToChar(k))
+            }
         } else if (len == 13 || len == 14) {
             xz <- readBin(k, "integer", n = 3L, endian = "little")
             x <- xz[1]
@@ -219,6 +222,9 @@ R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(ptr
             subtag <- NA
             if (len == 14) {
                 subtag <- as.integer(k[14])
+            }
+            if( tag >= 65 && tag != 118 ) {
+                return(rawToChar(k))
             }
         } else {
             return(rawToChar(k))
