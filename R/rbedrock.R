@@ -85,7 +85,7 @@ worlds_path <- function() {
 #' @param dir The path of the minecraftWorlds directory. It defaults to the likely path.
 #' @return A data.frame containing information about Minecraft worlds.
 #' @export
-list_worlds <- function(dir = worlds_path()) {
+list_worlds <- function(dir = worlds_path(), fancy = .befancy()) {
     folders <- list.dirs(path = dir, full.names = TRUE, recursive = FALSE)
     world_names <- character()
     world_times <- .POSIXct(numeric())
@@ -100,7 +100,13 @@ list_worlds <- function(dir = worlds_path()) {
         world_folders <- c(world_folders, basename(folder))
     }
     o <- rev(order(world_times))
-    out <- data.frame(folder = world_folders[o], name = world_names[o], last_opened = world_times[o])
+    out <- data.frame(folder = world_folders[o],
+                      name = world_names[o],
+                      last_opened = world_times[o],
+                      stringsAsFactors = FALSE)
+    if(fancy) {
+        out <- tibble::as_tibble(out)
+    }
     out
 }
 
