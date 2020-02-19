@@ -12,16 +12,19 @@ read_nbt <- function (con, len = NULL) {
 
 ##' @export
 write_nbt <- function (con, val) {
+    ret_val <- FALSE
     if (is.raw(con)) {
         con <- rawConnection(con, "wb")
         on.exit(close(con))
-        .write_nbt_compound_payload(con,val)
-        return(rawConnectionValue(con))
+        ret_val <- TRUE
     } else if (is.character(con)) {
         con <- file(con, "wb")
         on.exit(close(con))
     }
-    .write_nbt_compound_payload(con,val)
+    .write_nbt_compound_payload(con, val, writeEnd = FALSE)
+    if(ret_val) {
+        return(rawConnectionValue(con))
+    }
 }
 
 # nbt_type = list(
@@ -62,9 +65,14 @@ write_nbt <- function (con, val) {
 
 .write_nbt_name <- function (con, name) {
     #stopifnot(length(name) == 1L)
+    if(is.null(name)) {
+        name <- ""
+    }
     len <- nchar(name, type = "bytes")
     writeBin(len, con, size = 2, endian = "little")
-    writeChar(name, con, eos = NULL, useBytes = TRUE)
+    if(len > 0) {
+        writeChar(name, con, eos = NULL, useBytes = TRUE)
+    }
 }
 
 .read_nbt_compound_payload <- function(con, len = NULL) {
@@ -92,7 +100,6 @@ write_nbt <- function (con, val) {
         name <- names(val)[k]
         value <- val[[k]]
         type <- attr(value, "nbt_type", exact = TRUE)
-        print(c(name, value, type))
         .write_nbt_type(con, type)
         .write_nbt_name(con, name)
         .write_nbt_payload(con, value, type)
