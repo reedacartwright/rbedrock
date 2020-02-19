@@ -1,4 +1,4 @@
-##' @export
+#' @export
 read_nbt <- function (con, len = NULL) {
     if (is.character(con)) {
         con <- file(con, "rb")
@@ -10,7 +10,7 @@ read_nbt <- function (con, len = NULL) {
     .read_nbt_compound_payload(con,len)
 }
 
-##' @export
+#' @export
 write_nbt <- function (con, val) {
     ret_val <- FALSE
     if (is.raw(con)) {
@@ -42,6 +42,13 @@ write_nbt <- function (con, val) {
 #     INT_ARRAY = 11,
 #     LONG_ARRAY = 12
 # )
+
+#' @export
+as_nbt <- function(val, type) {
+    stopifnot(is.integer(type))
+    attr(val, "nbt_type") <- type
+    val
+}
 
 .read_nbt_type <- function (con) {
     type <- readBin(con, integer(), size = 1)
@@ -150,6 +157,7 @@ write_nbt <- function (con, val) {
     len <- readBin(con, integer(), size = 4L, endian = "little")
     stopifnot((length(len) > 0) && (ntype > 0) == (len > 0) )
     out <- list()
+    attr(out, "nbt_list_type") <- ntype
     for(i in seq_len(len)) {
         out[[i]] <- .read_nbt_payload(con,ntype)
     }
@@ -157,9 +165,9 @@ write_nbt <- function (con, val) {
 }
 
 .write_nbt_list_payload <- function(con, val) {
-    ntype <- sapply(val, attr, "nbt_type")
-    stopifnot(all(ntype == ntype[1]))
-    ntype <- ntype[1]
+    ntype <- attr(val, "nbt_list_type")
+    ntypes <- sapply(val, attr, "nbt_type")
+    stopifnot(all(ntypes == ntype))
     len <- length(val)
     .write_nbt_type(con, ntype)
     writeBin(len, con, size = 4L, endian = "little")
