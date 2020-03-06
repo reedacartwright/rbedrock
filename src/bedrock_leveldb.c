@@ -1,4 +1,5 @@
 // Copyright (c) 2016, Richard G. FitzJohn
+// Copyright (c) 2020, Reed A. Cartwright
 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -29,6 +30,7 @@
 #include <stdbool.h>
 #include <leveldb/c.h>
 #include "support.h"
+#include "strkey.h"
 
 leveldb_readoptions_t * default_readoptions;
 leveldb_writeoptions_t * default_writeoptions;
@@ -725,6 +727,54 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with, SEXP r_as_raw,
   }
   
   return PairToVectorList(ret);
+}
+
+SEXP bedrock_leveldb_strkeys(SEXP r_db, SEXP r_readoptions) {
+  leveldb_t *db = bedrock_leveldb_get_db(r_db, true);
+  leveldb_readoptions_t *readoptions =
+    bedrock_leveldb_get_readoptions(r_readoptions, true);
+
+  SEXP ret = R_NilValue;
+  SEXP last;
+  SEXP value;
+
+  char buffer[64];
+
+  leveldb_iterator_t *it = leveldb_create_iterator(db, readoptions);
+  for (leveldb_iter_seek_to_first(it);
+       leveldb_iter_valid(it);
+       leveldb_iter_next(it)) {
+    size_t key_len;
+    const char *key_data = leveldb_iter_key(it, &key_len);
+    int out_size = 64;
+    bool res = make_strkey(key_data, key_len, buffer, &out_size);
+    if(res && out_size >= 64) {
+      leveldb_iter_destroy(it);
+      Rf_error("Raw leveldb key failed to convert to a strkey.");
+      return(R_NilValue);
+    }
+    if(res) {
+      value = mkCharLen(buffer, out_size);
+    } else {
+      value = mkCharLen(key_data, key_len);
+    }
+    if(ret == R_NilValue) {
+      PROTECT(ret = list1(value));
+      last = ret;
+    } else {
+      last = SETCDR(last, list1(value));
+    }
+  }
+  leveldb_iter_destroy(it);
+  
+  if(ret == R_NilValue) {
+    return ret;
+  }
+
+  ret = coerceVector(ret, STRSXP);
+  UNPROTECT(1);
+
+  return ret;
 }
 
 SEXP bedrock_leveldb_keys_len(SEXP r_db, SEXP r_starts_with, SEXP r_readoptions) {

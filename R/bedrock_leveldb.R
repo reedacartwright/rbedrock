@@ -220,6 +220,9 @@ bedrock_leveldb_keys_len <- function(db, starts_with = NULL, readoptions = NULL)
 bedrock_leveldb_keys <- function(db, starts_with = NULL, as_raw = FALSE, readoptions = NULL) {
     .Call(Cbedrock_leveldb_keys, db, starts_with, as_raw, readoptions)
 }
+bedrock_leveldb_strkeys <- function(db, readoptions = NULL) {
+    .Call(Cbedrock_leveldb_strkeys, db, readoptions)
+}
 bedrock_leveldb_exists <- function(db, key, readoptions = NULL) {
     .Call(Cbedrock_leveldb_exists, db, key, readoptions)
 }

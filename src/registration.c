@@ -78,6 +78,7 @@ static const R_CallMethodDef call_methods[] = {
 
   {"Cbedrock_leveldb_keys_len",           (DL_FUNC) &bedrock_leveldb_keys_len,           3},
   {"Cbedrock_leveldb_keys",               (DL_FUNC) &bedrock_leveldb_keys,               4},
+  {"Cbedrock_leveldb_strkeys",            (DL_FUNC) &bedrock_leveldb_strkeys,            2},
   {"Cbedrock_leveldb_exists",             (DL_FUNC) &bedrock_leveldb_exists,             3},
   {"Cbedrock_leveldb_version",            (DL_FUNC) &bedrock_leveldb_version,            0},
 
