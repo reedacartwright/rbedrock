@@ -683,19 +683,7 @@ SEXP bedrock_leveldb_writeoptions(SEXP r_sync) {
   return ret;
 }
 
-// Built on top of the leveldb api:
-
-// TODO: at the moment this works with two passes; one computes the
-// number of keys and the other collects the keys.  That's not a bad
-// call, really, but it would be nice to be able to *collect* things.
-// To do that efficiently we need a growing data structure.  It's
-// possible that pairlists may accomplish that fairly effectively.
-// This is going to be needed for a "match pattern" find function,
-// though the bigger hurdle is going to be doing any sort of actual
-// pattern matching aside from "starts with"
-//
-// In any case this would be nice to rework to use pairlists as I
-// think that would be a nice solution and not too hard to implement.
+// Built on top of the leveldb api.
 SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with, SEXP r_as_raw,
                    SEXP r_readoptions) {
   leveldb_t *db = bedrock_leveldb_get_db(r_db, true);
@@ -706,28 +694,37 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with, SEXP r_as_raw,
   const char *starts_with = NULL;
   const size_t starts_with_len = get_starts_with(r_starts_with, &starts_with);
 
-  size_t n = bedrock_leveldb_get_keys_len(db, starts_with, starts_with_len,
-                                   readoptions);
-  SEXP ret = PROTECT(allocVector(as_string ? STRSXP : VECSXP, n));
+  SEXP ret = R_NilValue;
+  SEXP last;
+  SEXP value;
 
   leveldb_iterator_t *it = leveldb_create_iterator(db, readoptions);
-  leveldb_iter_seek_to_first(it);
-  size_t key_len;
-  for (size_t i = 0; i < n; leveldb_iter_next(it)) {
+  for (leveldb_iter_seek_to_first(it);
+       leveldb_iter_valid(it);
+       leveldb_iter_next(it)) {
     if (iter_key_starts_with(it, starts_with, starts_with_len)) {
+      size_t key_len;
       const char *key_data = leveldb_iter_key(it, &key_len);
       if (as_string) {
-        SET_STRING_ELT(ret, i, mkCharLen(key_data, key_len));
+        value = mkCharLen(key_data, key_len);
       } else {
-        SET_VECTOR_ELT(ret, i, raw_string_to_sexp(key_data, key_len, as_raw));
+        value = raw_string_to_sexp(key_data, key_len, as_raw);
       }
-      ++i;
+      if(ret == R_NilValue) {
+        PROTECT(ret = list1(value));
+        last = ret;
+      } else {
+        last = SETCDR(last, list1(value));
+      }
     }
   }
   leveldb_iter_destroy(it);
 
-  UNPROTECT(1);
-  return ret;
+  if(ret != R_NilValue) {
+    UNPROTECT(1);
+  }
+  
+  return PairToVectorList(ret);
 }
 
 SEXP bedrock_leveldb_keys_len(SEXP r_db, SEXP r_starts_with, SEXP r_readoptions) {
