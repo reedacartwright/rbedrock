@@ -49,7 +49,7 @@ get_hsa <- function(db, keys=db$keys(), fancy=.befancy()) {
 #'
 #' @param db A bedrockdb object.
 #' @param x1,y1,z1,x2,y2,z2 HSA bounding box coordinates.
-#' @param tag The type of HSA. 1 = NetherFortress, 2 = SwampHut, 3 = OceanMonument, 5 = PillagerOutputs.
+#' @param tag The type of HSA. 1 = NetherFortress, 2 = SwampHut, 3 = OceanMonument, 5 = PillagerOutpost.
 #'  4 and 6 are no longer used by the game.
 #' @param dimension The dimension that the HSA should be in. 0 = Overworld, 1 = Nether.
 #' @return A table containing information about the added HSAs.
@@ -60,6 +60,11 @@ get_hsa <- function(db, keys=db$keys(), fancy=.befancy()) {
 #'
 #' @export
 put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension=ifelse(tag == 1, 1, 0)) {
+    # convert tag as necessary
+    if(is.character(tag)) {
+        tag <- switch(tag, NetherFortress = 1, SwampHut = 2, OceanMonument = 3, PillagerOutpost = 5)
+    }
+
     # identify all chunks that this HSA overlaps
     x <- range(x1, x2)
     y <- range(y1, y2)
@@ -68,6 +73,7 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension=ifelse(tag == 1, 
     chunk_z1 <- z[1] %/% 16
     chunk_x2 <- x[2] %/% 16
     chunk_z2 <- z[2] %/% 16
+
     # create hsa for each chunk
     ret <- NULL
     for (chunk_x in seq.int(chunk_x1, chunk_x2)) {
@@ -105,7 +111,7 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension=ifelse(tag == 1, 
     }
     colnames(out) <- c("x1", "y1", "z1", "x2", "y2", "z2", "tag")
     y <- pmax.int(out[, "y1"], out[, "y2"]) - 
-        ifelse(out[,"tag"] == 1 || out[,"tag"] == 5, 0, 3)
+        ifelse(out[,"tag"] == 1 | out[,"tag"] == 5, 0, 3)
     out <- cbind(out, xspot = out[, "x1"] + (out[, "x2"] - out[, "x1"] + 1) %/% 2)
     out <- cbind(out, yspot = y-1)
     out <- cbind(out, zspot = out[, "z1"] + (out[, "z2"] - out[, "z1"] + 1) %/% 2)
