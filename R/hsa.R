@@ -10,7 +10,7 @@
 #' db$close()
 #'
 #' @export
-get_hsa <- function(db, keys=db$keys(), fancy=.befancy()) {
+get_hsa <- function(db, keys=db$keys()) {
     if (!is.character(keys)) {
         stop("'keys' must be a character vector.")
     }
@@ -22,23 +22,19 @@ get_hsa <- function(db, keys=db$keys(), fancy=.befancy()) {
         dat[attr(dat,"missing")] <- NULL
     }
     hsa <- lapply(dat, .read_hsa)
-    out <- do.call("rbind", hsa)
-    if(fancy == FALSE) {
-        return(out)
-    }
+    out <- do.call("rbind", hsa) %>% tibble::as_tibble()
 
     dimension <- as.integer(stringr::str_extract(names(hsa), "[^:]+(?=:57$)"))
     n <- sapply(hsa, nrow)
 
-    out <- tibble::as_tibble(out)
-    out$tag <- factor(out$tag, levels=1:6,
-        labels=c("NetherFortress",
-                 "SwampHut",
-                 "OceanMonument",
-                 "4", # removed cat HSA
-                 "PillagerOutpost",
-                 "6"  # removed cat HSA
-        ))
+    out$tag <- dplyr::recode(out$tag,
+        "NetherFortress",
+        "SwampHut",
+        "OceanMonument",
+        "4", # removed cat HSA
+        "PillagerOutpost",
+        "6"  # removed cat HSA
+    )
     out$dimension <- rep(dimension,n)
     out
 }

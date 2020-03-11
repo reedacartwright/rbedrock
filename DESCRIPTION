@@ -18,11 +18,13 @@ Biarch: false
 Depends:
     R (>= 3.6.0)
 Imports:
+    tibble,
     R6,
     stringr,
-    bit64
-Suggests:
+    bit64,
     rappdirs,
-    tibble
+    dplyr,
+    purrr,
+    magrittr
 URL: http://github.com/reedacartwright/rbedrock/
 BugReports: http://github.com/reedacartwright/rbedrock/issues

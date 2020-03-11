@@ -22,56 +22,32 @@ create_chunk_key <- function(x, z, d, tag, subtag = NA) {
 #' Extract information from chunk keys.
 #'
 #' @param keys A character vector of database keys.
-#' @return A data.frame containing information extracted from chunk keys. Keys that do not contain chunk data are dropped.
+#' @return A tibble containing information extracted from chunk keys. Keys that do not contain chunk data are dropped.
 #' @examples
 #' parse_chunk_keys("@@0:0:0:47-1")
 #' @export
-parse_chunk_keys <- function(keys, fancy = .befancy()) {
+parse_chunk_keys <- function(keys) {
     if (!is.character(keys)) {
         stop("keys must be a character vector.")
     }
-    m <- stringr::str_match(keys, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$")
-    m <- m[!is.na(m[, 1]), ]
-    out <- data.frame(key = m[, 1],
+    components <- stringr::str_match(keys, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$")
+    rows <- which(!is.na(components[, 1]))
+    m <- m[rows, ]
+
+    tibble::tibble(key = m[, 1],
         x = as.integer(m[, 2]),
         z = as.integer(m[, 3]),
         dimension = as.integer(m[, 4]),
-        tag = as.integer(m[, 5]),
+        tag = chunk_tag_str(m[, 5]),
         subtag = as.integer(m[, 6]),
-        stringsAsFactors = FALSE)
-    if(!fancy) {
-        return(out)
-    }
-    out <- tibble::as_tibble(out)
-    out$tag <- factor(out$tag, levels=c(45:58, 118),
-        labels=c("2DMaps",
-                 "2DMapsLegacy",
-                 "SubchunkBlocks",
-                 "48", # removed
-                 "BlockEntities",
-                 "Entities",
-                 "PendingBlockTicks",
-                 "52", # removed
-                 "BiomeStates",
-                 "Finalization",
-                 "55", # removed
-                 "BorderBlocks", # Education edition
-                 "HardcodedSpawnAreas",
-                 "RandomBlockTicks",
-                 "ChunkVersion"
-        ))
-    out
+    )
 }
 
 #' The local minecraftWorlds directory.
 #'
-#' Requires the \code{rappdirs} package.
 #' @return The likely path to the local minecraftWorlds directory.
 #' @export
 worlds_path <- function() {
-    if (!requireNamespace("rappdirs", quietly = TRUE)) {
-        stop("Package \"rappdirs\" needed for worlds_path function to work. Please install it.", call. = FALSE)
-    }
     if (.Platform$OS.type == "windows") {
         datadir <- rappdirs::user_data_dir("Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\LocalState","")
     } else {
@@ -85,7 +61,7 @@ worlds_path <- function() {
 #' @param dir The path of the minecraftWorlds directory. It defaults to the likely path.
 #' @return A data.frame containing information about Minecraft worlds.
 #' @export
-list_worlds <- function(dir = worlds_path(), fancy = .befancy()) {
+list_worlds <- function(dir = worlds_path()) {
     folders <- list.dirs(path = dir, full.names = TRUE, recursive = FALSE)
     world_names <- character()
     world_times <- .POSIXct(numeric())
@@ -100,13 +76,10 @@ list_worlds <- function(dir = worlds_path(), fancy = .befancy()) {
         world_folders <- c(world_folders, basename(folder))
     }
     o <- rev(order(world_times))
-    out <- data.frame(folder = world_folders[o],
+    out <- tibble::tibble(folder = world_folders[o],
                       name = world_names[o],
                       last_opened = world_times[o],
-                      stringsAsFactors = FALSE)
-    if(fancy) {
-        out <- tibble::as_tibble(out)
-    }
+                      )
     out
 }
 
@@ -122,6 +95,22 @@ list_worlds <- function(dir = worlds_path(), fancy = .befancy()) {
     path
 }
 
-.befancy <- function() {
-    requireNamespace("tibble", quietly=TRUE)
+chunk_tag_str <- function(tags) {
+    dplyr::recode(tags,
+        `45` = "2DMaps",
+        `46` = "2DMapsLegacy",
+        `47` = "SubchunkBlocks",
+        `48` = "48", # removed
+        `49` = "BlockEntities",
+        `50` = "Entities",
+        `51` = "PendingBlockTicks",
+        `52` = "52", # removed
+        `53` = "BiomeStates",
+        `54` = "Finalization",
+        `55` = "55", # removed
+        `56` = "BorderBlocks", # Education edition
+        `57` = "HardcodedSpawnAreas",
+        `58` = "RandomBlockTicks",
+        `118` = "ChunkVersion"
+    )
 }
