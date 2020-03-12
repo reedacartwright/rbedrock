@@ -21,13 +21,12 @@ get_hsa <- function(db, keys=db$keys()) {
     if(!is.null(attr(dat,"missing"))) {
         dat[attr(dat,"missing")] <- NULL
     }
-    hsa <- lapply(dat, .read_hsa)
-    out <- do.call("rbind", hsa) %>% tibble::as_tibble()
 
-    dimension <- as.integer(stringr::str_extract(names(hsa), "[^:]+(?=:57$)"))
-    n <- sapply(hsa, nrow)
+    hsa <- dat %>% map_dfr(~.read_hsa(.) %>% tibble::as_tibble(), .id="key")
 
-    out$tag <- dplyr::recode(out$tag,
+    hsa$dimension <- hsa$key %>% stringr::str_extract("[^:]+(?=:57$)") %>% as.integer()
+    
+    hsa$tag <- dplyr::recode(hsa$tag,
         "NetherFortress",
         "SwampHut",
         "OceanMonument",
@@ -35,8 +34,7 @@ get_hsa <- function(db, keys=db$keys()) {
         "PillagerOutpost",
         "6"  # removed cat HSA
     )
-    out$dimension <- rep(dimension,n)
-    out
+    hsa
 }
 
 #' Add a HardcodedSpawnArea to a world.
@@ -55,10 +53,13 @@ get_hsa <- function(db, keys=db$keys()) {
 #' db$close()
 #'
 #' @export
-put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension=ifelse(tag == 1, 1, 0)) {
+put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
     # convert tag as necessary
     if(is.character(tag)) {
         tag <- switch(tag, NetherFortress = 1, SwampHut = 2, OceanMonument = 3, PillagerOutpost = 5)
+    }
+    if(missing(dimension)) {
+        dimension <- (tag == 1)*1L
     }
 
     # identify all chunks that this HSA overlaps
@@ -99,7 +100,7 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension=ifelse(tag == 1, 
     on.exit(close(con))
 
     len <- readBin(con, integer(), n = 1, size = 4)
-    out <- c()
+    out <- integer()
     for (i in 1:len) {
         aabb <- readBin(con, integer(), n = 6, size = 4)
         tag <- readBin(con, integer(), n = 1, size = 1)

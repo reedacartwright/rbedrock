@@ -16,7 +16,10 @@ NULL
 #' create_chunk_key(0, 0, 0, 47, 1)
 #' @export
 create_chunk_key <- function(x, z, d, tag, subtag = NA) {
-    .create_bedrockdb_key(x, z, d, tag, subtag)
+    if(is.character(tag)) {
+        tag <- chunk_tag(tag)
+    }
+    .create_strkey(x, z, d, tag, subtag)
 }
 
 #' Extract information from chunk keys.
@@ -38,7 +41,7 @@ parse_chunk_keys <- function(keys) {
         x = as.integer(m[, 2]),
         z = as.integer(m[, 3]),
         dimension = as.integer(m[, 4]),
-        tag = chunk_tag_str(m[, 5]),
+        tag = chunk_tag_as_character(m[, 5]),
         subtag = as.integer(m[, 6]),
     )
 }
@@ -76,10 +79,11 @@ list_worlds <- function(dir = worlds_path()) {
         world_folders <- c(world_folders, basename(folder))
     }
     o <- rev(order(world_times))
-    out <- tibble::tibble(folder = world_folders[o],
-                      name = world_names[o],
-                      last_opened = world_times[o],
-                      )
+    out <- tibble::tibble(
+            folder = world_folders[o],
+            name = world_names[o],
+            last_opened = world_times[o],
+        )
     out
 }
 
@@ -93,24 +97,4 @@ list_worlds <- function(dir = worlds_path()) {
         }
     }
     path
-}
-
-chunk_tag_str <- function(tags) {
-    dplyr::recode(tags,
-        `45` = "2DMaps",
-        `46` = "2DMapsLegacy",
-        `47` = "SubchunkBlocks",
-        `48` = "48", # removed
-        `49` = "BlockEntities",
-        `50` = "Entities",
-        `51` = "PendingBlockTicks",
-        `52` = "52", # removed
-        `53` = "BiomeStates",
-        `54` = "Finalization",
-        `55` = "55", # removed
-        `56` = "BorderBlocks", # Education edition
-        `57` = "HardcodedSpawnAreas",
-        `58` = "RandomBlockTicks",
-        `118` = "ChunkVersion"
-    )
 }
