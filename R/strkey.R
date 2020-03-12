@@ -1,4 +1,4 @@
-chunk_tag_as_character <- function(tags) {
+chunk_tag <- function(tags) {
     dplyr::recode(tags,
         `45` = "2DMaps",
         `46` = "2DMapsLegacy",
@@ -18,7 +18,7 @@ chunk_tag_as_character <- function(tags) {
     )
 }
 
-chunk_tag <- function(str) {
+chunk_tag_as_int <- function(str) {
     dplyr::recode(str,
         "2DMaps" = 45,
         "2DMapsLegacy" = 46,
@@ -37,6 +37,24 @@ chunk_tag <- function(str) {
         "ChunkVersion" = 118
 
     )
+}
+
+get_chunk_tag <- function(keys) {
+    m <- stringr::str_match(keys, "^@[^:]+:[^:]+:[^:]+:([^:-]+)(?:-[^:]+)?$")
+    
+    chunk_tag(m[,2])
+}
+
+is_chunk_key <- function(keys) {
+    stringr::str_detect(keys, "^@[^:]+:[^:]+:[^:]+:[^:-]+(?:-[^:]+)?$")
+}
+
+subset_chunk_keys <- function(keys, negate = FALSE) {
+   stringr::str_subset(keys, "^@[^:]+:[^:]+:[^:]+:[^:-]+(?:-[^:]+)?$", negate = negate)
+}
+
+split_chunk_keys <- function(keys) {
+    stringr::str_match(keys, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$")
 }
 
 .create_strkey <- function(x, z, d, tag, subtag = NA) {

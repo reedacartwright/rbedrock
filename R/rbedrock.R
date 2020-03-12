@@ -17,7 +17,7 @@ NULL
 #' @export
 create_chunk_key <- function(x, z, d, tag, subtag = NA) {
     if(is.character(tag)) {
-        tag <- chunk_tag(tag)
+        tag <- chunk_tag_as_int(tag)
     }
     .create_strkey(x, z, d, tag, subtag)
 }
@@ -33,15 +33,13 @@ parse_chunk_keys <- function(keys) {
     if (!is.character(keys)) {
         stop("keys must be a character vector.")
     }
-    components <- stringr::str_match(keys, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$")
-    rows <- which(!is.na(components[, 1]))
-    m <- m[rows, ]
+    m <- keys %>% subset_chunk_keys() %>% split_chunk_keys()
 
     tibble::tibble(key = m[, 1],
         x = as.integer(m[, 2]),
         z = as.integer(m[, 3]),
         dimension = as.integer(m[, 4]),
-        tag = chunk_tag_as_character(m[, 5]),
+        tag = chunk_tag(m[, 5]),
         subtag = as.integer(m[, 6]),
     )
 }
