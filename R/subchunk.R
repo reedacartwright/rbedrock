@@ -3,8 +3,22 @@
 
 # [version:byte][num_storages:byte][block storage1]...[blockStorageN]
 
-##' export
-read_subchunk <- function(con) {
+#' @export
+read_subchunk <- function(con, storage=1, names_only=TRUE, simplify=TRUE) {
+    blocks <- .read_subchunk(con)
+    if (!is.null(storage)) {
+        blocks <- blocks[storage]
+    }
+    if (names_only) {
+        blocks <- purrr::modify_depth(blocks, 2, ~.$name)
+    }
+    if (simplify && length(blocks) == 1) {
+        return(blocks[[1]])
+    }
+    return(blocks)
+}
+
+.read_subchunk <- function(con) {
     if (is.character(con)) {
         con <- file(con, "rb")
         on.exit(close(con))
@@ -29,18 +43,37 @@ read_subchunk <- function(con) {
         wordCount <- ceiling(4096 / blocksPerWord)
         idMask <- 2^bitsPerBlock-1
         words <- readBin(con, integer(), n=wordCount, size=4L, endian="little")
+        # convert to numeric and fix na values to work around
+        # R's handling of 32-bit data
+        words <- as.numeric(words)
+        words[is.na(words)] <- -2147483648
         palleteSize <- readBin(con, integer(), n=1L, size=4L, endian="little")
         pallete <- read_nbt(con, palleteSize)
         ids <- array(0L, c(blocksPerWord, wordCount))
         for(j in seq.int(blocksPerWord)) {
-            k <- bitwShiftR(words, bitsPerBlock*(j-1))
-            ids[j,] <- bitwAnd(k,idMask)+1L
+            k <- bitops::bitShiftR(words, bitsPerBlock*(j-1))
+            ids[j,] <- bitops::bitAnd(k,idMask)+1L
         }
         o <- pallete[ids[1:4096]]
         dim(o) <- c(16,16,16)
         out[[i]] <- o
     }
     out
+}
+
+#' @export
+subchunk_origin <- function(keys) {
+    m <- keys %>% subset_chunk_keys() %>% split_chunk_keys()
+    m <- m[m[,5] == "47",]
+    xyz <- matrix(as.integer(m[,c(2,6,3)])*16L,ncol=3)
+    xyz <- xyz %>% array_branch(1)
+    names(xyz) <- m[,1]
+    xyz
+}
+
+#' @export
+subchunk_coords <- function(offsets, origins=subchunk_origin(names(offsets))) {
+    purrr::map2(offsets, origins, ~sweep(.x, 2, .y, "+")-1)
 }
 
 # (word >> ((position % blocksPerWord) * bitsPerBlock)) & ((1 << bitsPerBlock) - 1);

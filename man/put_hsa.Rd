@@ -4,7 +4,7 @@
 \alias{put_hsa}
 \title{Add a HardcodedSpawnArea to a world.}
 \usage{
-put_hsa(db, x1, y1, z1, x2, y2, z2, tag, dimension = ifelse(tag == 1, 1, 0))
+put_hsa(db, x1, y1, z1, x2, y2, z2, tag, dimension)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
