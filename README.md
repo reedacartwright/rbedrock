@@ -1,3 +1,5 @@
+[![Discord Chat](https://img.shields.io/discord/710697981677928479.svg)](https://discord.gg/sWb4YmX)
+
 ## Overview
 
 rbedrock is an extension package for [R](https://www.r-project.org/) that supports the analysis and management of Minecraft (Bedrock Edition) worlds. This includes Windows 10, Pocket Edition, XBox, and PS4 versions of the game. It does not include Minecraft: Java worlds.
