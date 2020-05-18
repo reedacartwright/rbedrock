@@ -287,7 +287,9 @@ class LEVELDB_EXPORT FileLock {
 
 // Log the specified data to *info_log if info_log is non-null.
 void Log(Logger* info_log, const char* format, ...)
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__USE_MINGW_ANSI_STDIO)
+    __attribute__((__format__(__MINGW_PRINTF_FORMAT, 2, 3)))
+#elif defined(__GNUC__) || defined(__clang__)
     __attribute__((__format__(__printf__, 2, 3)))
 #endif
     ;
