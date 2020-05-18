@@ -11,7 +11,8 @@ all: $(SHLIB)
 $(SHLIB): leveldb-mcpe/build/libleveldb.a
 
 leveldb-mcpe/build/Makefile: leveldb-mcpe/CMakeLists.txt
-	(cd leveldb-mcpe/build/ \
+	(mkdir -p leveldb-mcpe/build \
+		&& cd leveldb-mcpe/build \
 		&& $(CMAKE) -G "Unix Makefiles" .. \
 			-DCMAKE_MAKE_PROGRAM="$(MAKE)" \
 			-DCMAKE_CXX_COMPILER="$(CXX11)" \
