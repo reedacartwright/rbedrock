@@ -1,0 +1,23 @@
+CXX_STD = CXX11
+PKG_CFLAGS = $(C_VISIBILITY)
+PKG_CXXFLAGS = $(CXX_VISIBILITY)
+PKG_CPPFLAGS = -pthread -I./leveldb-mcpe/include -I./leveldb-mcpe/build/include
+PKG_LIBS = -L./leveldb-mcpe/build -pthread -lleveldb -lz
+
+all: $(SHLIB)
+
+$(SHLIB): leveldb-mcpe/build/libleveldb.a
+
+$(shell mkdir -p leveldb-mcpe/build)
+
+leveldb-mcpe/build/libleveldb.a: leveldb-mcpe/Makefile.mingw leveldb-mcpe/build/include/port/port_config.h
+	$(MAKE) --directory=leveldb-mcpe/build -f ../Makefile.mingw \
+	CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" \
+	AR="$(AR)" RANLIB="$(RANLIB)"
+
+leveldb-mcpe/build/include/port/port_config.h: leveldb-mcpe/port_config.h.mingw
+	mkdir -p leveldb-mcpe/build/include/port
+	cp $< $@
+
+clean:
+	$(MAKE) --directory=leveldb-mcpe/build -f ../Makefile.mingw clean

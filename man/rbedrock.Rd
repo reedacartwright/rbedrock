@@ -4,6 +4,3 @@
 \name{rbedrock}
 \alias{rbedrock}
 \title{rbedrock: A package for the analysis and manipulation of Minecraft: Bedrock Edition worlds.}
-\description{
-rbedrock: A package for the analysis and manipulation of Minecraft: Bedrock Edition worlds.
-}

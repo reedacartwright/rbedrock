@@ -66,7 +66,7 @@ subchunk_origin <- function(keys) {
     m <- keys %>% subset_chunk_keys() %>% split_chunk_keys()
     m <- m[m[,5] == "47",]
     xyz <- matrix(as.integer(m[,c(2,6,3)])*16L,ncol=3)
-    xyz <- xyz %>% array_branch(1)
+    xyz <- xyz %>% purrr::array_branch(1)
     names(xyz) <- m[,1]
     xyz
 }

@@ -22,7 +22,7 @@ get_hsa <- function(db, keys=db$keys()) {
         dat[attr(dat,"missing")] <- NULL
     }
 
-    hsa <- dat %>% map_dfr(~.read_hsa(.) %>% tibble::as_tibble(), .id="key")
+    hsa <- dat %>% purrr::map_dfr(~.read_hsa(.) %>% tibble::as_tibble(), .id="key")
 
     hsa$dimension <- hsa$key %>% stringr::str_extract("[^:]+(?=:57$)") %>% as.integer()
     
@@ -86,7 +86,7 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
             key <- create_chunk_key(chunk_x, chunk_z, dimension, 57)
             dat <- db$get(key, as_raw = TRUE)
             if (!is.null(dat)) {
-                hsa <- rbind(.read_hsa(dat, fancy=FALSE)[, 1:7], hsa)
+                hsa <- rbind(.read_hsa(dat)[, 1:7], hsa)
             }
             hsa <- .write_hsa(hsa)
             db$put(key, hsa)

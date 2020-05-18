@@ -1,0 +1,63 @@
+#CXX_FLAGS =  -fno-exceptions -fno-rtti -O3 -DNDEBUG   -std=c++11
+
+CXX_DEFINES = -DLEVELDB_COMPILE_LIBRARY -DLEVELDB_PLATFORM_WINDOWS=1 -DUNICODE -D_UNICODE -D__USE_MINGW_ANSI_STDIO
+
+CXX_INCLUDES = -I./include -I../ -I../include 
+
+# Object files for target leveldb
+leveldb_OBJECTS = \
+db/builder.cc.obj \
+db/c.cc.obj \
+db/db_impl.cc.obj \
+db/db_iter.cc.obj \
+db/dbformat.cc.obj \
+db/dumpfile.cc.obj \
+db/filename.cc.obj \
+db/log_reader.cc.obj \
+db/log_writer.cc.obj \
+db/memtable.cc.obj \
+db/repair.cc.obj \
+db/snappy_compressor.cc.obj \
+db/table_cache.cc.obj \
+db/version_edit.cc.obj \
+db/version_set.cc.obj \
+db/write_batch.cc.obj \
+db/zlib_compressor.cc.obj \
+table/block_builder.cc.obj \
+table/block.cc.obj \
+table/filter_block.cc.obj \
+table/format.cc.obj \
+table/iterator.cc.obj \
+table/merger.cc.obj \
+table/table_builder.cc.obj \
+table/table.cc.obj \
+table/two_level_iterator.cc.obj \
+util/arena.cc.obj \
+util/bloom.cc.obj \
+util/cache.cc.obj \
+util/coding.cc.obj \
+util/comparator.cc.obj \
+util/crc32c.cc.obj \
+util/env.cc.obj \
+util/filter_policy.cc.obj \
+util/hash.cc.obj \
+util/logging.cc.obj \
+util/options.cc.obj \
+util/status.cc.obj \
+util/env_windows.cc.obj \
+helpers/memenv/memenv.cc.obj
+
+# make output dirs
+OBJ_DIRS=$(dir $(sort $(leveldb_OBJECTS)))
+$(shell mkdir -p $(OBJ_DIRS))
+
+all: libleveldb.a
+
+libleveldb.a: $(leveldb_OBJECTS)
+	$(AR) crs $@ $^
+
+$(leveldb_OBJECTS) : %.cc.obj : ../%.cc
+	$(CXX) $(CXX_DEFINES) $(CXX_INCLUDES) $(CXXFLAGS) -c -o $@ $<
+
+clean:
+	-$(RM) libleveldb.a $(leveldb_OBJECTS)

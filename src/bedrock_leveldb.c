@@ -697,7 +697,7 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with, SEXP r_as_raw,
   const size_t starts_with_len = get_starts_with(r_starts_with, &starts_with);
 
   SEXP ret = R_NilValue;
-  SEXP last;
+  SEXP last = R_NilValue;
   SEXP value;
 
   leveldb_iterator_t *it = leveldb_create_iterator(db, readoptions);
@@ -735,7 +735,7 @@ SEXP bedrock_leveldb_strkeys(SEXP r_db, SEXP r_readoptions) {
     bedrock_leveldb_get_readoptions(r_readoptions, true);
 
   SEXP ret = R_NilValue;
-  SEXP last;
+  SEXP last = R_NilValue;
   SEXP value;
 
   char buffer[64];
@@ -746,7 +746,7 @@ SEXP bedrock_leveldb_strkeys(SEXP r_db, SEXP r_readoptions) {
        leveldb_iter_next(it)) {
     size_t key_len;
     const char *key_data = leveldb_iter_key(it, &key_len);
-    int out_size = 64;
+    size_t out_size = 64;
     bool res = make_strkey(key_data, key_len, buffer, &out_size);
     if(res && out_size >= 64) {
       leveldb_iter_destroy(it);

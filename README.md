@@ -6,15 +6,33 @@ rbedrock is an extension package for [R](https://www.r-project.org/) that suppor
 
 ## Installation
 
+To install the development version you will need to have suitable development tools installed on your machine. This includes [CMake](https://cmake.org/download/) on Unix.
+
 ``` r
 # Install from CRAN [NOT CURRENTLY AVAILABLE]
 # install.packages("rbedrock") 
 
 # Or the development version from GitHub
+# If you are installing on Windows for the first time, see section below
 if (!require(devtools)) {
     install.packages("devtools")
 }
 devtools::install_github("reedacartwright/rbedrock")
 ```
 
-To install the development version you will need to have suitable development tools installed on your machine. This includes [CMake](https://cmake.org/download/) and [Rtools](https://cran.r-project.org/bin/windows/Rtools/) if you are on Windows.
+## Windows Installation
+
+Install the latest [R](https://cloud.r-project.org/bin/windows/base/) and [RStudio](https://rstudio.com/products/rstudio/download/#download). On Windows, you will also need to install the [Rtools40](https://cran.r-project.org/bin/windows/Rtools/) package to build rbedrock from source. This can be accomplished with the code below.
+
+
+``` r
+# Install the "installr" package if neccessary
+if(!require(installr)) {
+    install.packages("installr")
+}
+# download, install, and setup rtools
+installr::install.URL("https://cran.r-project.org/bin/windows/Rtools/rtools40-x86_64.exe")
+writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron")
+
+# restart RStudio/R and follow the installion instruction above.
+```
