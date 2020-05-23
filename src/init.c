@@ -27,6 +27,7 @@
 
 #include "bedrock_leveldb.h"
 #include <R_ext/Rdynload.h>
+#include <R_ext/Visibility.h>
 #include <Rversion.h>
 
 // for testing:
@@ -91,13 +92,12 @@ static const R_CallMethodDef call_methods[] = {
   {NULL,                           NULL,                                   0}
 };
 
-void R_init_rbedrock(DllInfo *info) {
+void attribute_visible R_init_rbedrock(DllInfo *info) {
   bedrock_leveldb_init();
+  
   R_registerRoutines(info, NULL, call_methods, NULL, NULL);
-#if defined(R_VERSION) && R_VERSION >= R_Version(3, 3, 0)
   R_useDynamicSymbols(info, FALSE);
   R_forceSymbols(info, TRUE);
-#endif
 }
 
 // This can't be easily tested
