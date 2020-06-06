@@ -60,9 +60,7 @@ split_chunk_keys <- function(keys) {
 .create_strkey <- function(x, z, d, tag, subtag = NA) {
     ret <- stringr::str_c(x, z, d, tag, sep = ":")
     ret <- stringr::str_c("@", ret)
-    if (!is.na(subtag)) {
-        ret <- stringr::str_c(ret, subtag, sep = "-")
-    }
+    ret <- ifelse(is.na(subtag), ret, stringr::str_c(ret, subtag, sep = "-"))
     return(ret)
 }
 
