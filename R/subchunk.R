@@ -67,7 +67,7 @@ read_subchunk <- function(con, storage=1, names_only=TRUE, simplify=TRUE) {
 #' @export
 subchunk_origin <- function(keys) {
     m <- keys %>% subset_chunk_keys() %>% split_chunk_keys()
-    m <- m[m[,5] == "47",]
+    m <- m[m[,5] == "47", , drop = FALSE]
     xyz <- matrix(as.integer(m[,c(2,6,3)])*16L,ncol=3)
     xyz <- xyz %>% purrr::array_branch(1)
     names(xyz) <- m[,1]
@@ -76,7 +76,11 @@ subchunk_origin <- function(keys) {
 
 #' @export
 subchunk_coords <- function(offsets, origins=subchunk_origin(names(offsets))) {
-    purrr::map2(offsets, origins, ~sweep(.x, 2, .y, "+")-1)
+    if(is.list(offsets)) {
+        purrr::map2(offsets, origins, ~sweep(.x, 2, .y, "+")-1)        
+    } else {
+        sweep(offsets, 2, origins, "+")-1
+    }
 }
 
 # (word >> ((position % blocksPerWord) * bitsPerBlock)) & ((1 << bitsPerBlock) - 1);
