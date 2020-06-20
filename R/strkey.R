@@ -14,6 +14,7 @@ chunk_tag <- function(tags) {
         `56` = "BorderBlocks", # Education edition
         `57` = "HardcodedSpawnAreas",
         `58` = "RandomBlockTicks",
+        `59` = "59",
         `118` = "ChunkVersion"
     )
 }
@@ -34,6 +35,7 @@ chunk_tag_as_int <- function(str) {
         "BorderBlocks" = 56, # Education edition
         "HardcodedSpawnAreas" = 57,
         "RandomBlockTicks" = 58,
+        "59" = 59, # introduced in 1.16
         "ChunkVersion" = 118
 
     )
