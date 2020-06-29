@@ -70,16 +70,24 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
         bedrock_leveldb_get(self$db, .from_strkey(key), as_raw, error_if_missing, 
             readoptions)
     },
-    mget = function(key, as_raw = NULL, missing_value = NULL, missing_report = TRUE, 
+    mget = function(keyes, as_raw = NULL, missing_value = NULL, missing_report = TRUE, 
         readoptions = NULL) {
-        bedrock_leveldb_mget(self$db, .from_strkey(key), as_raw, missing_value, 
+        y <- bedrock_leveldb_mget(self$db, .from_strkey(keyes), as_raw, missing_value, 
             missing_report, readoptions)
+        names(y) <- keyes
+        y
     },
     put = function(key, value, writeoptions = NULL) {
         bedrock_leveldb_put(self$db, .from_strkey(key), value, writeoptions)
     },
-    mput = function(key, value, writeoptions = NULL) {
-        bedrock_leveldb_mput(self$db, .from_strkey(key), value, writeoptions)
+    mput = function(keyes = names(values), values, writeoptions = NULL) {
+        # if passed keys but not values, then rearrange.
+        # this allows uses to pass the output of mget back into mput
+        if(missing(values)) {
+            values <- keyes
+            keyes <- names(values)
+        }
+        bedrock_leveldb_mput(self$db, .from_strkey(keyes), values, writeoptions)
     },
     delete = function(key, report = FALSE, readoptions = NULL, writeoptions = NULL) {
         bedrock_leveldb_delete(self$db, .from_strkey(key), report, readoptions, 

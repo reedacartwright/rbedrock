@@ -1,8 +1,9 @@
 #' Get HardcodedSpawnArea information from a world.
 #'
 #' @param db A bedrockdb object.
-#' @param keys A character vector of db keys to extract HSAs from.
-#'    Any keys not representing HSA data will be dropped.
+#' @param x,z,dimension Chunk coordinates to extract HSA data from.
+#'    x can also be a character vector of db keys and any keys not
+#'    representing HSA data will be silently dropped.
 #' @return A table containing HSA and spawn-spot information.
 #' @examples
 #' db <- bedrockdb("x7fuXRc8AAA=")
@@ -10,13 +11,9 @@
 #' db$close()
 #'
 #' @export
-get_hsa <- function(db, keys=db$keys()) {
-    if (!is.character(keys)) {
-        stop("'keys' must be a character vector.")
-    }
-    keys <- stringr::str_subset(keys, "^@[^:]+:[^:]+:[^:]+:57$")
+get_hsa <- function(db, x=db$keys(), z, dimension) {
+    keys <- .process_strkey_args(x,z,dimension,tag=57L)
     dat <- db$mget(keys, as_raw = TRUE)
-    names(dat) <- keys;
     # prune keys that are missing
     if(!is.null(attr(dat,"missing"))) {
         dat[attr(dat,"missing")] <- NULL
@@ -26,7 +23,7 @@ get_hsa <- function(db, keys=db$keys()) {
 
     hsa$dimension <- hsa$key %>% stringr::str_extract("[^:]+(?=:57$)") %>% as.integer()
     
-    hsa$tag <- dplyr::recode(hsa$tag,
+    hsa$type <- dplyr::recode(hsa$tag,
         "NetherFortress",
         "SwampHut",
         "OceanMonument",
@@ -34,7 +31,7 @@ get_hsa <- function(db, keys=db$keys()) {
         "PillagerOutpost",
         "6"  # removed cat HSA
     )
-    hsa
+    hsa %>% dplyr::select(type, dplyr::everything())
 }
 
 #' Add a HardcodedSpawnArea to a world.
