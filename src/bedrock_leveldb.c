@@ -729,6 +729,8 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with, SEXP r_as_raw,
   return PairToVectorList(ret);
 }
 
+// TODO: This does not percent encode keys.
+//       need to use malloc/free/realloc
 SEXP bedrock_leveldb_strkeys(SEXP r_db, SEXP r_readoptions) {
   leveldb_t *db = bedrock_leveldb_get_db(r_db, true);
   leveldb_readoptions_t *readoptions =
