@@ -13,10 +13,18 @@
 #' @export
 get_hsa <- function(db, x=db$keys(), z, dimension) {
     keys <- .process_strkey_args(x,z,dimension,tag=57L)
-    dat <- db$mget(keys, as_raw = TRUE)
-    # prune keys that are missing
-    if(!is.null(attr(dat,"missing"))) {
-        dat[attr(dat,"missing")] <- NULL
+
+    dat <- db$mget(keys, as_raw = TRUE) %>% purrr::compact()
+
+    if(length(dat) == 0) {
+        hsa <- tibble(type = character(), key = character(),
+                      x1 = numeric(), y1 = numeric(), z1 = numeric(),
+                      x2 = numeric(), y2 = numeric(), z2 = numeric(),
+                      tag = numeric(),
+                      xspot = numeric(), yspot = numeric(), zspot = numeric(),
+                      dimension = numeric()
+            )
+        return(hsa)
     }
 
     hsa <- dat %>% purrr::map_dfr(~.read_hsa(.) %>% tibble::as_tibble(), .id="key")
@@ -63,27 +71,27 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
     x <- range(x1, x2)
     y <- range(y1, y2)
     z <- range(z1, z2)
-    chunk_x1 <- x[1] %/% 16
-    chunk_z1 <- z[1] %/% 16
-    chunk_x2 <- x[2] %/% 16
-    chunk_z2 <- z[2] %/% 16
+    chunk_x1 <- x[1] %/% 16L
+    chunk_z1 <- z[1] %/% 16L
+    chunk_x2 <- x[2] %/% 16L
+    chunk_z2 <- z[2] %/% 16L
 
     # create hsa for each chunk
     ret <- NULL
     for (chunk_x in seq.int(chunk_x1, chunk_x2)) {
         for (chunk_z in seq.int(chunk_z1, chunk_z2)) {
-            hx1 <- max(x[1], chunk_x * 16)
-            hx2 <- min(x[2], chunk_x * 16 + 15)
-            hz1 <- max(z[1], chunk_z * 16)
-            hz2 <- min(z[2], chunk_z * 16 + 15)
+            hx1 <- max(x[1], chunk_x * 16L)
+            hx2 <- min(x[2], chunk_x * 16L + 15L)
+            hz1 <- max(z[1], chunk_z * 16L)
+            hz2 <- min(z[2], chunk_z * 16L + 15L)
             hy1 <- y[1]
             hy2 <- y[2]
-            hsa <- matrix(c(hx1, hy1, hz1, hx2, hy2, hz2, tag), 1, 7)
+            hsa <- matrix(c(hx1, hy1, hz1, hx2, hy2, hz2, tag), 1L, 7L)
             ret <- rbind(ret, hsa)
-            key <- create_chunk_key(chunk_x, chunk_z, dimension, 57)
+            key <- create_chunk_key(chunk_x, chunk_z, dimension, 57L)
             dat <- db$get(key, as_raw = TRUE)
             if (!is.null(dat)) {
-                hsa <- rbind(.read_hsa(dat)[, 1:7], hsa)
+                hsa <- rbind(.read_hsa(dat)[, 1L:7L], hsa)
             }
             hsa <- .write_hsa(hsa)
             db$put(key, hsa)
@@ -105,10 +113,10 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
     }
     colnames(out) <- c("x1", "y1", "z1", "x2", "y2", "z2", "tag")
     y <- pmax.int(out[, "y1"], out[, "y2"]) - 
-        ifelse(out[,"tag"] == 1 | out[,"tag"] == 5, 0, 3)
-    out <- cbind(out, xspot = out[, "x1"] + (out[, "x2"] - out[, "x1"] + 1) %/% 2)
-    out <- cbind(out, yspot = y-1)
-    out <- cbind(out, zspot = out[, "z1"] + (out[, "z2"] - out[, "z1"] + 1) %/% 2)
+        ifelse(out[,"tag"] == 1L | out[,"tag"] == 5L, 0L, 3L)
+    out <- cbind(out, xspot = out[, "x1"] + (out[, "x2"] - out[, "x1"] + 1L) %/% 2L)
+    out <- cbind(out, yspot = y-1L)
+    out <- cbind(out, zspot = out[, "z1"] + (out[, "z2"] - out[, "z1"] + 1L) %/% 2L)
     rownames(out) <- NULL
     out
 }
