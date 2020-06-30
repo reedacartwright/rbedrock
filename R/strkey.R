@@ -56,7 +56,7 @@ chunk_tag_as_int <- function(str) {
 
 get_chunk_tag_int <- function(keys) {
     m <- stringr::str_match(keys, "^@[^:]+:[^:]+:[^:]+:([^:-]+)(?:-[^:]+)?$")
-    as.numeric(m[,2])
+    as.integer(m[,2])
 }
 
 get_chunk_tag <- function(keys) {
@@ -85,7 +85,7 @@ split_chunk_keys <- function(keys) {
     ret
 }
 
-.process_strkey_args <- function(x, z, d, tag, subtag = NA_integer_) {
+.process_strkey_args <- function(x, z, d, tag, subtag = NA_integer_, stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
     if(missing(z) && is.character(x)) {
         # if tag exists, we are going to filter on data type
@@ -94,7 +94,11 @@ split_chunk_keys <- function(keys) {
                 stop("when filtering keys in x, tag must have length 1")
             }
             ktag <- get_chunk_tag_int(x)
-            return( x[!is.na(ktag) & ktag == tag] )
+            b <- !is.na(ktag) & ktag == tag
+            if(stop_if_filtered && any(!b)) {
+                stop(paste0("Some keys passed to .process_strkeys_args are not of type ", tag))
+            }
+            x <- x[b]
         }
         return(x)
     }

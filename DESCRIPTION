@@ -27,5 +27,7 @@ Imports:
     dplyr,
     purrr,
     magrittr
+Suggests:
+    zip
 URL: http://github.com/reedacartwright/rbedrock/
 BugReports: http://github.com/reedacartwright/rbedrock/issues

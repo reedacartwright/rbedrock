@@ -57,7 +57,8 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
         self$db <- bedrock_leveldb_open(self$path, ...)
     },
     close = function(error_if_closed = FALSE) {
-        bedrock_leveldb_close(self$db, error_if_closed)
+        ret <- bedrock_leveldb_close(self$db, error_if_closed)
+        invisible(ret)
     },
     destroy = function() {
         self$close()
@@ -77,17 +78,14 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
         names(y) <- keys
         y
     },
-    put = function(key, value, writeoptions = NULL) {
-        bedrock_leveldb_put(self$db, .from_strkey(key), value, writeoptions)
+    put = function(value, key, writeoptions = NULL) {
+        ret <- bedrock_leveldb_put(self$db, .from_strkey(key), value, writeoptions)
+        invisible(ret)
     },
-    mput = function(keys = names(values), values, writeoptions = NULL) {
-        # if passed keys but not values, then rearrange.
-        # this allows uses to pass the output of mget back into mput
-        if(missing(values)) {
-            values <- keys
-            keys <- names(values)
-        }
-        bedrock_leveldb_mput(self$db, .from_strkey(keys), values, writeoptions)
+    # values comes before keys so we can pass a named list to this function
+    mput = function(values, keys = names(values), writeoptions = NULL) {
+        ret <- bedrock_leveldb_mput(self$db, .from_strkey(keys), values, writeoptions)
+        invisible(ret)
     },
     delete = function(key, report = FALSE, readoptions = NULL, writeoptions = NULL) {
         bedrock_leveldb_delete(self$db, .from_strkey(key), report, readoptions, 

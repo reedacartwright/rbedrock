@@ -85,14 +85,52 @@ list_worlds <- function(dir = worlds_path()) {
     out
 }
 
-.fixup_path <- function(path) {
+
+#' @export
+export_world <- function(path, output) {
+    path <- .fixup_path(path, verify=TRUE)
+    if(length(output) != 1) {
+        stop("output must be a scalar")
+    }
+    if(file.exists(output)) {
+        if(dir.exists(output)) {
+            stop("output exists, but is a directory")
+        }
+        file.remove(output)
+    }
+    wd <- getwd()
+    setwd(path)
+    f <- list.files()
+
+    if (!requireNamespace("zip", quietly = TRUE)) {
+        ret <- utils::zip(output, f, flags = "-r9Xq")
+    } else {
+        ret <- zip::zipr(output, f)
+    }
+
+    setwd(wd)
+    invisible(ret)
+}
+
+.fixup_path <- function(path, verify=FALSE) {
+    if(length(path) != 1) {
+        stop("path must be a scalar")
+    }
     if (file.exists(path)) {
         path <- normalizePath(path)
     } else {
-        wpath <- paste0(worlds_path(), "/", path)
+        wpath <- file.path(worlds_path(), path)
         if (file.exists(wpath)) {
             path <- normalizePath(wpath)
         }
     }
+    if(verify) {
+        f <- c("db", "level.dat", "levelname.txt")
+        if(!all(file.exists(file.path(path, f)))) {
+            stop("world folder does not appear to contain Minecraft data")
+        }
+    }
     path
 }
+
+

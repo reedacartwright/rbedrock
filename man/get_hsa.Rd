@@ -4,13 +4,14 @@
 \alias{get_hsa}
 \title{Get HardcodedSpawnArea information from a world.}
 \usage{
-get_hsa(db, keys = db$keys())
+get_hsa(db, x = db$keys(), z, dimension)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
 
-\item{keys}{A character vector of db keys to extract HSAs from.
-Any keys not representing HSA data will be dropped.}
+\item{x, z, dimension}{Chunk coordinates to extract HSA data from.
+x can also be a character vector of db keys and any keys not
+representing HSA data will be silently dropped.}
 }
 \value{
 A table containing HSA and spawn-spot information.
