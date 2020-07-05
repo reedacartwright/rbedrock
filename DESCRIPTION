@@ -26,7 +26,8 @@ Imports:
     rappdirs,
     dplyr,
     purrr,
-    magrittr
+    magrittr,
+    jsonlite
 Suggests:
     zip
 URL: http://github.com/reedacartwright/rbedrock/

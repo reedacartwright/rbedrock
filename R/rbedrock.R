@@ -85,19 +85,17 @@ list_worlds <- function(dir = worlds_path()) {
     out
 }
 
-
 #' @export
 export_world <- function(path, output) {
+    stopifnot(length(output) == 1)
+
     path <- .fixup_path(path, verify=TRUE)
-    if(length(output) != 1) {
-        stop("output must be a scalar")
-    }
+    
     if(file.exists(output)) {
-        if(dir.exists(output)) {
-            stop("output exists, but is a directory")
-        }
+        stopifnot(!dir.exists(output))
         file.remove(output)
     }
+
     wd <- getwd()
     setwd(path)
     f <- list.files()
@@ -112,10 +110,35 @@ export_world <- function(path, output) {
     invisible(ret)
 }
 
-.fixup_path <- function(path, verify=FALSE) {
-    if(length(path) != 1) {
-        stop("path must be a scalar")
+#' @export
+import_world <- function(mcworld, path) {
+    stopifnot(file.exists(mcworld))
+
+    # create a random world directory
+    while(TRUE) {
+        y <- as.raw(sample.int(256L,8L,replace=TRUE)-1L)
+        path <- jsonlite::base64_enc(y)
+        path <- stringr::str_replace(path, "/", "-")
+        ret <- path
+        path <- file.path(worlds_path(), path)
+        # check for collisions
+        if(!file.exists(path)) {
+            break
+        }
     }
+
+    if (!requireNamespace("zip", quietly = TRUE)) {
+        utils::unzip(mcworld, exdir = path)
+    } else {
+        zip::unzip(mcworld, exdir = path)
+    }
+
+    invisible(ret)
+}
+
+.fixup_path <- function(path, verify=FALSE) {
+    stopifnot(length(path) == 1)
+
     if (file.exists(path)) {
         path <- normalizePath(path)
     } else {

@@ -46,8 +46,8 @@ write_nbt <- function (con, val) {
 #' @export
 as_nbt <- function(val, type) {
     stopifnot(is.integer(type))
-    attr(val, "nbt_type") <- type
-    val
+
+    structure(val, nbt_type = type)
 }
 
 .read_nbt_type <- function (con) {
