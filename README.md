@@ -33,6 +33,18 @@ if(!require(installr)) {
 # download, install, and setup rtools
 installr::install.URL("https://cran.r-project.org/bin/windows/Rtools/rtools40-x86_64.exe")
 writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron")
+```
 
-# restart RStudio/R and follow the installion instruction above.
+Now restart R/Rstudio so the new .Renviron can take effect.
+
+``` r
+# Install from CRAN [NOT CURRENTLY AVAILABLE]
+# install.packages("rbedrock") 
+
+# Or the development version from GitHub
+# If you are installing on Windows for the first time, see section below
+if (!require(devtools)) {
+    install.packages("devtools")
+}
+devtools::install_github("reedacartwright/rbedrock")
 ```
