@@ -158,3 +158,8 @@ put_biomes <- function(db, values, x = names(values), z, dimension, missing_heig
 # invert the list
 .BIOME_LIST_INV <- character()
 .BIOME_LIST_INV[.BIOME_LIST+1] <- names(.BIOME_LIST)
+
+#' @export
+list_biomes <- function() {
+    tibble::tibble(name=names(.BIOME_LIST), id=.BIOME_LIST)
+}
