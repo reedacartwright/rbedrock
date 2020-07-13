@@ -54,7 +54,7 @@ worlds_path <- function() {
     } else {
         datadir <- rappdirs::user_data_dir("mcpelauncher")
     }
-    normalizePath(stringr::str_c(datadir, "/games/com.mojang/minecraftWorlds"))
+    normalizePath(file.path(datadir, "games/com.mojang/minecraftWorlds"))
 }
 
 #' List the worlds in the minecraftWorlds directory.
@@ -68,7 +68,7 @@ list_worlds <- function(dir = worlds_path()) {
     world_times <- .POSIXct(numeric())
     world_folders <- character()
     for (folder in folders) {
-        levelname <- stringr::str_c(folder, "/levelname.txt")
+        levelname <- file.path(folder, "levelname.txt")
         if (!file.exists(levelname)) {
             next
         }
@@ -85,6 +85,12 @@ list_worlds <- function(dir = worlds_path()) {
     out
 }
 
+#' Export a world to an mcworld file
+#'
+#' @param path The path to a world folder. If the path does not exist, it is 
+#'   assumed to be the base name of a world folder in the local minecraftWorlds
+#'   directory.
+#' @param output The path to the mcworld file that will be created.
 #' @export
 export_world <- function(path, output) {
     stopifnot(length(output) == 1)
@@ -110,8 +116,11 @@ export_world <- function(path, output) {
     invisible(ret)
 }
 
+#' Import a world from an mcworld file into the minecraftWorlds directory.
+#'
+#' @param mcworld The path to an mcworld file.
 #' @export
-import_world <- function(mcworld, path) {
+import_world <- function(mcworld) {
     stopifnot(file.exists(mcworld))
 
     # create a random world directory

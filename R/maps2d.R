@@ -1,3 +1,13 @@
+#' Get biome information from a world.
+#'
+#' @param db A bedrockdb object.
+#' @param x,z,dimension Chunk coordinates to extract HSA data from.
+#'    x can also be a character vector of db keys and any keys not
+#'    representing biome data will be silently dropped.
+#' @param return_names if set to true, this will return character vectors containing
+#'    the names of each biome instead of biome ids.
+#' @return An list of arrays containing biome information of each key.
+#'
 #' @export
 get_biomes <- function(db, x, z, dimension, return_names=TRUE) {
     k <- .process_strkey_args(x,z,dimension, tag=45L)
@@ -16,6 +26,21 @@ get_biomes <- function(db, x, z, dimension, return_names=TRUE) {
     biomes
 }
 
+#' Put biome information into the world
+#'
+#' put_biomes updates the biome information of chunks.
+#' It will preserve any existing height data or use
+#' the missing_height value if no such data exists.
+#'
+#' @param db A bedrockdb object.
+#' @param values A list of character or integer vectors. Each element of
+#'    the list must contain 256 values or an error will be raised.
+#' @param x,z,dimension Chunk coordinates to write biome data to.
+#'    `x` can also be a character vector of db keys and any keys not
+#'    representing biome data (tag 47) will be silently dropped.
+#'    `x` defaults to `names(values)`    
+#'
+#' @param missing_height if there is no existing height data, use this value for the chunk.
 #' @export
 put_biomes <- function(db, values, x = names(values), z, dimension, missing_height=0L) {
     k <- .process_strkey_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
@@ -159,6 +184,10 @@ put_biomes <- function(db, values, x = names(values), z, dimension, missing_heig
 .BIOME_LIST_INV <- character()
 .BIOME_LIST_INV[.BIOME_LIST+1] <- names(.BIOME_LIST)
 
+#' List Minecraft Bedrock Edition biomes.
+#'
+#' @return A table containing biome names and numeric ids.
+#'
 #' @export
 list_biomes <- function() {
     tibble::tibble(name=names(.BIOME_LIST), id=.BIOME_LIST)

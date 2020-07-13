@@ -2,10 +2,20 @@
 % Please edit documentation in R/leveldat.R
 \name{read_leveldat}
 \alias{read_leveldat}
-\title{export}
+\title{Read data from a world's level.dat file.}
 \usage{
 read_leveldat(path, old = FALSE)
 }
+\arguments{
+\item{path}{The path to a world folder. If the path does not exist, it is 
+assumed to be the base name of a world folder in the local minecraftWorlds
+directory.}
+
+\item{old}{If TRUE, `read_leveldat` will open level.dat_old instead.}
+}
+\value{
+A list containing nbt data read from level.dat
+}
 \description{
-export
+Read data from a world's level.dat file.
 }
