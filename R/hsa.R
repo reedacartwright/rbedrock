@@ -17,7 +17,7 @@ get_hsa <- function(db, x=db$keys(), z, dimension) {
     dat <- db$mget(keys, as_raw = TRUE) %>% purrr::compact()
 
     if(length(dat) == 0) {
-        hsa <- tibble(type = character(), key = character(),
+        hsa <- tibble::tibble(type = character(), key = character(),
                       x1 = numeric(), y1 = numeric(), z1 = numeric(),
                       x2 = numeric(), y2 = numeric(), z2 = numeric(),
                       tag = numeric(),
@@ -27,7 +27,7 @@ get_hsa <- function(db, x=db$keys(), z, dimension) {
         return(hsa)
     }
 
-    hsa <- dat %>% purrr::map_dfr(~.read_hsa(.) %>% tibble::as_tibble(), .id="key")
+    hsa <- dat %>% purrr::map_dfr(~tibble::as_tibble(read_hsa_data(.)), .id="key")
 
     hsa$dimension <- hsa$key %>% stringr::str_extract("[^:]+(?=:57$)") %>% as.integer()
     
@@ -39,7 +39,7 @@ get_hsa <- function(db, x=db$keys(), z, dimension) {
         "PillagerOutpost",
         "6"  # removed cat HSA
     )
-    hsa %>% dplyr::select(type, dplyr::everything())
+    hsa %>% dplyr::select("type", dplyr::everything())
 }
 
 #' Add a HardcodedSpawnArea to a world.
@@ -91,16 +91,17 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
             key <- create_chunk_key(chunk_x, chunk_z, dimension, 57L)
             dat <- db$get(key, as_raw = TRUE)
             if (!is.null(dat)) {
-                hsa <- rbind(.read_hsa(dat)[, 1L:7L], hsa)
+                hsa <- rbind(read_hsa_data(dat)[, 1L:7L], hsa)
             }
-            hsa <- .write_hsa(hsa)
+            hsa <- write_hsa_data(hsa)
             db$put(key, hsa)
         }
     }
     ret
 }
 
-.read_hsa <- function(rawval) {
+#' @export
+read_hsa_data <- function(rawval) {
     con <- rawConnection(rawval)
     on.exit(close(con))
 
@@ -121,13 +122,18 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
     out
 }
 
-.write_hsa <- function(hsa) {
+#' @export
+write_hsa_data <- function(hsa) {
+    con <- rawConnection(raw(0), "wb")
+    on.exit(close(con))
+
     len <- nrow(hsa)
-    out <- writeBin(as.integer(len), raw(), size = 4, endian = "little")
+    writeBin(as.integer(len), con, size = 4, endian = "little")
     for (i in 1:len) {
         n <- as.integer(hsa[i, ])
-        out <- c(out, writeBin(n[1:6], raw(), size = 4, endian = "little"))
-        out <- c(out, writeBin(n[7], raw(), size = 1, endian = "little"))
+        writeBin(n[1:6], con, size = 4, endian = "little")
+        writeBin(n[7], con, size = 1, endian = "little")
     }
-    out
+
+    rawConnectionValue(con)
 }

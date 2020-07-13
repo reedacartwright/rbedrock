@@ -5,4 +5,5 @@
 ^src/leveldb-mcpe/.clang-format$
 ^src/leveldb-mcpe/.travis.yml$
 ^rbedrock.sublime-project$
+^rbedrock.sublime-workspace$
 

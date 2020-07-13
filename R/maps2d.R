@@ -15,7 +15,7 @@ get_biomes <- function(db, x, z, dimension, return_names=TRUE) {
     dat <- db$mget(k, as_raw = TRUE) %>% purrr::compact()
 
     biomes <- dat %>% purrr::map(function(x) {
-        y <- .read_2dmaps(x)$biome_map
+        y <- read_2dmaps_data(x)$biome_map
         if(return_names) {
             y <- .BIOME_LIST_INV[y+1]
         }
@@ -54,7 +54,7 @@ put_biomes <- function(db, values, x = names(values), z, dimension, missing_heig
         if(is.null(x)) {
             rep(missing_height, 256L)
         } else {
-            .read_2dmaps(x)$height_map
+            read_2dmaps_data(x)$height_map
         }
     })
     dat2 <- purrr::map2(h, values, function(x,y) {
@@ -64,42 +64,33 @@ put_biomes <- function(db, values, x = names(values), z, dimension, missing_heig
                 stop("biome list contains unknown biome")
             }
         }
-        .write_2dmaps(x,y)
+        write_2dmaps_data(x,y)
     })
     
     db$mput(dat2)
 }
 
-.read_2dmaps <- function(con) {
-    if (is.character(con)) {
-        con <- file(con, "rb")
-        on.exit(close(con))
-    } else if (is.raw(con)) {
-        con <- rawConnection(con, "rb")
-        on.exit(close(con))
-    }
+#' @export
+read_2dmaps_data <- function(rawval) {
+    con <- rawConnection(rawval)
+    on.exit(close(con))
+
     h <- readBin(con, integer(), n=256L, size=2L, endian="little", signed = TRUE)
     b <- readBin(con, integer(), n=256L, size=1L, endian="little", signed = FALSE)
 
     list(height_map = h, biome_map = b)
 }
 
-.write_2dmaps <- function(height_map, biome_map, con = raw(0)) {
+#' @export
+write_2dmaps_data <- function(height_map, biome_map) {
     # support passing a list
     if(missing(biome_map) && is.list(height_map)) {
         biome_map <- height_map$biome_map
         height_map <- height_map$height_map
     }
 
-    con_is_raw_connection <- FALSE
-    if(is.character(con)) {
-        con <- file(con, "wb")
-        on.exit(close(con))
-    } else if(is.raw(con)) {
-        con_is_raw_connection <- TRUE
-        con <- rawConnection(raw(0), "wb")
-        on.exit(close(con))
-    }
+    con <- rawConnection(raw(0), "wb")
+    on.exit(close(con))
 
     height_map <- as.integer(height_map)
     biome_map <- as.integer(biome_map)
@@ -109,9 +100,6 @@ put_biomes <- function(db, values, x = names(values), z, dimension, missing_heig
     writeBin(height_map, con, size = 2L, endian="little")
     writeBin(biome_map, con, size = 1L, endian="little")
     
-    if(!con_is_raw_connection) {
-        return()
-    }
     rawConnectionValue(con)
 }
 
