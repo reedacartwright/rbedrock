@@ -42,9 +42,13 @@ Now restart R/Rstudio so the new .Renviron can take effect.
 # install.packages("rbedrock") 
 
 # Or the development version from GitHub
-# If you are installing on Windows for the first time, see section below
 if (!require(devtools)) {
     install.packages("devtools")
 }
 devtools::install_github("reedacartwright/rbedrock")
+
+# Install tidyverse (not needed, but useful)
+if(!require(tidyverse)) {
+    install.packages("tidyverse")
+}    
 ```
