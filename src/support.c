@@ -34,6 +34,14 @@ size_t get_key(SEXP key, const char **key_data) {
   return get_data(key, key_data, "key");
 }
 
+size_t get_key_maybe_nil(SEXP key, const char **key_data) {
+  if(TYPEOF(key) == NILSXP) {
+    *key_data = NULL;
+    return 0;
+  }
+  return get_key(key, key_data);
+}
+
 size_t get_value(SEXP value, const char **value_data) {
   return get_data(value, value_data, "data");
 }

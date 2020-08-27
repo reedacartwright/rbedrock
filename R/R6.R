@@ -113,7 +113,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
     approximate_sizes = function(start, limit) {
         bedrock_leveldb_approximate_sizes(self$db, start, limit)
     },
-    compact_range = function(start, limit) {
+    compact_range = function(start = NULL, limit = NULL) {
         bedrock_leveldb_compact_range(self$db, start, limit)
     }))
 

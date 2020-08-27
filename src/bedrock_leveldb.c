@@ -640,8 +640,8 @@ SEXP bedrock_leveldb_compact_range(SEXP r_db, SEXP r_start_key, SEXP r_limit_key
   leveldb_t *db = bedrock_leveldb_get_db(r_db, true);
   const char *start_key = NULL, *limit_key = NULL;
   size_t
-    start_key_len = get_key(r_start_key, &start_key),
-    limit_key_len = get_key(r_limit_key, &limit_key);
+    start_key_len = get_key_maybe_nil(r_start_key, &start_key),
+    limit_key_len = get_key_maybe_nil(r_limit_key, &limit_key);
   leveldb_compact_range(db, start_key, start_key_len, limit_key, limit_key_len);
   return R_NilValue;
 }

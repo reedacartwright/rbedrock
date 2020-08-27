@@ -35,6 +35,7 @@ typedef enum return_as {
 } return_as;
 
 size_t get_key(SEXP key, const char **key_data);
+size_t get_key_maybe_nil(SEXP key, const char **key_data);
 size_t get_value(SEXP value, const char **value_data);
 size_t get_keys(SEXP keys, const char ***key_data, size_t **key_len);
 size_t get_starts_with(SEXP starts_with, const char **starts_with_data);
