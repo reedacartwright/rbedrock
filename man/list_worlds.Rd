@@ -4,10 +4,10 @@
 \alias{list_worlds}
 \title{List the worlds in the minecraftWorlds directory.}
 \usage{
-list_worlds(dir = worlds_path())
+list_worlds(worlds_dir = worlds_dir_path())
 }
 \arguments{
-\item{dir}{The path of the minecraftWorlds directory. It defaults to the likely path.}
+\item{worlds_dir}{The path of the minecraftWorlds directory. It defaults to the likely path.}
 }
 \value{
 A data.frame containing information about Minecraft worlds.

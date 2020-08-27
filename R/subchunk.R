@@ -13,7 +13,7 @@ read_subchunk <- function(con, storage=1, names_only=TRUE, simplify=TRUE) {
         blocks <- purrr::modify_depth(blocks, 2, ~.$name)
     }
     if (simplify && length(blocks) == 1) {
-        b <- simplify(blocks[[1]])
+        b <- purrr::simplify(blocks[[1]])
         dim(b) <- c(16,16,16)
         # b[y,z,x]
         return(b)

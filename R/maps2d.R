@@ -180,3 +180,10 @@ write_2dmaps_data <- function(height_map, biome_map) {
 list_biomes <- function() {
     tibble::tibble(name=names(.BIOME_LIST), id=.BIOME_LIST)
 }
+
+#' @describeIn list_biomes Convert character vectors containing biome names
+#'                         to numeric biome ids.
+#' @export
+biome_id <- function(x) {
+    .BIOME_LIST[x]
+}

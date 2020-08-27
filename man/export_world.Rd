@@ -4,14 +4,15 @@
 \alias{export_world}
 \title{Export a world to an mcworld file}
 \usage{
-export_world(path, output)
+export_world(world_path, output)
 }
 \arguments{
-\item{path}{The path to a world folder. If the path does not exist, it is 
+\item{world_path}{The path to a world folder. If the path does not exist, it is 
 assumed to be the base name of a world folder in the local minecraftWorlds
 directory.}
 
-\item{output}{The path to the mcworld file that will be created.}
+\item{output}{The path to the mcworld file that will be created. If it already
+exists, it will be overwritten.}
 }
 \description{
 Export a world to an mcworld file
