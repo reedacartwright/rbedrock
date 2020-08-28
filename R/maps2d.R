@@ -174,15 +174,17 @@ write_2dmaps_data <- function(height_map, biome_map) {
 
 #' List Minecraft Bedrock Edition biomes.
 #'
-#' @return A table containing biome names and numeric ids.
+#' @param x A character vector containing biome name.
+#'
+#' @return \code{list_biomes} returns a table containing biome names and numeric ids.
+#'         \code{biome_id} returns the numeric ids corresponding to input names.
 #'
 #' @export
 list_biomes <- function() {
     tibble::tibble(name=names(.BIOME_LIST), id=.BIOME_LIST)
 }
 
-#' @describeIn list_biomes Convert character vectors containing biome names
-#'                         to numeric biome ids.
+#' @rdname list_biomes
 #' @export
 biome_id <- function(x) {
     .BIOME_LIST[x]

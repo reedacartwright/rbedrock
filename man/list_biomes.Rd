@@ -2,12 +2,19 @@
 % Please edit documentation in R/maps2d.R
 \name{list_biomes}
 \alias{list_biomes}
+\alias{biome_id}
 \title{List Minecraft Bedrock Edition biomes.}
 \usage{
 list_biomes()
+
+biome_id(x)
+}
+\arguments{
+\item{x}{A character vector containing biome name.}
 }
 \value{
-A table containing biome names and numeric ids.
+\code{list_biomes} returns a table containing biome names and numeric ids.
+        \code{biome_id} returns the numeric ids corresponding to input names.
 }
 \description{
 List Minecraft Bedrock Edition biomes.

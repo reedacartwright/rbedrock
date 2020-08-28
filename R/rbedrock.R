@@ -85,24 +85,27 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
     out
 }
 
-#' Export a world to an mcworld file
+#' Export and Import Minecraft Worlds.
 #'
-#' @param world_path The path to a world folder. If the path does not exist, it is 
-#'   assumed to be the base name of a world folder in the local minecraftWorlds
+#'
+#' @param world_folder The path to a world folder. If the path does not exist, it is 
+#'   assumed to be the base name of a world folder in \code{worlds_dir}.
 #'   directory.
-#' @param output The path to the mcworld file that will be created. If it already
-#'   exists, it will be overwritten.
+#' @param mcworld_path The path to an mcworld file. If exporting, it will be created
+#'   and overwritten if it exists. If importing, it will be extracted.
+#' @param worlds_dir The path of the \code{minecraftWorlds} directory.
+#'
 #' @export
-export_world <- function(world_path, output) {
-    stopifnot(length(output) == 1)
+export_world <- function(world_folder, mcworld_path, worlds_dir = worlds_dir_path()) {
+    stopifnot(length(mcworld_path) == 1)
 
-    world_path <- .fixup_path(world_path, verify=TRUE)
+    world_path <- .fixup_path(world_folder, verify=TRUE)
     
-    output <- .absolute_path(output)
+    mcworld_path <- .absolute_path(mcworld_path)
 
-    if(file.exists(output)) {
-        stopifnot(!dir.exists(output))
-        file.remove(output)
+    if(file.exists(mcworld_path)) {
+        stopifnot(!dir.exists(mcworld_path))
+        file.remove(mcworld_path)
     }
 
     wd <- getwd()
@@ -110,23 +113,21 @@ export_world <- function(world_path, output) {
     f <- list.files()
 
     if (!requireNamespace("zip", quietly = TRUE)) {
-        ret <- utils::zip(output, f, flags = "-r9Xq")
+        ret <- utils::zip(mcworld_path, f, flags = "-r9Xq")
     } else {
-        ret <- zip::zipr(output, f)
+        ret <- zip::zipr(mcworld_path, f)
     }
 
     setwd(wd)
     invisible(ret)
 }
 
-#' Import a world from an mcworld file into the minecraftWorlds directory.
-#'
-#' @param mcworld The path to an mcworld file.
+#' @rdname export_world
 #' @export
-import_world <- function(mcworld) {
-    mcworld <- normalizePath(mcworld)
+import_world <- function(mcworld_path, worlds_dir = worlds_dir_path()) {
+    mcworld_path <- normalizePath(mcworld_path)
 
-    stopifnot(file.exists(mcworld))
+    stopifnot(file.exists(mcworld_path))
 
     # create a random world directory
     while(TRUE) {
@@ -134,7 +135,7 @@ import_world <- function(mcworld) {
         path <- jsonlite::base64_enc(y)
         path <- stringr::str_replace(path, "/", "-")
         ret <- path
-        path <- file.path(worlds_dir_path(), path)
+        path <- file.path(worlds_dir, path)
         # check for collisions
         if(!file.exists(path)) {
             break
@@ -142,9 +143,9 @@ import_world <- function(mcworld) {
     }
 
     if (!requireNamespace("zip", quietly = TRUE)) {
-        utils::unzip(mcworld, exdir = path)
+        utils::unzip(mcworld_path, exdir = path)
     } else {
-        zip::unzip(mcworld, exdir = path)
+        zip::unzip(mcworld_path, exdir = path)
     }
 
     invisible(ret)

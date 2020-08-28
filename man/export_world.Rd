@@ -2,18 +2,23 @@
 % Please edit documentation in R/rbedrock.R
 \name{export_world}
 \alias{export_world}
-\title{Export a world to an mcworld file}
+\alias{import_world}
+\title{Export and Import Minecraft Worlds.}
 \usage{
-export_world(world_path, output)
+export_world(world_folder, mcworld_path, worlds_dir = worlds_dir_path())
+
+import_world(mcworld_path, worlds_dir = worlds_dir_path())
 }
 \arguments{
-\item{world_path}{The path to a world folder. If the path does not exist, it is 
-assumed to be the base name of a world folder in the local minecraftWorlds
+\item{world_folder}{The path to a world folder. If the path does not exist, it is 
+assumed to be the base name of a world folder in \code{worlds_dir}.
 directory.}
 
-\item{output}{The path to the mcworld file that will be created. If it already
-exists, it will be overwritten.}
+\item{mcworld_path}{The path to an mcworld file. If exporting, it will be created
+and overwritten if it exists. If importing, it will be extracted.}
+
+\item{worlds_dir}{The path of the \code{minecraftWorlds} directory.}
 }
 \description{
-Export a world to an mcworld file
+Export and Import Minecraft Worlds.
 }
