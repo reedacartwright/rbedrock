@@ -44,9 +44,21 @@ parse_chunk_keys <- function(keys) {
     )
 }
 
-#' The local minecraftWorlds directory.
+#' Utilities for working with Minecraft world folders.
 #'
-#' @return The likely path to the local minecraftWorlds directory.
+#' @param world_folder The path to a world folder. If the path does not exist, it is 
+#'   assumed to be the base name of a world folder in \code{worlds_dir}.
+#' @param mcworld_path The path to an mcworld file. If exporting, it will be created
+#'   and overwritten if it exists. If importing, it will be extracted.
+#' @param worlds_dir The path of a \code{minecraftWorlds} directory.
+#'
+#' @return \code{world_dir_path} returns the most likely path to the \code{minecraftWorlds} directory.
+#'         \code{list_worlds} returns a data.frame containing information about Minecraft saved games.
+#'
+#' @name minecraft_worlds
+NULL
+
+#' @rdname minecraft_worlds
 #' @export
 worlds_dir_path <- function() {
     if (.Platform$OS.type == "windows") {
@@ -57,10 +69,7 @@ worlds_dir_path <- function() {
     normalizePath(file.path(datadir, "games/com.mojang/minecraftWorlds"))
 }
 
-#' List the worlds in the minecraftWorlds directory.
-#'
-#' @param worlds_dir The path of the minecraftWorlds directory. It defaults to the likely path.
-#' @return A data.frame containing information about Minecraft worlds.
+#' @rdname minecraft_worlds
 #' @export
 list_worlds <- function(worlds_dir = worlds_dir_path()) {
     folders <- list.dirs(path = worlds_dir, full.names = TRUE, recursive = FALSE)
@@ -85,16 +94,7 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
     out
 }
 
-#' Export and Import Minecraft Worlds.
-#'
-#'
-#' @param world_folder The path to a world folder. If the path does not exist, it is 
-#'   assumed to be the base name of a world folder in \code{worlds_dir}.
-#'   directory.
-#' @param mcworld_path The path to an mcworld file. If exporting, it will be created
-#'   and overwritten if it exists. If importing, it will be extracted.
-#' @param worlds_dir The path of the \code{minecraftWorlds} directory.
-#'
+#' @rdname minecraft_worlds
 #' @export
 export_world <- function(world_folder, mcworld_path, worlds_dir = worlds_dir_path()) {
     stopifnot(length(mcworld_path) == 1)
@@ -122,7 +122,7 @@ export_world <- function(world_folder, mcworld_path, worlds_dir = worlds_dir_pat
     invisible(ret)
 }
 
-#' @rdname export_world
+#' @rdname minecraft_worlds
 #' @export
 import_world <- function(mcworld_path, worlds_dir = worlds_dir_path()) {
     mcworld_path <- normalizePath(mcworld_path)
