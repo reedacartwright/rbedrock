@@ -4,7 +4,13 @@
 \alias{write_leveldat}
 \title{Write data from a world's level.dat file.}
 \usage{
-write_leveldat(path, value, old = FALSE, version = 8L)
+write_leveldat(
+  path,
+  value,
+  old = FALSE,
+  version = 8L,
+  worlds_dir = worlds_dir_path()
+)
 }
 \arguments{
 \item{path}{The path to a world folder. If the path does not exist, it is 

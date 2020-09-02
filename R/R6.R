@@ -48,8 +48,8 @@ bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, p
 
 #' @importFrom R6 R6Class
 R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, levelname = NULL, 
-    mtime = NULL, initialize = function(path, ...) {
-        path <- .fixup_path(path)
+    mtime = NULL, initialize = function(path, worlds_dir = worlds_dir_path(), ...) {
+        path <- .fixup_path(path, worlds_dir)
         namefile <- paste0(path, "/levelname.txt")
         self$levelname <- readLines(namefile, 1L, warn = FALSE)
         self$mtime <- as.character(file.mtime(namefile))

@@ -8,8 +8,8 @@
 #' @return A list containing nbt data read from level.dat
 #'
 #' @export
-read_leveldat <- function(path, old=FALSE) {
-    path <- .fixup_path(path)
+read_leveldat <- function(path, old=FALSE, worlds_dir = worlds_dir_path()) {
+    path <- .fixup_path(path, worlds_dir, verify=TRUE)
     path <- file.path(path, "level.dat")
     if (old) {
         path <- paste0(path, "_old")
@@ -34,8 +34,8 @@ read_leveldat <- function(path, old=FALSE) {
 #' @return A list containing nbt data read from level.dat.
 #'
 #' @export
-write_leveldat <- function(path, value, old = FALSE, version = 8L) {
-    path <- .fixup_path(path)
+write_leveldat <- function(path, value, old = FALSE, version = 8L, worlds_dir = worlds_dir_path()) {
+    path <- .fixup_path(path, worlds_dir)
     path <- file.path(path, "level.dat")
     if (old) {
         path <- paste0(path, "_old")

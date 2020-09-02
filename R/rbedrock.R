@@ -99,7 +99,7 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
 export_world <- function(world_folder, mcworld_path, worlds_dir = worlds_dir_path()) {
     stopifnot(length(mcworld_path) == 1)
 
-    world_path <- .fixup_path(world_folder, verify=TRUE)
+    world_path <- .fixup_path(world_folder, worlds_dir, verify=TRUE)
     
     mcworld_path <- .absolute_path(mcworld_path)
 
@@ -151,13 +151,13 @@ import_world <- function(mcworld_path, worlds_dir = worlds_dir_path()) {
     invisible(ret)
 }
 
-.fixup_path <- function(path, verify=FALSE) {
+.fixup_path <- function(path, worlds_dir, verify=FALSE) {
     stopifnot(length(path) == 1)
 
     if (file.exists(path)) {
         path <- normalizePath(path)
     } else {
-        wpath <- file.path(worlds_dir_path(), path)
+        wpath <- file.path(worlds_dir, path)
         if (file.exists(wpath)) {
             path <- normalizePath(wpath)
         }
