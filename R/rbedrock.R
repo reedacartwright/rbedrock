@@ -63,11 +63,11 @@ NULL
 
 #' @rdname minecraft_worlds
 #' @export
-worlds_dir_path <- function(default=TRUE) {
+worlds_dir_path <- function(default = FALSE) {
     if(default) {
         .worlds_dir_path_def()
     } else {
-        rbedrock_opt("world_dir_path")
+        rbedrock_opt("worlds_dir_path")
     }
 }
 

@@ -8,7 +8,7 @@
 \alias{import_world}
 \title{Utilities for working with Minecraft world folders.}
 \usage{
-worlds_dir_path(default = TRUE)
+worlds_dir_path(default = FALSE)
 
 list_worlds(worlds_dir = worlds_dir_path())
 
