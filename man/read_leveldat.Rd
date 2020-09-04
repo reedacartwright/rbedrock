@@ -4,7 +4,7 @@
 \alias{read_leveldat}
 \title{Read data from a world's level.dat file.}
 \usage{
-read_leveldat(path, old = FALSE, worlds_dir = worlds_dir_path())
+read_leveldat(path, old = FALSE)
 }
 \arguments{
 \item{path}{The path to a world folder. If the path does not exist, it is 

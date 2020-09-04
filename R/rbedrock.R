@@ -51,8 +51,11 @@ parse_chunk_keys <- function(keys) {
 #' @param mcworld_path The path to an mcworld file. If exporting, it will be created
 #'   and overwritten if it exists. If importing, it will be extracted.
 #' @param worlds_dir The path of a \code{minecraftWorlds} directory.
+#' @param default If \code{TRUE}, return most likely world path on the system.
 #'
-#' @return \code{world_dir_path} returns the most likely path to the \code{minecraftWorlds} directory.
+#' @return \code{world_dir_path} returns the path to the \code{minecraftWorlds} directory.
+#'         You can use \code{options(rbedrock.worlds_dir_path = "custom/path")} to customize the path
+#'         as needed.
 #'         \code{list_worlds} returns a data.frame containing information about Minecraft saved games.
 #'
 #' @name minecraft_worlds
@@ -60,13 +63,12 @@ NULL
 
 #' @rdname minecraft_worlds
 #' @export
-worlds_dir_path <- function() {
-    if (.Platform$OS.type == "windows") {
-        datadir <- rappdirs::user_data_dir("Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\LocalState","")
+worlds_dir_path <- function(default=TRUE) {
+    if(default) {
+        .worlds_dir_path_def()
     } else {
-        datadir <- rappdirs::user_data_dir("mcpelauncher")
+        rbedrock_opt("world_dir_path")
     }
-    normalizePath(file.path(datadir, "games/com.mojang/minecraftWorlds"))
 }
 
 #' @rdname minecraft_worlds
@@ -151,7 +153,7 @@ import_world <- function(mcworld_path, worlds_dir = worlds_dir_path()) {
     invisible(ret)
 }
 
-.fixup_path <- function(path, worlds_dir, verify=FALSE) {
+.fixup_path <- function(path, worlds_dir = worlds_dir_path(), verify=FALSE) {
     stopifnot(length(path) == 1)
 
     if (file.exists(path)) {
@@ -171,7 +173,5 @@ import_world <- function(mcworld_path, worlds_dir = worlds_dir_path()) {
     path
 }
 
-.absolute_path <- function(path) {
-    file.path(normalizePath(dirname(path)), basename(path))
-}
+
 

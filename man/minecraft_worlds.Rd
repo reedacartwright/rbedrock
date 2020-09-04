@@ -8,7 +8,7 @@
 \alias{import_world}
 \title{Utilities for working with Minecraft world folders.}
 \usage{
-worlds_dir_path()
+worlds_dir_path(default = TRUE)
 
 list_worlds(worlds_dir = worlds_dir_path())
 
@@ -17,6 +17,8 @@ export_world(world_folder, mcworld_path, worlds_dir = worlds_dir_path())
 import_world(mcworld_path, worlds_dir = worlds_dir_path())
 }
 \arguments{
+\item{default}{If \code{TRUE}, return most likely world path on the system.}
+
 \item{worlds_dir}{The path of a \code{minecraftWorlds} directory.}
 
 \item{world_folder}{The path to a world folder. If the path does not exist, it is 
@@ -26,7 +28,9 @@ assumed to be the base name of a world folder in \code{worlds_dir}.}
 and overwritten if it exists. If importing, it will be extracted.}
 }
 \value{
-\code{world_dir_path} returns the most likely path to the \code{minecraftWorlds} directory.
+\code{world_dir_path} returns the path to the \code{minecraftWorlds} directory.
+        You can use \code{options(rbedrock.worlds_dir_path = "custom/path")} to customize the path
+        as needed.
         \code{list_worlds} returns a data.frame containing information about Minecraft saved games.
 }
 \description{
