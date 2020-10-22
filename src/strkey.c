@@ -49,7 +49,7 @@ bool is_chunk_key(const char *key, size_t key_len) {
 
 // maximum size 45 characters
 bool make_strkey(const char *key, size_t key_len, char *out, size_t *out_len) {
-    int dimension = 0;
+    unsigned int dimension = 0;
     int x;
     int z;
     char tag;
@@ -81,11 +81,14 @@ bool make_strkey(const char *key, size_t key_len, char *out, size_t *out_len) {
     } else {
         return false;
     }
+    if(dimension > 2) {
+        return false;
+    }
     if(subtag != -1) {
-        *out_len = snprintf(out, *out_len, "@%i:%i:%i:%u-%u",
+        *out_len = snprintf(out, *out_len, "@%i:%i:%u:%u-%u",
             x, z, dimension, (unsigned int)tag, (unsigned int)subtag);
     } else {
-        *out_len = snprintf(out, *out_len, "@%i:%i:%i:%u",
+        *out_len = snprintf(out, *out_len, "@%i:%i:%u:%u",
             x, z, dimension, (unsigned int)tag);
     }
     return true;

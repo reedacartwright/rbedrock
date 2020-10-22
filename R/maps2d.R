@@ -20,6 +20,7 @@ get_biomes <- function(db, x, z, dimension, return_names=TRUE) {
             y <- .BIOME_LIST_INV[y+1]
         }
         dim(y) <- c(16,16)
+        # y[x+1,z+1] is biome of x,z
         y
     })
 

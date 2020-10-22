@@ -143,7 +143,7 @@ split_chunk_keys <- function(keys) {
             if (len == 14) {
                 subtag <- as.integer(k[14])
             }
-            if (!(tag %in% c(45:64,118))) {
+            if (!(tag %in% c(45:64,118)) || d > 2) {
                 return(.raw_to_strkey(k))
             }
         } else {
