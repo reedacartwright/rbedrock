@@ -52,3 +52,8 @@ if(!require(tidyverse)) {
     install.packages("tidyverse")
 }    
 ```
+## Installation Tutorial Videos
+
+[![Installing R and RStudio](https://img.youtube.com/vi/1irdS8C1ZjA/0.jpg)](https://www.youtube.com/watch?v=1irdS8C1ZjA)
+
+[![Installing RBedrock](https://img.youtube.com/vi/3KI2qwEg3vk/0.jpg)](https://www.youtube.com/watch?v=3KI2qwEg3vk)
