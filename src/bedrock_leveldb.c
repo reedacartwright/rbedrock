@@ -758,7 +758,39 @@ SEXP bedrock_leveldb_strkeys(SEXP r_db, SEXP r_readoptions) {
     if(res) {
       value = mkCharLen(buffer, out_size);
     } else {
-      value = mkCharLen(key_data, key_len);
+      size_t key_len2 = 0;
+      for(size_t i = 0; i != key_len; ++i) {
+        char ch = key_data[i];
+        if(ch <= 0x20 || ch >= 0x7F || ch == '%' || ch == '@') {
+          key_len2 += 3;
+        } else {
+          key_len2 += 1;
+        }
+      }
+      if(key_len2 == key_len) {
+        value = mkCharLen(key_data, key_len);
+      } else {
+        char* buffer2 = malloc(key_len2+1);
+        if(buffer2 == NULL) {
+          leveldb_iter_destroy(it);
+          Rf_error("Raw leveldb key failed to convert to a strkey.");
+          return(R_NilValue);
+        }
+        size_t j = 0;
+        for(size_t i = 0; i != key_len; ++i) {
+          char ch = key_data[i];
+          if(ch <= 0x20 || ch >= 0x7F || ch == '%' || ch == '@') {
+            snprintf(&buffer2[j], 4, "%%%02hhX", ch);
+            j += 3;
+          } else {
+            buffer2[j] = ch;
+            j += 1;
+          }
+        }
+
+        value = mkCharLen(buffer2, key_len2);
+        free(buffer2);
+      }
     }
     if(ret == R_NilValue) {
       PROTECT(ret = list1(value));
