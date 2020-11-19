@@ -94,7 +94,7 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
                 hsa <- rbind(read_hsa_data(dat)[, 1L:7L], hsa)
             }
             hsa <- write_hsa_data(hsa)
-            db$put(key, hsa)
+            db$put(hsa, key)
         }
     }
     ret
