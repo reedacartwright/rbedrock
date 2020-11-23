@@ -1,25 +1,34 @@
 
-# https://gist.github.com/Tomcc/a96af509e275b1af483b25c543cfbf37
-
-# [version:byte][num_storages:byte][block storage1]...[blockStorageN]
 
 #' @export
-read_subchunk <- function(con, storage=1, names_only=TRUE, simplify=TRUE) {
+read_subchunk <- function(con, storage=1, names_only=TRUE, simplify=TRUE, keep_palette=FALSE) {
     blocks <- .read_subchunk(con)
+    # subset the storage layers
     if (!is.null(storage)) {
         blocks <- blocks[storage]
     }
+    # apply palette if needed
+    if (!keep_palette || names_only) {
+        blocks <- purrr::map(blocks, function(x) {
+            pal <- attr(x,'palette')
+            array(pal[x], c(16,16,16))
+        })
+    }
+    # Convert to names only if requested
     if (names_only) {
-        blocks <- purrr::modify_depth(blocks, 2, ~.$name)
+        blocks <- purrr::map(blocks, function(x) {
+            array(purrr::map_chr(x, pluck, 'name'), c(16,16,16))
+        })
     }
+    # Simplify if requested
     if (simplify && length(blocks) == 1) {
-        b <- purrr::simplify(blocks[[1]])
-        dim(b) <- c(16,16,16)
-        # b[y,z,x]
-        return(b)
+        blocks <- blocks[[1]]
     }
-    return(blocks)
+    blocks
 }
+
+# https://gist.github.com/Tomcc/a96af509e275b1af483b25c543cfbf37
+# [version:byte][num_storages:byte][block storage1]...[blockStorageN]
 
 .read_subchunk <- function(con) {
     if (is.character(con)) {
@@ -50,16 +59,17 @@ read_subchunk <- function(con, storage=1, names_only=TRUE, simplify=TRUE) {
         # R's handling of 32-bit data
         words <- as.numeric(words)
         words[is.na(words)] <- -2147483648
-        palleteSize <- readBin(con, integer(), n=1L, size=4L, endian="little")
-        pallete <- read_nbt(con, palleteSize)
+        paletteSize <- readBin(con, integer(), n=1L, size=4L, endian="little")
+        palette <- .read_nbt_compound_payload(con, paletteSize)
         ids <- array(0L, c(blocksPerWord, wordCount))
         for(j in seq.int(blocksPerWord)) {
             k <- bitops::bitShiftR(words, bitsPerBlock*(j-1))
             ids[j,] <- bitops::bitAnd(k,idMask)+1L
         }
-        o <- pallete[ids[1:4096]]
-        dim(o) <- c(16,16,16)
-        out[[i]] <- o
+        # Find the id of a block use: ids[y,z,x]
+        blocks <- array(as.integer(ids[1:4096]), c(16,16,16))
+        blocks <- aperm(blocks, c(3,1,2))
+        out[[i]] <- structure(blocks, palette = palette)
     }
     out
 }

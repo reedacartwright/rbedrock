@@ -15,7 +15,7 @@
 # )
 
 #' @export
-read_nbt <- function (con, len = NULL) {
+read_nbt <- function (con) {
     if (is.character(con)) {
         con <- file(con, "rb")
         on.exit(close(con))
@@ -23,7 +23,8 @@ read_nbt <- function (con, len = NULL) {
         con <- rawConnection(con)
         on.exit(close(con))
     }
-    .read_nbt_compound_payload(con,len)
+
+    .read_nbt_compound_payload(con)
 }
 
 #' @export
