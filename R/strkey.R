@@ -1,5 +1,6 @@
 chunk_tag <- function(tags) {
     dplyr::recode(tags,
+        `44` = "ChunkVersion",
         `45` = "2DMaps",
         `46` = "2DMapsLegacy",
         `47` = "SubchunkBlocks",
@@ -15,7 +16,7 @@ chunk_tag <- function(tags) {
         `57` = "HardcodedSpawnAreas",
         `58` = "RandomBlockTicks",
         `59` = "Checksums",
-        `118` = "ChunkVersion",
+        `118` = "ChunkVersionLegacy", # was moved to 44 in v 1.16.100
 
         `60` = "60", # future proofing
         `61` = "61", # future proofing
@@ -28,6 +29,7 @@ chunk_tag <- function(tags) {
 
 chunk_tag_as_int <- function(str) {
     dplyr::recode(str,
+        "ChunkVersion" = 44L,
         "2DMaps" = 45L,
         "2DMapsLegacy" = 46L,
         "SubchunkBlocks" = 47L,
@@ -43,7 +45,7 @@ chunk_tag_as_int <- function(str) {
         "HardcodedSpawnAreas" = 57L,
         "RandomBlockTicks" = 58L,
         "Checksums" = 59L, # introduced in 1.16
-        "ChunkVersion" = 118L,
+        "ChunkVersionLegacy" = 118L,
 
         "60" = 60L, # future proofing
         "61" = 61L, # future proofing
@@ -130,7 +132,7 @@ split_chunk_keys <- function(keys) {
             if (len == 10) {
                 subtag <- as.integer(k[10])
             }
-            if (!(tag %in% c(45:64,118))) {
+            if (!(tag %in% c(44:64,118))) {
                 return(.raw_to_strkey(k))
             }
         } else if (len == 13 || len == 14) {
@@ -143,7 +145,7 @@ split_chunk_keys <- function(keys) {
             if (len == 14) {
                 subtag <- as.integer(k[14])
             }
-            if (!(tag %in% c(45:64,118)) || d > 2) {
+            if (!(tag %in% c(44:64,118)) || d > 2) {
                 return(.raw_to_strkey(k))
             }
         } else {

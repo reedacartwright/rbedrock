@@ -38,7 +38,7 @@ bool is_chunk_key(const char *key, size_t key_len) {
      default:
         return false;
     }
-    if(45 <= tag && tag <= 64) {
+    if(44 <= tag && tag <= 64) {
         return true;
     }
     if(tag == 118) {
@@ -74,7 +74,7 @@ bool make_strkey(const char *key, size_t key_len, char *out, size_t *out_len) {
      default:
         return false;
     }
-    if(45 <= tag && tag <= 64) {
+    if(44 <= tag && tag <= 64) {
         /* noop */;
     } else if(tag == 118) {
         /* noop */;
