@@ -1,3 +1,13 @@
+#' @export
+split_chunk_keys <- function(keys) {
+    stringr::str_match(keys, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$")
+}
+
+#' @export
+chunk_pos <- function(keys) {
+    as.integer(split_chunk_keys(keys)[,2:3])
+}
+
 chunk_tag <- function(tags) {
     dplyr::recode(tags,
         `44` = "ChunkVersion",
@@ -71,10 +81,6 @@ is_chunk_key <- function(keys) {
 
 subset_chunk_keys <- function(keys, negate = FALSE) {
    stringr::str_subset(keys, "^@[^:]+:[^:]+:[^:]+:[^:-]+(?:-[^:]+)?$", negate = negate)
-}
-
-split_chunk_keys <- function(keys) {
-    stringr::str_match(keys, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$")
 }
 
 .create_strkey <- function(x, z, d, tag, subtag = NA_integer_) {
