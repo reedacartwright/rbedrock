@@ -37,6 +37,9 @@ get_subchunk_blocks <- function(db, x, z, dimension, subchunk, names_only = FALS
     k <- .process_strkey_args(x,z,dimension, tag=47L, subtag = subchunk)
 
     dat <- db$mget(k) %>% purrr::map(function(rawval) {
+        if(is.null(rawval)) {
+            return(NULL)
+        }
         blocks <- .read_subchunk(rawval)
         pal <- block_palette(blocks[[1]]) %>% purrr::map_chr(.block_string, names_only = names_only)
         b <- array(pal[blocks[[1]]], dim = dim(blocks[[1]]))
@@ -63,6 +66,9 @@ get_subchunk <- function(db, x, z, dimension, subchunk, storage=1, simplify=TRUE
 #' @rdname get_blocks
 #' @export
 read_subchunk <- function(con, storage=1, simplify=TRUE) {
+    if(is.null(con)) {
+        return(NULL)
+    }
     blocks <- .read_subchunk(con)
     # subset the storage layers
     if (!is.null(storage)) {
