@@ -15,6 +15,7 @@ RoxygenNote: 7.1.1
 SystemRequirements: C++11, cmake, zlib
 NeedsCompilation: yes
 Biarch: false
+Roxygen: list(markdown = TRUE)
 Depends:
     R (>= 3.6.0)
 Imports:

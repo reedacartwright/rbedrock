@@ -13,9 +13,9 @@ put_biomes(db, values, x = names(values), z, dimension, missing_height = 0L)
 the list must contain 256 values or an error will be raised.}
 
 \item{x, z, dimension}{Chunk coordinates to write biome data to.
-`x` can also be a character vector of db keys and any keys not
+\code{x} can also be a character vector of db keys and any keys not
 representing biome data (tag 47) will be silently dropped.
-`x` defaults to `names(values)`}
+\code{x} defaults to \code{names(values)}}
 
 \item{missing_height}{if there is no existing height data, use this value for the chunk.}
 }

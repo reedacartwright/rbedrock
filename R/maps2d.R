@@ -1,11 +1,19 @@
 #' @export
+get_2dmaps <- function(db, x, z, dimension) {
+    k <- .process_strkey_args(x,z,dimension, tag=45L)
+    dat <- db$mget(k, as_raw = TRUE) %>% purrr::compact()
+    dat %>% purrr::map(read_2dmaps_data)
+}
+
+#' @export
 read_2dmaps_data <- function(rawval) {
     con <- rawConnection(rawval)
     on.exit(close(con))
 
     h <- readBin(con, integer(), n=256L, size=2L, endian="little", signed = TRUE)
     b <- readBin(con, integer(), n=256L, size=1L, endian="little", signed = FALSE)
-
+    dim(h) <- c(16,16)
+    dim(b) <- c(16,16)
     list(height_map = h, biome_map = b)
 }
 

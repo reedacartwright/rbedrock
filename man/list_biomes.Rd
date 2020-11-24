@@ -14,7 +14,7 @@ biome_id(x)
 }
 \value{
 \code{list_biomes} returns a table containing biome names and numeric ids.
-        \code{biome_id} returns the numeric ids corresponding to input names.
+\code{biome_id} returns the numeric ids corresponding to input names.
 }
 \description{
 List Minecraft Bedrock Edition biomes.

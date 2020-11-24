@@ -1,30 +1,93 @@
+#' Get block information stored in subchunks.
+#'
+#' Reads block information from a bedrockdb. `get_subchunk_blocks` reads data from multiple
+#' subchunks and returns a named list containing a three-dimensional character array with
+#' axes `x`, `y`, and `z`.
+#' Each block is represented by a string containing block name and block states in the format
+#' `blockname@@state1=value1@@state2=value2...`. Blocks may have 0 or mode states.
+#'
+#'
+#'
+#' @param db A bedrockdb object.
+#' @param x,z,dimension,subchunk Subchunk Coordinates to extract block data from.
+#'    x can also be a character vector of db keys and any keys not
+#'    representing subchunk data will be silently dropped.
+#' @param con A connection, raw vector, or character vector specifying a path to read
+#'    binary subchunk data from.
+#' @param names_only Return only the names of the blocks, ignoring block states.
+#' @param extra_block Append the extra block layer to the output (separated by ';'').
+#'    This is mostly useful if you have waterlogged blocks. If the extra block is air,
+#'    it will not be appended.
+#' @param storage Which storage layer(s) to get. If `storage = NULL`, all storage layers will be
+#'    returned.
+#' @param simplify Return a single storage layer instead of a list containing a single storage layer.
+#' @param object A storage layer returned from `read_subchunk` or `get_subchunk`.
+#'
+#' @return `get_subchunk_blocks` returns a list of character arrays.
+#'         `get_subchunk` and `read_subchunk` return a list of numeric arrays or a single array.
+#'         Each array contains block ids with a block palette stored in attribute 'palette'.
+#'         `palette` returns the palette.
+#'
+#' @name get_blocks
+NULL
 
-
+#' @rdname get_blocks
 #' @export
-read_subchunk <- function(con, storage=1, names_only=TRUE, simplify=TRUE, keep_palette=FALSE) {
+get_subchunk_blocks <- function(db, x, z, dimension, subchunk, names_only = FALSE, extra_block = FALSE) {
+    k <- .process_strkey_args(x,z,dimension, tag=47L, subtag = subchunk)
+
+    dat <- db$mget(k) %>% purrr::map(function(rawval) {
+        blocks <- .read_subchunk(rawval)
+        pal <- block_palette(blocks[[1]]) %>% purrr::map_chr(.block_string, names_only = names_only)
+        b <- array(pal[blocks[[1]]], dim = dim(blocks[[1]]))
+        if(extra_block && length(blocks) >= 2) {
+            pal2 <- block_palette(blocks[[2]]) %>% purrr::map_chr(.block_string, names_only = names_only)
+            pal2[pal2 == 'minecraft:air'] <- ""
+            b2 <- array(pal2[blocks[[2]]], dim = dim(blocks[[2]]))
+            b[] <- stringr::str_c(b, ifelse(b2 == "", '', ';'), b2)
+        }
+        b
+    })
+    dat
+}
+
+#' @rdname get_blocks
+#' @export
+get_subchunk <- function(db, x, z, dimension, subchunk, storage=1, simplify=TRUE) {
+    k <- .process_strkey_args(x,z,dimension, tag=47L, subtag = subchunk)
+
+    dat <- db$mget(k) %>% purrr::map(read_subchunk, storage=storage, simplify = simplify)
+    dat
+}
+
+#' @rdname get_blocks
+#' @export
+read_subchunk <- function(con, storage=1, simplify=TRUE) {
     blocks <- .read_subchunk(con)
     # subset the storage layers
     if (!is.null(storage)) {
         blocks <- blocks[storage]
-    }
-    # apply palette if needed
-    if (!keep_palette || names_only) {
-        blocks <- purrr::map(blocks, function(x) {
-            pal <- attr(x,'palette')
-            array(pal[x], c(16,16,16))
-        })
-    }
-    # Convert to names only if requested
-    if (names_only) {
-        blocks <- purrr::map(blocks, function(x) {
-            array(purrr::map_chr(x, pluck, 'name'), c(16,16,16))
-        })
     }
     # Simplify if requested
     if (simplify && length(blocks) == 1) {
         blocks <- blocks[[1]]
     }
     blocks
+}
+
+#' @rdname get_blocks
+#' @export
+block_palette <- function(object) {
+    attr(object, 'palette')
+}
+
+.block_string <- function(x, names_only = FALSE) {
+    # convert block information in a palette entry into a string
+    if(length(x$states) == 0L || names_only) {
+        return(x$name)
+    }
+    states <- stringr::str_c(names(x$states),x$states,sep='=',collapse='@')
+    stringr::str_c(x$name, states, sep="@")
 }
 
 # https://gist.github.com/Tomcc/a96af509e275b1af483b25c543cfbf37

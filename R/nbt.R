@@ -89,7 +89,7 @@ nbtnode <- function(payload, tag, list_tag=NULL) {
     if(length(tag) == 0L) {
         return(0)
     }
-    return(tag)
+    tag
 }
 
 .read_nbt_name <- function (con) {
@@ -97,7 +97,7 @@ nbtnode <- function(payload, tag, list_tag=NULL) {
     stopifnot(length(len) == 1L)
     name <- readChar(con, len, useBytes = TRUE)
     stopifnot(nchar(name, type="bytes") == len)
-    return(name)
+    name
 }
 
 .read_nbt_compound_payload <- function(con, len = NULL) {
@@ -111,7 +111,9 @@ nbtnode <- function(payload, tag, list_tag=NULL) {
         name <- .read_nbt_name(con)
         payload <- .read_nbt_payload(con, tag)
         nbt[[k]] <- new_nbtnode(payload, tag)
-        names(nbt)[k] <- name
+        if(nchar(name) > 0) {
+            names(nbt)[k] <- name
+        }
         if (!is.null(len) && k == len) {
             break
         }

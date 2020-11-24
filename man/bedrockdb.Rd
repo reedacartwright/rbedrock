@@ -18,13 +18,13 @@ bedrockdb(
 )
 }
 \arguments{
-\item{path}{The path to a world folder. If the path does not exist, it is 
+\item{path}{The path to a world folder. If the path does not exist, it is
 assumed to be the base name of a world folder in the local minecraftWorlds
 directory.}
 }
 \value{
 On success, an R6 class of type "bedrockdb" that contains and open handle to the
-  leveldb database that contains the world information.
+leveldb database that contains the world information.
 }
 \description{
 Open a Minecraft: Bedrock Edition world for reading and writing.

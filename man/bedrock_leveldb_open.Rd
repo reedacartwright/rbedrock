@@ -66,7 +66,7 @@ then LevelDB will create an 8MB internal cache.}
 
 \item{bloom_filter_bits_per_key}{If non-NULL, this sets up a
 'filter policy' to reduce disk reads.  A good value for
-bits_per_key // is 10, which yields a filter with ~ 1% false
+bits_per_key // is 10, which yields a filter with ~ 1\% false
 positive rate.  Further information from the LevelDB headers
 (filter_policy.h) 'This object is responsible for
 creating a small filter from a set of keys.  These filters are
