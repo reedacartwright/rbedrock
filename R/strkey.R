@@ -5,7 +5,9 @@ split_chunk_keys <- function(keys) {
 
 #' @export
 chunk_pos <- function(keys) {
-    as.integer(split_chunk_keys(keys)[,2:3])
+    pos <- split_chunk_keys(keys)[,2:3, drop = FALSE]
+    mode(pos) <- "integer"
+    pos
 }
 
 chunk_tag <- function(tags) {
