@@ -10,12 +10,12 @@ CMAKE = cmake
 
 ifeq ($(uname_S),Darwin)
 	# Assume that on MacOS the compiler is in this format: clang -mmacosx-version-min=10.13
-	CMAKE_CC = $(shell sh -c 'echo $0' $(CC))
-	CMAKE_CXX = $(shell sh -c 'echo $0' $(CXX))
-	CMAKE_EXTRA_ARGS = -DCMAKE_OSX_DEPLOYMENT_TARGET=$(shell sh -c 'echo ${1\#-mmacosx-version-min=}' $(CXX))
+	CC_ = $(shell sh -c 'echo $$0' $(CC))
+	CXX_ = $(shell sh -c 'echo $$0' $(CXX11))
+	CMAKE_EXTRA_ARGS = -DCMAKE_OSX_DEPLOYMENT_TARGET=$(shell sh -c 'echo $${1\#-mmacosx-version-min=}' $(CXX))
 else
-	CMAKE_CC = $(CC)
-	CMAKE_CXX = $(CXX11)
+	CC_ = $(CC)
+	CXX_ = $(CXX11)
 endif
 
 all: $(SHLIB)
@@ -23,13 +23,12 @@ all: $(SHLIB)
 $(SHLIB): leveldb-mcpe/build/libleveldb.a
 
 leveldb-mcpe/build/Makefile: leveldb-mcpe/CMakeLists.txt
-	echo $(uname_S)
 	(mkdir -p leveldb-mcpe/build \
 		&& cd leveldb-mcpe/build \
 		&& $(CMAKE) -G "Unix Makefiles" .. \
 			-DCMAKE_MAKE_PROGRAM="$(MAKE)" \
-			-DCMAKE_CXX_COMPILER="$(CXX11)" \
-			-DCMAKE_C_COMPILER="$(CMAKE_CC)" \
+			-DCMAKE_CXX_COMPILER="$(CXX_)" \
+			-DCMAKE_C_COMPILER="$(CC_)" \
 			-DCMAKE_CXX_FLAGS_RELEASE_INIT="$(CXX11STD) $(CXX11FLAGS)" \
 			-DCMAKE_C_FLAGS_RELEASE_INIT="$(CFLAGS)" \
 			$(CMAKE_EXTRA_ARGS) \
