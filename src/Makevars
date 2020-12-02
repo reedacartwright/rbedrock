@@ -12,7 +12,7 @@ ifeq ($(uname_S),Darwin)
 	# Assume that on MacOS the compiler is in this format: clang -mmacosx-version-min=10.13
 	CMAKE_CC = $(shell sh -c 'echo $0' $(CC))
 	CMAKE_CXX = $(shell sh -c 'echo $0' $(CXX))
-	CMAKE_EXTRA_ARGS = -DCMAKE_OSX_DEPLOYMENT_TARGET=$(shell sh -c 'echo ${1#-mmacosx-version-min=}' $(CXX))
+	CMAKE_EXTRA_ARGS = -DCMAKE_OSX_DEPLOYMENT_TARGET=$(shell sh -c 'echo ${1\#-mmacosx-version-min=}' $(CXX))
 else
 	CMAKE_CC = $(CC)
 	CMAKE_CXX = $(CXX11)
