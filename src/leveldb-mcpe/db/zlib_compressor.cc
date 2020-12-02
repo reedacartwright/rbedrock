@@ -25,12 +25,14 @@ namespace leveldb {
 
 		auto res = deflateInit2(&strm, compressionLevel, Z_DEFLATED, _window(), 8, Z_DEFAULT_STRATEGY);
 		assert(res == Z_OK);
+		res; // silence unused variable warning
 		
 		int deflate_res = Z_OK;
 		while (strm.avail_in != 0)
 		{
 			int res = deflate(&strm, Z_NO_FLUSH);
 			assert(res == Z_OK);
+			res; // silence unused variable warning
 			if (strm.avail_out == 0)
 			{
 				buffer.append(temp_buffer, temp_buffer + BUFSIZE);
