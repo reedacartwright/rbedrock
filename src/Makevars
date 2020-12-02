@@ -23,6 +23,7 @@ all: $(SHLIB)
 $(SHLIB): leveldb-mcpe/build/libleveldb.a
 
 leveldb-mcpe/build/Makefile: leveldb-mcpe/CMakeLists.txt
+	echo $(uname_S)
 	(mkdir -p leveldb-mcpe/build \
 		&& cd leveldb-mcpe/build \
 		&& $(CMAKE) -G "Unix Makefiles" .. \
