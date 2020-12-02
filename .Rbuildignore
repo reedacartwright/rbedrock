@@ -6,4 +6,4 @@
 ^src/leveldb-mcpe/.travis.yml$
 ^rbedrock.sublime-project$
 ^rbedrock.sublime-workspace$
-
+^\.github$
