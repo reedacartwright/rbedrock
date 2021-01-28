@@ -246,7 +246,8 @@ put_biomes <- function(db, values, x = names(values), z, dimension, missing_heig
 #'
 #' @export
 list_biomes <- function() {
-    tibble::tibble(name=names(.BIOME_LIST), id=.BIOME_LIST, color=.BIOME_COLORS[name])
+    n <- names(.BIOME_LIST)
+    tibble::tibble(name=n, id=.BIOME_LIST, color=.BIOME_COLORS[n])
 }
 
 #' @rdname list_biomes

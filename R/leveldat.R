@@ -40,7 +40,7 @@ write_leveldat <- function(path, value, old = FALSE, version = 8L) {
     if (old) {
         path <- paste0(path, "_old")
     }
-    dat <- write_nbt(raw(), as_nbt(list(value),10L))
+    dat <- write_nbt(raw(), nbtnode(list(value),10L))
     len <- length(dat)
     con <- file(path, "wb")
     on.exit(close(con))
