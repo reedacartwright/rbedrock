@@ -6,9 +6,9 @@
 #'    representing HSA data will be silently dropped.
 #' @return A table containing HSA and spawn-spot information.
 #' @examples
-#' db <- bedrockdb("x7fuXRc8AAA=")
+#' \dontrun{db <- bedrockdb("x7fuXRc8AAA=")
 #' hsa <- get_hsa(db)
-#' db$close()
+#' db$close()}
 #'
 #' @export
 get_hsa <- function(db, x=db$keys(), z, dimension) {
@@ -53,9 +53,9 @@ get_hsa <- function(db, x=db$keys(), z, dimension) {
 #' @param dimension The dimension that the HSA should be in. 0 = Overworld, 1 = Nether.
 #' @return A table containing information about the added HSAs.
 #' @examples
-#' db <- bedrockdb("x7fuXRc8AAA=")
+#' \dontrun{db <- bedrockdb("x7fuXRc8AAA=")
 #' put_hsa(db, 0, 60, 0, 15, 70, 15, 2, 0)
-#' db$close()
+#' db$close()}
 #'
 #' @export
 put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {

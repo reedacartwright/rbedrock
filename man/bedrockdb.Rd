@@ -30,9 +30,9 @@ leveldb database that contains the world information.
 Open a Minecraft: Bedrock Edition world for reading and writing.
 }
 \examples{
-db <- bedrockdb("x7fuXRc8AAA=")
+\dontrun{db <- bedrockdb("x7fuXRc8AAA=")
 o <- db$get("Overworld")
 read_nbt(o)
-db$close()
+db$close()}
 
 }

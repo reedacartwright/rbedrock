@@ -23,8 +23,8 @@ A table containing information about the added HSAs.
 If the bounding box of the HSA overlaps multiple chunks, one HSA will be added per chunk.
 }
 \examples{
-db <- bedrockdb("x7fuXRc8AAA=")
+\dontrun{db <- bedrockdb("x7fuXRc8AAA=")
 put_hsa(db, 0, 60, 0, 15, 70, 15, 2, 0)
-db$close()
+db$close()}
 
 }

@@ -33,10 +33,10 @@
 #' @return On success, an R6 class of type "bedrockdb" that contains and open handle to the
 #'   leveldb database that contains the world information.
 #' @examples
-#' db <- bedrockdb("x7fuXRc8AAA=")
+#' \dontrun{db <- bedrockdb("x7fuXRc8AAA=")
 #' o <- db$get("Overworld")
 #' read_nbt(o)
-#' db$close()
+#' db$close()}
 #'
 #' @export
 bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, paranoid_checks = NULL, 

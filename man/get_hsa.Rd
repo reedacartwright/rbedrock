@@ -20,8 +20,8 @@ A table containing HSA and spawn-spot information.
 Get HardcodedSpawnArea information from a world.
 }
 \examples{
-db <- bedrockdb("x7fuXRc8AAA=")
+\dontrun{db <- bedrockdb("x7fuXRc8AAA=")
 hsa <- get_hsa(db)
-db$close()
+db$close()}
 
 }
