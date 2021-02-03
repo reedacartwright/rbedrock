@@ -97,6 +97,7 @@ nbtnode <- function(payload, tag, list_tag=NULL) {
     stopifnot(length(len) == 1L)
     name <- readChar(con, len, useBytes = TRUE)
     stopifnot(nchar(name, type="bytes") == len)
+    Encoding(name) <- "UTF-8"
     name
 }
 
@@ -194,10 +195,11 @@ nbtnode <- function(payload, tag, list_tag=NULL) {
 }
 
 .write_nbt_name <- function (con, name) {
-    #stopifnot(length(name) == 1L)
     if(is.null(name)) {
         name <- ""
     }
+    stopifnot(length(name) == 1L)
+    name <- enc2utf8(name)
     len <- nchar(name, type = "bytes")
     writeBin(len, con, size = 2, endian = "little")
     if(len > 0) {
@@ -243,28 +245,28 @@ nbtnode <- function(payload, tag, list_tag=NULL) {
 .write_nbt_payload <- function(con, val, tag) {
     switch(tag,
         # BYTE
-        .write_nbt_unit_payload(con, val, size = 1L),
+        .write_nbt_unit_payload(con, as.integer(val), size = 1L),
         # SHORT
-        .write_nbt_unit_payload(con, val, size = 2L),
+        .write_nbt_unit_payload(con, as.integer(val), size = 2L),
         # INT
-        .write_nbt_unit_payload(con, val, size = 4L),
+        .write_nbt_unit_payload(con, as.integer(val), size = 4L),
         # LONG
-        .write_nbt_unit_payload(con, val, size = 8L),
+        .write_nbt_unit_payload(con, bit64::as.integer64(val), size = 8L),
         # FLOAT
-        .write_nbt_unit_payload(con, val, size = 4L),
+        .write_nbt_unit_payload(con, as.double(val), size = 4L),
         # DOUBLE
-        .write_nbt_unit_payload(con, val, size = 8L),
+        .write_nbt_unit_payload(con, as.double(val), size = 8L),
         # BYTEARRAY
-        .write_nbt_array_payload(con, val, size = 1L),
+        .write_nbt_array_payload(con, as.integer(val), size = 1L),
         # STRING
-        .write_nbt_name(con, val),
+        .write_nbt_name(con, as.character(val)),
         # LIST
         .write_nbt_list_payload(con, val),
         # COMPOUND
         .write_nbt_compound_payload(con, val),
         # INTARRAY
-        .write_nbt_array_payload(con, val, size = 4L),
+        .write_nbt_array_payload(con, as.integer(val), size = 4L),
         # LONGARRAY
-        .write_nbt_array_payload(con, val, size = 8L)
+        .write_nbt_array_payload(con, bit64::as.integer64(val), size = 8L)
     )
 }
