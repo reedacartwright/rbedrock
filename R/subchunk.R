@@ -6,8 +6,6 @@
 #' Each block is represented by a string containing block name and block states in the format
 #' `blockname@@state1=value1@@state2=value2...`. Blocks may have 0 or mode states.
 #'
-#'
-#'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension,subchunk Subchunk Coordinates to extract block data from.
 #'    x can also be a character vector of db keys and any keys not

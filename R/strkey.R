@@ -10,71 +10,63 @@ chunk_pos <- function(keys) {
     pos
 }
 
-chunk_tag <- function(tags) {
-    dplyr::recode(tags,
-        `44` = "ChunkVersion",
-        `45` = "2DMaps",
-        `46` = "2DMapsLegacy",
-        `47` = "SubchunkBlocks",
-        `48` = "48", # removed
-        `49` = "BlockEntities",
-        `50` = "Entities",
-        `51` = "PendingBlockTicks",
-        `52` = "52", # removed
-        `53` = "BiomeStates",
-        `54` = "Finalization",
-        `55` = "55", # removed
-        `56` = "BorderBlocks", # Education edition
-        `57` = "HardcodedSpawnAreas",
-        `58` = "RandomBlockTicks",
-        `59` = "Checksums",
-        `118` = "ChunkVersionLegacy", # was moved to 44 in v 1.16.100
+# List of Tags that identify the contents of a chunk key.
+.CHUNK_TAGS <- c(
+    "ChunkVersion" = 44L,
+    "2DMaps" = 45L,
+    "2DMapsLegacy" = 46L,
+    "SubchunkBlocks" = 47L,
+    "48" = 48L, # removed
+    "BlockEntities" = 49L,
+    "Entities"= 50L,
+    "PendingBlockTicks" = 51L,
+    "52" = 52L, # removed
+    "BiomeStates" = 53L,
+    "Finalization" = 54L,
+    "55" = 55L, # removed
+    "BorderBlocks" = 56L, # Education edition
+    "HardcodedSpawnAreas" = 57L,
+    "RandomBlockTicks" = 58L,
+    "Checksums" = 59L, # introduced in 1.16
+    "ChunkVersionLegacy" = 118L,
 
-        `60` = "60", # future proofing
-        `61` = "61", # future proofing
-        `62` = "62", # future proofing
-        `63` = "63", # future proofing
-        `64` = "64", # future proofing
-        .default = NA_character_
-    )
+    # future proofing
+    "33" = 33L,
+    "34" = 34L,
+    "35" = 35L,
+    "36" = 36L,
+    "37" = 37L,
+    "38" = 38L,
+    "39" = 39L,
+    "40" = 40L,
+    "41" = 41L,
+    "42" = 42L,
+    "43" = 43L,
+    "60" = 60L,
+    "60" = 60L,
+    "61" = 61L,
+    "62" = 62L,
+    "63" = 63L,
+    "64" = 64L
+)
+.CHUNK_TAGS_INV <- rep(NA_character_, 128)
+.CHUNK_TAGS_INV[.CHUNK_TAGS+1] <- names(.CHUNK_TAGS)
+
+chunk_tag_str <- function(tags) {
+    .CHUNK_TAGS_INV[tags]
 }
 
-chunk_tag_as_int <- function(str) {
-    dplyr::recode(str,
-        "ChunkVersion" = 44L,
-        "2DMaps" = 45L,
-        "2DMapsLegacy" = 46L,
-        "SubchunkBlocks" = 47L,
-        "48" = 48L, # removed
-        "BlockEntities" = 49L,
-        "Entities"= 50L,
-        "PendingBlockTicks" = 51L,
-        "52" = 52L, # removed
-        "BiomeStates" = 53L,
-        "Finalization" = 54L,
-        "55" = 55L, # removed
-        "BorderBlocks" = 56L, # Education edition
-        "HardcodedSpawnAreas" = 57L,
-        "RandomBlockTicks" = 58L,
-        "Checksums" = 59L, # introduced in 1.16
-        "ChunkVersionLegacy" = 118L,
-
-        "60" = 60L, # future proofing
-        "61" = 61L, # future proofing
-        "62" = 62L, # future proofing
-        "63" = 63L, # future proofing
-        "64" = 64L, # future proofing
-        .default = NA_integer_
-    )
+chunk_tag_int <- function(str) {
+    .CHUNK_TAGS[str]
 }
 
-get_chunk_tag_int <- function(keys) {
+get_chunk_tag_from_key <- function(keys) {
     m <- stringr::str_match(keys, "^@[^:]+:[^:]+:[^:]+:([^:-]+)(?:-[^:]+)?$")
     as.integer(m[,2])
 }
 
-get_chunk_tag <- function(keys) {
-    chunk_tag(get_chunk_tag_int(keys))
+get_chunk_tag_str <- function(keys) {
+    chunk_tag_str(get_chunk_tag_from_key(keys))
 }
 
 is_chunk_key <- function(keys) {
@@ -103,7 +95,7 @@ subset_chunk_keys <- function(keys, negate = FALSE) {
             if(length(tag) != 1) {
                 stop("when filtering keys in x, tag must have length 1")
             }
-            ktag <- get_chunk_tag_int(x)
+            ktag <- get_chunk_tag_from_key(x)
             b <- !is.na(ktag) & ktag == tag
             if(stop_if_filtered && any(!b)) {
                 stop(paste0("Some keys passed to .process_strkeys_args are not of type ", tag))
@@ -117,7 +109,9 @@ subset_chunk_keys <- function(keys, negate = FALSE) {
 
 # this can be very very inefficient compared to a c-level api
 .to_strkey <- function(key) {
-    if (is.character(key)) {
+    if (is.raw(key)) {
+        key <- list(key)
+    } else if (is.character(key)) {
         key <- lapply(key, charToRaw)
     }
     out <- sapply(key, function(k) {
@@ -140,7 +134,7 @@ subset_chunk_keys <- function(keys, negate = FALSE) {
             if (len == 10) {
                 subtag <- as.integer(k[10])
             }
-            if (!(tag %in% c(44:64,118))) {
+            if (!(tag %in% .CHUNK_TAGS)) {
                 return(.raw_to_strkey(k))
             }
         } else if (len == 13 || len == 14) {
@@ -153,7 +147,7 @@ subset_chunk_keys <- function(keys, negate = FALSE) {
             if (len == 14) {
                 subtag <- as.integer(k[14])
             }
-            if (!(tag %in% c(44:64,118)) || d > 2) {
+            if (!(tag %in% .CHUNK_TAGS) || d > 2) {
                 return(.raw_to_strkey(k))
             }
         } else {
@@ -165,6 +159,9 @@ subset_chunk_keys <- function(keys, negate = FALSE) {
 }
 
 .from_strkey <- function(key, simplify=TRUE) {
+    if(is.raw(key)) {
+        return(key)
+    }
     m <- stringr::str_match(key, "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$|^.*$")
     s <- split(m, seq_len(nrow(m)))
     out <- lapply(s, function(k) {

@@ -21,7 +21,7 @@ NULL
 #' @export
 create_chunk_key <- function(x, z, d, tag, subtag = NA) {
     if(is.character(tag)) {
-        tag <- chunk_tag_as_int(tag)
+        tag <- chunk_tag_int(tag)
     }
     .create_strkey(x, z, d, tag, subtag)
 }
@@ -43,7 +43,7 @@ parse_chunk_keys <- function(keys) {
         x = as.integer(m[, 2]),
         z = as.integer(m[, 3]),
         dimension = as.integer(m[, 4]),
-        tag = chunk_tag(m[, 5]),
+        tag = chunk_tag_str(m[, 5]),
         subtag = as.integer(m[, 6]),
     )
 }

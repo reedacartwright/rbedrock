@@ -25,6 +25,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#define CHUNK_KEY_MIN 33
+#define CHUNK_KEY_MAX 64
+
 bool is_chunk_key(const char *key, size_t key_len) {
     char tag;
     switch(key_len) {
@@ -38,7 +41,7 @@ bool is_chunk_key(const char *key, size_t key_len) {
      default:
         return false;
     }
-    if(44 <= tag && tag <= 64) {
+    if(CHUNK_KEY_MIN <= tag && tag <= CHUNK_KEY_MAX) {
         return true;
     }
     if(tag == 118) {
@@ -74,7 +77,7 @@ bool make_strkey(const char *key, size_t key_len, char *out, size_t *out_len) {
      default:
         return false;
     }
-    if(44 <= tag && tag <= 64) {
+    if(CHUNK_KEY_MIN <= tag && tag <= CHUNK_KEY_MAX) {
         /* noop */;
     } else if(tag == 118) {
         /* noop */;

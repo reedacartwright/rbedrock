@@ -123,7 +123,8 @@ R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(it = NU
         self$it <- bedrock_leveldb_iter_create(db, readoptions)
     },
     destroy = function(error_if_destroyed = FALSE) {
-        bedrock_leveldb_iter_destroy(self$it, error_if_destroyed)
+        ret <- bedrock_leveldb_iter_destroy(self$it, error_if_destroyed)
+        invisible(ret)
     },
     valid = function() {
         bedrock_leveldb_iter_valid(self$it)
@@ -137,7 +138,7 @@ R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(it = NU
         invisible(self)
     },
     seek = function(key) {
-        bedrock_leveldb_iter_seek(self$it, key)
+        bedrock_leveldb_iter_seek(self$it, .from_strkey(key))
         invisible(self)
     },
     move_next = function(error_if_invalid = FALSE) {
@@ -148,8 +149,12 @@ R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(it = NU
         bedrock_leveldb_iter_prev(self$it, error_if_invalid)
         invisible(self)
     },
-    key = function(error_if_invalid = FALSE) {
-        .to_strkey(bedrock_leveldb_iter_key(self$it, as_raw = TRUE, error_if_invalid))
+    key = function(error_if_invalid = FALSE, as_raw = FALSE) {
+        key <- bedrock_leveldb_iter_key(self$it, as_raw = TRUE, error_if_invalid)
+        if(as_raw) {
+            return(key)
+        }
+        return(.to_strkey(key))
     },
     value = function(as_raw = NULL, error_if_invalid = FALSE) {
         bedrock_leveldb_iter_value(self$it, as_raw, error_if_invalid)
@@ -161,7 +166,8 @@ R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(ptr
         self$ptr <- bedrock_leveldb_writebatch_create()
     },
     destroy = function(error_if_destroyed = FALSE) {
-        bedrock_leveldb_writebatch_destroy(self$ptr, error_if_destroyed)
+        ret <- bedrock_leveldb_writebatch_destroy(self$ptr, error_if_destroyed)
+        invisible(ret)
     },
     clear = function() {
         bedrock_leveldb_writebatch_clear(self$ptr)
