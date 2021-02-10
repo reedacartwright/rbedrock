@@ -53,10 +53,12 @@ chunk_pos <- function(keys) {
 .CHUNK_TAGS_INV[.CHUNK_TAGS+1] <- names(.CHUNK_TAGS)
 
 chunk_tag_str <- function(tags) {
+    tags <- as.integer(tags)
     .CHUNK_TAGS_INV[tags]
 }
 
 chunk_tag_int <- function(str) {
+    str <- as.character(str)
     .CHUNK_TAGS[str]
 }
 
@@ -125,7 +127,7 @@ subset_chunk_keys <- function(keys, negate = FALSE) {
         tag <- NA
         subtag <- NA
         if (len == 9 || len == 10) {
-            xz <- readBin(k, "integer", n = 2L, endian = "little")
+            xz <- readBin(k, integer(), n = 2L, endian = "little")
             x <- xz[1]
             z <- xz[2]
             d <- 0
@@ -138,7 +140,7 @@ subset_chunk_keys <- function(keys, negate = FALSE) {
                 return(.raw_to_strkey(k))
             }
         } else if (len == 13 || len == 14) {
-            xz <- readBin(k, "integer", n = 3L, endian = "little")
+            xz <- readBin(k, integer(), n = 3L, endian = "little")
             x <- xz[1]
             z <- xz[2]
             d <- xz[3]
@@ -227,4 +229,33 @@ subset_chunk_keys <- function(keys, negate = FALSE) {
         }
     }
     out
+}
+
+.create_key_prefix <- function(x, z, dimension, simplify=TRUE) {
+    stopifnot(length(x) == length(z) && length(x) == length(dimension))
+
+    # convert coordinates to raw values and bind them together
+    rx <- writeBin(as.integer(x), raw(), size = 4, endian = "little")
+    rz <- writeBin(as.integer(z), raw(), size = 4, endian = "little")
+    rd <- writeBin(as.integer(dimension), raw(), size = 4, endian = "little")
+    mx <- matrix(rx, nrow=4)
+    mz <- matrix(rz, nrow=4)
+    md <- matrix(rd, nrow=4)
+    m <- rbind(mx,mz,md)
+
+    # split matrix into a list of columns
+    s <- split(m, col(m))
+    names(s) <- NULL
+
+    # strip dimension data for overworld
+    ret <- lapply(s, function(x) {
+        if(all(x[9:12] == 0x00)) {
+            x <- x[1:8]
+        }
+        x
+    })
+    if(simplify && length(ret) == 1) {
+        ret <- ret[[1]]
+    }
+    ret
 }
