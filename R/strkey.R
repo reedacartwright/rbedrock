@@ -50,7 +50,7 @@ chunk_pos <- function(keys) {
     "64" = 64L
 )
 .CHUNK_TAGS_INV <- rep(NA_character_, 128)
-.CHUNK_TAGS_INV[.CHUNK_TAGS+1] <- names(.CHUNK_TAGS)
+.CHUNK_TAGS_INV[.CHUNK_TAGS] <- names(.CHUNK_TAGS)
 
 chunk_tag_str <- function(tags) {
     tags <- as.integer(tags)
