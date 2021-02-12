@@ -27,6 +27,7 @@ Imports:
     bit64,
     bitops,
     rappdirs,
+    rlang,
     dplyr,
     purrr,
     magrittr,

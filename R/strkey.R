@@ -212,6 +212,10 @@ subset_chunk_keys <- function(keys, negate = FALSE) {
     }
     x <- charToRaw(key)
     pc <- charToRaw("%")
+    # bypass decoding if not needed
+    if(all(x != pc)) {
+        return(x)
+    }
     out <- raw(0L)
     i <- 1L
     while (i <= length(x)) {
