@@ -56,9 +56,6 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
         self$path <- paste0(path, "/db")
         self$db <- bedrock_leveldb_open(self$path, ...)
     },
-    finalize = function() {
-        self$close(error_if_closed=FALSE)
-    },
     close = function(error_if_closed = FALSE) {
         ret <- bedrock_leveldb_close(self$db, error_if_closed)
         invisible(ret)
@@ -79,7 +76,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
         readoptions = NULL) {
         y <- bedrock_leveldb_mget(self$db, .from_strkey(keys), as_raw, missing_value, 
             missing_report, readoptions)
-        setNames(y, keys)
+        rlang::set_names(y, keys)
     },
     put = function(value, key, writeoptions = NULL) {
         ret <- bedrock_leveldb_put(self$db, .from_strkey(key), value, writeoptions)
@@ -126,9 +123,6 @@ R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(it = NU
     initialize = function(db, readoptions) {
         self$it <- bedrock_leveldb_iter_create(db, readoptions)
     },
-    finalize = function() {
-        self$destroy(error_if_destroyed = FALSE)
-    },
     destroy = function(error_if_destroyed = FALSE) {
         ret <- bedrock_leveldb_iter_destroy(self$it, error_if_destroyed)
         invisible(ret)
@@ -172,9 +166,6 @@ R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(ptr
     db = NULL, initialize = function(db) {
         self$db <- db
         self$ptr <- bedrock_leveldb_writebatch_create()
-    },
-    finalize = function() {
-        self$destroy(error_if_destroyed = FALSE)
     },
     destroy = function(error_if_destroyed = FALSE) {
         ret <- bedrock_leveldb_writebatch_destroy(self$ptr, error_if_destroyed)
