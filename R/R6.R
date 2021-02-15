@@ -68,35 +68,34 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
     property = function(name, error_if_missing = FALSE) {
         bedrock_leveldb_property(self$db, name, error_if_missing)
     },
-    get = function(key, as_raw = NULL, error_if_missing = FALSE, readoptions = NULL) {
-        bedrock_leveldb_get(self$db, .from_strkey(key), as_raw, error_if_missing, 
+    get = function(key, error_if_missing = FALSE, readoptions = NULL) {
+        bedrock_leveldb_get(self$db, key, error_if_missing, 
             readoptions)
     },
-    mget = function(keys, as_raw = NULL, missing_value = NULL, missing_report = FALSE,
+    mget = function(keys, missing_value = NULL, missing_report = FALSE,
         readoptions = NULL) {
-        y <- bedrock_leveldb_mget(self$db, .from_strkey(keys), as_raw, missing_value, 
+        y <- bedrock_leveldb_mget(self$db, keys, missing_value, 
             missing_report, readoptions)
         rlang::set_names(y, keys)
     },
-    put = function(value, key, writeoptions = NULL) {
-        ret <- bedrock_leveldb_put(self$db, .from_strkey(key), value, writeoptions)
+    put = function(key, value, writeoptions = NULL) {
+        ret <- bedrock_leveldb_put(self$db, key, value, writeoptions)
         invisible(self)
     },
     # values comes before keys so we can pass a named list to this function
-    mput = function(values, keys = names(values), writeoptions = NULL) {
-        ret <- bedrock_leveldb_mput(self$db, .from_strkey(keys), values, writeoptions)
+    mput = function(keys, values, writeoptions = NULL) {
+        ret <- bedrock_leveldb_mput(self$db, keys, values, writeoptions)
         invisible(self)
     },
     delete = function(key, report = FALSE, readoptions = NULL, writeoptions = NULL) {
-        bedrock_leveldb_delete(self$db, .from_strkey(key), report, readoptions, 
+        bedrock_leveldb_delete(self$db, key, report, readoptions, 
             writeoptions)
     },
     exists = function(key, readoptions = NULL) {
-        bedrock_leveldb_exists(self$db, .from_strkey(key), readoptions)
+        bedrock_leveldb_exists(self$db, key, readoptions)
     },
-    keys = function(readoptions = NULL) {
-        # use the c-level function here for speed
-        bedrock_leveldb_strkeys(self$db, readoptions)
+    keys = function(starts_with = NULL, readoptions = NULL) {
+        bedrock_leveldb_keys(self$db, starts_with, readoptions)
     },
     keys_len = function(starts_with = NULL, readoptions = NULL) {
         bedrock_leveldb_keys_len(self$db, starts_with, readoptions)
@@ -150,15 +149,11 @@ R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(it = NU
         bedrock_leveldb_iter_prev(self$it, error_if_invalid)
         invisible(self)
     },
-    key = function(error_if_invalid = FALSE, as_raw = FALSE) {
-        key <- bedrock_leveldb_iter_key(self$it, as_raw = TRUE, error_if_invalid)
-        if(as_raw) {
-            return(key)
-        }
-        return(.to_strkey(key))
+    key = function(error_if_invalid = FALSE) {
+        bedrock_leveldb_iter_key(self$it, error_if_invalid)
     },
-    value = function(as_raw = NULL, error_if_invalid = FALSE) {
-        bedrock_leveldb_iter_value(self$it, as_raw, error_if_invalid)
+    value = function(error_if_invalid = FALSE) {
+        bedrock_leveldb_iter_value(self$it, error_if_invalid)
     }
 ))
 

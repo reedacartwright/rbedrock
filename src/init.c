@@ -29,6 +29,7 @@
 #include <Rversion.h>
 
 #include "bedrock_leveldb.h"
+#include "key_conv.h"
 
 // for testing:
 SEXP bedrock_leveldb_test_cleanup() {
@@ -102,6 +103,8 @@ static const R_CallMethodDef call_methods[] = {
     // For testing:
     {"Cbedrock_leveldb_test_cleanup", (DL_FUNC)&bedrock_leveldb_test_cleanup,
      0},
+
+    {"Crawkeys_to_chrkeys", (DL_FUNC)&rawkeys_to_chrkeys, 1},
 
     {NULL, NULL, 0}};
 

@@ -20,8 +20,11 @@
 # SOFTWARE.
 */
 
-#include <stdbool.h>
+#include <R.h>
+#include <Rinternals.h>
+
 #include <stddef.h>
 
-bool is_chunk_key(const char *key, size_t key_len);
-bool make_strkey(const char *key, size_t key_len, char *out, size_t *out_len);
+size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, size_t buffer_len);
+
+SEXP rawkeys_to_chrkeys(SEXP r_keys);

@@ -263,3 +263,10 @@ subset_chunk_keys <- function(keys, negate = FALSE) {
     }
     ret
 }
+
+rawkeys_to_chrkeys <- function(keys) {
+    if(is.raw(keys)) {
+        keys <- list(keys)
+    }
+    .Call(Crawkeys_to_chrkeys, keys)
+}

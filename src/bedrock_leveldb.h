@@ -1,5 +1,5 @@
 // Copyright (c) 2016 Richard G. FitzJohn
-// Copyright (c) 2020 Reed A. Cartwright
+// Copyright (c) 2020,2021 Reed A. Cartwright
 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -38,9 +38,9 @@ SEXP bedrock_leveldb_destroy(SEXP r_path);
 SEXP bedrock_leveldb_repair(SEXP r_path);
 SEXP bedrock_leveldb_property(SEXP r_db, SEXP r_name, SEXP r_error_if_missing);
 
-SEXP bedrock_leveldb_get(SEXP r_db, SEXP r_key, SEXP r_as_raw,
+SEXP bedrock_leveldb_get(SEXP r_db, SEXP r_key,
                          SEXP r_error_if_missing, SEXP r_readoptions);
-SEXP bedrock_leveldb_mget(SEXP r_db, SEXP r_key, SEXP r_as_raw,
+SEXP bedrock_leveldb_mget(SEXP r_db, SEXP r_key,
                           SEXP r_missing_value, SEXP r_missing_report,
                           SEXP r_readoptions);
 
@@ -63,9 +63,9 @@ SEXP bedrock_leveldb_iter_seek_to_last(SEXP r_it);
 SEXP bedrock_leveldb_iter_seek(SEXP r_it, SEXP r_key);
 SEXP bedrock_leveldb_iter_next(SEXP r_it, SEXP r_error_if_invalid);
 SEXP bedrock_leveldb_iter_prev(SEXP r_it, SEXP r_error_if_invalid);
-SEXP bedrock_leveldb_iter_key(SEXP r_it, SEXP r_as_raw,
+SEXP bedrock_leveldb_iter_key(SEXP r_it,
                               SEXP r_error_if_invalid);
-SEXP bedrock_leveldb_iter_value(SEXP r_it, SEXP r_as_raw,
+SEXP bedrock_leveldb_iter_value(SEXP r_it,
                                 SEXP r_error_if_invalid);
 
 SEXP bedrock_leveldb_snapshot_create(SEXP r_db);
@@ -90,7 +90,7 @@ SEXP bedrock_leveldb_readoptions(SEXP r_verify_checksums, SEXP r_fill_cache,
                                  SEXP r_snapshot);
 SEXP bedrock_leveldb_writeoptions(SEXP r_sync);
 
-SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with, SEXP r_as_raw,
+SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with,
                           SEXP r_readoptions);
 SEXP bedrock_leveldb_strkeys(SEXP r_db, SEXP r_readoptions);
 SEXP bedrock_leveldb_keys_len(SEXP r_db, SEXP r_starts_with,

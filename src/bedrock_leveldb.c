@@ -1,5 +1,5 @@
 // Copyright (c) 2016 Richard G. FitzJohn
-// Copyright (c) 2020 Reed A. Cartwright
+// Copyright (c) 2020,2021 Reed A. Cartwright
 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -30,7 +30,7 @@
 #include <leveldb/c.h>
 #include <stdbool.h>
 
-#include "strkey.h"
+#include "key_conv.h"
 #include "support.h"
 
 leveldb_readoptions_t *default_readoptions;
@@ -200,14 +200,13 @@ SEXP bedrock_leveldb_property(SEXP r_db, SEXP r_name, SEXP r_error_if_missing) {
     return ret;
 }
 
-SEXP bedrock_leveldb_get(SEXP r_db, SEXP r_key, SEXP r_as_raw,
+SEXP bedrock_leveldb_get(SEXP r_db, SEXP r_key,
                          SEXP r_error_if_missing, SEXP r_readoptions) {
     leveldb_t *db = bedrock_leveldb_get_db(r_db, true);
     const char *key_data = NULL;
     size_t key_len = get_key(r_key, &key_data);
 
     bool error_if_missing = scalar_logical(r_error_if_missing);
-    return_as as_raw = to_return_as(r_as_raw);
     leveldb_readoptions_t *readoptions =
         bedrock_leveldb_get_readoptions(r_readoptions, true);
 
@@ -219,12 +218,10 @@ SEXP bedrock_leveldb_get(SEXP r_db, SEXP r_key, SEXP r_as_raw,
 
     SEXP ret;
     if(read != NULL) {
-        ret = raw_string_to_sexp(read, read_len, as_raw);
+        ret = raw_string_to_sexp(read, read_len);
         leveldb_free(read);
     } else if(!error_if_missing) {
         ret = R_NilValue;
-    } else if(TYPEOF(r_key) == STRSXP) {
-        Rf_error("Key '%s' not found in database", key_data);
     } else {
         Rf_error("Key not found in database");
     }
@@ -232,33 +229,20 @@ SEXP bedrock_leveldb_get(SEXP r_db, SEXP r_key, SEXP r_as_raw,
     return ret;
 }
 
-SEXP bedrock_leveldb_mget(SEXP r_db, SEXP r_key, SEXP r_as_raw,
+SEXP bedrock_leveldb_mget(SEXP r_db, SEXP r_key,
                           SEXP r_missing_value, SEXP r_missing_report,
                           SEXP r_readoptions) {
     leveldb_t *db = bedrock_leveldb_get_db(r_db, true);
     leveldb_readoptions_t *readoptions =
         bedrock_leveldb_get_readoptions(r_readoptions, true);
-    return_as as_raw = to_return_as(r_as_raw);
     bool missing_report = scalar_logical(r_missing_report);
-    if(as_raw == AS_STRING) {
-        if(r_missing_value == R_NilValue) {
-            r_missing_value = NA_STRING;
-        } else if(TYPEOF(r_missing_value) != STRSXP ||
-                  length(r_missing_value) != 1) {
-            Rf_error(
-                "If as_raw = TRUE, missing_value must be a scalar character");
-        } else {
-            r_missing_value = STRING_ELT(r_missing_value, 0);
-        }
-    }
 
     const char **key_data = NULL;
     size_t *key_len = NULL;
     size_t num_key = get_keys(r_key, &key_data, &key_len);
     bool *missing = NULL;
 
-    SEXPTYPE ret_type = as_raw == AS_STRING ? STRSXP : VECSXP;
-    SEXP ret = PROTECT(allocVector(ret_type, num_key));
+    SEXP ret = PROTECT(allocVector(VECSXP, num_key));
 
     size_t n_missing = 0;
     for(size_t i = 0; i < num_key; ++i) {
@@ -268,20 +252,12 @@ SEXP bedrock_leveldb_mget(SEXP r_db, SEXP r_key, SEXP r_as_raw,
                                  &read_len, &err);
         bedrock_leveldb_handle_error(err);
         if(read != NULL) {
-            SEXP el = PROTECT(raw_string_to_sexp(read, read_len, as_raw));
-            if(as_raw == AS_STRING) {
-                SET_STRING_ELT(ret, i, STRING_ELT(el, 0));
-            } else {
-                SET_VECTOR_ELT(ret, i, el);
-            }
+            SEXP el = PROTECT(raw_string_to_sexp(read, read_len));
+            SET_VECTOR_ELT(ret, i, el);
             leveldb_free(read);
             UNPROTECT(1);
         } else {
-            if(as_raw == AS_STRING) {
-                SET_STRING_ELT(ret, i, r_missing_value);
-            } else {
-                SET_VECTOR_ELT(ret, i, r_missing_value);
-            }
+            SET_VECTOR_ELT(ret, i, r_missing_value);
             if(missing_report) {
                 n_missing++;
                 if(missing == NULL) {
@@ -491,28 +467,26 @@ SEXP bedrock_leveldb_iter_prev(SEXP r_it, SEXP r_error_if_invalid) {
     return R_NilValue;
 }
 
-SEXP bedrock_leveldb_iter_key(SEXP r_it, SEXP r_as_raw,
+SEXP bedrock_leveldb_iter_key(SEXP r_it,
                               SEXP r_error_if_invalid) {
     leveldb_iterator_t *it = bedrock_leveldb_get_iterator(r_it, true);
-    return_as as_raw = to_return_as(r_as_raw);
     size_t len;
     if(!check_iterator(it, r_error_if_invalid)) {
         return R_NilValue;
     }
     const char *data = leveldb_iter_key(it, &len);
-    return raw_string_to_sexp(data, len, as_raw);
+    return raw_string_to_sexp(data, len);
 }
 
-SEXP bedrock_leveldb_iter_value(SEXP r_it, SEXP r_as_raw,
+SEXP bedrock_leveldb_iter_value(SEXP r_it,
                                 SEXP r_error_if_invalid) {
     leveldb_iterator_t *it = bedrock_leveldb_get_iterator(r_it, true);
-    return_as as_raw = to_return_as(r_as_raw);
     if(!check_iterator(it, r_error_if_invalid)) {
         return R_NilValue;
     }
     size_t len;
     const char *data = leveldb_iter_value(it, &len);
-    return raw_string_to_sexp(data, len, as_raw);
+    return raw_string_to_sexp(data, len);
 }
 
 // Snapshots
@@ -693,13 +667,11 @@ SEXP bedrock_leveldb_writeoptions(SEXP r_sync) {
 }
 
 // Built on top of the leveldb api.
-SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with, SEXP r_as_raw,
+SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with,
                           SEXP r_readoptions) {
     leveldb_t *db = bedrock_leveldb_get_db(r_db, true);
-    return_as as_raw = to_return_as(r_as_raw);
     leveldb_readoptions_t *readoptions =
         bedrock_leveldb_get_readoptions(r_readoptions, true);
-    bool as_string = as_raw == AS_STRING;
     const char *starts_with = NULL;
     const size_t starts_with_len = get_starts_with(r_starts_with, &starts_with);
 
@@ -708,22 +680,23 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with, SEXP r_as_raw,
     SEXP value;
 
     leveldb_iterator_t *it = leveldb_create_iterator(db, readoptions);
-    for(leveldb_iter_seek_to_first(it); leveldb_iter_valid(it);
-        leveldb_iter_next(it)) {
-        if(iter_key_starts_with(it, starts_with, starts_with_len)) {
-            size_t key_len;
-            const char *key_data = leveldb_iter_key(it, &key_len);
-            if(as_string) {
-                value = mkCharLen(key_data, key_len);
-            } else {
-                value = raw_string_to_sexp(key_data, key_len, as_raw);
-            }
-            if(ret == R_NilValue) {
-                PROTECT(ret = list1(value));
-                last = ret;
-            } else {
-                last = SETCDR(last, list1(value));
-            }
+    if(starts_with_len == 0) {
+        leveldb_iter_seek_to_first(it);
+    } else {
+        leveldb_iter_seek(it, starts_with, starts_with_len);
+    }
+    for(; leveldb_iter_valid(it); leveldb_iter_next(it)) {
+        if(!iter_key_starts_with(it, starts_with, starts_with_len)) {
+            break;
+        }
+        size_t key_len;
+        const char *key_data = leveldb_iter_key(it, &key_len);
+        value = raw_string_to_sexp(key_data, key_len);
+        if(ret == R_NilValue) {
+            PROTECT(ret = list1(value));
+            last = ret;
+        } else {
+            last = SETCDR(last, list1(value));
         }
     }
     leveldb_iter_destroy(it);
@@ -738,80 +711,80 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with, SEXP r_as_raw,
 // TODO: This does not percent encode keys.
 //       need to use malloc/free/realloc
 SEXP bedrock_leveldb_strkeys(SEXP r_db, SEXP r_readoptions) {
-    leveldb_t *db = bedrock_leveldb_get_db(r_db, true);
-    leveldb_readoptions_t *readoptions =
-        bedrock_leveldb_get_readoptions(r_readoptions, true);
+    // leveldb_t *db = bedrock_leveldb_get_db(r_db, true);
+    // leveldb_readoptions_t *readoptions =
+    //     bedrock_leveldb_get_readoptions(r_readoptions, true);
 
     SEXP ret = R_NilValue;
-    SEXP last = R_NilValue;
-    SEXP value;
+    // SEXP last = R_NilValue;
+    // SEXP value;
 
-    char buffer[64];
+    // char buffer[64];
 
-    leveldb_iterator_t *it = leveldb_create_iterator(db, readoptions);
-    for(leveldb_iter_seek_to_first(it); leveldb_iter_valid(it);
-        leveldb_iter_next(it)) {
-        size_t key_len;
-        const char *key_data = leveldb_iter_key(it, &key_len);
-        size_t out_size = 64;
-        bool res = make_strkey(key_data, key_len, buffer, &out_size);
-        if(res && out_size >= 64) {
-            leveldb_iter_destroy(it);
-            Rf_error("Raw leveldb key failed to convert to a strkey.");
-            return (R_NilValue);
-        }
-        if(res) {
-            value = mkCharLen(buffer, out_size);
-        } else {
-            size_t key_len2 = 0;
-            for(size_t i = 0; i != key_len; ++i) {
-                char ch = key_data[i];
-                if(ch <= 0x20 || ch >= 0x7F || ch == '%' || ch == '@') {
-                    key_len2 += 3;
-                } else {
-                    key_len2 += 1;
-                }
-            }
-            if(key_len2 == key_len) {
-                value = mkCharLen(key_data, key_len);
-            } else {
-                char *buffer2 = malloc(key_len2 + 1);
-                if(buffer2 == NULL) {
-                    leveldb_iter_destroy(it);
-                    Rf_error("Raw leveldb key failed to convert to a strkey.");
-                    return (R_NilValue);
-                }
-                size_t j = 0;
-                for(size_t i = 0; i != key_len; ++i) {
-                    char ch = key_data[i];
-                    if(ch <= 0x20 || ch >= 0x7F || ch == '%' || ch == '@') {
-                        snprintf(&buffer2[j], 4, "%%%02hhX", ch);
-                        j += 3;
-                    } else {
-                        buffer2[j] = ch;
-                        j += 1;
-                    }
-                }
+    // leveldb_iterator_t *it = leveldb_create_iterator(db, readoptions);
+    // for(leveldb_iter_seek_to_first(it); leveldb_iter_valid(it);
+    //     leveldb_iter_next(it)) {
+    //     size_t key_len;
+    //     const char *key_data = leveldb_iter_key(it, &key_len);
+    //     size_t out_size = 64;
+    //     out_size = rawkey_to_chrkey(key_data, key_len, buffer, sizeof(buffer));
+    //     if(res && out_size >= 64) {
+    //         leveldb_iter_destroy(it);
+    //         Rf_error("Raw leveldb key failed to convert to a strkey.");
+    //         return (R_NilValue);
+    //     }
+    //     if(res) {
+    //         value = mkCharLen(buffer, out_size);
+    //     } else {
+    //         size_t key_len2 = 0;
+    //         for(size_t i = 0; i != key_len; ++i) {
+    //             char ch = key_data[i];
+    //             if(ch <= 0x20 || ch >= 0x7F || ch == '%' || ch == '@') {
+    //                 key_len2 += 3;
+    //             } else {
+    //                 key_len2 += 1;
+    //             }
+    //         }
+    //         if(key_len2 == key_len) {
+    //             value = mkCharLen(key_data, key_len);
+    //         } else {
+    //             char *buffer2 = malloc(key_len2 + 1);
+    //             if(buffer2 == NULL) {
+    //                 leveldb_iter_destroy(it);
+    //                 Rf_error("Raw leveldb key failed to convert to a strkey.");
+    //                 return (R_NilValue);
+    //             }
+    //             size_t j = 0;
+    //             for(size_t i = 0; i != key_len; ++i) {
+    //                 char ch = key_data[i];
+    //                 if(ch <= 0x20 || ch >= 0x7F || ch == '%' || ch == '@') {
+    //                     snprintf(&buffer2[j], 4, "%%%02hhX", ch);
+    //                     j += 3;
+    //                 } else {
+    //                     buffer2[j] = ch;
+    //                     j += 1;
+    //                 }
+    //             }
 
-                value = mkCharLen(buffer2, key_len2);
-                free(buffer2);
-            }
-        }
-        if(ret == R_NilValue) {
-            PROTECT(ret = list1(value));
-            last = ret;
-        } else {
-            last = SETCDR(last, list1(value));
-        }
-    }
-    leveldb_iter_destroy(it);
+    //             value = mkCharLen(buffer2, key_len2);
+    //             free(buffer2);
+    //         }
+    //     }
+    //     if(ret == R_NilValue) {
+    //         PROTECT(ret = list1(value));
+    //         last = ret;
+    //     } else {
+    //         last = SETCDR(last, list1(value));
+    //     }
+    // }
+    // leveldb_iter_destroy(it);
 
-    if(ret == R_NilValue) {
-        return ret;
-    }
+    // if(ret == R_NilValue) {
+    //     return ret;
+    // }
 
-    ret = coerceVector(ret, STRSXP);
-    UNPROTECT(1);
+    // ret = coerceVector(ret, STRSXP);
+    // UNPROTECT(1);
 
     return ret;
 }
@@ -1040,12 +1013,20 @@ size_t bedrock_leveldb_get_keys_len(leveldb_t *db, const char *starts_with,
                                     size_t starts_with_len,
                                     leveldb_readoptions_t *readoptions) {
     leveldb_iterator_t *it = leveldb_create_iterator(db, readoptions);
+
     size_t n = 0;
-    for(leveldb_iter_seek_to_first(it); leveldb_iter_valid(it);
-        leveldb_iter_next(it)) {
-        if(iter_key_starts_with(it, starts_with, starts_with_len)) {
-            ++n;
+
+    if(starts_with_len == 0) {
+        leveldb_iter_seek_to_first(it);
+    } else {
+        leveldb_iter_seek(it, starts_with, starts_with_len);
+    }
+
+    for(; leveldb_iter_valid(it); leveldb_iter_next(it)) {
+        if(!iter_key_starts_with(it, starts_with, starts_with_len)) {
+            break;
         }
+        ++n;
     }
     leveldb_iter_destroy(it);
     return n;

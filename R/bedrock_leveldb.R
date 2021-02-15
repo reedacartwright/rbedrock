@@ -120,13 +120,13 @@ bedrock_leveldb_repair <- function(path) {
 bedrock_leveldb_property <- function(db, path, error_if_missing = FALSE) {
     .Call(Cbedrock_leveldb_property, db, path, error_if_missing)
 }
-bedrock_leveldb_get <- function(db, key, as_raw = NULL, error_if_missing = FALSE, 
+bedrock_leveldb_get <- function(db, key, error_if_missing = FALSE, 
     readoptions = NULL) {
-    .Call(Cbedrock_leveldb_get, db, key, as_raw, error_if_missing, readoptions)
+    .Call(Cbedrock_leveldb_get, db, key, error_if_missing, readoptions)
 }
-bedrock_leveldb_mget <- function(db, key, as_raw = NULL, missing_value = NULL, missing_report = TRUE, 
+bedrock_leveldb_mget <- function(db, key, missing_value = NULL, missing_report = TRUE, 
     readoptions = NULL) {
-    .Call(Cbedrock_leveldb_mget, db, key, as_raw, missing_value, missing_report, 
+    .Call(Cbedrock_leveldb_mget, db, key, missing_value, missing_report, 
         readoptions)
 }
 bedrock_leveldb_put <- function(db, key, value, writeoptions = NULL) {
@@ -162,11 +162,11 @@ bedrock_leveldb_iter_next <- function(it, error_if_invalid = FALSE) {
 bedrock_leveldb_iter_prev <- function(it, error_if_invalid = FALSE) {
     .Call(Cbedrock_leveldb_iter_prev, it, error_if_invalid)
 }
-bedrock_leveldb_iter_key <- function(it, as_raw = NULL, error_if_invalid = FALSE) {
-    .Call(Cbedrock_leveldb_iter_key, it, as_raw, error_if_invalid)
+bedrock_leveldb_iter_key <- function(it, error_if_invalid = FALSE) {
+    .Call(Cbedrock_leveldb_iter_key, it, error_if_invalid)
 }
-bedrock_leveldb_iter_value <- function(it, as_raw = NULL, error_if_invalid = FALSE) {
-    .Call(Cbedrock_leveldb_iter_value, it, as_raw, error_if_invalid)
+bedrock_leveldb_iter_value <- function(it, error_if_invalid = FALSE) {
+    .Call(Cbedrock_leveldb_iter_value, it, error_if_invalid)
 }
 bedrock_leveldb_snapshot <- function(db) {
     ptr <- .Call(Cbedrock_leveldb_snapshot_create, db)
@@ -218,8 +218,8 @@ bedrock_leveldb_writeoptions <- function(sync = NULL) {
 bedrock_leveldb_keys_len <- function(db, starts_with = NULL, readoptions = NULL) {
     .Call(Cbedrock_leveldb_keys_len, db, starts_with, readoptions)
 }
-bedrock_leveldb_keys <- function(db, starts_with = NULL, as_raw = FALSE, readoptions = NULL) {
-    .Call(Cbedrock_leveldb_keys, db, starts_with, as_raw, readoptions)
+bedrock_leveldb_keys <- function(db, starts_with = NULL, readoptions = NULL) {
+    .Call(Cbedrock_leveldb_keys, db, starts_with, readoptions)
 }
 bedrock_leveldb_strkeys <- function(db, readoptions = NULL) {
     .Call(Cbedrock_leveldb_strkeys, db, readoptions)

@@ -1,4 +1,5 @@
-// Copyright (c) 2016, Richard G. FitzJohn
+// Copyright (c) 2016 Richard G. FitzJohn
+// Copyright (c) 2021 Reed A. Cartwright
 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -64,25 +65,11 @@ size_t get_starts_with(SEXP starts_with, const char **starts_with_data) {
 }
 
 size_t get_data(SEXP data, const char **data_contents, const char *name) {
-    switch(TYPEOF(data)) {
-    case CHARSXP:
-        *data_contents = CHAR(data);
-        return length(data);
-        break;
-    case STRSXP:
-        if(length(data) != 1) {
-            Rf_error("%s must be a scalar character", name);
-        }
-        SEXP el = STRING_ELT(data, 0);
-        *data_contents = CHAR(el);
-        return length(el);
-        break;
-    case RAWSXP:
-        *data_contents = (const char *)RAW(data);
-        return length(data);
-    default:
-        Rf_error("Invalid data type for %s; expected string or raw", name);
+    if(TYPEOF(data) != RAWSXP) {
+        Rf_error("Invalid data type for %s; expected raw", name);        
     }
+    *data_contents = (const char *)RAW(data);
+    return length(data);
 }
 
 size_t get_keys_len(SEXP keys) {
@@ -93,44 +80,20 @@ void get_keys_data(size_t len, SEXP keys, const char **data, size_t *data_len) {
     if(TYPEOF(keys) == RAWSXP) {
         data[0] = (char *)RAW(keys);
         data_len[0] = length(keys);
-    } else if(TYPEOF(keys) == STRSXP) {
-        for(size_t i = 0; i < len; ++i) {
-            SEXP s = STRING_ELT(keys, i);
-            data[i] = CHAR(s);
-            data_len[i] = length(s);
-        }
     } else if(TYPEOF(keys) == VECSXP) {
         for(size_t i = 0; i < len; ++i) {
             data_len[i] = get_key(VECTOR_ELT(keys, i), data + i);
         }
     } else {
-        Rf_error("Invalid type; expected a character or raw vector");
-    }
-}
-
-bool is_raw_string(const char *str, size_t len, return_as as) {
-    if(as == AS_RAW) {
-        return true;
-    } else {
-        bool has_raw = memchr(str, '\0', len) != NULL;
-        if(has_raw && as == AS_STRING) {
-            Rf_error("Value contains embedded nul bytes; cannot return string");
-        }
-        return has_raw;
+        Rf_error("Invalid type; expected a raw vector");
     }
 }
 
 // This is the same strategy as redux.
-SEXP raw_string_to_sexp(const char *str, size_t len, return_as as) {
-    bool is_raw = is_raw_string(str, len, as);
+SEXP raw_string_to_sexp(const char *str, size_t len) {
     SEXP ret;
-    if(is_raw) {
-        ret = PROTECT(allocVector(RAWSXP, len));
-        memcpy(RAW(ret), str, len);
-    } else {
-        ret = PROTECT(allocVector(STRSXP, 1));
-        SET_STRING_ELT(ret, 0, mkCharLen(str, len));
-    }
+    ret = PROTECT(allocVector(RAWSXP, len));
+    memcpy(RAW(ret), str, len);
     UNPROTECT(1);
     return ret;
 }
@@ -146,21 +109,6 @@ bool scalar_logical(SEXP x) {
     } else {
         Rf_error("Expected a logical scalar");
         return 0;
-    }
-}
-
-return_as to_return_as(SEXP x) {
-    if(x == R_NilValue) {
-        return AS_ANY;
-    } else if(TYPEOF(x) == LGLSXP && LENGTH(x) == 1) {
-        int as_raw = INTEGER(x)[0];
-        if(as_raw == NA_LOGICAL) {
-            Rf_error("Expected a non-missing logical scalar (or NULL)");
-        }
-        return as_raw ? AS_RAW : AS_STRING;
-    } else {
-        Rf_error("Expected a logical scalar (or NULL)");
-        return AS_ANY;
     }
 }
 
