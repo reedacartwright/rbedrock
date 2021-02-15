@@ -40,10 +40,10 @@
 #'
 #' @export
 bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, paranoid_checks = NULL, 
-    write_buffer_size = 4194304, max_open_files = NULL, block_size = NULL, use_compression = 4, 
+    write_buffer_size = 4194304, max_open_files = NULL, block_size = NULL, 
     cache_capacity = 41943040, bloom_filter_bits_per_key = 10) {
     R6_bedrockdb$new(path, create_if_missing, error_if_exists, paranoid_checks, write_buffer_size, 
-        max_open_files, block_size, use_compression, cache_capacity, bloom_filter_bits_per_key)
+        max_open_files, block_size, cache_capacity, bloom_filter_bits_per_key)
 }
 
 #' @importFrom R6 R6Class

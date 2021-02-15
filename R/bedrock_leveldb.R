@@ -1,4 +1,5 @@
-# Copyright (c) 2016, Richard G. FitzJohn
+# Copyright (c) 2016 Richard G. FitzJohn
+# Copyright (c) 2021 Reed A. Cartwright <reed@cartwrig.ht>
 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are

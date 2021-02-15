@@ -52,6 +52,10 @@ get_subchunk_blocks <- function(db, x, z, dimension, subchunk, names_only = FALS
     dat
 }
 
+# get_chunk_blocks <- function(db, x, z, dimension) {
+    
+# }
+
 #' @rdname get_blocks
 #' @export
 get_subchunk <- function(db, x, z, dimension, subchunk, storage=1, simplify=TRUE) {
