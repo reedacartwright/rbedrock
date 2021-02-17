@@ -39,14 +39,14 @@ SEXP bedrock_leveldb_test_cleanup() {
 }
 
 static const R_CallMethodDef call_methods[] = {
-    {"Cbedrock_leveldb_open", (DL_FUNC)&bedrock_leveldb_open, 10},
+    {"Cbedrock_leveldb_open", (DL_FUNC)&bedrock_leveldb_open, 9},
     {"Cbedrock_leveldb_close", (DL_FUNC)&bedrock_leveldb_close, 2},
     {"Cbedrock_leveldb_destroy", (DL_FUNC)&bedrock_leveldb_destroy, 1},
     {"Cbedrock_leveldb_repair", (DL_FUNC)&bedrock_leveldb_repair, 1},
     {"Cbedrock_leveldb_property", (DL_FUNC)&bedrock_leveldb_property, 3},
 
-    {"Cbedrock_leveldb_get", (DL_FUNC)&bedrock_leveldb_get, 5},
-    {"Cbedrock_leveldb_mget", (DL_FUNC)&bedrock_leveldb_mget, 6},
+    {"Cbedrock_leveldb_get", (DL_FUNC)&bedrock_leveldb_get, 3},
+    {"Cbedrock_leveldb_mget", (DL_FUNC)&bedrock_leveldb_mget, 3},
     {"Cbedrock_leveldb_put", (DL_FUNC)&bedrock_leveldb_put, 4},
     {"Cbedrock_leveldb_mput", (DL_FUNC)&bedrock_leveldb_mput, 4},
     {"Cbedrock_leveldb_delete", (DL_FUNC)&bedrock_leveldb_delete, 5},
@@ -62,8 +62,8 @@ static const R_CallMethodDef call_methods[] = {
     {"Cbedrock_leveldb_iter_seek", (DL_FUNC)&bedrock_leveldb_iter_seek, 2},
     {"Cbedrock_leveldb_iter_next", (DL_FUNC)&bedrock_leveldb_iter_next, 2},
     {"Cbedrock_leveldb_iter_prev", (DL_FUNC)&bedrock_leveldb_iter_prev, 2},
-    {"Cbedrock_leveldb_iter_key", (DL_FUNC)&bedrock_leveldb_iter_key, 3},
-    {"Cbedrock_leveldb_iter_value", (DL_FUNC)&bedrock_leveldb_iter_value, 3},
+    {"Cbedrock_leveldb_iter_key", (DL_FUNC)&bedrock_leveldb_iter_key, 2},
+    {"Cbedrock_leveldb_iter_value", (DL_FUNC)&bedrock_leveldb_iter_value, 2},
 
     {"Cbedrock_leveldb_snapshot_create",
      (DL_FUNC)&bedrock_leveldb_snapshot_create, 1},
@@ -92,8 +92,7 @@ static const R_CallMethodDef call_methods[] = {
      1},
 
     {"Cbedrock_leveldb_keys_len", (DL_FUNC)&bedrock_leveldb_keys_len, 3},
-    {"Cbedrock_leveldb_keys", (DL_FUNC)&bedrock_leveldb_keys, 4},
-    {"Cbedrock_leveldb_strkeys", (DL_FUNC)&bedrock_leveldb_strkeys, 2},
+    {"Cbedrock_leveldb_keys", (DL_FUNC)&bedrock_leveldb_keys, 3},
     {"Cbedrock_leveldb_exists", (DL_FUNC)&bedrock_leveldb_exists, 3},
     {"Cbedrock_leveldb_version", (DL_FUNC)&bedrock_leveldb_version, 0},
 
@@ -105,6 +104,7 @@ static const R_CallMethodDef call_methods[] = {
      0},
 
     {"Crawkeys_to_chrkeys", (DL_FUNC)&rawkeys_to_chrkeys, 1},
+    {"Cchrkeys_to_rawkeys", (DL_FUNC)&chrkeys_to_rawkeys, 1},
 
     {NULL, NULL, 0}};
 

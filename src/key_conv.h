@@ -25,6 +25,5 @@
 
 #include <stddef.h>
 
-size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, size_t buffer_len);
-
 SEXP rawkeys_to_chrkeys(SEXP r_keys);
+SEXP chrkeys_to_rawkeys(SEXP r_keys);

@@ -38,11 +38,8 @@ SEXP bedrock_leveldb_destroy(SEXP r_path);
 SEXP bedrock_leveldb_repair(SEXP r_path);
 SEXP bedrock_leveldb_property(SEXP r_db, SEXP r_name, SEXP r_error_if_missing);
 
-SEXP bedrock_leveldb_get(SEXP r_db, SEXP r_key,
-                         SEXP r_error_if_missing, SEXP r_readoptions);
-SEXP bedrock_leveldb_mget(SEXP r_db, SEXP r_key,
-                          SEXP r_missing_value, SEXP r_missing_report,
-                          SEXP r_readoptions);
+SEXP bedrock_leveldb_get(SEXP r_db, SEXP r_key, SEXP r_readoptions);
+SEXP bedrock_leveldb_mget(SEXP r_db, SEXP r_keys, SEXP r_readoptions);
 
 SEXP bedrock_leveldb_put(SEXP r_db, SEXP r_key, SEXP r_value,
                          SEXP r_writeoptions);

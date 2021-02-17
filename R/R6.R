@@ -68,15 +68,11 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
     property = function(name, error_if_missing = FALSE) {
         bedrock_leveldb_property(self$db, name, error_if_missing)
     },
-    get = function(key, error_if_missing = FALSE, readoptions = NULL) {
-        bedrock_leveldb_get(self$db, key, error_if_missing, 
-            readoptions)
+    get = function(key, readoptions = NULL) {
+        bedrock_leveldb_get(self$db, key, readoptions)
     },
-    mget = function(keys, missing_value = NULL, missing_report = FALSE,
-        readoptions = NULL) {
-        y <- bedrock_leveldb_mget(self$db, keys, missing_value, 
-            missing_report, readoptions)
-        rlang::set_names(y, keys)
+    mget = function(keys, readoptions = NULL) {
+        bedrock_leveldb_mget(self$db, keys, readoptions)
     },
     put = function(key, value, writeoptions = NULL) {
         ret <- bedrock_leveldb_put(self$db, key, value, writeoptions)

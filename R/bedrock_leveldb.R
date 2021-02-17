@@ -97,13 +97,13 @@
 ##' @useDynLib rbedrock, .registration = TRUE
 bedrock_leveldb_open <- function(path, create_if_missing = NULL, error_if_exists = NULL, 
     paranoid_checks = NULL, write_buffer_size = NULL, max_open_files = NULL, block_size = NULL, 
-    use_compression = NULL, cache_capacity = NULL, bloom_filter_bits_per_key = NULL) {
+    cache_capacity = NULL, bloom_filter_bits_per_key = NULL) {
     ptr <- .Call(Cbedrock_leveldb_open, path, create_if_missing, error_if_exists, 
-        paranoid_checks, write_buffer_size, max_open_files, block_size, use_compression, 
+        paranoid_checks, write_buffer_size, max_open_files, block_size, 
         cache_capacity, bloom_filter_bits_per_key)
     attr(ptr, "options") <- list(path = path, create_if_missing = create_if_missing, 
         error_if_exists = error_if_exists, paranoid_checks = paranoid_checks, write_buffer_size = write_buffer_size, 
-        max_open_files = max_open_files, block_size = block_size, use_compression = use_compression, 
+        max_open_files = max_open_files, block_size = block_size, 
         cache_capacity = cache_capacity, bloom_filter_bits_per_key = bloom_filter_bits_per_key)
     class(ptr) <- c("bedrock_leveldb_connection", "bedrock_leveldb_options")
     ptr
@@ -120,14 +120,11 @@ bedrock_leveldb_repair <- function(path) {
 bedrock_leveldb_property <- function(db, path, error_if_missing = FALSE) {
     .Call(Cbedrock_leveldb_property, db, path, error_if_missing)
 }
-bedrock_leveldb_get <- function(db, key, error_if_missing = FALSE, 
-    readoptions = NULL) {
-    .Call(Cbedrock_leveldb_get, db, key, error_if_missing, readoptions)
+bedrock_leveldb_get <- function(db, key, readoptions = NULL) {
+    .Call(Cbedrock_leveldb_get, db, key, readoptions)
 }
-bedrock_leveldb_mget <- function(db, key, missing_value = NULL, missing_report = TRUE, 
-    readoptions = NULL) {
-    .Call(Cbedrock_leveldb_mget, db, key, missing_value, missing_report, 
-        readoptions)
+bedrock_leveldb_mget <- function(db, key, readoptions = NULL) {
+    .Call(Cbedrock_leveldb_mget, db, key, readoptions)
 }
 bedrock_leveldb_put <- function(db, key, value, writeoptions = NULL) {
     .Call(Cbedrock_leveldb_put, db, key, value, writeoptions)
