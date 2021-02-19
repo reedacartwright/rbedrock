@@ -12,7 +12,6 @@ bedrock_leveldb_open(
   write_buffer_size = NULL,
   max_open_files = NULL,
   block_size = NULL,
-  use_compression = NULL,
   cache_capacity = NULL,
   bloom_filter_bits_per_key = NULL
 )
@@ -55,9 +54,6 @@ block (user data is stored in a set of blocks, and a block is
 the unit of reading from disk).  The block size here corresponds
 to uncompressed data; the actual size of the unit read frmo disk
 may be smaller if compression is enabled (LevelDB default: 4K)}
-
-\item{use_compression}{Compress blocks using the 'Snappy'
-compression algorithm (LevelDB default: \code{TRUE})}
 
 \item{cache_capacity}{The size of the cache to use.  If
 non-\code{NULL} this must be a non-negative integer, indicating

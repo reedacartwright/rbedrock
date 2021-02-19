@@ -8,13 +8,13 @@
 #' @examples
 #' \dontrun{db <- bedrockdb("x7fuXRc8AAA=")
 #' hsa <- get_hsa(db)
-#' db$close()}
+#' close(db)}
 #'
 #' @export
-get_hsa <- function(db, x=db$keys(), z, dimension) {
-    keys <- .process_strkey_args(x,z,dimension,tag=57L)
+get_hsa <- function(db, x=get_keys(db), z, dimension) {
+    keys <- .process_key_args(x,z,dimension,tag=57L)
 
-    dat <- db$mget(keys, as_raw = TRUE) %>% purrr::compact()
+    dat <- get_values(keys) %>% purrr::compact()
 
     if(length(dat) == 0) {
         hsa <- tibble::tibble(type = character(), key = character(),
@@ -55,7 +55,7 @@ get_hsa <- function(db, x=db$keys(), z, dimension) {
 #' @examples
 #' \dontrun{db <- bedrockdb("x7fuXRc8AAA=")
 #' put_hsa(db, 0, 60, 0, 15, 70, 15, 2, 0)
-#' db$close()}
+#' close(db)}
 #'
 #' @export
 put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
@@ -89,12 +89,12 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
             hsa <- matrix(c(hx1, hy1, hz1, hx2, hy2, hz2, tag), 1L, 7L)
             ret <- rbind(ret, hsa)
             key <- create_chunk_key(chunk_x, chunk_z, dimension, 57L)
-            dat <- db$get(key, as_raw = TRUE)
+            dat <- get_value(db, key)
             if (!is.null(dat)) {
                 hsa <- rbind(read_hsa_data(dat)[, 1L:7L], hsa)
             }
             hsa <- write_hsa_data(hsa)
-            db$put(hsa, key)
+            put_value(db, key, hsa)
         }
     }
     ret

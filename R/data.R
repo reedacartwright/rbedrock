@@ -16,16 +16,25 @@ get_values <- function(db, keys, readoptions = NULL) {
 }
 
 #' @export
-rawkeys_to_chrkeys <- function(keys) {
-    if(is.raw(keys)) {
-        keys <- list(keys)
+get_value <- function(db, key, readoptions = NULL) {
+    if(length(key) != 1 || !is.character(key)) {
+        stop("key must be a scalar character value")
     }
-    .Call(Crawkeys_to_chrkeys, keys)
+    rawkey <- chrkeys_to_rawkeys(key)[[1]]
+    db$get(rawkey, readoptions)
 }
 
 #' @export
-chrkeys_to_rawkeys <- function(keys) {
-    keys <- as.character(keys)
-    .Call(Cchrkeys_to_rawkeys, keys)
+put_values <- function(db, data, keys = names(data), writeoptions = NULL) {
+    rawkeys <- chrkeys_to_rawkeys(keys)
+    db$mput(keys, data, writeoptions)
 }
 
+#' @export
+put_value <- function(db, key, value, writeoptions = NULL) {
+    if(length(key) != 1 || !is.character(key)) {
+        stop("key must be a scalar character value")
+    }
+    rawkey <- chrkeys_to_rawkeys(key)[[1]]
+    db$put(rawkey, value, writeoptions)
+}

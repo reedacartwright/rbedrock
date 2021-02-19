@@ -25,25 +25,53 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#' Open a Minecraft: Bedrock Edition world for reading and writing.
+#' Open a Bedrock Edition world for reading and writing.
+#'
+#' `bedrockdb` opens a handle to a leveldb database that contains
+#' save-game data for a Bedrock Edition world. On success, it returns
+#' an R6 class of type 'bedrockdb' that can be used directly for
+#' low-level reading and writing access to the db or can be passed to
+#' higher-level functions. The handle to the database can be closed
+#' by passing it to `close`.
 #'
 #' @param path The path to a world folder. If the path does not exist, it is 
 #'   assumed to be the base name of a world folder in the local minecraftWorlds
 #'   directory.
-#' @return On success, an R6 class of type "bedrockdb" that contains and open handle to the
-#'   leveldb database that contains the world information.
-#' @examples
-#' \dontrun{db <- bedrockdb("x7fuXRc8AAA=")
-#' o <- db$get("Overworld")
-#' read_nbt(o)
-#' db$close()}
+#' @param create_if_missing Create world database if it doesn't exist.
+#' @param error_if_exists Raise an error if the world database already exists.
+#' @param paranoid_checks Internal leveldb option
+#' @param write_buffer_size Internal leveldb option
+#' @param max_open_files Internal leveldb option
+#' @param block_size Internal leveldb option
+#' @param cache_capacity Internal leveldb option
+#' @param bloom_filter_bits_per_key Internal leveldb option
+#' @param con An database object created by bedrockdb.
+#' @param ... arguments passed to or from other methods.
 #'
+#' @return On success, `bedrockdb` returns an R6 class of type 'bedrockdb'.
+#'         
+#' @examples
+#'\dontrun{
+#' db <- bedrockdb("lrkkYFpUABA=") # open a world in the minecraftWorlds folder.
+#' # do something with db ...
+#' close(db)
+#'
+#' db <- bedrockdb("C:\\\\minecraftWorlds\\\\my_world") # open a world using absolute path
+#' # do something with db ...
+#' close(db)
+#' }
 #' @export
 bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, paranoid_checks = NULL, 
-    write_buffer_size = 4194304, max_open_files = NULL, block_size = NULL, 
-    cache_capacity = 41943040, bloom_filter_bits_per_key = 10) {
+    write_buffer_size = 4194304L, max_open_files = NULL, block_size = NULL, 
+    cache_capacity = 41943040L, bloom_filter_bits_per_key = 10L) {
     R6_bedrockdb$new(path, create_if_missing, error_if_exists, paranoid_checks, write_buffer_size, 
         max_open_files, block_size, cache_capacity, bloom_filter_bits_per_key)
+}
+
+#' @export
+#' @rdname bedrockdb
+close.bedrockdb <- function(con, ...) {
+    con$close()
 }
 
 #' @importFrom R6 R6Class
@@ -75,12 +103,11 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
         bedrock_leveldb_mget(self$db, keys, readoptions)
     },
     put = function(key, value, writeoptions = NULL) {
-        ret <- bedrock_leveldb_put(self$db, key, value, writeoptions)
+        bedrock_leveldb_put(self$db, key, value, writeoptions)
         invisible(self)
     },
-    # values comes before keys so we can pass a named list to this function
     mput = function(keys, values, writeoptions = NULL) {
-        ret <- bedrock_leveldb_mput(self$db, keys, values, writeoptions)
+        bedrock_leveldb_mput(self$db, keys, values, writeoptions)
         invisible(self)
     },
     delete = function(key, report = FALSE, readoptions = NULL, writeoptions = NULL) {

@@ -25,6 +25,6 @@ If the bounding box of the HSA overlaps multiple chunks, one HSA will be added p
 \examples{
 \dontrun{db <- bedrockdb("x7fuXRc8AAA=")
 put_hsa(db, 0, 60, 0, 15, 70, 15, 2, 0)
-db$close()}
+close(db)}
 
 }

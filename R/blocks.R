@@ -32,7 +32,7 @@ NULL
 #' @rdname get_blocks
 #' @export
 get_subchunk_blocks <- function(db, x, z, dimension, subchunk, names_only = FALSE, extra_block = FALSE) {
-    k <- .process_strkey_args(x,z,dimension, tag=47L, subtag = subchunk)
+    k <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
 
     dat <- db$mget(k) %>% purrr::map(function(rawval) {
         if(is.null(rawval)) {
@@ -59,7 +59,7 @@ get_subchunk_blocks <- function(db, x, z, dimension, subchunk, names_only = FALS
 #' @rdname get_blocks
 #' @export
 get_subchunk <- function(db, x, z, dimension, subchunk, storage=1, simplify=TRUE) {
-    k <- .process_strkey_args(x,z,dimension, tag=47L, subtag = subchunk)
+    k <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
 
     dat <- db$mget(k) %>% purrr::map(read_subchunk, storage=storage, simplify = simplify)
     dat
@@ -146,17 +146,8 @@ block_palette <- function(object) {
 }
 
 #' @export
-subchunk_origin <- function(keys) {
-    m <- keys %>% subset_chunk_keys() %>% split_chunk_keys()
-    m <- m[m[,5] == "47", , drop = FALSE]
-    xyz <- matrix(as.integer(m[,c(2,6,3)])*16L,ncol=3)
-    xyz <- xyz %>% purrr::array_branch(1)
-    names(xyz) <- m[,1]
-    xyz
-}
-
-#' @export
-subchunk_coords <- function(offsets, origins=subchunk_origin(names(offsets))) {
+#' @rdname parse_chunk_keys
+subchunk_coords <- function(offsets, origins=subchunk_origins(names(offsets))) {
     if(is.list(offsets)) {
         purrr::map2(offsets, origins, ~sweep(.x, 2, .y, "+")-1)        
     } else {

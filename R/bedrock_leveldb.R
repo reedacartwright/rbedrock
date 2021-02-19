@@ -74,9 +74,6 @@
 ##'   to uncompressed data; the actual size of the unit read frmo disk
 ##'   may be smaller if compression is enabled (LevelDB default: 4K)
 ##'
-##' @param use_compression Compress blocks using the 'Snappy'
-##'   compression algorithm (LevelDB default: \code{TRUE})
-##'
 ##' @param cache_capacity The size of the cache to use.  If
 ##'   non-\code{NULL} this must be a non-negative integer, indicating
 ##'   the size of the cache in bytes.  If \code{NULL} (the default)
@@ -218,9 +215,6 @@ bedrock_leveldb_keys_len <- function(db, starts_with = NULL, readoptions = NULL)
 bedrock_leveldb_keys <- function(db, starts_with = NULL, readoptions = NULL) {
     .Call(Cbedrock_leveldb_keys, db, starts_with, readoptions)
 }
-bedrock_leveldb_strkeys <- function(db, readoptions = NULL) {
-    .Call(Cbedrock_leveldb_strkeys, db, readoptions)
-}
 bedrock_leveldb_exists <- function(db, key, readoptions = NULL) {
     .Call(Cbedrock_leveldb_exists, db, key, readoptions)
 }
@@ -229,36 +223,36 @@ bedrock_leveldb_version <- function() {
     class(ret) <- "numeric_version"
     ret
 }
-##' @export
+#' @export
 as.character.bedrock_leveldb_snapshot <- function(x, ...) {
     sprintf("<bedrock_leveldb_snapshot> @ %s", attr(x, "timestamp"))
 }
-##' @export
+#' @export
 print.bedrock_leveldb_snapshot <- function(x, ...) {
     cat(as.character(x), "\n")
     invisible(x)
 }
-##' @export
+#' @export
 names.bedrock_leveldb_options <- function(x, ...) {
     names(attr(x, "options", exact = TRUE))
 }
-##' @export
+#' @export
 `$.bedrock_leveldb_options` <- function(x, i) {
     attr(x, "options")[[i]]
 }
-##' @export
+#' @export
 `[[.bedrock_leveldb_options` <- function(x, i, ...) {
     attr(x, "options")[[i]]
 }
-##' @export
+#' @export
 `$<-.bedrock_leveldb_options` <- function(x, i, value) {
     stop(sprintf("%s objects are immutable", class(x)[[1L]]))
 }
-##' @export
+#' @export
 `[[<-.bedrock_leveldb_options` <- function(x, ..., value) {
     stop(sprintf("%s objects are immutable", class(x)[[1L]]))
 }
-##' @export
+#' @export
 as.character.bedrock_leveldb_options <- function(x, ...) {
     f <- function(x) {
         if (is.null(x)) {
@@ -271,7 +265,7 @@ as.character.bedrock_leveldb_options <- function(x, ...) {
     txt <- c(sprintf("<%s>", class(x)[[1]]), sprintf("  - %s: %s", names(x), value))
     paste(txt, collapse = "\n")
 }
-##' @export
+#' @export
 print.bedrock_leveldb_options <- function(x, ...) {
     cat(as.character(x), "\n")
     invisible(x)

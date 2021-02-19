@@ -7,3 +7,5 @@
 ^rbedrock.sublime-project$
 ^rbedrock.sublime-workspace$
 ^\.github$
+^\.clang-format$
+^\.clang_complete$

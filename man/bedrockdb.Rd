@@ -2,37 +2,67 @@
 % Please edit documentation in R/R6.R
 \name{bedrockdb}
 \alias{bedrockdb}
-\title{Open a Minecraft: Bedrock Edition world for reading and writing.}
+\alias{close.bedrockdb}
+\title{Open a Bedrock Edition world for reading and writing.}
 \usage{
 bedrockdb(
   path,
   create_if_missing = FALSE,
   error_if_exists = NULL,
   paranoid_checks = NULL,
-  write_buffer_size = 4194304,
+  write_buffer_size = 4194304L,
   max_open_files = NULL,
   block_size = NULL,
-  use_compression = 4,
-  cache_capacity = 41943040,
-  bloom_filter_bits_per_key = 10
+  cache_capacity = 41943040L,
+  bloom_filter_bits_per_key = 10L
 )
+
+\method{close}{bedrockdb}(con, ...)
 }
 \arguments{
 \item{path}{The path to a world folder. If the path does not exist, it is
 assumed to be the base name of a world folder in the local minecraftWorlds
 directory.}
+
+\item{create_if_missing}{Create world database if it doesn't exist.}
+
+\item{error_if_exists}{Raise an error if the world database already exists.}
+
+\item{paranoid_checks}{Internal leveldb option}
+
+\item{write_buffer_size}{Internal leveldb option}
+
+\item{max_open_files}{Internal leveldb option}
+
+\item{block_size}{Internal leveldb option}
+
+\item{cache_capacity}{Internal leveldb option}
+
+\item{bloom_filter_bits_per_key}{Internal leveldb option}
+
+\item{con}{An database object created by bedrockdb.}
+
+\item{...}{arguments passed to or from other methods.}
 }
 \value{
-On success, an R6 class of type "bedrockdb" that contains and open handle to the
-leveldb database that contains the world information.
+On success, \code{bedrockdb} returns an R6 class of type 'bedrockdb'.
 }
 \description{
-Open a Minecraft: Bedrock Edition world for reading and writing.
+\code{bedrockdb} opens a handle to a leveldb database that contains
+save-game data for a Bedrock Edition world. On success, it returns
+an R6 class of type 'bedrockdb' that can be used directly for
+low-level reading and writing access to the db or can be passed to
+higher-level functions. The handle to the database can be closed
+by passing it to \code{close}.
 }
 \examples{
-\dontrun{db <- bedrockdb("x7fuXRc8AAA=")
-o <- db$get("Overworld")
-read_nbt(o)
-db$close()}
+\dontrun{
+db <- bedrockdb("lrkkYFpUABA=") # open a world in the minecraftWorlds folder.
+# do something with db ...
+close(db)
 
+db <- bedrockdb("C:\\\\\\\\minecraftWorlds\\\\\\\\my_world") # open a world using absolute path
+# do something with db ...
+close(db)
+}
 }

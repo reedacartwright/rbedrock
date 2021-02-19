@@ -8,46 +8,6 @@
 #' @name rbedrock
 NULL
 
-#' Create a database key from chunk information.
-#'
-#' @param x Chunk x-coordinate.
-#' @param z Chunk z-coordinate.
-#' @param d Chunk dimension.
-#' @param tag The type of information the key holds.
-#' @param subtag The subchunk the key refers to. (Only used if \code{tag==47}).
-#' @return The database key corresponding to the inputs.
-#' @examples
-#' create_chunk_key(0, 0, 0, 47, 1)
-#' @export
-create_chunk_key <- function(x, z, d, tag, subtag = NA) {
-    if(is.character(tag)) {
-        tag <- chunk_tag_int(tag)
-    }
-    .create_strkey(x, z, d, tag, subtag)
-}
-
-#' Extract information from chunk keys.
-#'
-#' @param keys A character vector of database keys.
-#' @return A tibble containing information extracted from chunk keys. Keys that do not contain chunk data are dropped.
-#' @examples
-#' parse_chunk_keys("@@0:0:0:47-1")
-#' @export
-parse_chunk_keys <- function(keys) {
-    if (!is.character(keys)) {
-        stop("keys must be a character vector.")
-    }
-    m <- keys %>% subset_chunk_keys() %>% split_chunk_keys()
-
-    tibble::tibble(key = m[, 1],
-        x = as.integer(m[, 2]),
-        z = as.integer(m[, 3]),
-        dimension = as.integer(m[, 4]),
-        tag = chunk_tag_str(m[, 5]),
-        subtag = as.integer(m[, 6]),
-    )
-}
-
 #' Utilities for working with Minecraft world folders.
 #'
 #' @param world_folder The path to a world folder. If the path does not exist, it is 

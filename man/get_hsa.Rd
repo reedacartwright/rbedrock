@@ -4,7 +4,7 @@
 \alias{get_hsa}
 \title{Get HardcodedSpawnArea information from a world.}
 \usage{
-get_hsa(db, x = db$keys(), z, dimension)
+get_hsa(db, x = get_keys(db), z, dimension)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -22,6 +22,6 @@ Get HardcodedSpawnArea information from a world.
 \examples{
 \dontrun{db <- bedrockdb("x7fuXRc8AAA=")
 hsa <- get_hsa(db)
-db$close()}
+close(db)}
 
 }

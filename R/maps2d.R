@@ -1,7 +1,7 @@
 #' @export
 get_2dmaps <- function(db, x, z, dimension) {
-    k <- .process_strkey_args(x,z,dimension, tag=45L)
-    dat <- db$mget(k, as_raw = TRUE) %>% purrr::compact()
+    keys <- .process_key_args(x,z,dimension, tag=45L)
+    dat <- get_values(db, keys) %>% purrr::compact()
     dat %>% purrr::map(read_2dmaps_data)
 }
 

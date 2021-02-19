@@ -4,18 +4,18 @@
 \alias{put_biomes}
 \title{Put biome information into the world}
 \usage{
-put_biomes(db, values, x = names(values), z, dimension, missing_height = 0L)
+put_biomes(db, data, x = names(data), z, dimension, missing_height = 0L)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
 
-\item{values}{A list of character or integer vectors. Each element of
+\item{data}{A list of character or integer vectors. Each element of
 the list must contain 256 values or an error will be raised.}
 
 \item{x, z, dimension}{Chunk coordinates to write biome data to.
 \code{x} can also be a character vector of db keys and any keys not
 representing biome data (tag 47) will be silently dropped.
-\code{x} defaults to \code{names(values)}}
+\code{x} defaults to \code{names(data)}}
 
 \item{missing_height}{if there is no existing height data, use this value for the chunk.}
 }

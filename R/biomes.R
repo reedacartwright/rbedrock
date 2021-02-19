@@ -10,9 +10,9 @@
 #'
 #' @export
 get_biomes <- function(db, x, z, dimension, return_names=TRUE) {
-    k <- .process_strkey_args(x,z,dimension, tag=45L)
+    keys <- .process_key_args(x,z,dimension, tag=45L)
     
-    dat <- db$mget(k, as_raw = TRUE) %>% purrr::compact()
+    dat <- get_values(db, keys) %>% purrr::compact()
 
     biomes <- dat %>% purrr::map(function(x) {
         y <- read_2dmaps_data(x)$biome_map
@@ -34,23 +34,22 @@ get_biomes <- function(db, x, z, dimension, return_names=TRUE) {
 #' the missing_height value if no such data exists.
 #'
 #' @param db A bedrockdb object.
-#' @param values A list of character or integer vectors. Each element of
+#' @param data A list of character or integer vectors. Each element of
 #'    the list must contain 256 values or an error will be raised.
 #' @param x,z,dimension Chunk coordinates to write biome data to.
 #'    `x` can also be a character vector of db keys and any keys not
 #'    representing biome data (tag 47) will be silently dropped.
-#'    `x` defaults to `names(values)`    
-#'
+#'    `x` defaults to `names(data)`
 #' @param missing_height if there is no existing height data, use this value for the chunk.
 #' @export
-put_biomes <- function(db, values, x = names(values), z, dimension, missing_height=0L) {
-    k <- .process_strkey_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
+put_biomes <- function(db, data, x = names(data), z, dimension, missing_height=0L) {
+    keys <- .process_key_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
 
-    if(length(k) != length(values)) {
-        stop("put_biomes: keys and values have different lengths")
+    if(length(keys) != length(data)) {
+        stop("put_biomes: keys and data have different lengths")
     }
 
-    dat <- db$mget(k, as_raw = TRUE)
+    dat <- get_values(db, keys)
     h <- dat %>% purrr::map(function(x) {
         if(is.null(x)) {
             rep(missing_height, 256L)
@@ -58,7 +57,7 @@ put_biomes <- function(db, values, x = names(values), z, dimension, missing_heig
             read_2dmaps_data(x)$height_map
         }
     })
-    dat2 <- purrr::map2(h, values, function(x,y) {
+    dat2 <- purrr::map2(h, data, function(x,y) {
         if(is.character(y)) {
             y <- .BIOME_LIST[y]
             if(any(is.na(y))) {
@@ -68,7 +67,7 @@ put_biomes <- function(db, values, x = names(values), z, dimension, missing_heig
         write_2dmaps_data(x,y)
     })
     
-    db$mput(dat2)
+    put_values(db, dat2)
 }
 
 
