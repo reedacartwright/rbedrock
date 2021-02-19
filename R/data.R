@@ -1,11 +1,13 @@
-
 #' @export
 get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
+    starts_with_raw <- .create_rawkey_prefix(starts_with)
+    rawkeys <- db$keys(starts_with_raw, readoptions)
+    res <- rawkeys_to_chrkeys(rawkeys)
     if(!is.null(starts_with)) {
-        starts_with <- charToRaw(starts_with)
+        # filter out keys from the wrong dimension
+        res <- stringr::str_subset(res, stringr::fixed(starts_with))
     }
-    rawkeys <- db$keys(starts_with, readoptions)
-    rawkeys_to_chrkeys(rawkeys)
+    res
 }
 
 #' @export

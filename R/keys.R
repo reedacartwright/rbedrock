@@ -195,31 +195,25 @@ split_chunk_keys <- function(keys) {
     create_chunk_key(x, z, d, tag, subtag)
 }
 
-.create_key_prefix <- function(x, z, dimension, simplify=TRUE) {
-    stopifnot(length(x) == length(z) && length(x) == length(dimension))
-
-    # convert coordinates to raw values and bind them together
-    rx <- writeBin(as.integer(x), raw(), size = 4, endian = "little")
-    rz <- writeBin(as.integer(z), raw(), size = 4, endian = "little")
-    rd <- writeBin(as.integer(dimension), raw(), size = 4, endian = "little")
-    mx <- matrix(rx, nrow=4)
-    mz <- matrix(rz, nrow=4)
-    md <- matrix(rd, nrow=4)
-    m <- rbind(mx,mz,md)
-
-    # split matrix into a list of columns
-    s <- split(m, col(m))
-    names(s) <- NULL
-
-    # strip dimension data for overworld
-    ret <- lapply(s, function(x) {
-        if(all(x[9:12] == 0x00)) {
-            x <- x[1:8]
-        }
-        x
-    })
-    if(simplify && length(ret) == 1) {
-        ret <- ret[[1]]
+.create_rawkey_prefix <- function(starts_with) {
+    if(is.null(starts_with)) {
+        return(NULL)
     }
-    ret
+    stopifnot(length(starts_with) == 1L && is.character(starts_with))
+
+    if(stringr::str_starts(starts_with, pattern=stringr::fixed("@"))) {
+        # Chunk-key prefixes must refer to a chunk
+        v <- stringr::str_count(starts_with, stringr::fixed(":"))
+        if(v < 2) {
+            stop("Argument 'starts_with' does not identify a chunk")
+        }
+        if(v == 2) {
+            #append a dummy tag
+            starts_with <- paste0(starts_with, ":44")
+            res <- chrkeys_to_rawkeys(starts_with)[[1]]
+            # strip last byte
+            return(head(res,-1))
+        }
+    }
+    chrkeys_to_rawkeys(starts_with)[[1]]
 }
