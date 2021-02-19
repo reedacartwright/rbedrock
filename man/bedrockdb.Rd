@@ -65,4 +65,7 @@ db <- bedrockdb("C:\\\\\\\\minecraftWorlds\\\\\\\\my_world") # open a world usin
 # do something with db ...
 close(db)
 }
+dbpath <- rbedrock_example("7U8vYCDqAAA=") # example world
+db <- bedrockdb(dbpath)
+close(db)
 }

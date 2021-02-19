@@ -2,9 +2,12 @@
 % Please edit documentation in R/hsa.R
 \name{put_hsa}
 \alias{put_hsa}
+\alias{write_hsa_data}
 \title{Add a HardcodedSpawnArea to a world.}
 \usage{
 put_hsa(db, x1, y1, z1, x2, y2, z2, tag, dimension)
+
+write_hsa_data(hsa)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -15,6 +18,8 @@ put_hsa(db, x1, y1, z1, x2, y2, z2, tag, dimension)
 4 and 6 are no longer used by the game.}
 
 \item{dimension}{The dimension that the HSA should be in. 0 = Overworld, 1 = Nether.}
+
+\item{hsa}{A matrix containing HSA data.}
 }
 \value{
 A table containing information about the added HSAs.

@@ -8,7 +8,7 @@
 \alias{subchunk_origins}
 \title{Extract information from chunk keys.}
 \usage{
-subchunk_coords(offsets, origins = subchunk_origin(names(offsets)))
+subchunk_coords(offsets, origins = subchunk_origins(names(offsets)))
 
 parse_chunk_keys(keys)
 

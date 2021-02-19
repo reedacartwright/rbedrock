@@ -2,9 +2,12 @@
 % Please edit documentation in R/hsa.R
 \name{get_hsa}
 \alias{get_hsa}
+\alias{read_hsa_data}
 \title{Get HardcodedSpawnArea information from a world.}
 \usage{
 get_hsa(db, x = get_keys(db), z, dimension)
+
+read_hsa_data(rawval)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -12,6 +15,8 @@ get_hsa(db, x = get_keys(db), z, dimension)
 \item{x, z, dimension}{Chunk coordinates to extract HSA data from.
 x can also be a character vector of db keys and any keys not
 representing HSA data will be silently dropped.}
+
+\item{rawval}{a raw value containing HSA data}
 }
 \value{
 A table containing HSA and spawn-spot information.
@@ -20,8 +25,8 @@ A table containing HSA and spawn-spot information.
 Get HardcodedSpawnArea information from a world.
 }
 \examples{
-\dontrun{db <- bedrockdb("x7fuXRc8AAA=")
+db <- bedrockdb(rbedrock_example("7U8vYCDqAAA="))
 hsa <- get_hsa(db)
-close(db)}
+close(db)
 
 }

@@ -4,17 +4,18 @@
 #' @param x,z,dimension Chunk coordinates to extract HSA data from.
 #'    x can also be a character vector of db keys and any keys not
 #'    representing HSA data will be silently dropped.
+#' @param rawval a raw value containing HSA data
 #' @return A table containing HSA and spawn-spot information.
 #' @examples
-#' \dontrun{db <- bedrockdb("x7fuXRc8AAA=")
+#' db <- bedrockdb(rbedrock_example("7U8vYCDqAAA="))
 #' hsa <- get_hsa(db)
-#' close(db)}
+#' close(db)
 #'
 #' @export
 get_hsa <- function(db, x=get_keys(db), z, dimension) {
     keys <- .process_key_args(x,z,dimension,tag=57L)
 
-    dat <- get_values(keys) %>% purrr::compact()
+    dat <- get_values(db,keys) %>% purrr::compact()
 
     if(length(dat) == 0) {
         hsa <- tibble::tibble(type = character(), key = character(),
@@ -51,6 +52,7 @@ get_hsa <- function(db, x=get_keys(db), z, dimension) {
 #' @param tag The type of HSA. 1 = NetherFortress, 2 = SwampHut, 3 = OceanMonument, 5 = PillagerOutpost.
 #'  4 and 6 are no longer used by the game.
 #' @param dimension The dimension that the HSA should be in. 0 = Overworld, 1 = Nether.
+#' @param hsa A matrix containing HSA data.
 #' @return A table containing information about the added HSAs.
 #' @examples
 #' \dontrun{db <- bedrockdb("x7fuXRc8AAA=")
@@ -101,6 +103,7 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
 }
 
 #' @export
+#' @rdname get_hsa
 read_hsa_data <- function(rawval) {
     con <- rawConnection(rawval)
     on.exit(close(con))
@@ -123,6 +126,7 @@ read_hsa_data <- function(rawval) {
 }
 
 #' @export
+#' @rdname put_hsa
 write_hsa_data <- function(hsa) {
     con <- rawConnection(raw(0), "wb")
     on.exit(close(con))

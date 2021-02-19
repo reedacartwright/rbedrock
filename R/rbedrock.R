@@ -11,16 +11,16 @@ NULL
 #' Utilities for working with Minecraft world folders.
 #'
 #' @param world_folder The path to a world folder. If the path does not exist, it is 
-#'   assumed to be the base name of a world folder in \code{worlds_dir}.
+#'   assumed to be the base name of a world folder in `worlds_dir`.
 #' @param mcworld_path The path to an mcworld file. If exporting, it will be created
 #'   and overwritten if it exists. If importing, it will be extracted.
-#' @param worlds_dir The path of a \code{minecraftWorlds} directory.
-#' @param default If \code{TRUE}, return most likely world path on the system.
+#' @param worlds_dir The path of a `minecraftWorlds` directory.
+#' @param default If `TRUE`, return most likely world path on the system.
 #'
-#' @return \code{world_dir_path} returns the path to the \code{minecraftWorlds} directory.
-#'         You can use \code{options(rbedrock.worlds_dir_path = "custom/path")} to customize the path
+#' @return `world_dir_path` returns the path to the `minecraftWorlds` directory.
+#'         You can use `options(rbedrock.worlds_dir_path = "custom/path")` to customize the path
 #'         as needed.
-#'         \code{list_worlds} returns a data.frame containing information about Minecraft saved games.
+#'         `list_worlds` returns a `data.frame` containing information about Minecraft saved games.
 #'
 #' @name minecraft_worlds
 NULL

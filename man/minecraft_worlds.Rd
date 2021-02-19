@@ -31,7 +31,7 @@ and overwritten if it exists. If importing, it will be extracted.}
 \code{world_dir_path} returns the path to the \code{minecraftWorlds} directory.
 You can use \code{options(rbedrock.worlds_dir_path = "custom/path")} to customize the path
 as needed.
-\code{list_worlds} returns a data.frame containing information about Minecraft saved games.
+\code{list_worlds} returns a \code{data.frame} containing information about Minecraft saved games.
 }
 \description{
 Utilities for working with Minecraft world folders.
