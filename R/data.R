@@ -1,3 +1,14 @@
+#' Get a list of keys stored in a bedrockdb.
+#'
+#' @param db A `bedrockdb` object
+#' @param starts_with A string specifying chunk prefix or string prefix.
+#' @param readoptions A `bedrock_leveldb_readoptions` object
+#'
+#' @return
+#' A vector containing all the keys found in the bedrockdb.
+#'
+#' If `starts_with` is specified, this vector will be filtered for
+#' based on the specified prefix.
 #' @export
 get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
     starts_with_raw <- .create_rawkey_prefix(starts_with)
@@ -10,6 +21,17 @@ get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
     res
 }
 
+#' Read values stored in a bedrockdb.
+#'
+#' @param db A `bedrockdb` object
+#' @param keys A character vector of keys.
+#' @param key  A single key.
+#' @param readoptions A `bedrock_leveldb_readoptions` object
+#' 
+#' @return
+#' `get_values` returns a named-list of raw vectors.
+#'
+#' `get_value` returns a raw vector.
 #' @export
 get_values <- function(db, keys, readoptions = NULL) {
     rawkeys <- chrkeys_to_rawkeys(keys)
@@ -18,6 +40,7 @@ get_values <- function(db, keys, readoptions = NULL) {
 }
 
 #' @export
+#' @rdname get_values
 get_value <- function(db, key, readoptions = NULL) {
     if(length(key) != 1 || !is.character(key)) {
         stop("key must be a scalar character value")
@@ -26,17 +49,36 @@ get_value <- function(db, key, readoptions = NULL) {
     db$get(rawkey, readoptions)
 }
 
+#' Write values to a bedrockdb.
+#'
+#' @param db A `bedrockdb` object
+#' @param data A named-list of raw values, specifying key-value pairs.
+#' @param keys A character vector of keys.
+#' @param key  A key that will be used to store data.
+#' @param value A raw vector that contains the information to be written.
+#' @param values A list of raw values.
+#' @param writeoptions A `bedrock_leveldb_writeoptions` object
+#' 
+#' @return A copy of `db`.
 #' @export
-put_values <- function(db, data, keys = names(data), writeoptions = NULL) {
+put_values <- function(db, keys, values, writeoptions = NULL) {
     rawkeys <- chrkeys_to_rawkeys(keys)
     db$mput(keys, data, writeoptions)
 }
 
 #' @export
+#' @rdname put_values
 put_value <- function(db, key, value, writeoptions = NULL) {
     if(length(key) != 1 || !is.character(key)) {
         stop("key must be a scalar character value")
     }
     rawkey <- chrkeys_to_rawkeys(key)[[1]]
     db$put(rawkey, value, writeoptions)
+}
+
+#' @export
+#' @rdname put_values
+put_data <- function(db, data, writeoptions = NULL) {
+    rawkeys <- chrkeys_to_rawkeys(keys)
+    db$mput(names(data), data, writeoptions)
 }

@@ -67,7 +67,7 @@ put_biomes <- function(db, data, x = names(data), z, dimension, missing_height=0
         write_2dmaps_data(x,y)
     })
     
-    put_values(db, dat2)
+    put_data(db, dat2)
 }
 
 
