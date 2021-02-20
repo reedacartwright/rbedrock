@@ -42,6 +42,7 @@ static const R_CallMethodDef call_methods[] = {
     {"Cbedrock_leveldb_open", (DL_FUNC)&bedrock_leveldb_open, 9},
     {"Cbedrock_leveldb_close", (DL_FUNC)&bedrock_leveldb_close, 2},
     {"Cbedrock_leveldb_destroy", (DL_FUNC)&bedrock_leveldb_destroy, 1},
+    {"Cbedrock_leveldb_is_open", (DL_FUNC)&bedrock_leveldb_is_open, 1},
     {"Cbedrock_leveldb_repair", (DL_FUNC)&bedrock_leveldb_repair, 1},
     {"Cbedrock_leveldb_property", (DL_FUNC)&bedrock_leveldb_property, 3},
 

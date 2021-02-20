@@ -97,6 +97,9 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
         ret <- bedrock_leveldb_destroy(self$path)
         invisible(ret)
     },
+    is_open = function() {
+        bedrock_leveldb_is_open(self$db)
+    },
     property = function(name, error_if_missing = FALSE) {
         bedrock_leveldb_property(self$db, name, error_if_missing)
     },

@@ -173,6 +173,10 @@ SEXP bedrock_leveldb_destroy(SEXP r_path) {
     return ScalarLogical(true);
 }
 
+SEXP bedrock_leveldb_is_open(SEXP r_db) {
+    return ScalarLogical(bedrock_leveldb_get_db(r_db, false) != NULL);
+}
+
 SEXP bedrock_leveldb_repair(SEXP r_path) {
     const char *path = scalar_character(r_path);
     leveldb_options_t *options = leveldb_options_create();

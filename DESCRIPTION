@@ -33,6 +33,7 @@ Imports:
     magrittr,
     jsonlite
 Suggests:
-    zip
+    zip,
+    testthat
 URL: http://github.com/reedacartwright/rbedrock/
 BugReports: http://github.com/reedacartwright/rbedrock/issues

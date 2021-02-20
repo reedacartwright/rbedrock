@@ -35,6 +35,7 @@ SEXP bedrock_leveldb_open(SEXP r_path, SEXP r_create_if_missing,
                           SEXP r_bloom_filter_bits_per_key);
 SEXP bedrock_leveldb_close(SEXP r_db, SEXP r_error_if_closed);
 SEXP bedrock_leveldb_destroy(SEXP r_path);
+SEXP bedrock_leveldb_is_open(SEXP r_db);
 SEXP bedrock_leveldb_repair(SEXP r_path);
 SEXP bedrock_leveldb_property(SEXP r_db, SEXP r_name, SEXP r_error_if_missing);
 

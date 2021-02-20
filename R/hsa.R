@@ -61,6 +61,8 @@ get_hsa <- function(db, x=get_keys(db), z, dimension) {
 #'
 #' @export
 put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
+    stopifnot(length(x1) == 1L && length(y1) == 1L && length (z1) == 1L)
+    stopifnot(length(x2) == 1L && length(y2) == 1L && length (z2) == 1L)
     # convert tag as necessary
     if(is.character(tag)) {
         tag <- switch(tag, NetherFortress = 1, SwampHut = 2, OceanMonument = 3, PillagerOutpost = 5)
@@ -116,8 +118,8 @@ read_hsa_data <- function(rawval) {
         out <- rbind(out, c(aabb, tag))
     }
     colnames(out) <- c("x1", "y1", "z1", "x2", "y2", "z2", "tag")
-    y <- pmax.int(out[, "y1"], out[, "y2"]) - 
-        ifelse(out[,"tag"] == 1L | out[,"tag"] == 5L, 0L, 3L)
+    y <- pmax.int(out[, "y1"], out[, "y2"]) + 
+        ifelse(out[,"tag"] %in% c(2L,5L), -3L, 0L)
     out <- cbind(out, xspot = out[, "x1"] + (out[, "x2"] - out[, "x1"] + 1L) %/% 2L)
     out <- cbind(out, yspot = y-1L)
     out <- cbind(out, zspot = out[, "z1"] + (out[, "z2"] - out[, "z1"] + 1L) %/% 2L)

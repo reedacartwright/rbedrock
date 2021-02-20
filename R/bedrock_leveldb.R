@@ -111,6 +111,9 @@ bedrock_leveldb_close <- function(db, error_if_closed = FALSE) {
 bedrock_leveldb_destroy <- function(path) {
     .Call(Cbedrock_leveldb_destroy, path)
 }
+bedrock_leveldb_is_open <- function(db) {
+    .Call(Cbedrock_leveldb_is_open, db)
+}
 bedrock_leveldb_repair <- function(path) {
     .Call(Cbedrock_leveldb_repair, path)
 }
