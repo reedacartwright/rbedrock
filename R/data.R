@@ -63,7 +63,7 @@ get_value <- function(db, key, readoptions = NULL) {
 #' @export
 put_values <- function(db, keys, values, writeoptions = NULL) {
     rawkeys <- chrkeys_to_rawkeys(keys)
-    db$mput(keys, data, writeoptions)
+    db$mput(rawkeys, values, writeoptions)
 }
 
 #' @export
@@ -79,6 +79,5 @@ put_value <- function(db, key, value, writeoptions = NULL) {
 #' @export
 #' @rdname put_values
 put_data <- function(db, data, writeoptions = NULL) {
-    rawkeys <- chrkeys_to_rawkeys(keys)
-    db$mput(names(data), data, writeoptions)
+    put_values(db, names(data), data)
 }
