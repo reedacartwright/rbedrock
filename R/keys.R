@@ -7,11 +7,14 @@
 #' @param keys a character vector of chrkeys or a list or rawkeys 
 #'  
 #' @return `chrkeys_to_rawkeys` returns a list of raw vectors.
+#'
 #'         `rawkeys_to_chrkeys` returns a character vector.
 #'
 #' @export
 chrkeys_to_rawkeys <- function(keys) {
-    keys <- as.character(keys)
+    if(!is.null(keys)) {
+        keys <- as.character(keys)
+    }
     .Call(Cchrkeys_to_rawkeys, keys)
 }
 

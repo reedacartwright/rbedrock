@@ -1,4 +1,3 @@
-context("Hardcoded Spawn Areas")
 library(rbedrock)
 
 dbpath <- rbedrock_example_world("example1.mcworld")

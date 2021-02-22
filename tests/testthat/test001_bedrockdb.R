@@ -1,4 +1,4 @@
-context("Database Opening and Closing")
+#context("Database Opening and Closing")
 library(rbedrock)
 
 dbpath <- rbedrock_example_world("example1.mcworld")
