@@ -250,7 +250,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
     // Check buffer space
     size_t decode_len = 8+4*(dimension != 0)+1+(subtag != -1);
     if(buffer_len < decode_len) {
-        return decode_len;
+        return decode_len; // # nocov
     }
     // Write values
     i = 0;
@@ -354,7 +354,7 @@ SEXP rawkeys_to_chrkeys(SEXP r_keys) {
         R_xlen_t raw_len = XLENGTH(elm);
         size_t key_len = rawkey_to_chrkey(RAW(elm), raw_len, buffer, buffer_len);
         if(key_len >= buffer_len) {
-            Rf_error("Conversion of element %td of argument 'key' exceeded buffer space.", i);
+            Rf_error("Conversion of element %td of argument 'key' exceeded buffer space.", i+1);
             return R_NilValue;
         }
         SET_STRING_ELT(r_ret, i, Rf_mkCharLenCE(buffer, key_len, CE_UTF8));
@@ -402,7 +402,7 @@ SEXP chrkeys_to_rawkeys(SEXP r_keys) {
         }
         size_t raw_len = chrkey_to_rawkey(CHAR(elm), XLENGTH(elm), buffer, buffer_len);
         if(raw_len > buffer_len) {
-            Rf_error("Conversion of element %td of argument 'key' exceeded buffer space.", i);
+            Rf_error("Conversion of element %td of argument 'key' exceeded buffer space.", i+1);
             return R_NilValue;
         }
         SET_VECTOR_ELT(r_ret, i, Rf_allocVector(RAWSXP, raw_len));
