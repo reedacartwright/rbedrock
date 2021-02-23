@@ -332,7 +332,7 @@ SEXP rawkeys_to_chrkeys(SEXP r_keys) {
     char buffer[2048];
     const int buffer_len = 2048;
 
-    if(r_keys == R_NilValue) {
+    if(Rf_isNull(r_keys)) {
         return R_NilValue;
     }
     if(TYPEOF(r_keys) != VECSXP) {
@@ -343,7 +343,7 @@ SEXP rawkeys_to_chrkeys(SEXP r_keys) {
     SEXP r_ret = PROTECT(Rf_allocVector(STRSXP, sz));
     for(R_xlen_t i = 0; i < sz; ++i) {
         SEXP elm = VECTOR_ELT(r_keys, i);
-        if(elm == R_NilValue) {
+        if(Rf_isNull(elm)) {
             SET_STRING_ELT(r_ret, i, NA_STRING);
             continue;
         }
@@ -385,7 +385,7 @@ SEXP chrkeys_to_rawkeys(SEXP r_keys) {
     unsigned char buffer[2048];
     const int buffer_len = 2048;    
 
-    if(r_keys == R_NilValue) {
+    if(Rf_isNull(r_keys)) {
         return R_NilValue;
     }
     if(!Rf_isString(r_keys)) {

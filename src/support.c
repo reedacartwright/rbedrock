@@ -56,7 +56,7 @@ size_t get_keys(SEXP keys, const char ***key_data, size_t **key_len) {
 }
 
 size_t get_starts_with(SEXP starts_with, const char **starts_with_data) {
-    if(starts_with == R_NilValue) {
+    if(Rf_isNull(starts_with)) {
         *starts_with_data = NULL;
         return 0;
     } else {

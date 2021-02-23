@@ -1,5 +1,5 @@
 /*
-# Copyright (c) 2020 Reed A. Cartwright <reed@cartwright.ht>
+# Copyright (c) 2021 Reed A. Cartwright <reed@cartwright.ht>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,6 @@
 
 #include <R.h>
 #include <Rinternals.h>
-
-#include <stddef.h>
 
 SEXP rawkeys_to_chrkeys(SEXP r_keys);
 SEXP chrkeys_to_rawkeys(SEXP r_keys);

@@ -102,8 +102,8 @@ SEXP bedrock_leveldb_open(SEXP r_path, SEXP r_create_if_missing,
     SEXP r_filterpolicy_ptr = R_NilValue;
     leveldb_cache_t *cache = NULL;
     leveldb_filterpolicy_t *filterpolicy = NULL;
-    bool has_cache = r_cache_capacity != R_NilValue;
-    bool has_filterpolicy = r_bloom_filter_bits_per_key != R_NilValue;
+    bool has_cache = !Rf_isNull(r_cache_capacity);
+    bool has_filterpolicy = !Rf_isNull(r_bloom_filter_bits_per_key);
     if(has_cache) {
         cache = leveldb_cache_create_lru(scalar_size(r_cache_capacity));
         r_cache_ptr = PROTECT(R_MakeExternalPtr(cache, R_NilValue, R_NilValue));
@@ -152,7 +152,7 @@ SEXP bedrock_leveldb_close(SEXP r_db, SEXP r_error_if_closed) {
     if(db != NULL) {
         SEXP tag = bedrock_leveldb_tag(r_db);
         SEXP r_iterators = VECTOR_ELT(tag, TAG_ITERATORS);
-        while(r_iterators != R_NilValue) {
+        while(!Rf_isNull(r_iterators)) {
             bedrock_leveldb_iter_destroy(CAR(r_iterators),
                                          ScalarLogical(false));
             r_iterators = CDR(r_iterators);
@@ -613,15 +613,15 @@ SEXP bedrock_leveldb_readoptions(SEXP r_verify_checksums, SEXP r_fill_cache,
     SET_VECTOR_ELT(tag, 2, r_snapshot);
     SEXP ret = PROTECT(R_MakeExternalPtr(options, tag, R_NilValue));
     R_RegisterCFinalizer(ret, bedrock_leveldb_readoptions_finalize);
-    if(r_verify_checksums != R_NilValue) {
+    if(!Rf_isNull(r_verify_checksums)) {
         bool verify_checksums = scalar_logical(r_verify_checksums);
         leveldb_readoptions_set_verify_checksums(options, verify_checksums);
     }
-    if(r_fill_cache != R_NilValue) {
+    if(!Rf_isNull(r_fill_cache)) {
         leveldb_readoptions_set_fill_cache(options,
                                            scalar_logical(r_fill_cache));
     }
-    if(r_snapshot != R_NilValue) {
+    if(!Rf_isNull(r_snapshot)) {
         leveldb_readoptions_set_snapshot(
             options, bedrock_leveldb_get_snapshot(r_snapshot, true));
     }
@@ -636,7 +636,7 @@ SEXP bedrock_leveldb_writeoptions(SEXP r_sync) {
     SET_VECTOR_ELT(tag, 0, r_sync);
     SEXP ret = PROTECT(R_MakeExternalPtr(options, tag, R_NilValue));
     R_RegisterCFinalizer(ret, bedrock_leveldb_writeoptions_finalize);
-    if(r_sync != R_NilValue) {
+    if(!Rf_isNull(r_sync)) {
         leveldb_writeoptions_set_sync(options, scalar_logical(r_sync));
     }
     UNPROTECT(2);
@@ -669,7 +669,7 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with,
         size_t key_len;
         const char *key_data = leveldb_iter_key(it, &key_len);
         value = raw_string_to_sexp(key_data, key_len);
-        if(ret == R_NilValue) {
+        if(Rf_isNull(ret)) {
             PROTECT(ret = list1(value));
             last = ret;
         } else {
@@ -678,7 +678,7 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with,
     }
     leveldb_iter_destroy(it);
 
-    if(ret != R_NilValue) {
+    if(!Rf_isNull(ret)) {
         UNPROTECT(1);
     }
 
@@ -865,7 +865,7 @@ leveldb_writebatch_t *bedrock_leveldb_get_writebatch(SEXP r_writebatch,
 
 leveldb_readoptions_t *bedrock_leveldb_get_readoptions(SEXP r_readoptions,
                                                        bool closed_error) {
-    if(r_readoptions == R_NilValue) {
+    if(Rf_isNull(r_readoptions)) {
         return default_readoptions;
     }
     void *readoptions = NULL;
@@ -881,7 +881,7 @@ leveldb_readoptions_t *bedrock_leveldb_get_readoptions(SEXP r_readoptions,
 
 leveldb_writeoptions_t *bedrock_leveldb_get_writeoptions(SEXP r_writeoptions,
                                                          bool closed_error) {
-    if(r_writeoptions == R_NilValue) {
+    if(Rf_isNull(r_writeoptions)) {
         return default_writeoptions;
     }
     void *writeoptions = NULL;
@@ -959,27 +959,27 @@ leveldb_options_t *bedrock_leveldb_collect_options(
     // not really a wonderful way of doing this.  The simplest route
     // would be to check on the R side really and then we don't have to
     // do any of the hard work.
-    if(r_create_if_missing != R_NilValue) {
+    if(!Rf_isNull(r_create_if_missing)) {
         leveldb_options_set_create_if_missing(
             options, scalar_logical(r_create_if_missing));
     }
-    if(r_error_if_exists != R_NilValue) {
+    if(!Rf_isNull(r_error_if_exists)) {
         leveldb_options_set_error_if_exists(options,
                                             scalar_logical(r_error_if_exists));
     }
-    if(r_paranoid_checks != R_NilValue) {
+    if(!Rf_isNull(r_paranoid_checks)) {
         leveldb_options_set_paranoid_checks(options,
                                             scalar_logical(r_paranoid_checks));
     }
-    if(r_write_buffer_size != R_NilValue) {
+    if(!Rf_isNull(r_write_buffer_size)) {
         leveldb_options_set_write_buffer_size(options,
                                               scalar_size(r_write_buffer_size));
     }
-    if(r_max_open_files != R_NilValue) {
+    if(!Rf_isNull(r_max_open_files)) {
         leveldb_options_set_max_open_files(options,
                                            scalar_size(r_max_open_files));
     }
-    if(r_block_size != R_NilValue) {
+    if(!Rf_isNull(r_block_size)) {
         leveldb_options_set_block_size(options, scalar_size(r_block_size));
     }
 
