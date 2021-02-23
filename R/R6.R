@@ -117,8 +117,8 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
         bedrock_leveldb_mput(self$db, keys, values, writeoptions)
         invisible(self)
     },
-    delete = function(key, report = FALSE, readoptions = NULL, writeoptions = NULL) {
-        bedrock_leveldb_delete(self$db, key, report, readoptions, 
+    delete = function(keys, report = FALSE, readoptions = NULL, writeoptions = NULL) {
+        bedrock_leveldb_delete(self$db, keys, report, readoptions, 
             writeoptions)
     },
     exists = function(key, readoptions = NULL) {

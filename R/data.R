@@ -32,6 +32,9 @@ get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
 #' `get_values` returns a named-list of raw vectors.
 #'
 #' `get_value` returns a raw vector.
+#'
+#' `exists_values` returns a logical vector.
+#'
 #' @export
 get_values <- function(db, keys, readoptions = NULL) {
     rawkeys <- chrkeys_to_rawkeys(keys)
@@ -47,6 +50,14 @@ get_value <- function(db, key, readoptions = NULL) {
     }
     rawkey <- chrkeys_to_rawkeys(key)[[1]]
     db$get(rawkey, readoptions)
+}
+
+#' @export
+#' @rdname get_values
+has_values <- function(db, keys, readoptions = NULL) {
+    rawkeys <- chrkeys_to_rawkeys(keys)
+    dat <- db$exists(rawkeys, readoptions)
+    rlang::set_names(dat, keys)
 }
 
 #' Write values to a bedrockdb.
@@ -80,4 +91,24 @@ put_value <- function(db, key, value, writeoptions = NULL) {
 #' @rdname put_values
 put_data <- function(db, data, writeoptions = NULL) {
     put_values(db, names(data), data)
+}
+
+#' Remove values from a bedrockdb.
+#'
+#' @param db A `bedrockdb` object
+#' @param keys A character vector of keys.
+#' @param report A logical indicating whether to generate a report on deleted keys
+#' @param readoptions A `bedrock_leveldb_readoptions` object
+#' @param writeoptions A `bedrock_leveldb_writeoptions` object
+#'
+#' @return If `report == TRUE`, a logical vector indicating which keys were deleted.
+#' 
+#' @export
+delete_values <- function(db, keys, report = FALSE, readoptions = NULL, writeoptions = NULL) {
+    rawkeys <- chrkeys_to_rawkeys(keys)
+    ret <- db$delete(rawkeys, report, readoptions, writeoptions)
+    if(!report) {
+        return(invisible(ret))
+    }
+    ret
 }

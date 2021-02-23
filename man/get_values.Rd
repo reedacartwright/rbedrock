@@ -3,11 +3,14 @@
 \name{get_values}
 \alias{get_values}
 \alias{get_value}
+\alias{has_values}
 \title{Read values stored in a bedrockdb.}
 \usage{
 get_values(db, keys, readoptions = NULL)
 
 get_value(db, key, readoptions = NULL)
+
+has_values(db, keys, readoptions = NULL)
 }
 \arguments{
 \item{db}{A \code{bedrockdb} object}
@@ -22,6 +25,8 @@ get_value(db, key, readoptions = NULL)
 \code{get_values} returns a named-list of raw vectors.
 
 \code{get_value} returns a raw vector.
+
+\code{exists_values} returns a logical vector.
 }
 \description{
 Read values stored in a bedrockdb.
