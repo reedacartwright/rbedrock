@@ -10,8 +10,7 @@
 #' @param x,z,dimension,subchunk Subchunk Coordinates to extract block data from.
 #'    x can also be a character vector of db keys and any keys not
 #'    representing subchunk data will be silently dropped.
-#' @param con A connection, raw vector, or character vector specifying a path to read
-#'    binary subchunk data from.
+#' @param rawval A raw vector containing binary subchunk data
 #' @param names_only Return only the names of the blocks, ignoring block states.
 #' @param extra_block Append the extra block layer to the output (separated by ';'').
 #'    This is mostly useful if you have waterlogged blocks. If the extra block is air,
@@ -32,9 +31,9 @@ NULL
 #' @rdname get_blocks
 #' @export
 get_subchunk_blocks <- function(db, x, z, dimension, subchunk, names_only = FALSE, extra_block = FALSE) {
-    k <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
-
-    dat <- db$mget(k) %>% purrr::map(function(rawval) {
+    keys <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
+    dat <- get_values(db, keys)
+    ret <- purrr::map(dat, function(rawval){
         if(is.null(rawval)) {
             return(NULL)
         }
@@ -49,7 +48,7 @@ get_subchunk_blocks <- function(db, x, z, dimension, subchunk, names_only = FALS
         }
         b
     })
-    dat
+    ret
 }
 
 # get_chunk_blocks <- function(db, x, z, dimension) {
@@ -59,19 +58,19 @@ get_subchunk_blocks <- function(db, x, z, dimension, subchunk, names_only = FALS
 #' @rdname get_blocks
 #' @export
 get_subchunk <- function(db, x, z, dimension, subchunk, storage=1, simplify=TRUE) {
-    k <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
-
-    dat <- db$mget(k) %>% purrr::map(read_subchunk, storage=storage, simplify = simplify)
-    dat
+    keys <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
+    dat <- get_values(db, keys)
+    ret <- purrr::map(dat, read_subchunk, storage=storage, simplify = simplify)
+    ret
 }
 
 #' @rdname get_blocks
 #' @export
-read_subchunk <- function(con, storage=1, simplify=TRUE) {
-    if(is.null(con)) {
+read_subchunk <- function(rawval, storage=1, simplify=TRUE) {
+    if(is.null(rawval)) {
         return(NULL)
     }
-    blocks <- .read_subchunk(con)
+    blocks <- .read_subchunk(rawval)
     # subset the storage layers
     if (!is.null(storage)) {
         blocks <- blocks[storage]
@@ -101,14 +100,9 @@ block_palette <- function(object) {
 # https://gist.github.com/Tomcc/a96af509e275b1af483b25c543cfbf37
 # [version:byte][num_storages:byte][block storage1]...[blockStorageN]
 
-.read_subchunk <- function(con) {
-    if (is.character(con)) {
-        con <- file(con, "rb")
-        on.exit(close(con))
-    } else if (is.raw(con)) {
-        con <- rawConnection(con)
-        on.exit(close(con))
-    }
+.read_subchunk <- function(rawval) {
+    con <- rawConnection(rawval)
+    on.exit(close(con))
 
     # read data format version
     version <- readBin(con, integer(), n=1L, size=1L, endian="little", signed = FALSE)
