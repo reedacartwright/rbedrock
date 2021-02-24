@@ -28,6 +28,11 @@ read_nbt <- function (con) {
 }
 
 #' @export
+read_nbt2 <- function(rawval) {
+    .Call(Cread_nbt, rawval)
+}
+
+#' @export
 write_nbt <- function (con, val) {
     ret_val <- FALSE
     if (is.raw(con)) {
