@@ -39,7 +39,8 @@ enum NBT_TYPE {
     TAG_LIST,
     TAG_COMPOUND,
     TAG_INT_ARRAY,
-    TAG_LONG_ARRAY
+    TAG_LONG_ARRAY,
+    TAG_CHECK
 };
 typedef enum NBT_TYPE nbt_type_t;
 
@@ -220,7 +221,7 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
     // read payloads
     switch(tag) {
      case TAG_END:
-        break;
+        return R_NilValue;
      case TAG_BYTE:
      case TAG_BYTE_ARRAY:
         return read_nbt_payload_integer(ptr, end, 1, array_len);
@@ -241,7 +242,10 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
         return read_nbt_list_payload(ptr, end);
      case TAG_COMPOUND:
         return read_nbt_compound_payload(ptr, end);
+     default:
+        break;
     }
+    Rf_error("Malformed NBT tag: '%d'", tag);
     return R_NilValue;
 }
 
@@ -252,6 +256,9 @@ SEXP read_nbt_node(const unsigned char** ptr, const unsigned char* end) {
     nbt_type_t tag = **ptr;
     *ptr += 1;
     if(tag == TAG_END) {
+        return R_NilValue;
+    } else if( (unsigned int)tag >= TAG_CHECK) {
+        Rf_error("Malformed NBT tag: '%d'", tag);
         return R_NilValue;
     }
     SEXP name = PROTECT(read_nbt_payload_character(ptr, end));
@@ -276,6 +283,11 @@ SEXP read_nbt(SEXP r_value) {
 
     size_t len = XLENGTH(r_value);
     const unsigned char *buffer = RAW(r_value);
-    SEXP r_ret = read_nbt_compound_payload(&buffer, buffer+len);
+    const unsigned char *p = buffer;
+    SEXP r_ret = read_nbt_compound_payload(&p, buffer+len);
+    if(p != buffer+len) {
+        Rf_error("Malformed NBT data: %d bytes were read out of %d bytes total", (int)(p-buffer), (int)len);
+        return R_NilValue;
+    }
     return r_ret;
 }
