@@ -15,9 +15,12 @@
 # )
 
 #' @export
-read_nbt <- function(rawval, simplify=TRUE) {
-    res <- .Call(Cread_nbt, rawval)
-    if(simplify && length(res) == 1L && is.null(names(res)) && !inherits(res, "nbtnode")) {
+read_nbt <- function(rawval, max_elements = NULL, simplify = TRUE) {
+    if(!is.null(max_elements)) {
+        stopifnot(length(max_elements) == 1L && !is.na(max_elements))
+    }
+    res <- .Call(Cread_nbt, rawval, max_elements)
+    if(isTRUE(simplify) && length(res) == 1L && is.null(attributes(res))) {
         res <- res[[1]]
     }
     res

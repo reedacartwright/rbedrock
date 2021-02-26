@@ -31,6 +31,7 @@
 #include "bedrock_leveldb.h"
 #include "key_conv.h"
 #include "nbt.h"
+#include "blocks.h"
 
 // for testing:
 SEXP bedrock_leveldb_test_cleanup() {
@@ -108,7 +109,9 @@ static const R_CallMethodDef call_methods[] = {
     {"Crawkeys_to_chrkeys", (DL_FUNC)&rawkeys_to_chrkeys, 1},
     {"Cchrkeys_to_rawkeys", (DL_FUNC)&chrkeys_to_rawkeys, 1},
 
-    {"Cread_nbt", (DL_FUNC)&read_nbt, 1},
+    {"Cread_nbt", (DL_FUNC)&read_nbt, 2},
+
+    {"Cread_subchunk", (DL_FUNC)&read_subchunk, 1},
 
     {NULL, NULL, 0}};
 

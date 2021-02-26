@@ -151,3 +151,22 @@ test_that("read_nbt matches new_nbtnode", {
         100, 0, 156, 255, 0, 1, 1, 0)
     expect_equal(read_nbt(list_dat), list(lsttest = new_nbtnode(c(100L, -100L, 256L, 1L), tag$list, tag$short)))
 })
+
+
+test_that("read_nbt reads a maximum number of values", {
+    dat <- as_raw(
+            tag$byte, rawstr("A"), 0,
+            tag$byte, rawstr("B"), 1,
+            tag$byte, rawstr("C"), 2
+            )
+    a <- structure(0L, class="nbtnode", tag=tag$byte)
+    b <- structure(1L, class="nbtnode", tag=tag$byte)
+    c <- structure(2L, class="nbtnode", tag=tag$byte)
+    expect_equal(read_nbt(dat, max_elements = 0), structure(list(), bytes_read = 0L))
+    expect_equal(read_nbt(dat, max_elements = 1), structure(list(A = a), bytes_read = 5L))
+    expect_equal(read_nbt(dat, max_elements = 2), structure(list(A = a, B = b), bytes_read = 10L))
+    expect_equal(read_nbt(dat, max_elements = 3), structure(list(A = a, B = b, C = c), bytes_read = 15L))
+    expect_equal(read_nbt(dat, max_elements = 4), structure(list(A = a, B = b, C = c), bytes_read = 15L))
+    
+    expect_equal(read_nbt(dat, max_elements = 1, simplify = TRUE), structure(list(A = a), bytes_read = 5L))
+})

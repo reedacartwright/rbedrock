@@ -101,42 +101,12 @@ block_palette <- function(object) {
 # [version:byte][num_storages:byte][block storage1]...[blockStorageN]
 
 .read_subchunk <- function(rawval) {
-    con <- rawConnection(rawval)
-    on.exit(close(con))
-
-    # read data format version
-    version <- readBin(con, integer(), n=1L, size=1L, endian="little", signed = FALSE)
-    # currently we only support version 8
-    stopifnot(version == 8)
-    # read how many layers of blocks we have
-    storage_count <- readBin(con, integer(), n=1L, size=1L, endian="little", signed = FALSE)
-    out <- list()
-    for (i in seq.int(storage_count)) {
-        flag <- readBin(con, integer(), n=1L, size=1L, endian="little", signed = FALSE)
-        isRuntime <- flag %% 2
-        stopifnot(isRuntime == 0) # check for "persistent storage"
-        bitsPerBlock <- flag %/% 2
-        blocksPerWord <- floor(32 / bitsPerBlock)
-        wordCount <- ceiling(4096 / blocksPerWord)
-        idMask <- 2^bitsPerBlock-1
-        words <- readBin(con, integer(), n=wordCount, size=4L, endian="little")
-        # convert to numeric and fix na values to work around
-        # R's handling of 32-bit data
-        words <- as.numeric(words)
-        words[is.na(words)] <- -2147483648
-        paletteSize <- readBin(con, integer(), n=1L, size=4L, endian="little")
-        palette <- .read_nbt_compound_payload(con, paletteSize)
-        ids <- array(0L, c(blocksPerWord, wordCount))
-        for(j in seq.int(blocksPerWord)) {
-            k <- bitops::bitShiftR(words, bitsPerBlock*(j-1))
-            ids[j,] <- bitops::bitAnd(k,idMask)+1L
-        }
-        # Find the id of a block use: ids[y,z,x]
-        blocks <- array(as.integer(ids[1:4096]), c(16,16,16))
-        blocks <- aperm(blocks, c(3,1,2))
-        out[[i]] <- structure(blocks, palette = palette)
-    }
-    out
+    .Call(Cread_subchunk, rawval)
+    # lapply(res, function(x) {
+    #     dim(x) <- c(16,16,16)
+    #     x[] <- aperm(x+1, c(3,1,2))
+    #     x
+    # })
 }
 
 #' @export

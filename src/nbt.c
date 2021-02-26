@@ -22,6 +22,8 @@
 
 #define R_NO_REMAP
 
+#include <limits.h>
+
 #include "nbt.h"
 
 #define return_nbt_error() error_return("Malformed NBT data.")
@@ -173,10 +175,11 @@ static SEXP make_nbtnode(SEXP r_payload, SEXP r_name, nbt_type_t tag) {
     return r_ret;
 }
 
-static SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned char* end) {
+SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned char* end,
+        int max_elements) {
     SEXP r_ret = R_NilValue;
     SEXP last = R_NilValue;
-    while(*ptr < end) {
+    for(int i = 0; *ptr < end && i < max_elements; ++i) {
         SEXP r_node = read_nbt_node(ptr, end);
         if(Rf_isNull(r_node)) {
             // we have encountered an END node
@@ -241,7 +244,7 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
      case TAG_LIST:
         return read_nbt_list_payload(ptr, end);
      case TAG_COMPOUND:
-        return read_nbt_compound_payload(ptr, end);
+        return read_nbt_compound_payload(ptr, end, INT_MAX);
      default:
         break;
     }
@@ -273,9 +276,13 @@ SEXP read_nbt_node(const unsigned char** ptr, const unsigned char* end) {
     return make_nbtnode(payload,name,tag);
 }
 
-SEXP read_nbt(SEXP r_value) {
+SEXP read_nbt(SEXP r_value, SEXP r_max_elements) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
+    }
+    int max_elements = INT_MAX;
+    if(!Rf_isNull(r_max_elements)) {
+        max_elements = Rf_asInteger(r_max_elements);
     }
     if(TYPEOF(r_value) != RAWSXP) {
         error_return("Argument is not a raw type or NULL.");
@@ -284,9 +291,12 @@ SEXP read_nbt(SEXP r_value) {
     size_t len = XLENGTH(r_value);
     const unsigned char *buffer = RAW(r_value);
     const unsigned char *p = buffer;
-    SEXP r_ret = read_nbt_compound_payload(&p, buffer+len);
-    if(p != buffer+len) {
-        Rf_error("Malformed NBT data: %d bytes were read out of %d bytes total", (int)(p-buffer), (int)len);
+    SEXP r_ret = read_nbt_compound_payload(&p, buffer+len, max_elements);
+    R_xlen_t bytes_read = p-buffer;
+    if(!Rf_isNull(r_max_elements) && bytes_read <= len) {
+        Rf_setAttrib(r_ret, Rf_install("bytes_read"), Rf_ScalarInteger(bytes_read));
+    } else if(bytes_read != len) {
+        Rf_error("Malformed NBT data: %d bytes were read out of %d bytes total", (int)(bytes_read), (int)len);
         return R_NilValue;
     }
     return r_ret;
