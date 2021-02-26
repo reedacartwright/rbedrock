@@ -5,7 +5,9 @@
 \alias{get_subchunk_blocks}
 \alias{get_subchunk}
 \alias{read_subchunk}
+\alias{read_subchunk_blocks}
 \alias{block_palette}
+\alias{subchunk_coords}
 \title{Get block information stored in subchunks.}
 \usage{
 get_subchunk_blocks(
@@ -20,9 +22,13 @@ get_subchunk_blocks(
 
 get_subchunk(db, x, z, dimension, subchunk, storage = 1, simplify = TRUE)
 
-read_subchunk(con, storage = 1, simplify = TRUE)
+read_subchunk(rawval, storage = 1, simplify = TRUE)
+
+read_subchunk_blocks(rawval, names_only = FALSE, extra_block = FALSE)
 
 block_palette(object)
+
+subchunk_coords(ind, origins = subchunk_origins(names(ind)))
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -42,8 +48,7 @@ returned.}
 
 \item{simplify}{Return a single storage layer instead of a list containing a single storage layer.}
 
-\item{con}{A connection, raw vector, or character vector specifying a path to read
-binary subchunk data from.}
+\item{rawval}{A raw vector containing binary subchunk data}
 
 \item{object}{A storage layer returned from \code{read_subchunk} or \code{get_subchunk}.}
 }

@@ -33,27 +33,9 @@ NULL
 get_subchunk_blocks <- function(db, x, z, dimension, subchunk, names_only = FALSE, extra_block = FALSE) {
     keys <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
     dat <- get_values(db, keys)
-    ret <- purrr::map(dat, function(rawval){
-        if(is.null(rawval)) {
-            return(NULL)
-        }
-        blocks <- .read_subchunk(rawval)
-        pal <- block_palette(blocks[[1]]) %>% purrr::map_chr(.block_string, names_only = names_only)
-        b <- array(pal[blocks[[1]]], dim = dim(blocks[[1]]))
-        if(extra_block && length(blocks) >= 2) {
-            pal2 <- block_palette(blocks[[2]]) %>% purrr::map_chr(.block_string, names_only = names_only)
-            pal2[pal2 == 'minecraft:air'] <- ""
-            b2 <- array(pal2[blocks[[2]]], dim = dim(blocks[[2]]))
-            b[] <- stringr::str_c(b, ifelse(b2 == "", '', ';'), b2)
-        }
-        b
-    })
+    ret <- purrr::map(dat, read_subchunk_blocks, names_only = names_only, extra_block = extra_block)
     ret
 }
-
-# get_chunk_blocks <- function(db, x, z, dimension) {
-    
-# }
 
 #' @rdname get_blocks
 #' @export
@@ -84,6 +66,24 @@ read_subchunk <- function(rawval, storage=1, simplify=TRUE) {
 
 #' @rdname get_blocks
 #' @export
+read_subchunk_blocks <- function(rawval, names_only = FALSE, extra_block = FALSE) {
+    if(is.null(rawval)) {
+        return(NULL)
+    }
+    blocks <- .read_subchunk(rawval)
+    pal <- block_palette(blocks[[1]]) %>% purrr::map_chr(.block_string, names_only = names_only)
+    b <- array(pal[blocks[[1]]], dim = dim(blocks[[1]]))
+    if(isTRUE(extra_block) && length(blocks) >= 2) {
+        pal2 <- block_palette(blocks[[2]]) %>% purrr::map_chr(.block_string, names_only = names_only)
+        pal2[pal2 == 'minecraft:air'] <- ""
+        b2 <- array(pal2[blocks[[2]]], dim = dim(blocks[[2]]))
+        b[] <- stringr::str_c(b, ifelse(b2 == "", '', ';'), b2)
+    }
+    b
+}
+
+#' @rdname get_blocks
+#' @export
 block_palette <- function(object) {
     attr(object, 'palette')
 }
@@ -97,26 +97,18 @@ block_palette <- function(object) {
     stringr::str_c(x$name, states, sep="@")
 }
 
-# https://gist.github.com/Tomcc/a96af509e275b1af483b25c543cfbf37
-# [version:byte][num_storages:byte][block storage1]...[blockStorageN]
-
 .read_subchunk <- function(rawval) {
     .Call(Cread_subchunk, rawval)
-    # lapply(res, function(x) {
-    #     dim(x) <- c(16,16,16)
-    #     x[] <- aperm(x+1, c(3,1,2))
-    #     x
-    # })
 }
 
 #' @export
-#' @rdname parse_chunk_keys
-subchunk_coords <- function(offsets, origins=subchunk_origins(names(offsets))) {
-    if(is.list(offsets)) {
-        purrr::map2(offsets, origins, ~sweep(.x, 2, .y, "+")-1)        
+#' @rdname get_blocks
+subchunk_coords <- function(ind, origins=subchunk_origins(names(ind))) {
+    f <- function(x,y) t(y - 1L + t(arrayInd(x,c(16,16,16))))
+    if(is.list(ind)) {
+        o <- purrr::array_tree(origins,1)
+        purrr::map2(ind, o, f)
     } else {
-        sweep(offsets, 2, origins, "+")-1
+        f(ind,origins)
     }
 }
-
-# (word >> ((position % blocksPerWord) * bitsPerBlock)) & ((1 << bitsPerBlock) - 1);

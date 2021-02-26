@@ -32,11 +32,6 @@ SEXP read_subchunk(SEXP r_value) {
     }
     SEXP r_ret = PROTECT(Rf_allocVector(VECSXP, num_storages));
     // read each layer of subchunk block storage
-    SEXP r_perm = PROTECT(Rf_allocVector(INTSXP, 3));
-    INTEGER(r_perm)[0] = 3;
-    INTEGER(r_perm)[1] = 1;
-    INTEGER(r_perm)[2] = 2;
-    SEXP r_aperm = PROTECT(Rf_lang3(Rf_install("aperm"), R_NilValue, r_perm));
     for(int i = 0; i < num_storages; ++i) {
         if(end-p < 1) {
             return_block_error();
@@ -57,22 +52,25 @@ SEXP read_subchunk(SEXP r_value) {
             return_block_error();
         }
         // read palette ids
-        int u = 0;
+        unsigned int u = 0;
         int *v = INTEGER(r_blocks);
         for(int j = 0; j < word_count; ++j) {
+            // read current word and parse
             int temp;
             memcpy(&temp, p, 4);
             p += 4;
             for(int k = 0; k < blocks_per_word && u < 4096; ++k) {
-                v[u] = (temp & mask) + 1;
+                // calculate position as if we did aperm(v, c(3,1,2))
+                unsigned int x = (u >> 8) & 0xf;
+                unsigned int y = u & 0xf;
+                unsigned int z = (u >> 4) & 0xf;
+                unsigned int pos = x + 16*y + 256*z;
+                // store block id
+                v[pos] = (temp & mask) + 1;
                 temp = temp >> bits_per_block;
                 u += 1;
             }
         }
-
-        // execute aperm(r_blocks, c(3,1,2))
-        SETCADR(r_aperm, r_blocks);
-        r_blocks = PROTECT(Rf_eval(r_aperm, R_GlobalEnv));
         // read NBT palette data
         if(end-p < 4) {
             return_block_error();
@@ -84,14 +82,15 @@ SEXP read_subchunk(SEXP r_value) {
         if(XLENGTH(r_palette) != palette_size) {
             return_block_error();
         }
+        // store palette as an attribute
         Rf_setAttrib(r_blocks, Rf_install("palette"), r_palette);
         SET_VECTOR_ELT(r_ret, i, r_blocks);
-        UNPROTECT(3);
+        UNPROTECT(2);
     }
     if(p != end) {
         Rf_error("Malformed NBT data: %d bytes were read out of %d bytes total", (int)(end-p), (int)len);
         return R_NilValue;
     }
-    UNPROTECT(3);
+    UNPROTECT(1);
     return r_ret;
 }
