@@ -27,20 +27,15 @@ read_nbt <- function(rawval, max_elements = NULL, simplify = TRUE) {
 }
 
 #' @export
-write_nbt <- function (con, val) {
-    ret_val <- FALSE
-    if (is.raw(con)) {
-        con <- rawConnection(con, "wb")
-        on.exit(close(con))
-        ret_val <- TRUE
-    } else if (is.character(con)) {
-        con <- file(con, "wb")
-        on.exit(close(con))
+write_nbt <- function (object) {
+    con <- rawConnection(raw(), "wb")
+    on.exit(close(con))
+    if(inherits(object,"nbtnode")) {
+        object <- list(object)
     }
-    .write_nbt_compound_payload(con, val, writeEnd = FALSE)
-    if(ret_val) {
-        return(rawConnectionValue(con))
-    }
+    .write_nbt_compound_payload(con, object)
+
+    rawConnectionValue(con)
 }
 
 #' @export
@@ -103,17 +98,14 @@ nbtnode <- function(payload, tag, list_tag = NULL) {
     }
 }
 
-.write_nbt_compound_payload <- function(con, val, writeEnd = TRUE) {
+.write_nbt_compound_payload <- function(con, val) {
     for (k in seq_along(val)) {
         name <- names(val)[k]
         value <- val[[k]]
         tag <- attr(value, "tag", exact = TRUE)
         .write_nbt_tag(con, tag)
         .write_nbt_name(con, name)
-        .write_nbt_payload(con, payload(value), tag)
-    }
-    if (writeEnd) {
-        .write_nbt_tag(con, 0L)
+        .write_nbt_payload(con, value, tag)
     }
 }
 
@@ -159,7 +151,10 @@ nbtnode <- function(payload, tag, list_tag = NULL) {
         # LIST
         .write_nbt_list_payload(con, val),
         # COMPOUND
-        .write_nbt_compound_payload(con, val),
+        {
+            .write_nbt_compound_payload(con, val)
+            .write_nbt_tag(con, 0L)
+        },
         # INTARRAY
         .write_nbt_array_payload(con, as.integer(val), size = 4L),
         # LONGARRAY

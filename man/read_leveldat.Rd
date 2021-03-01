@@ -2,20 +2,29 @@
 % Please edit documentation in R/leveldat.R
 \name{read_leveldat}
 \alias{read_leveldat}
-\title{Read data from a world's level.dat file.}
+\alias{write_leveldat}
+\title{Read and write data from a world's level.dat file.}
 \usage{
 read_leveldat(path, old = FALSE)
+
+write_leveldat(object, path, old = FALSE, version = 8L)
 }
 \arguments{
 \item{path}{The path to a world folder. If the path does not exist, it is
 assumed to be the base name of a world folder in the local minecraftWorlds
 directory.}
 
-\item{old}{If TRUE, \code{read_leveldat} will open level.dat_old instead.}
+\item{old}{Read/write to 'level.dat_old' instead.}
+
+\item{object}{NBT data to be written to level.dat.}
+
+\item{version}{The level.dat format version for the file header.}
 }
 \value{
-A list containing nbt data read from level.dat
+\code{read_leveldat} returns an nbtnode object.
+
+\code{write_leveldat} returns a copy of the data written.
 }
 \description{
-Read data from a world's level.dat file.
+Read and write data from a world's level.dat file.
 }

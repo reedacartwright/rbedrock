@@ -31,7 +31,8 @@ Imports:
     dplyr,
     purrr,
     magrittr,
-    jsonlite
+    jsonlite,
+    readr
 Suggests:
     zip,
     testthat
