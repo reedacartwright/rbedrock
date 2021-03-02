@@ -78,7 +78,9 @@ nbtnode <- function(payload, tag, list_tag = NULL) {
 
 #' @export
 `payload.nbtnode` <- function(node) {
-    structure(node, tag = NULL, list_tag = NULL)
+    cls <- class(node)
+    cls <- cls[cls != 'nbtnode']
+    structure(node, class = cls, tag = NULL, list_tag = NULL)
 }
 
 .write_nbt_tag <- function (con, tag) {
