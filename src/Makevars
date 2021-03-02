@@ -1,5 +1,3 @@
-uname_S = `sh -c 'uname -s 2>/dev/null || echo not'`
-
 CXX_STD = CXX11
 PKG_CFLAGS = $(C_VISIBILITY)
 PKG_CXXFLAGS = $(CXX_VISIBILITY)
@@ -7,17 +5,6 @@ PKG_CPPFLAGS = -pthread -I./leveldb-mcpe/include -I./leveldb-mcpe/build/include
 PKG_LIBS = -L./leveldb-mcpe/build -pthread -lleveldb -lz
 
 CMAKE = cmake
-
-ifeq ($(uname_S),Darwin)
-	# Assume that on MacOS the compiler is in this format:
-	#     clang -mmacosx-version-min=10.13
-	CC_ = `sh -c 'echo $$0' $(CC)`
-	CXX_ = `sh -c 'echo $$0' $(CXX11)`
-	CMAKE_EXTRA_ARGS = -DCMAKE_OSX_DEPLOYMENT_TARGET=`sh -c 'echo $${1\#-mmacosx-version-min=}' $(CXX)`
-else
-	CC_ = $(CC)
-	CXX_ = $(CXX11)
-endif
 
 all: $(SHLIB)
 
@@ -28,18 +15,17 @@ leveldb-mcpe/build/Makefile: leveldb-mcpe/CMakeLists.txt
 		&& cd leveldb-mcpe/build \
 		&& $(CMAKE) -G "Unix Makefiles" .. \
 			-DCMAKE_MAKE_PROGRAM="$(MAKE)" \
-			-DCMAKE_CXX_COMPILER="$(CXX_)" \
-			-DCMAKE_C_COMPILER="$(CC_)" \
-			-DCMAKE_CXX_FLAGS_RELEASE_INIT="$(CXX11STD) $(CXX11FLAGS) $(CXXPICFLAGS) $(C_VISIBILITY)" \
-			-DCMAKE_C_FLAGS_RELEASE_INIT="$(CFLAGS) $(CPICFLAGS)" \
-			$(CMAKE_EXTRA_ARGS) \
+			-DR_CXX_COMPILER="$(CXX11)" \
+			-DR_C_COMPILER="$(CC)" \
+			-DCMAKE_CXX_FLAGS_INIT="$(CXX11STD) $(CXX11FLAGS) $(CXXPICFLAGS) $(C_VISIBILITY)" \
+			-DCMAKE_C_FLAGS_INIT="$(CFLAGS) $(CPICFLAGS)" \
 			-DCMAKE_BUILD_TYPE=Release \
-			-DLEVELDB_BUILD_TESTS=OFF \
-			-DLEVELDB_BUILD_BENCHMARKS=OFF \
+			-DLEVELDB_BUILD_TESTS:BOOL=OFF \
+			-DLEVELDB_BUILD_BENCHMARKS:BOOL=OFF \
 			-Wno-dev )
 
 leveldb-mcpe/build/libleveldb.a: leveldb-mcpe/build/Makefile
-	$(MAKE) --directory=leveldb-mcpe/build
+	$(MAKE) --directory=leveldb-mcpe/build VERBOSE=1
 
 clean:
 	$(MAKE) --directory=leveldb-mcpe/build clean
