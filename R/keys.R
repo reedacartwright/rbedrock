@@ -198,6 +198,33 @@ split_chunk_keys <- function(keys) {
     create_chunk_key(x, z, d, tag, subtag)
 }
 
+.process_key_args2 <- function(x, z, d, tag, subtag = NA_integer_, stop_if_filtered = FALSE) {
+    # is z is missing then x should contain keys as strings
+    if(missing(z) && is.character(x)) {
+        # if tag exists, we are going to filter on data type
+        if(!missing(tag)) {
+            if(length(tag) == 0L) {
+                stop("when filtering keys in x, tag must not be empty")
+            }
+            ktag <- get_tag_from_chunk_key(x)
+            b <- !is.na(ktag) & ktag %in% tag
+            if(stop_if_filtered && any(!b)) {
+                stop(paste0("Some keys passed to .process_keys_args2 were filtered based on tag."))
+            }
+            x <- x[b]
+        }
+        return(x)
+    }
+    # create keys and interleave tags.
+    ret <- character(0L)
+    for(atag in tag) {
+        keys <- create_chunk_key(x, z, d, atag, subtag)
+        ret <- rbind(ret,keys)
+    }
+    as.vector(ret)
+}
+
+
 #' @importFrom utils head
 .create_rawkey_prefix <- function(starts_with) {
     if(is.null(starts_with)) {

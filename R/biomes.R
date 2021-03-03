@@ -1,7 +1,7 @@
 #' Get biome information from a world.
 #'
 #' @param db A bedrockdb object.
-#' @param x,z,dimension Chunk coordinates to extract HSA data from.
+#' @param x,z,dimension Chunk coordinates to extract biome data from.
 #'    x can also be a character vector of db keys and any keys not
 #'    representing biome data will be silently dropped.
 #' @param return_names if set to true, this will return character vectors containing
@@ -240,8 +240,9 @@ put_biomes <- function(db, data, x = names(data), z, dimension, missing_height=0
 #'
 #' @param x A character vector containing biome name.
 #'
-#' @return \code{list_biomes} returns a table containing biome names and numeric ids.
-#'         \code{biome_id} returns the numeric ids corresponding to input names.
+#' @return `list_biomes` returns a table containing biome names and numeric ids.
+#'
+#'         `biome_id` returns the numeric ids corresponding to input names.
 #'
 #' @export
 list_biomes <- function() {

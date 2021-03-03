@@ -10,7 +10,7 @@ get_2dmaps(db, x, z, dimension)
 
 read_2dmaps_data(rawval)
 
-write_2dmaps_data(data, biome_map)
+write_2dmaps_data(object, biome_map)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -21,7 +21,7 @@ representing 2dMaps data will be silently dropped.}
 
 \item{rawval}{A \code{raw} vector containing binary 2dMaps data.}
 
-\item{data}{A list containing height and biome biome. If \code{biome_map} is specified,
+\item{object}{A list containing height and biome biome. If \code{biome_map} is specified,
 this can be a 16x16 array of height data for a chunk.}
 
 \item{biome_map}{A 16x16 array of biome data for a chunk}

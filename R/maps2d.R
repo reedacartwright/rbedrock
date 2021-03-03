@@ -8,7 +8,7 @@
 #'    x can also be a character vector of db keys and any keys not
 #'    representing 2dMaps data will be silently dropped.
 #' @param rawval A `raw` vector containing binary 2dMaps data.
-#' @param data A list containing height and biome biome. If `biome_map` is specified,
+#' @param object A list containing height and biome biome. If `biome_map` is specified,
 #'             this can be a 16x16 array of height data for a chunk.
 #' @param biome_map  A 16x16 array of biome data for a chunk
 #'
@@ -40,13 +40,13 @@ read_2dmaps_data <- function(rawval) {
 #'
 #' @rdname get_2dmaps
 #' @export
-write_2dmaps_data <- function(data, biome_map) {
+write_2dmaps_data <- function(object, biome_map) {
     # support passing a list
-    if(missing(biome_map) && is.list(data)) {
-        biome_map <- data$biome_map
-        height_map <- data$height_map
+    if(missing(biome_map) && is.list(object)) {
+        biome_map <- object$biome_map
+        height_map <- object$height_map
     } else {
-        height_map <- data
+        height_map <- object
     }
 
     con <- rawConnection(raw(0), "wb")
