@@ -34,7 +34,7 @@ get_chunk_versions <- function(db, x, z, dimension, include_legacy = TRUE) {
     b <- !purrr::map_lgl(dat[k], is.null)
     dat[nullkey[b]] <- NULL
 
-    read_version_data(dat)
+    read_chunk_version_data(dat)
 }
 
 #' @description

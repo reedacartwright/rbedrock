@@ -112,8 +112,8 @@ new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
 
 #' @export
 `payload<-.nbtnode` <- function(object,value) {
-    node[] <- object
-    node
+    object[] <- value
+    object
 }
 
 
@@ -159,7 +159,7 @@ new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
 .write_nbt_list_payload <- function(object, con) {
     ntag <- attr(object, "list_tag")
     len <- length(object)
-    .write_nbt_tag(con, ntag)
+    .write_nbt_tag(ntag, con)
     writeBin(len, con, size = 4L, endian = "little")
     for(v in object) {
         .write_nbt_payload(v, ntag, con)
@@ -189,7 +189,7 @@ new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
         # COMPOUND
         {
             .write_nbt_compound_payload(object, con)
-            .write_nbt_tag(con, 0L)
+            .write_nbt_tag(0L, con)
         },
         # INTARRAY
         .write_nbt_array_payload(as.integer(object), con, size = 4L),

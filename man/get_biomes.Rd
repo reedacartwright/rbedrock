@@ -9,7 +9,7 @@ get_biomes(db, x, z, dimension, return_names = TRUE)
 \arguments{
 \item{db}{A bedrockdb object.}
 
-\item{x, z, dimension}{Chunk coordinates to extract HSA data from.
+\item{x, z, dimension}{Chunk coordinates to extract biome data from.
 x can also be a character vector of db keys and any keys not
 representing biome data will be silently dropped.}
 

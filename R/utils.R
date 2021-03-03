@@ -8,6 +8,11 @@
 #' @usage lhs \%>\% rhs
 NULL
 
+# Silence warnings about undefined global variables
+#' @importFrom rlang .data
+NULL
+
+
 # helper function for conversion
 .apply_func <- function(object, f) {
     if(is.null(f)) {
