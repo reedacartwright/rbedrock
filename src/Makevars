@@ -25,7 +25,7 @@ leveldb-mcpe/build/Makefile: leveldb-mcpe/CMakeLists.txt
 			-Wno-dev )
 
 leveldb-mcpe/build/libleveldb.a: leveldb-mcpe/build/Makefile
-	$(MAKE) --directory=leveldb-mcpe/build VERBOSE=1
+	$(MAKE) --directory=leveldb-mcpe/build
 
 clean:
 	$(MAKE) --directory=leveldb-mcpe/build clean

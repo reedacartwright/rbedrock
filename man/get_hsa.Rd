@@ -25,7 +25,8 @@ A table containing HSA and spawn-spot information.
 Get HardcodedSpawnArea information from a world.
 }
 \examples{
-db <- bedrockdb(rbedrock_example("7U8vYCDqAAA="))
+dbpath <- rbedrock_example_world("example1.mcworld")
+db <- bedrockdb(dbpath)
 hsa <- get_hsa(db)
 close(db)
 

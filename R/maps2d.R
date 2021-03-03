@@ -1,3 +1,17 @@
+#' Read and Write 2dmaps data.
+#'
+#' @description
+#' `get_2dmaps` retrieves a 2dMap data from a `bedrockdb`.
+#'
+#' @param db A bedrockdb object.
+#' @param x,z,dimension Chunk coordinates to extract 2dMaps data from.
+#'    x can also be a character vector of db keys and any keys not
+#'    representing 2dMaps data will be silently dropped.
+#' @param rawval A `raw` vector containing binary 2dMaps data.
+#' @param data A list containing height and biome biome. If `biome_map` is specified,
+#'             this can be a 16x16 array of height data for a chunk.
+#' @param biome_map  A 16x16 array of biome data for a chunk
+#'
 #' @export
 get_2dmaps <- function(db, x, z, dimension) {
     keys <- .process_key_args(x,z,dimension, tag=45L)
@@ -5,6 +19,10 @@ get_2dmaps <- function(db, x, z, dimension) {
     dat %>% purrr::map(read_2dmaps_data)
 }
 
+#' @description
+#' `read_2dmaps_data` parses a raw vector of 2dMaps data.
+#'
+#' @rdname get_2dmaps
 #' @export
 read_2dmaps_data <- function(rawval) {
     con <- rawConnection(rawval)
@@ -17,12 +35,18 @@ read_2dmaps_data <- function(rawval) {
     list(height_map = h, biome_map = b)
 }
 
+#' @description
+#' `write_2dmaps_data` converts 2dMaps data into a raw vector.
+#'
+#' @rdname get_2dmaps
 #' @export
-write_2dmaps_data <- function(height_map, biome_map) {
+write_2dmaps_data <- function(data, biome_map) {
     # support passing a list
-    if(missing(biome_map) && is.list(height_map)) {
-        biome_map <- height_map$biome_map
-        height_map <- height_map$height_map
+    if(missing(biome_map) && is.list(data)) {
+        biome_map <- data$biome_map
+        height_map <- data$height_map
+    } else {
+        height_map <- data
     }
 
     con <- rawConnection(raw(0), "wb")
@@ -30,9 +54,8 @@ write_2dmaps_data <- function(height_map, biome_map) {
 
     height_map <- as.integer(height_map)
     biome_map <- as.integer(biome_map)
-    if(length(height_map) != 256 || length(biome_map) != 256) {
-        stop("length of both height_maps and biomes_ids must be 256")
-    }
+
+    stopifnot(length(height_map) == 256L && length(biome_map) == 256L)
     writeBin(height_map, con, size = 2L, endian="little")
     writeBin(biome_map, con, size = 1L, endian="little")
     

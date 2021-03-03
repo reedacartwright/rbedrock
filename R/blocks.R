@@ -19,6 +19,8 @@
 #'    returned.
 #' @param simplify Return a single storage layer instead of a list containing a single storage layer.
 #' @param object A storage layer returned from `read_subchunk` or `get_subchunk`.
+#' @param ind Numeric vector or a named list of numeric vectors containing indexes for blocks in a subchunk.
+#' @param origins A matrix of subchunk origins.
 #'
 #' @return `get_subchunk_blocks` returns a list of character arrays.
 #'         `get_subchunk` and `read_subchunk` return a list of numeric arrays or a single array.

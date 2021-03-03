@@ -7,7 +7,8 @@
 #' @param rawval a raw value containing HSA data
 #' @return A table containing HSA and spawn-spot information.
 #' @examples
-#' db <- bedrockdb(rbedrock_example("7U8vYCDqAAA="))
+#' dbpath <- rbedrock_example_world("example1.mcworld")
+#' db <- bedrockdb(dbpath)
 #' hsa <- get_hsa(db)
 #' close(db)
 #'

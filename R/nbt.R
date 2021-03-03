@@ -14,6 +14,15 @@
 #     LONG_ARRAY = 12
 # )
 
+#' Read and Write NBT Data
+#'
+#' @description
+#' `read_nbt` reads NBT data from a `raw` vector.
+#'
+#' @param rawval A `raw` vector of binary data to parse.
+#' @param max_elements Maximum number of elements to parse.
+#' @param simplify If TRUE, simplifies a list containing a single unnamed `nbtnode`.
+#' @param object A single object of class `nbtnode` or a named list of such objects.
 #' @export
 read_nbt <- function(rawval, max_elements = NULL, simplify = TRUE) {
     if(!is.null(max_elements)) {
@@ -26,6 +35,10 @@ read_nbt <- function(rawval, max_elements = NULL, simplify = TRUE) {
     res
 }
 
+#' @description
+#' `write_nbt` writes a single `nbtnode` or a list of `nbtnodes` into `raw` vector.
+#'
+#' @rdname read_nbt
 #' @export
 write_nbt <- function (object) {
     con <- rawConnection(raw(), "wb")
@@ -33,11 +46,34 @@ write_nbt <- function (object) {
     if(inherits(object,"nbtnode")) {
         object <- list(object)
     }
-    .write_nbt_compound_payload(con, object)
+    .write_nbt_compound_payload(object, con)
 
     rawConnectionValue(con)
 }
 
+#' NBTnode constructor
+#'
+#' @description
+#' `nbtnode` is a convenient wrapper around `new_nbtnode` that supports
+#' type conversion.
+#' @param payload A nbtnode payload
+#' @param tag A numeric tag for the node.
+#' @param list_tag A numeric tag for values stored in the payload of an NBT "list" node.
+#' @param ... Additional parameters passed to `structure` when creating the object.
+#'
+#' @export
+nbtnode <- function(payload, tag, list_tag = NULL) {
+    tag <- as.integer(tag)
+    if(tag == 9L) {
+        list_tag <- as.integer(list_tag)
+    }
+    new_nbtnode(payload, tag, list_tag = list_tag)
+}
+
+#' @description
+#' `new_nbtnode` creates a new object with class `nbtnode`.
+#'
+#' @rdname nbtnode
 #' @export
 new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
     stopifnot(is.integer(tag) && length(tag) == 1L && !is.na(tag))
@@ -51,43 +87,41 @@ new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
     structure(payload, class = cls, tag = tag, list_tag = list_tag, ...)
 }
 
+#' Read and write an `nbtnode`'s payload
+#'
+#' @param object An nbtnode
+#' @param value A new payload
+#''
 #' @export
-nbtnode <- function(payload, tag, list_tag = NULL) {
-    tag <- as.integer(tag)
-    if(tag == 9L) {
-        list_tag <- as.integer(list_tag)
-    }
-    new_nbtnode(payload, tag, list_tag = list_tag)
+`payload` <- function(object) {
+    UseMethod('payload',object)
 }
 
 #' @export
-`payload<-` <- function(node,value) {
-    UseMethod('payload<-',node)
+`payload.nbtnode` <- function(object) {
+    cls <- class(object)
+    cls <- cls[cls != 'nbtnode']
+    structure(object, class = cls, tag = NULL, list_tag = NULL)
+}
+
+#' @rdname payload
+#' @export
+`payload<-` <- function(object,value) {
+    UseMethod('payload<-',object)
 }
 
 #' @export
-`payload<-.nbtnode` <- function(node,value) {
-    node[] <- value
+`payload<-.nbtnode` <- function(object,value) {
+    node[] <- object
     node
 }
 
-#' @export
-`payload` <- function(node) {
-    UseMethod('payload',node)
-}
 
-#' @export
-`payload.nbtnode` <- function(node) {
-    cls <- class(node)
-    cls <- cls[cls != 'nbtnode']
-    structure(node, class = cls, tag = NULL, list_tag = NULL)
-}
-
-.write_nbt_tag <- function (con, tag) {
+.write_nbt_tag <- function (tag, con) {
     writeBin(tag, con, size = 1, endian = "little")
 }
 
-.write_nbt_name <- function (con, name) {
+.write_nbt_name <- function (name, con) {
     if(is.null(name)) {
         name <- ""
     }
@@ -100,66 +134,66 @@ nbtnode <- function(payload, tag, list_tag = NULL) {
     }
 }
 
-.write_nbt_compound_payload <- function(con, val) {
-    for (k in seq_along(val)) {
-        name <- names(val)[k]
-        value <- val[[k]]
+.write_nbt_compound_payload <- function(object, con) {
+    for (k in seq_along(object)) {
+        name <- names(object)[k]
+        value <- object[[k]]
         tag <- attr(value, "tag", exact = TRUE)
-        .write_nbt_tag(con, tag)
-        .write_nbt_name(con, name)
-        .write_nbt_payload(con, value, tag)
+        .write_nbt_tag(tag, con)
+        .write_nbt_name(name, con)
+        .write_nbt_payload(value, tag, con)
     }
 }
 
-.write_nbt_unit_payload <- function(con, val, ...) {
-    stopifnot(length(val) == 1L)
-    writeBin(as.vector(val), con, endian = "little", ...)
+.write_nbt_unit_payload <- function(object, con, ...) {
+    stopifnot(length(object) == 1L)
+    writeBin(as.vector(object), con, endian = "little", ...)
 }
 
-.write_nbt_array_payload <- function(con, val, ...) {
-    len <- length(val)
+.write_nbt_array_payload <- function(object, con, ...) {
+    len <- length(object)
     writeBin(len, con, size = 4L, endian = "little")
-    writeBin(as.vector(val), con, endian = "little", ...)
+    writeBin(as.vector(object), con, endian = "little", ...)
 }
 
-.write_nbt_list_payload <- function(con, val) {
-    ntag <- attr(val, "list_tag")
-    len <- length(val)
+.write_nbt_list_payload <- function(object, con) {
+    ntag <- attr(object, "list_tag")
+    len <- length(object)
     .write_nbt_tag(con, ntag)
     writeBin(len, con, size = 4L, endian = "little")
-    for(v in val) {
-        .write_nbt_payload(con, v, ntag)
+    for(v in object) {
+        .write_nbt_payload(v, ntag, con)
     }
 }
 
-.write_nbt_payload <- function(con, val, tag) {
+.write_nbt_payload <- function(object, tag, con) {
     switch(tag,
         # BYTE
-        .write_nbt_unit_payload(con, as.integer(val), size = 1L),
+        .write_nbt_unit_payload(as.integer(object), con, size = 1L),
         # SHORT
-        .write_nbt_unit_payload(con, as.integer(val), size = 2L),
+        .write_nbt_unit_payload(as.integer(object), con, size = 2L),
         # INT
-        .write_nbt_unit_payload(con, as.integer(val), size = 4L),
+        .write_nbt_unit_payload(as.integer(object), con, size = 4L),
         # LONG
-        .write_nbt_unit_payload(con, bit64::as.integer64(val), size = 8L),
+        .write_nbt_unit_payload(bit64::as.integer64(object), con, size = 8L),
         # FLOAT
-        .write_nbt_unit_payload(con, as.double(val), size = 4L),
+        .write_nbt_unit_payload(as.double(object), con, size = 4L),
         # DOUBLE
-        .write_nbt_unit_payload(con, as.double(val), size = 8L),
+        .write_nbt_unit_payload(as.double(object), con, size = 8L),
         # BYTEARRAY
-        .write_nbt_array_payload(con, as.integer(val), size = 1L),
+        .write_nbt_array_payload(as.integer(object), con, size = 1L),
         # STRING
-        .write_nbt_name(con, as.character(val)),
+        .write_nbt_name(as.character(object), con),
         # LIST
-        .write_nbt_list_payload(con, val),
+        .write_nbt_list_payload(object, con),
         # COMPOUND
         {
-            .write_nbt_compound_payload(con, val)
+            .write_nbt_compound_payload(object, con)
             .write_nbt_tag(con, 0L)
         },
         # INTARRAY
-        .write_nbt_array_payload(con, as.integer(val), size = 4L),
+        .write_nbt_array_payload(as.integer(object), con, size = 4L),
         # LONGARRAY
-        .write_nbt_array_payload(con, bit64::as.integer64(val), size = 8L)
+        .write_nbt_array_payload(bit64::as.integer64(object), con, size = 8L)
     )
 }

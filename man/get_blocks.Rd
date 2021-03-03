@@ -51,6 +51,10 @@ returned.}
 \item{rawval}{A raw vector containing binary subchunk data}
 
 \item{object}{A storage layer returned from \code{read_subchunk} or \code{get_subchunk}.}
+
+\item{ind}{Numeric vector or a named list of numeric vectors containing indexes for blocks in a subchunk.}
+
+\item{origins}{A matrix of subchunk origins.}
 }
 \value{
 \code{get_subchunk_blocks} returns a list of character arrays.

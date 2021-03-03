@@ -32,7 +32,8 @@ Imports:
     purrr,
     magrittr,
     jsonlite,
-    readr
+    readr,
+    utils
 Suggests:
     zip,
     testthat

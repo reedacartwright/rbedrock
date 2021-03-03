@@ -198,6 +198,7 @@ split_chunk_keys <- function(keys) {
     create_chunk_key(x, z, d, tag, subtag)
 }
 
+#' @importFrom utils head
 .create_rawkey_prefix <- function(starts_with) {
     if(is.null(starts_with)) {
         return(NULL)
