@@ -14,11 +14,14 @@ NULL
 
 
 # helper function for conversion
-.apply_func <- function(object, f) {
+.apply_func <- function(object, f, ..., simplify) {
     if(is.null(f)) {
         return(NULL)
     } else if(!is.list(object)) {
-        return(f(object))
-    }
-    purrr::map(object,f)
+        if(isTRUE(simplify)) {
+            return(f(object, ...))
+        }
+        object <- list(object)
+    } 
+    purrr::map(object, f, ...)
 }

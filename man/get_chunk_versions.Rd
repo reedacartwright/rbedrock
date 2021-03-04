@@ -3,31 +3,45 @@
 \name{get_chunk_versions}
 \alias{get_chunk_versions}
 \alias{read_chunk_version_data}
+\alias{read_chunk_version_value}
 \alias{write_chunk_version_data}
+\alias{write_chunk_version_value}
 \title{Read and write chunk version data}
 \usage{
 get_chunk_versions(db, x, z, dimension, include_legacy = TRUE)
 
 read_chunk_version_data(object)
 
+read_chunk_version_value(rawdata)
+
 write_chunk_version_data(object)
+
+write_chunk_version_value(num)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
 
 \item{x, z, dimension}{Chunk coordinates to extract version data from.
-x can also be a character vector of db keys and any keys not
+\code{x} can also be a character vector of db keys and any keys not
 representing version data will be silently dropped.}
 
 \item{include_legacy}{If true, \code{ChunkVersionLegacy} tags will be included.}
 
 \item{object}{For \code{read_chunk_version_data}, this is a list of raw values.
 For \code{write_chunk_version_data}, this is a list of integers.}
+
+\item{rawdata}{A scalar raw.}
+
+\item{num}{A scalar integer.}
 }
 \description{
 \code{get_chunk_versions} retrieves chunk versions from a \code{bedrockdb}.
 
-\code{read_chunk_version_data} parses chunk version data.
+\code{read_chunk_version_data} parses a list of raw scalars of chunk version data.
 
-\code{write_chunk_version_data} converts chunk version data into binary form.
+\code{read_chunk_version_values} parses a raw scalar of chunk version data.
+
+\code{write_chunk_version_data} converts a list of chunk versions into binary form.
+
+\code{write_chunk_version_value} converts a chunk version to binary form.
 }

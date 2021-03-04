@@ -12,10 +12,6 @@ biome_id(x)
 \arguments{
 \item{x}{A character vector containing biome name.}
 }
-\value{
-\code{list_biomes} returns a table containing biome names and numeric ids.\preformatted{    `biome_id` returns the numeric ids corresponding to input names.
-}
-}
 \description{
 List Minecraft Bedrock Edition biomes.
 }

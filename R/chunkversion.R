@@ -5,11 +5,13 @@
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract version data from.
-#'    x can also be a character vector of db keys and any keys not
+#'    `x` can also be a character vector of db keys and any keys not
 #'    representing version data will be silently dropped.
 #' @param include_legacy If true, `ChunkVersionLegacy` tags will be included.
 #' @param object For `read_chunk_version_data`, this is a list of raw values.
 #'               For `write_chunk_version_data`, this is a list of integers.
+#' @param rawdata A scalar raw.
+#' @param num A scalar integer.
 #'
 #' @export
 get_chunk_versions <- function(db, x, z, dimension, include_legacy = TRUE) {
@@ -38,24 +40,49 @@ get_chunk_versions <- function(db, x, z, dimension, include_legacy = TRUE) {
 }
 
 #' @description
-#' `read_chunk_version_data` parses chunk version data.
+#' `read_chunk_version_data` parses a list of raw scalars of chunk version data.
 #'
 #' @rdname get_chunk_versions
 #' @export
 read_chunk_version_data <- function(object) {
-    .apply_func(object, function(x) {
-        stopifnot(is.raw(x))
-        as.integer(x)
-    })
+    purrr::map(object, read_chunk_version_value);
 }
 
 #' @description
-#' `write_chunk_version_data` converts chunk version data into binary form.
+#' `read_chunk_version_values` parses a raw scalar of chunk version data.
+#'
+#' @rdname get_chunk_versions
+#' @export
+read_chunk_version_value <- function(rawdata) {
+    stopifnot(rlang::is_scalar_raw(rawdata))
+
+    .read_chunk_version_value_impl(rawdata)
+}
+
+.read_chunk_version_value_impl <- function(x) {
+    as.integer(x)
+}
+
+#' @description
+#' `write_chunk_version_data` converts a list of chunk versions into binary form.
 #'
 #' @rdname get_chunk_versions
 #' @export
 write_chunk_version_data <- function(object) {
-    .apply_func(object, function(x) {
-        as.raw(x)
-    })
+    purrr::map(object, write_chunk_version_value);
+}
+
+#' @description
+#' `write_chunk_version_value` converts a chunk version to binary form.
+#'
+#' @rdname get_chunk_versions
+#' @export
+write_chunk_version_value <- function(num) {
+    stopifnot(rlang::is_scalar_integerish(num))
+
+    .write_chunk_version_value_impl(num)
+}
+
+.write_chunk_version_value_impl <- function(x) {
+    as.raw(x)
 }

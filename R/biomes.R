@@ -64,7 +64,7 @@ put_biomes <- function(db, data, x = names(data), z, dimension, missing_height=0
                 stop("biome list contains unknown biome")
             }
         }
-        write_2dmaps_data(x,y)
+        .write_2dmaps_value_impl(x,y)
     })
     
     put_data(db, dat2)
@@ -239,10 +239,6 @@ put_biomes <- function(db, data, x = names(data), z, dimension, missing_height=0
 #' List Minecraft Bedrock Edition biomes.
 #'
 #' @param x A character vector containing biome name.
-#'
-#' @return `list_biomes` returns a table containing biome names and numeric ids.
-#'
-#'         `biome_id` returns the numeric ids corresponding to input names.
 #'
 #' @export
 list_biomes <- function() {
