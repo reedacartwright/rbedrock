@@ -151,7 +151,7 @@ chunk_tag_str <- function(tags) {
 
 chunk_tag_int <- function(str) {
     str <- as.character(str)
-    .CHUNK_TAGS[str]
+    unname(.CHUNK_TAGS[str])
 }
 
 get_tag_from_chunk_key <- function(keys, as_string = FALSE) {

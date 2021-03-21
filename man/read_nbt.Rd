@@ -63,6 +63,8 @@ put_nbt_data(db, data, writeoptions = NULL)
 
 \item{values}{A list of nbt objects}
 
+\item{writeoptions}{A \code{bedrock_leveldb_writeoptions} object}
+
 \item{value}{An nbt object.}
 }
 \description{
