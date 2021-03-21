@@ -1,8 +1,8 @@
 #' Utilities for working with Minecraft world folders.
 #'
-#' @param world_folder The path to a world folder. If the path does not exist, it is 
+#' @param id The path to a world folder. If the path does not exist, it is 
 #'   assumed to be the base name of a world folder in `worlds_dir`.
-#' @param mcworld_path The path to an mcworld file. If exporting, it will be created
+#' @param file The path to an mcworld file. If exporting, it will be created
 #'   and overwritten if it exists. If importing, it will be extracted.
 #' @param worlds_dir The path of a `minecraftWorlds` directory.
 #' @param default If `TRUE`, return most likely world path on the system.
@@ -36,8 +36,8 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
         levelname <- payload(dat$LevelName)
         lastplayed <- as.POSIXct(as.numeric(payload(dat$LastPlayed)), 
             origin = "1970-01-01")
-        fname <- basename(f)
-        list(folder = fname, name = levelname, last_opened = lastplayed)
+        id <- basename(f)
+        list(id = id, levelname = levelname, last_opened = lastplayed)
     })
 
     dplyr::arrange(out, dplyr::desc(.data$last_opened))
@@ -45,16 +45,16 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
 
 #' @rdname minecraft_worlds
 #' @export
-export_world <- function(world_folder, mcworld_path, worlds_dir = worlds_dir_path()) {
-    stopifnot(length(mcworld_path) == 1)
+export_world <- function(id, file, worlds_dir = worlds_dir_path()) {
+    stopifnot(is.character(file) && length(file) == 1L && !is.na(file))
 
-    world_path <- .fixup_path(world_folder, worlds_dir, verify=TRUE)
+    world_path <- .fixup_path(id, worlds_dir, verify=TRUE)
     
-    mcworld_path <- .absolute_path(mcworld_path)
+    file <- .absolute_path(file)
 
-    if(file.exists(mcworld_path)) {
-        stopifnot(!dir.exists(mcworld_path))
-        file.remove(mcworld_path)
+    if(file.exists(file)) {
+        stopifnot(!dir.exists(file))
+        file.remove(file)
     }
 
     wd <- getwd()
@@ -62,9 +62,9 @@ export_world <- function(world_folder, mcworld_path, worlds_dir = worlds_dir_pat
     f <- list.files()
 
     if (!requireNamespace("zip", quietly = TRUE)) {
-        ret <- utils::zip(mcworld_path, f, flags = "-r9Xq")
+        ret <- utils::zip(file, f, flags = "-r9Xq")
     } else {
-        ret <- zip::zipr(mcworld_path, f)
+        ret <- zip::zipr(file, f)
     }
 
     setwd(wd)
@@ -73,10 +73,10 @@ export_world <- function(world_folder, mcworld_path, worlds_dir = worlds_dir_pat
 
 #' @rdname minecraft_worlds
 #' @export
-import_world <- function(mcworld_path, worlds_dir = worlds_dir_path(), levelname = NULL) {
-    mcworld_path <- normalizePath(mcworld_path)
+import_world <- function(file, worlds_dir = worlds_dir_path(), levelname = NULL) {
+    file <- normalizePath(file)
 
-    stopifnot(file.exists(mcworld_path))
+    stopifnot(file.exists(file))
 
     # create a random world directory
     while(TRUE) {
@@ -92,9 +92,9 @@ import_world <- function(mcworld_path, worlds_dir = worlds_dir_path(), levelname
     }
 
     if (!requireNamespace("zip", quietly = TRUE)) {
-        utils::unzip(mcworld_path, exdir = path)
+        utils::unzip(file, exdir = path)
     } else {
-        zip::unzip(mcworld_path, exdir = path)
+        zip::unzip(file, exdir = path)
     }
 
     # update the last opened time to now

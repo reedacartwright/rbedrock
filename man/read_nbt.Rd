@@ -3,11 +3,44 @@
 \name{read_nbt}
 \alias{read_nbt}
 \alias{write_nbt}
+\alias{read_nbt_data}
+\alias{write_nbt_data}
+\alias{get_nbt_values}
+\alias{get_nbt_value}
+\alias{put_nbt_values}
+\alias{put_nbt_value}
+\alias{put_nbt_data}
 \title{Read and Write NBT Data}
 \usage{
 read_nbt(rawval, max_elements = NULL, simplify = TRUE)
 
 write_nbt(object)
+
+read_nbt_data(data, max_elements = NULL, simplify = TRUE)
+
+write_nbt_data(data)
+
+get_nbt_values(
+  db,
+  keys,
+  readoptions = NULL,
+  max_elements = NULL,
+  simplify = TRUE
+)
+
+get_nbt_value(
+  db,
+  key,
+  readoptions = NULL,
+  max_elements = NULL,
+  simplify = TRUE
+)
+
+put_nbt_values(db, keys, values, writeoptions = NULL)
+
+put_nbt_value(db, key, value, writeoptions = NULL)
+
+put_nbt_data(db, data, writeoptions = NULL)
 }
 \arguments{
 \item{rawval}{A \code{raw} vector of binary data to parse.}
@@ -17,9 +50,31 @@ write_nbt(object)
 \item{simplify}{If TRUE, simplifies a list containing a single unnamed \code{nbtnode}.}
 
 \item{object}{A single object of class \code{nbtnode} or a named list of such objects.}
+
+\item{data}{A named-list specifying key-value pairs.}
+
+\item{db}{A \code{bedrockdb} object}
+
+\item{keys}{A character vector of keys.}
+
+\item{readoptions}{A \code{bedrock_leveldb_readoptions} object}
+
+\item{key}{A single key.}
+
+\item{values}{A list of nbt objects}
+
+\item{value}{An nbt object.}
 }
 \description{
 \code{read_nbt} reads NBT data from a \code{raw} vector.
 
 \code{write_nbt} writes a single \code{nbtnode} or a list of \code{nbtnodes} into \code{raw} vector.
+
+\code{read_nbt_data} calls \code{read_nbt} on each element of a list.
+
+\code{write_nbt_data} calls \code{write_nbt} on each element of a list.
+
+\code{get_nbt_values} and \code{get_nbt_value} load nbt-formatted data from \code{db} and parses it.
+
+\code{put_nbt_values}, \code{put_nbt_value}, and \code{put_nbt_data} stores nbt data into \code{db} in binary form.
 }

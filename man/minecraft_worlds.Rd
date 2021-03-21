@@ -12,19 +12,19 @@ worlds_dir_path(default = FALSE)
 
 list_worlds(worlds_dir = worlds_dir_path())
 
-export_world(world_folder, mcworld_path, worlds_dir = worlds_dir_path())
+export_world(id, file, worlds_dir = worlds_dir_path())
 
-import_world(mcworld_path, worlds_dir = worlds_dir_path(), levelname = NULL)
+import_world(file, worlds_dir = worlds_dir_path(), levelname = NULL)
 }
 \arguments{
 \item{default}{If \code{TRUE}, return most likely world path on the system.}
 
 \item{worlds_dir}{The path of a \code{minecraftWorlds} directory.}
 
-\item{world_folder}{The path to a world folder. If the path does not exist, it is
+\item{id}{The path to a world folder. If the path does not exist, it is
 assumed to be the base name of a world folder in \code{worlds_dir}.}
 
-\item{mcworld_path}{The path to an mcworld file. If exporting, it will be created
+\item{file}{The path to an mcworld file. If exporting, it will be created
 and overwritten if it exists. If importing, it will be extracted.}
 
 \item{levelname}{Rename the imported world to this name.}

@@ -1,5 +1,3 @@
-library(rbedrock)
-
 test_that("chrkeys_to_rawkeys supports strings", {
     expect_equal(chrkeys_to_rawkeys("test_string"),
         list(charToRaw("test_string")))

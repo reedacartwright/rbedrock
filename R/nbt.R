@@ -1,19 +1,3 @@
-# nbt_type = list(
-#     END = 0,
-#     BYTE = 1,
-#     SHORT = 2,
-#     INT = 3,
-#     LONG = 4,
-#     FLOAT = 5,
-#     DOUBLE = 6,
-#     BYTE_ARRAY = 7,
-#     STRING = 8,
-#     LIST = 9,
-#     COMPOUND = 10,
-#     INT_ARRAY = 11,
-#     LONG_ARRAY = 12
-# )
-
 #' Read and Write NBT Data
 #'
 #' @description
@@ -23,6 +7,14 @@
 #' @param max_elements Maximum number of elements to parse.
 #' @param simplify If TRUE, simplifies a list containing a single unnamed `nbtnode`.
 #' @param object A single object of class `nbtnode` or a named list of such objects.
+#' @param data A named-list specifying key-value pairs.
+#' @param db A `bedrockdb` object
+#' @param keys A character vector of keys.
+#' @param key  A single key.
+#' @param value An nbt object.
+#' @param values A list of nbt objects
+#' @param readoptions A `bedrock_leveldb_readoptions` object
+#' @param writeoptions A `bedrock_leveldb_writeoptions` object
 #' @export
 read_nbt <- function(rawval, max_elements = NULL, simplify = TRUE) {
     if(!is.null(max_elements)) {
@@ -49,6 +41,65 @@ write_nbt <- function (object) {
     .write_nbt_compound_payload(object, con)
 
     rawConnectionValue(con)
+}
+
+#' @description
+#' `read_nbt_data` calls `read_nbt` on each element of a list.
+#'
+#' @rdname read_nbt
+#' @export
+read_nbt_data <- function(data, max_elements = NULL, simplify=TRUE) {
+    purrr::map(data, read_nbt, max_elements = max_elements, simplify = simplify)
+}
+
+#' @description
+#' `write_nbt_data` calls `write_nbt` on each element of a list.
+#'
+#' @rdname read_nbt
+#' @export
+write_nbt_data <- function(data) {
+    purrr::map(data, write_nbt)
+}
+
+#' @description
+#' `get_nbt_values` and `get_nbt_value` load nbt-formatted data from `db` and parses it.
+#'
+#' @rdname read_nbt
+#' @export
+get_nbt_values <- function(db, keys, readoptions = NULL, max_elements = NULL, simplify=TRUE) {
+    dat <- get_values(db, keys, readoptions = readoptions)
+    read_nbt_data(dat, max_elements = max_elements, simplify = simplify)
+}
+
+#' @rdname read_nbt
+#' @export
+get_nbt_value <- function(db, key, readoptions = NULL, max_elements = NULL, simplify=TRUE) {
+    dat <- get_value(db, key, readoptions = readoptions)
+    read_nbt(dat, max_elements = max_elements, simplify = simplify)
+}
+
+#' @description
+#' `put_nbt_values`, `put_nbt_value`, and `put_nbt_data` stores nbt data into `db` in binary form.
+#'
+#' @rdname read_nbt
+#' @export
+put_nbt_values <- function(db, keys, values, writeoptions = NULL) {
+    dat <- write_nbt_data(values)
+    put_values(db, keys, dat, writeoptions = writeoptions)
+}
+
+#' @rdname read_nbt
+#' @export
+put_nbt_value <- function(db, key, value, writeoptions = NULL) {
+    dat <- write_nbt(value)
+    put_value(db, key, dat, writeoptions = writeoptions)
+}
+
+#' @rdname read_nbt
+#' @export
+put_nbt_data <- function(db, data, writeoptions = NULL) {
+    dat <- write_nbt_data(data)
+    put_data(db, dat, writeoptions = writeoptions)
 }
 
 #' NBTnode constructor
@@ -115,7 +166,6 @@ new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
     object[] <- value
     object
 }
-
 
 .write_nbt_tag <- function (tag, con) {
     writeBin(tag, con, size = 1, endian = "little")
@@ -197,3 +247,19 @@ new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
         .write_nbt_array_payload(bit64::as.integer64(object), con, size = 8L)
     )
 }
+
+# nbt_type = list(
+#     END = 0,
+#     BYTE = 1,
+#     SHORT = 2,
+#     INT = 3,
+#     LONG = 4,
+#     FLOAT = 5,
+#     DOUBLE = 6,
+#     BYTE_ARRAY = 7,
+#     STRING = 8,
+#     LIST = 9,
+#     COMPOUND = 10,
+#     INT_ARRAY = 11,
+#     LONG_ARRAY = 12
+# )
