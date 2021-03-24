@@ -163,14 +163,19 @@ get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
     res
 }
 
+trim_stem_from_chunk_key <- function(keys) {
+    stringr::str_replace(keys, "^@[^:]+:[^:]+:[^:]+:", "")
+}
+
 check_chunk_key_tag <- function(keys, tag) {
     ktag <- get_tag_from_chunk_key(keys)
     b <- !is.na(ktag) & ktag == tag
     all(b)
 }
 
-.CHUNK_KEY_RE = "^@[^:]+:[^:]+:[^:]+:[^:-]+(?:-[^:]+)?$"
-.CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:]+))?$"
+.CHUNK_KEY_RE = "^@[^:]+:[^:]+:[^:]+:[^:-]+(?:-[^:-]+)?$"
+.CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:-]+))?$"
+.CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?:-([^:-]+))?$"
 
 is_chunk_key <- function(keys) {
     stringr::str_detect(keys, .CHUNK_KEY_RE)
