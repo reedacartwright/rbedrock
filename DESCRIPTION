@@ -33,7 +33,8 @@ Imports:
     magrittr,
     jsonlite,
     readr,
-    utils
+    utils,
+    digest
 Suggests:
     zip,
     testthat
