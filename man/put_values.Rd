@@ -28,7 +28,7 @@ put_data(db, data, writeoptions = NULL)
 \item{data}{A named-list of raw values, specifying key-value pairs.}
 }
 \value{
-A copy of \code{db}.
+An invisible copy of \code{db}.
 }
 \description{
 Write values to a bedrockdb.

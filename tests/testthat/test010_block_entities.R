@@ -6,14 +6,13 @@ test_that("BlockEntities is chunk tag 49", {
     expect_equal(chunk_tag_str(49L), "BlockEntities")
 })
 
-
 test_that("get_block_entities_data returns all BlockEnties data", {
     dat <- get_block_entities_data(db)
     expect_vector(dat, list(), 22L)
     expect_named(dat)
     expect_true(all(grepl(":49$", names(dat))))
     for(i in seq_along(dat)) {
-        expect_named(dat[[i]], NULL)
+        expect_named(dat[[!!i]], NULL)
     }
 })
 
@@ -24,7 +23,7 @@ test_that("get_block_entities_data returns specific BlockEnties data", {
     expect_named(dat)
     expect_true(all(grepl(":49$", names(dat))))
     for(i in seq_along(dat)) {
-        expect_named(dat[[i]], NULL)
+        expect_named(dat[[!!i]], NULL)
     }
 })
 

@@ -12,7 +12,7 @@ test_that("get_entities_data returns all Entities data", {
     expect_named(dat)
     expect_true(all(grepl(":50$", names(dat))))
     for(i in seq_along(dat)) {
-        expect_named(dat[[i]], NULL)
+        expect_named(dat[[!!i]], NULL)
     }
 })
 
@@ -23,7 +23,7 @@ test_that("get_entities_data returns specific Entities data", {
     expect_named(dat)
     expect_true(all(grepl(":50$", names(dat))))
     for(i in seq_along(dat)) {
-        expect_named(dat[[i]], NULL)
+        expect_named(dat[[!!i]], NULL)
     }
 })
 

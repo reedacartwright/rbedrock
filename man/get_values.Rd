@@ -2,11 +2,14 @@
 % Please edit documentation in R/data.R
 \name{get_values}
 \alias{get_values}
+\alias{get_data}
 \alias{get_value}
 \alias{has_values}
 \title{Read values stored in a bedrockdb.}
 \usage{
 get_values(db, keys, readoptions = NULL)
+
+get_data(db, keys, readoptions = NULL)
 
 get_value(db, key, readoptions = NULL)
 
@@ -22,12 +25,12 @@ has_values(db, keys, readoptions = NULL)
 \item{key}{A single key.}
 }
 \value{
-\code{get_values} returns a named-list of raw vectors.
+\code{get_values()} returns a named-list of raw vectors.
 
-\code{get_value} returns a raw vector.
+\code{get_value()} returns a raw vector.
 
-\code{exists_values} returns a logical vector.
+\code{has_values()} returns a logical vector.
 }
 \description{
-Read values stored in a bedrockdb.
+\code{get_values()} and \code{get_data()} are synonyms.
 }
