@@ -42,6 +42,10 @@ get_values <- function(db, keys, readoptions = NULL) {
     rlang::set_names(dat, keys)
 }
 
+#' @rdname get_values
+#' @export
+get_data <- get_values
+
 #' @export
 #' @rdname get_values
 get_value <- function(db, key, readoptions = NULL) {
