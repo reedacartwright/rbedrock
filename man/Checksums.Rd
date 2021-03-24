@@ -27,38 +27,38 @@ write_checksums_value(object)
 
 \item{rawdata}{a raw vector holding binary chucksums data}
 
-\item{object}{a named character vector in the same format as returned by \code{read_checksums_value}.}
+\item{object}{a named character vector in the same format as returned by \code{read_checksums_value()}.}
 }
 \value{
-\code{get_checksums_data} returns a named-list of the values returned
-by \code{get_checksums_value}.
+\code{get_checksums_data()} returns a named-list of the values returned
+by \code{get_checksums_value()}.
 
-\code{get_checksums_value} and \code{read_checksums_value}
+\code{get_checksums_value()} and \code{read_checksums_value()}
 return a character vector.
 The names of the character vector indicate which
 chunk record (tag and subtag) the checksum is for.
 
-\code{write_checksums_value} returns a raw vector.
+\code{write_checksums_value()} returns a raw vector.
 }
 \description{
 Checksums data (tag 59) holds checksums for several chunk records.
 These records are 2DMaps (tag 45), SubchunkBlocks (tag 47),
 BlockEntities (tag 49), and Entities (tag 50).
 
-\code{get_checksums_data} loads Checksums data from a \code{bedrockdb}.
+\code{get_checksums_data()} loads Checksums data from a \code{bedrockdb}.
 It will silently drop and keys not representing Checksums data.
 
-\code{get_checksums_value} loads Checksums data from a \code{bedrockdb}.
+\code{get_checksums_value()} loads Checksums data from a \code{bedrockdb}.
 It only supports loading a single value.
 
-\code{update_checksums_data} recalculates Checksums data.
+\code{update_checksums_data()} recalculates Checksums data.
 It calculates checksums for the specified chunks'
 SubchunkBlocks, 2DMaps, BlockEntities, and Entities
 records in \code{db} and updates the Checksums record to match.
 
-\code{read_checksums_value} parses a binary checksums record
+\code{read_checksums_value()} parses a binary checksums record
 into a list of checksums.
 
-\code{write_checksums_value} converts Checksums from a named list into
+\code{write_checksums_value()} converts Checksums from a named list into
 binary format.
 }

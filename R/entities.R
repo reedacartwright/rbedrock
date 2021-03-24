@@ -8,7 +8,7 @@ NULL
 
 #'
 #' @description
-#' `get_entities_data` loads Entities data from a `bedrockdb`.
+#' `get_entities_data()` loads Entities data from a `bedrockdb`.
 #' It will silently drop and keys not representing Entities data.
 #'
 #' @param db A bedrockdb object.
@@ -23,7 +23,7 @@ get_entities_data <- function(db, x=get_keys(db), z, dimension) {
 }
 
 #' @description
-#' `put_entities_data` stores Entities data into a `bedrockdb`.
+#' `put_entities_data()` stores Entities data into a `bedrockdb`.
 #'
 #' @param data A named-list of key-value pairs for Entities data.
 #'

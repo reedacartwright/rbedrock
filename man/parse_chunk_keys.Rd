@@ -19,11 +19,11 @@ subchunk_origins(keys)
 \item{keys}{A character vector of database keys.}
 }
 \value{
-\code{parse_chunk_keys} returns a tibble containing information extracted
+\code{parse_chunk_keys()} returns a tibble containing information extracted
 from chunk keys. Keys that do not contain chunk data are dropped.
-\code{chunk_pos} return a matrix containing chunk coordinates.
-\code{chunk_origins} returns the block position of the NW corner of chunks.
-\code{subchunk_origins} returns the block position of the lower NW corner of subchunk.
+\code{chunk_pos()} return a matrix containing chunk coordinates.
+\code{chunk_origins()} returns the block position of the NW corner of chunks.
+\code{subchunk_origins()} returns the block position of the lower NW corner of subchunk.
 }
 \description{
 Extract information from chunk keys.

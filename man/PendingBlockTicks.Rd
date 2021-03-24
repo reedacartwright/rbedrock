@@ -22,8 +22,8 @@ put_pending_block_ticks_data(db, data)
 PendingBlockTicks data (tag 51) holds a list of NBT values for
 pending ticks.
 
-\code{get_pending_block_ticks_data} loads PendingBlockTicks data from a \code{bedrockdb}.
+\code{get_pending_block_ticks_data()} loads PendingBlockTicks data from a \code{bedrockdb}.
 It will silently drop and keys not representing PendingBlockTicks data.
 
-\code{put_pending_block_ticks_data} stores PendingBlockTicks data into a \code{bedrockdb}.
+\code{put_pending_block_ticks_data()} stores PendingBlockTicks data into a \code{bedrockdb}.
 }

@@ -13,7 +13,7 @@ rawkeys_to_chrkeys(keys)
 \item{keys}{a character vector of chrkeys or a list or rawkeys}
 }
 \value{
-\code{chrkeys_to_rawkeys} returns a list of raw vectors.\preformatted{    `rawkeys_to_chrkeys` returns a character vector.
+\code{chrkeys_to_rawkeys()} returns a list of raw vectors.\preformatted{    `rawkeys_to_chrkeys()` returns a character vector.
 }
 }
 \description{

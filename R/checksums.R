@@ -8,15 +8,15 @@
 NULL
 
 #' @description
-#' `get_checksums_data` loads Checksums data from a `bedrockdb`.
+#' `get_checksums_data()` loads Checksums data from a `bedrockdb`.
 #'  It will silently drop and keys not representing Checksums data.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
 #'
-#' @return `get_checksums_data` returns a named-list of the values returned
-#'          by `get_checksums_value`.
+#' @return `get_checksums_data()` returns a named-list of the values returned
+#'          by `get_checksums_value()`.
 #' @rdname Checksums
 #' @export
 get_checksums_data <- function(db, x=get_keys(db), z, dimension) {
@@ -26,10 +26,10 @@ get_checksums_data <- function(db, x=get_keys(db), z, dimension) {
 }
 
 #' @description
-#' `get_checksums_value` loads Checksums data from a `bedrockdb`.
+#' `get_checksums_value()` loads Checksums data from a `bedrockdb`.
 #' It only supports loading a single value.
 #'
-#' @return `get_checksums_value` and `read_checksums_value`
+#' @return `get_checksums_value()` and `read_checksums_value()`
 #'         return a character vector.
 #'         The names of the character vector indicate which
 #'         chunk record (tag and subtag) the checksum is for.
@@ -44,7 +44,7 @@ get_checksums_value <- function(db, x, z, dimension) {
 }
 
 #' @description
-#' `update_checksums_data` recalculates Checksums data.
+#' `update_checksums_data()` recalculates Checksums data.
 #' It calculates checksums for the specified chunks'
 #' SubchunkBlocks, 2DMaps, BlockEntities, and Entities
 #' records in `db` and updates the Checksums record to match.
@@ -58,7 +58,7 @@ update_checksums_data <- function(db, x, z, dimension) {
 }
 
 #' @description
-#' `read_checksums_value` parses a binary checksums record
+#' `read_checksums_value()` parses a binary checksums record
 #' into a list of checksums.
 #'
 #' @param rawdata a raw vector holding binary chucksums data
@@ -84,12 +84,12 @@ read_checksums_value <- function(rawdata) {
 }
 
 #' @description
-#' `write_checksums_value` converts Checksums from a named list into 
+#' `write_checksums_value()` converts Checksums from a named list into 
 #' binary format.
 #'
-#' @param object a named character vector in the same format as returned by `read_checksums_value`.
+#' @param object a named character vector in the same format as returned by `read_checksums_value()`.
 #'
-#' @return `write_checksums_value` returns a raw vector.
+#' @return `write_checksums_value()` returns a raw vector.
 #' @rdname Checksums
 #' @export
 write_checksums_value <- function(object) {

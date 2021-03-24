@@ -6,9 +6,9 @@
 #'
 #' @param keys a character vector of chrkeys or a list or rawkeys 
 #'  
-#' @return `chrkeys_to_rawkeys` returns a list of raw vectors.
+#' @return `chrkeys_to_rawkeys()` returns a list of raw vectors.
 #'
-#'         `rawkeys_to_chrkeys` returns a character vector.
+#'         `rawkeys_to_chrkeys()` returns a character vector.
 #'
 #' @export
 chrkeys_to_rawkeys <- function(keys) {
@@ -56,11 +56,11 @@ create_chunk_key <- function(x, z, d, tag, subtag = NA_integer_) {
 #'
 #' @param keys A character vector of database keys.
 #' @return
-#'   `parse_chunk_keys` returns a tibble containing information extracted
+#'   `parse_chunk_keys()` returns a tibble containing information extracted
 #'   from chunk keys. Keys that do not contain chunk data are dropped.
-#'   `chunk_pos` return a matrix containing chunk coordinates.
-#'   `chunk_origins` returns the block position of the NW corner of chunks.
-#'   `subchunk_origins` returns the block position of the lower NW corner of subchunk.
+#'   `chunk_pos()` return a matrix containing chunk coordinates.
+#'   `chunk_origins()` returns the block position of the NW corner of chunks.
+#'   `subchunk_origins()` returns the block position of the lower NW corner of subchunk.
 #' @examples
 #' parse_chunk_keys("@@0:0:0:47-1")
 #' @export

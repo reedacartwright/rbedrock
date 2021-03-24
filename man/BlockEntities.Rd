@@ -22,8 +22,8 @@ put_block_entities_data(db, data)
 BlockEntities data (tag 49) holds a list of NBT values for
 entity data associated with specific blocks.
 
-\code{get_block_entities_data} loads BlockEntities data from a \code{bedrockdb}.
+\code{get_block_entities_data()} loads BlockEntities data from a \code{bedrockdb}.
 It will silently drop and keys not representing BlockEntities data.
 
-\code{put_block_entities_data} stores BlockEntities data into a \code{bedrockdb}.
+\code{put_block_entities_data()} stores BlockEntities data into a \code{bedrockdb}.
 }

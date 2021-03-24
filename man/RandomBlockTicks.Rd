@@ -22,8 +22,8 @@ put_random_block_ticks_data(db, data)
 RandomBlockTicks data (tag 59) holds a list of NBT values for
 random ticks.
 
-\code{get_random_block_ticks_data} loads RandomBlockTicks data from a \code{bedrockdb}.
+\code{get_random_block_ticks_data()} loads RandomBlockTicks data from a \code{bedrockdb}.
 It will silently drop and keys not representing RandomBlockTicks data.
 
-\code{put_random_block_ticks_data} stores RandomBlockTicks data into a \code{bedrockdb}.
+\code{put_random_block_ticks_data()} stores RandomBlockTicks data into a \code{bedrockdb}.
 }

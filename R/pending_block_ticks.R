@@ -7,7 +7,7 @@
 NULL
 
 #' @description
-#' `get_pending_block_ticks_data` loads PendingBlockTicks data from a `bedrockdb`.
+#' `get_pending_block_ticks_data()` loads PendingBlockTicks data from a `bedrockdb`.
 #' It will silently drop and keys not representing PendingBlockTicks data.
 #'
 #' @param db A bedrockdb object.
@@ -22,7 +22,7 @@ get_pending_block_ticks_data <- function(db, x=get_keys(db), z, dimension) {
 }
 
 #' @description
-#' `put_pending_block_ticks_data` stores PendingBlockTicks data into a `bedrockdb`.
+#' `put_pending_block_ticks_data()` stores PendingBlockTicks data into a `bedrockdb`.
 #'
 #' @param data A named-list of key-value pairs for PendingBlockTicks data.
 #'

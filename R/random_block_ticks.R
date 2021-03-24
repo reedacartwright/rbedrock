@@ -7,7 +7,7 @@
 NULL
 
 #' @description
-#' `get_random_block_ticks_data` loads RandomBlockTicks data from a `bedrockdb`.
+#' `get_random_block_ticks_data()` loads RandomBlockTicks data from a `bedrockdb`.
 #' It will silently drop and keys not representing RandomBlockTicks data.
 #'
 #' @param db A bedrockdb object.
@@ -22,7 +22,7 @@ get_random_block_ticks_data <- function(db, x=get_keys(db), z, dimension) {
 }
 
 #' @description
-#' `put_random_block_ticks_data` stores RandomBlockTicks data into a `bedrockdb`.
+#' `put_random_block_ticks_data()` stores RandomBlockTicks data into a `bedrockdb`.
 #'
 #' @param data A named-list of key-value pairs for RandomBlockTicks data.
 #'

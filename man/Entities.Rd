@@ -22,8 +22,8 @@ put_entities_data(db, data)
 Entities data (tag 50) holds a list of NBT values for
 mobs and other entities in the game.
 
-\code{get_entities_data} loads Entities data from a \code{bedrockdb}.
+\code{get_entities_data()} loads Entities data from a \code{bedrockdb}.
 It will silently drop and keys not representing Entities data.
 
-\code{put_entities_data} stores Entities data into a \code{bedrockdb}.
+\code{put_entities_data()} stores Entities data into a \code{bedrockdb}.
 }
