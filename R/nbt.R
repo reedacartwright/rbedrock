@@ -1,20 +1,68 @@
 #' Read and Write NBT Data
 #'
+#' The Named Binary Tag (NBT) format is used by Minecraft for various data types.
+#'
+#' @description
+#' `get_nbt_data()` and `get_nbt_value()` load nbt-formatted data from `db` and parses it.
+#' `get_nbt_values()` is a synonym for `get_nbt_data()`.
+#'
+#'
+#' @param db A `bedrockdb` object
+#' @param keys A character vector of keys.
+#' @param readoptions A `bedrock_leveldb_readoptions` object
+#' @param max_elements Maximum number of elements to parse.
+#' @param simplify If TRUE, simplifies a list containing a single unnamed `nbtnode`.
+#' @export
+get_nbt_data <- function(db, keys, readoptions = NULL, max_elements = NULL, simplify=TRUE) {
+    dat <- get_values(db, keys, readoptions = readoptions)
+    read_nbt_data(dat, max_elements = max_elements, simplify = simplify)
+}
+
+#' @param key  A single key.
+#' @rdname get_nbt_data
+#' @export
+get_nbt_value <- function(db, key, readoptions = NULL, max_elements = NULL, simplify=TRUE) {
+    dat <- get_value(db, key, readoptions = readoptions)
+    read_nbt(dat, max_elements = max_elements, simplify = simplify)
+}
+
+#' @rdname get_nbt_data
+#' @export
+get_nbt_values <- get_nbt_data
+
+#' @description
+#' `put_nbt_values`, `put_nbt_value`, and `put_nbt_data` stores nbt data into `db` in binary form.
+#'
+#' @param values A list of nbt objects
+#' @param writeoptions A `bedrock_leveldb_writeoptions` object
+#' @rdname get_nbt_data
+#' @export
+put_nbt_values <- function(db, keys, values, writeoptions = NULL) {
+    dat <- write_nbt_data(values)
+    put_values(db, keys, dat, writeoptions = writeoptions)
+}
+
+#' @param value An nbt object.
+#' @rdname get_nbt_data
+#' @export
+put_nbt_value <- function(db, key, value, writeoptions = NULL) {
+    dat <- write_nbt(value)
+    put_value(db, key, dat, writeoptions = writeoptions)
+}
+
+#' @rdname get_nbt_data
+#' @param data A named-list specifying key-value pairs.
+#' @export
+put_nbt_data <- function(db, data, writeoptions = NULL) {
+    dat <- write_nbt_data(data)
+    put_data(db, dat, writeoptions = writeoptions)
+}
+
 #' @description
 #' `read_nbt` reads NBT data from a `raw` vector.
 #'
 #' @param rawval A `raw` vector of binary data to parse.
-#' @param max_elements Maximum number of elements to parse.
-#' @param simplify If TRUE, simplifies a list containing a single unnamed `nbtnode`.
-#' @param object A single object of class `nbtnode` or a named list of such objects.
-#' @param data A named-list specifying key-value pairs.
-#' @param db A `bedrockdb` object
-#' @param keys A character vector of keys.
-#' @param key  A single key.
-#' @param value An nbt object.
-#' @param values A list of nbt objects
-#' @param readoptions A `bedrock_leveldb_readoptions` object
-#' @param writeoptions A `bedrock_leveldb_writeoptions` object
+#' @rdname get_nbt_data
 #' @export
 read_nbt <- function(rawval, max_elements = NULL, simplify = TRUE) {
     if(!is.null(max_elements)) {
@@ -30,7 +78,8 @@ read_nbt <- function(rawval, max_elements = NULL, simplify = TRUE) {
 #' @description
 #' `write_nbt` writes a single `nbtnode` or a list of `nbtnodes` into `raw` vector.
 #'
-#' @rdname read_nbt
+#' @param object A single object of class `nbtnode` or a named list of such objects.
+#' @rdname get_nbt_data
 #' @export
 write_nbt <- function (object) {
     con <- rawConnection(raw(), "wb")
@@ -46,7 +95,7 @@ write_nbt <- function (object) {
 #' @description
 #' `read_nbt_data` calls `read_nbt` on each element of a list.
 #'
-#' @rdname read_nbt
+#' @rdname get_nbt_data
 #' @export
 read_nbt_data <- function(data, max_elements = NULL, simplify=TRUE) {
     purrr::map(data, read_nbt, max_elements = max_elements, simplify = simplify)
@@ -55,51 +104,11 @@ read_nbt_data <- function(data, max_elements = NULL, simplify=TRUE) {
 #' @description
 #' `write_nbt_data` calls `write_nbt` on each element of a list.
 #'
-#' @rdname read_nbt
+
+#' @rdname get_nbt_data
 #' @export
 write_nbt_data <- function(data) {
     purrr::map(data, write_nbt)
-}
-
-#' @description
-#' `get_nbt_values` and `get_nbt_value` load nbt-formatted data from `db` and parses it.
-#'
-#' @rdname read_nbt
-#' @export
-get_nbt_values <- function(db, keys, readoptions = NULL, max_elements = NULL, simplify=TRUE) {
-    dat <- get_values(db, keys, readoptions = readoptions)
-    read_nbt_data(dat, max_elements = max_elements, simplify = simplify)
-}
-
-#' @rdname read_nbt
-#' @export
-get_nbt_value <- function(db, key, readoptions = NULL, max_elements = NULL, simplify=TRUE) {
-    dat <- get_value(db, key, readoptions = readoptions)
-    read_nbt(dat, max_elements = max_elements, simplify = simplify)
-}
-
-#' @description
-#' `put_nbt_values`, `put_nbt_value`, and `put_nbt_data` stores nbt data into `db` in binary form.
-#'
-#' @rdname read_nbt
-#' @export
-put_nbt_values <- function(db, keys, values, writeoptions = NULL) {
-    dat <- write_nbt_data(values)
-    put_values(db, keys, dat, writeoptions = writeoptions)
-}
-
-#' @rdname read_nbt
-#' @export
-put_nbt_value <- function(db, key, value, writeoptions = NULL) {
-    dat <- write_nbt(value)
-    put_value(db, key, dat, writeoptions = writeoptions)
-}
-
-#' @rdname read_nbt
-#' @export
-put_nbt_data <- function(db, data, writeoptions = NULL) {
-    dat <- write_nbt_data(data)
-    put_data(db, dat, writeoptions = writeoptions)
 }
 
 #' NBTnode constructor
