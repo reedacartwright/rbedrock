@@ -24,8 +24,7 @@ test_that("get_checksums_data returns specific Checksums data", {
     keys <- c("@36:16:0:59", "fake_data", "@37:15:0:59")
     dat <- get_checksums_data(db, keys)
     expect_vector(dat, list(), 2L)
-    expect_named(dat)
-    expect_true(all(grepl(":59$", names(dat))))
+    expect_named(dat, keys[-2])
     for(i in seq_along(dat)) {
         expect_named(dat[[!!i]])
     }

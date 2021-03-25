@@ -34,7 +34,8 @@ Imports:
     jsonlite,
     readr,
     utils,
-    digest
+    digest,
+    vctrs
 Suggests:
     zip,
     testthat
