@@ -2,20 +2,29 @@
 % Please edit documentation in R/chunk_version.R
 \name{ChunkVersion}
 \alias{ChunkVersion}
-\alias{get_chunk_versions}
-\alias{read_chunk_version_data}
+\alias{get_chunk_version_data}
+\alias{get_chunk_version_value}
+\alias{get_chunk_version_values}
+\alias{put_chunk_version_data}
+\alias{put_chunk_version_values}
+\alias{put_chunk_version_value}
 \alias{read_chunk_version_value}
-\alias{write_chunk_version_data}
 \alias{write_chunk_version_value}
 \title{Read and write chunk version data}
 \usage{
-get_chunk_versions(db, x, z, dimension, include_legacy = TRUE)
+get_chunk_version_data(db, x, z, dimension, include_legacy = TRUE)
 
-read_chunk_version_data(object)
+get_chunk_version_value(db, x, z, dimension, include_legacy = TRUE)
+
+get_chunk_version_values(db, x, z, dimension, include_legacy = TRUE)
+
+put_chunk_version_data(db, data)
+
+put_chunk_version_values(db, x, z, dimension, values)
+
+put_chunk_version_value(db, x, z, dimension, value)
 
 read_chunk_version_value(rawdata)
-
-write_chunk_version_data(object)
 
 write_chunk_version_value(num)
 }
@@ -27,8 +36,11 @@ write_chunk_version_value(num)
 
 \item{include_legacy}{If true, \code{ChunkVersionLegacy} tags will be included.}
 
-\item{object}{For \code{read_chunk_version_data}, this is a list of raw values.
-For \code{write_chunk_version_data}, this is a list of integers.}
+\item{data}{A named-vector of key-value pairs for Finalization data.}
+
+\item{values}{An integer vector}
+
+\item{value}{A scalar integer vector}
 
 \item{rawdata}{A scalar raw.}
 
@@ -36,16 +48,20 @@ For \code{write_chunk_version_data}, this is a list of integers.}
 }
 \description{
 ChunkVersion data (tag 44) and ChunkVersionLegacy data (tag 118)
-store the version number of a chunk.
+store the version number of a chunk. In Minecraft version 1.16.100,
+chunk version data was moved from tag 118 to tag 44.
 
-\code{get_chunk_versions()} retrieves chunk versions from a \code{bedrockdb}.
+\code{get_chunk_version_data()} retrieves chunk versions from a \code{bedrockdb}.
 It will silently drop and keys not representing ChunkVersion data.
 
-\code{read_chunk_version_data()} parses a list of raw scalars of chunk version data.
+\code{put_chunk_version_data()}, \code{put_chunk_version_values()}, and
+\code{put_chunk_version_value()} store Finalization data into a \code{bedrockdb}.
+\code{put_chunk_version_data()} supports writing both ChunkVersion and
+ChunkVersionLegacy tags.
+\code{put_chunk_version_values()} and \code{put_chunk_version_value()}
+only support ChunkVersion tags.
 
-\code{read_chunk_version_value()} parses a raw scalar of chunk version data.
+\code{read_chunk_version_value()} decodes ChunkVersion data.
 
-\code{write_chunk_version_data()} converts a list of chunk versions into binary form.
-
-\code{write_chunk_version_value()} converts a chunk version to binary form.
+\code{write_chunk_version_value()} encodes ChunkVersion data.
 }

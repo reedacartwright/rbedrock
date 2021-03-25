@@ -1,13 +1,14 @@
 #' Read and write chunk version data
 #'
 #' ChunkVersion data (tag 44) and ChunkVersionLegacy data (tag 118)
-#' store the version number of a chunk.
+#' store the version number of a chunk. In Minecraft version 1.16.100,
+#' chunk version data was moved from tag 118 to tag 44.
 #'
 #' @name ChunkVersion
 NULL
 
 #' @description
-#' `get_chunk_versions()` retrieves chunk versions from a `bedrockdb`.
+#' `get_chunk_version_data()` retrieves chunk versions from a `bedrockdb`.
 #' It will silently drop and keys not representing ChunkVersion data.
 #'
 #' @param db A bedrockdb object.
@@ -17,7 +18,7 @@ NULL
 #'
 #' @rdname ChunkVersion
 #' @export
-get_chunk_versions <- function(db, x, z, dimension, include_legacy = TRUE) {
+get_chunk_version_data <- function(db, x, z, dimension, include_legacy = TRUE) {
     tags <- 44L
     if(isTRUE(include_legacy)) {
         tags <- c(tags, 118L)
@@ -39,45 +40,84 @@ get_chunk_versions <- function(db, x, z, dimension, include_legacy = TRUE) {
     b <- !purrr::map_lgl(dat[k], is.null)
     dat[nullkey[b]] <- NULL
 
-    read_chunk_version_data(dat)
+    purrr::map_int(dat, read_chunk_version_value)
 }
 
+#' @rdname ChunkVersion
+#' @export
+get_chunk_version_value <- function(db, x, z, dimension, include_legacy = TRUE) {
+    key <- .process_key_args(x, z, dimension, tag=44L)
+    stopifnot(rlang::is_scalar_character(key))
+    val <- get_value(db, key)
+    if(is.null(val) && isTRUE(include_legacy)) {
+        key <- .process_key_args(x, z, dimension, tag=118L)
+        stopifnot(rlang::is_scalar_character(key))
+        val <- get_value(db, key)
+    }
+    read_chunk_version_value(val)
+}
+
+#' @rdname ChunkVersion
+#' @export
+get_chunk_version_values <- get_chunk_version_data
+
 #' @description
-#' `read_chunk_version_data()` parses a list of raw scalars of chunk version data.
+#' `put_chunk_version_data()`, `put_chunk_version_values()`, and
+#' `put_chunk_version_value()` store Finalization data into a `bedrockdb`.
+#' `put_chunk_version_data()` supports writing both ChunkVersion and
+#' ChunkVersionLegacy tags.
+#' `put_chunk_version_values()` and `put_chunk_version_value()`
+#' only support ChunkVersion tags.
 #'
-#' @param object For `read_chunk_version_data`, this is a list of raw values.
-#'               For `write_chunk_version_data`, this is a list of integers.
+#' @param data A named-vector of key-value pairs for Finalization data.
 #'
 #' @rdname ChunkVersion
 #' @export
-read_chunk_version_data <- function(object) {
-    purrr::map(object, read_chunk_version_value);
+put_chunk_version_data <- function(db, data) {
+    stopifnot(all(get_tag_from_chunk_key(names(data)) %in% c(44L,118L)))
+    dat <- purrr::map(data, write_chunk_version_value)
+    put_data(db, dat)
+}
+
+#' @param values An integer vector
+#'
+#' @rdname ChunkVersion
+#' @export
+put_chunk_version_values <- function(db, x, z, dimension, values) {
+    keys <- .process_key_args(x, z, dimension, tag=44L, stop_if_filtered = TRUE)
+    values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
+    values <- purrr::map(values, write_finalization_value)
+    put_values(db, keys, values)
+}
+
+#' @param value A scalar integer vector
+#'
+#' @rdname ChunkVersion
+#' @export
+put_chunk_version_value <- function(db, x, z, dimension, value) {
+    key <- .process_key_args(x, z, dimension, tag=44L)
+    stopifnot(rlang::is_scalar_character(key))
+    value <- write_finalization_value(value)
+    put_value(db, key, value)
 }
 
 #' @description
-#' `read_chunk_version_value()` parses a raw scalar of chunk version data.
+#' `read_chunk_version_value()` decodes ChunkVersion data.
 #'
 #' @param rawdata A scalar raw.
 #'
 #' @rdname ChunkVersion
 #' @export
 read_chunk_version_value <- function(rawdata) {
+    if(is.null(rawdata)) {
+        return(NULL)
+    }
     stopifnot(rlang::is_scalar_raw(rawdata))
-
     as.integer(rawdata)
 }
 
 #' @description
-#' `write_chunk_version_data()` converts a list of chunk versions into binary form.
-#'
-#' @rdname ChunkVersion
-#' @export
-write_chunk_version_data <- function(object) {
-    purrr::map(object, write_chunk_version_value);
-}
-
-#' @description
-#' `write_chunk_version_value()` converts a chunk version to binary form.
+#' `write_chunk_version_value()` encodes ChunkVersion data.
 #'
 #' @param num A scalar integer.
 #'
@@ -85,7 +125,5 @@ write_chunk_version_data <- function(object) {
 #' @export
 write_chunk_version_value <- function(num) {
     stopifnot(rlang::is_scalar_integerish(num))
-
     as.raw(num)
 }
-
