@@ -163,6 +163,12 @@ get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
     res
 }
 
+get_dimension_from_chunk_key <- function(keys) {
+    m <- stringr::str_match(keys, "^@[^:]+:[^:]+:([^:]+):[^:-]+(?:-[^:]+)?$")
+    res <- as.integer(m[,2])
+    res
+}
+
 trim_stem_from_chunk_key <- function(keys) {
     stringr::str_replace(keys, "^@[^:]+:[^:]+:[^:]+:", "")
 }

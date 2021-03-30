@@ -57,10 +57,6 @@ get_chunk_version_value <- function(db, x, z, dimension, include_legacy = TRUE) 
     read_chunk_version_value(val)
 }
 
-#' @rdname ChunkVersion
-#' @export
-get_chunk_version_values <- get_chunk_version_data
-
 #' @description
 #' `put_chunk_version_data()`, `put_chunk_version_values()`, and
 #' `put_chunk_version_value()` store Finalization data into a `bedrockdb`.

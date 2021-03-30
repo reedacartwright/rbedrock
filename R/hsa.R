@@ -1,47 +1,109 @@
-#' Get HardcodedSpawnArea information from a world.
+#' Read and write HardcodedSpawnArea (HSA) data
 #'
-#' @param db A bedrockdb object.
-#' @param x,z,dimension Chunk coordinates to extract HSA data from.
-#'    x can also be a character vector of db keys and any keys not
-#'    representing HSA data will be silently dropped.
-#' @param rawval a raw value containing HSA data
-#' @return A table containing HSA and spawn-spot information.
+#' HardcodedSpawnArea (HSA) data (tag 57) stores information
+#' about any structure spawning locations in a chunk.
+#'
+#' @name HSA
 #' @examples
 #' dbpath <- rbedrock_example_world("example1.mcworld")
 #' db <- bedrockdb(dbpath)
-#' hsa <- get_hsa(db)
+#' hsa <- get_hsa_data(db)
+#' hsa # show results
 #' close(db)
+NULL
+
+# put_hsa_data merge=TRUE 
+# put_hsa_value
+# put_hsa_values
+
+#' @description
+#' `get_hsa_data()` loads HardcodedSpawnArea data from a `bedrockdb`.
+#'  It will silently drop and keys not representing HSA data.
 #'
+#' @param db A bedrockdb object.
+#' @param x,z,dimension Chunk coordinates to extract data from.
+#'    `x` can also be a character vector of db keys.
+#'
+#' @return `get_hsa_data()` returns a table in the same format
+#'         as `get_hsa_value()` with the additional column of
+#'         "key".
+#' @rdname HSA
 #' @export
-get_hsa <- function(db, x=get_keys(db), z, dimension) {
-    keys <- .process_key_args(x,z,dimension,tag=57L)
+get_hsa_data <- function(db, x=get_keys(db), z, dimension) {
+    keys <- .process_key_args(x,z,dimension, tag=57L)
+    dat <- get_values(db, keys)
+    hsa <- purrr::map_dfr(dat, read_hsa_value, .id="key")
+    hsa$dimension <- get_dimension_from_chunk_key(hsa$key)
+    dplyr::select("type", "key", dplyr::everything())
+}
 
-    dat <- get_values(db,keys) %>% purrr::compact()
+#' @rdname HSA
+#' @export
+get_hsa_value <- function(db, x, z, dimension) {
+    key <- .process_key_args(x,z,dimension, tag=57L)
+    stopifnot(rlang::is_scalar_character(key))
+    dat <- get_value(db, key)
+    hsa <- read_hsa_value(dat)
+    hsa$dimension <- get_dimension_from_chunk_key(key)
+    hsa
+}
 
-    if(length(dat) == 0) {
-        hsa <- tibble::tibble(type = character(), key = character(),
-                      x1 = numeric(), y1 = numeric(), z1 = numeric(),
-                      x2 = numeric(), y2 = numeric(), z2 = numeric(),
-                      tag = numeric(),
-                      xspot = numeric(), yspot = numeric(), zspot = numeric(),
-                      dimension = numeric()
-            )
-        return(hsa)
+.HSA_LIST = c(
+   "NetherFortress",
+   "SwampHut",
+   "OceanMonument",
+   "4",  # removed cat HSA
+   "PillagerOutput",
+   "6" # removed cat HSA
+)
+
+#' @description
+#' `read_hsa_value()` decodes HSA data.
+#'
+#' @param rawdata A scalar raw.
+#'
+#' @rdname HSA
+#' @export
+read_hsa_value <- function(rawdata) {
+    sz <- readBin(rawdata, integer(), n=1L, size= 4L, endian = "little")
+    rawdata <- rawdata[-c(1:4)]
+    stopifnot(length(rawdata) == sz*25L)
+    mat <- matrix(0L, nrow=sz, ncol=7)
+    for(i in 1:sz) {
+        aabb <- readBin(con, integer(), n = 6, size = 4)
+        tag <- readBin(con, integer(), n = 1, size = 1)
+        mat[i,] <- c(tag,aabb)
+        rawdata <- rawdata[-c(1:25)]   
     }
+    # store results in a tibble
+    hsa <- tibble::tibble(
+        type = .HSA_LIST[mat[,1]],
+        x1 = mat[,2], y1 = mat[,3], z1 = mat[,4],
+        x2 = mat[,5], y2 = mat[,6], z2 = mat[,7],
+        tag = mat[,1])
+    # include HSS information.
+    hsa$xspot <- (hsa$x1 + hsa$x2 + 1L) %/% 2L
+    hsa$yspot <- pmax.int(hsa$y1, hsa$y2) -
+        ifelse(hsa$tag == 2L | hsa$tag == 5L, 4L, 1L)
+    hsa$zspot <- (hsa$z1 + hsa$z2 + 1L) %/% 2L
 
-    hsa <- dat %>% purrr::map_dfr(~tibble::as_tibble(read_hsa_data(.)), .id="key")
+    hsa
+}
 
-    hsa$dimension <- hsa$key %>% stringr::str_extract("[^:]+(?=:57$)") %>% as.integer()
-    
-    hsa$type <- dplyr::recode(hsa$tag,
-        "NetherFortress",
-        "SwampHut",
-        "OceanMonument",
-        "4", # removed cat HSA
-        "PillagerOutpost",
-        "6"  # removed cat HSA
-    )
-    hsa %>% dplyr::select("type", dplyr::everything())
+#' @export
+#' @rdname HSA
+write_hsa_data <- function(value) {
+    len <- nrow(value)
+    ret <- raw(4L + 25L*len)
+    ret[1:4] <- writeBin(as.integer(len), raw(), size = 4, endian = "little")
+    hsa <- value[, c("x1","y1","z1","x2","y2","z2","tag")]
+    for (i in 1:len) {
+        pos <- i*25L - 21L
+        n <- as.integer(hsa[i,])
+        ret[i+1:24] <- writeBin(n[1:6], raw(), size = 4, endian = "little")
+        ret[i+25L] <- c(r,writeBin(n[7], raw(), size = 1, endian = "little"))
+    }
+    ret
 }
 
 #' Add a HardcodedSpawnArea to a world.
@@ -103,44 +165,4 @@ put_hsa <- function(db, x1, y1, z1, x2, y2, z2, tag, dimension) {
         }
     }
     ret
-}
-
-#' @export
-#' @rdname get_hsa
-read_hsa_data <- function(rawval) {
-    con <- rawConnection(rawval)
-    on.exit(close(con))
-
-    len <- readBin(con, integer(), n = 1, size = 4)
-    out <- integer()
-    for (i in 1:len) {
-        aabb <- readBin(con, integer(), n = 6, size = 4)
-        tag <- readBin(con, integer(), n = 1, size = 1)
-        out <- rbind(out, c(aabb, tag))
-    }
-    colnames(out) <- c("x1", "y1", "z1", "x2", "y2", "z2", "tag")
-    y <- pmax.int(out[, "y1"], out[, "y2"]) + 
-        ifelse(out[,"tag"] %in% c(2L,5L), -3L, 0L)
-    out <- cbind(out, xspot = out[, "x1"] + (out[, "x2"] - out[, "x1"] + 1L) %/% 2L)
-    out <- cbind(out, yspot = y-1L)
-    out <- cbind(out, zspot = out[, "z1"] + (out[, "z2"] - out[, "z1"] + 1L) %/% 2L)
-    rownames(out) <- NULL
-    out
-}
-
-#' @export
-#' @rdname put_hsa
-write_hsa_data <- function(hsa) {
-    con <- rawConnection(raw(0), "wb")
-    on.exit(close(con))
-
-    len <- nrow(hsa)
-    writeBin(as.integer(len), con, size = 4, endian = "little")
-    for (i in 1:len) {
-        n <- as.integer(hsa[i, ])
-        writeBin(n[1:6], con, size = 4, endian = "little")
-        writeBin(n[7], con, size = 1, endian = "little")
-    }
-
-    rawConnectionValue(con)
 }
