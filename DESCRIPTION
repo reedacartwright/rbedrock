@@ -35,7 +35,8 @@ Imports:
     readr,
     utils,
     digest,
-    vctrs
+    vctrs,
+    tidyr
 Suggests:
     zip,
     testthat

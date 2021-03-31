@@ -152,7 +152,6 @@ test_that("read_nbt matches new_nbtnode", {
     expect_equal(read_nbt(list_dat), list(lsttest = new_nbtnode(c(100L, -100L, 256L, 1L), tag$list, tag$short)))
 })
 
-
 test_that("read_nbt reads a maximum number of values", {
     dat <- as_raw(
             tag$byte, rawstr("A"), 0,
@@ -169,4 +168,17 @@ test_that("read_nbt reads a maximum number of values", {
     expect_equal(read_nbt(dat, max_elements = 4), structure(list(A = a, B = b, C = c), bytes_read = 15L))
     
     expect_equal(read_nbt(dat, max_elements = 1, simplify = TRUE), structure(list(A = a), bytes_read = 5L))
+})
+
+test_that("read_nbt throws errors on malformed values", {
+    dat <- as_raw(tag$compound, rawstr(""),
+            tag$byte, rawstr("A"), 0,
+            tag$byte_array, rawstr("BCD"), 3, 0, 0, 0, 1, 2, 3,
+            tag$byte, rawstr(""), 2,
+            tag$end
+            )
+    expect_silent(read_nbt(dat))
+    for(i in seq.int(length(dat)-1)) {
+        expect_error(read_nbt(dat[1:!!i]))
+    }
 })

@@ -11,8 +11,13 @@
 #' @examples
 #' dbpath <- rbedrock_example_world("example1.mcworld")
 #' db <- bedrockdb(dbpath)
+#' # view all HSA in a world
 #' hsa <- get_hsa_data(db)
-#' hsa # show results
+#' hsa
+#' # add an HSA to a world
+#' dat <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15,
+#'                   y1 = 40, y2 = 60, tag = "SwampHut")
+#' put_hsa_data(db, dat, merge = TRUE)
 #' close(db)
 NULL
 
@@ -25,8 +30,7 @@ NULL
 #'    `x` can also be a character vector of db keys.
 #'
 #' @return `get_hsa_data()` returns a table in the same format
-#'         as `get_hsa_value()` with the additional column of
-#'         "key".
+#'         as `get_hsa_value()`.
 #' @rdname HSA
 #' @export
 get_hsa_data <- function(db, x=get_keys(db), z, dimension) {
@@ -56,6 +60,7 @@ get_hsa_value <- function(db, x, z, dimension) {
     dat <- get_value(db, key)
     hsa <- read_hsa_value(dat)
     hsa$dimension <- get_dimension_from_chunk_key(key)
+    hsa$key <- key
     hsa
 }
 
@@ -64,7 +69,7 @@ get_hsa_value <- function(db, x, z, dimension) {
    "SwampHut",
    "OceanMonument",
    "4",  # removed cat HSA
-   "PillagerOutput",
+   "PillagerOutpost",
    "6" # removed cat HSA
 )
 
@@ -76,15 +81,18 @@ get_hsa_value <- function(db, x, z, dimension) {
 #' @rdname HSA
 #' @export
 read_hsa_value <- function(rawdata) {
+    if(is.null(rawdata)) {
+        return(NULL)
+    }
     sz <- readBin(rawdata, integer(), n=1L, size= 4L, endian = "little")
     rawdata <- rawdata[-c(1:4)]
     stopifnot(length(rawdata) == sz*25L)
     mat <- matrix(0L, nrow=sz, ncol=7)
     for(i in 1:sz) {
-        aabb <- readBin(con, integer(), n = 6, size = 4)
-        tag <- readBin(con, integer(), n = 1, size = 1)
-        mat[i,] <- c(tag,aabb)
-        rawdata <- rawdata[-c(1:25)]   
+        aabb <- readBin(rawdata, integer(), n = 6, size = 4, endian = "little")
+        tag <- as.raw(rawdata[25])
+        mat[i,] <- c(tag, aabb)
+        rawdata <- rawdata[-c(1:25)]
     }
     # store results in a tibble
     hsa <- tibble::tibble(
@@ -94,7 +102,7 @@ read_hsa_value <- function(rawdata) {
     # include HSS information.
     hsa$xspot <- (hsa$x1 + hsa$x2 + 1L) %/% 2L
     hsa$yspot <- pmax.int(hsa$y1, hsa$y2) -
-        ifelse(hsa$tag == 2L | hsa$tag == 5L, 4L, 1L)
+        ifelse(hsa$tag %in% .HSA_LIST[c(2,5)], 4L, 1L)
     hsa$zspot <- (hsa$z1 + hsa$z2 + 1L) %/% 2L
 
     hsa
@@ -140,23 +148,27 @@ put_hsa_data <- function(db, data, merge = TRUE) {
         b2 <- pmin(chunks$z*16L+15L, z2[i])
         # construct table of hsa
         dati <- tibble::tibble(
+            tag = tag[i],
             x1 = a1, y1 = y1[i], z1 = b1,
             x2 = a2, y2 = y2[i], z2 = b2,
-            tag = tag[i], key = chunks$key
+            key = chunks$key
             )
         dat <- dplyr::bind_rows(dat, dati)
     }
     # merge existing values
+    ret <- dat
     if(isTRUE(merge)) {
         mdat <- get_hsa_data(db, unique(dat$key))
-        mdat <- mdat[,c("x1","y1","z1","x2","y2","z2","tag","key")]
+        mdat <- mdat[,c("tag","x1","y1","z1","x2","y2","z2","key")]
         mdat$tag <- match(mdat$tag, .HSA_LIST)
-        dat <- dplyr::bind_rpws(mdat,dat)
+        dat <- dplyr::bind_rows(mdat,dat)
     }
     # split hsa by chunk and store
     dat <- split(dat, dat$key)
     dat <- purrr::map(dat, write_hsa_value)
     put_data(db, dat)
+    ret$tag <- .HSA_LIST[ret$tag]
+    ret
 }
 
 #' @description
@@ -202,8 +214,8 @@ write_hsa_value <- function(value) {
     for (i in 1:len) {
         pos <- i*25L - 21L
         n <- as.integer(hsa[i,])
-        ret[i+1:24] <- writeBin(n[1:6], raw(), size = 4, endian = "little")
-        ret[i+25L] <- writeBin(n[7], raw(), size = 1, endian = "little")
+        ret[pos+1:24] <- writeBin(n[1:6], raw(), size = 4, endian = "little")
+        ret[pos+25L] <- writeBin(n[7], raw(), size = 1, endian = "little")
     }
     ret
 }

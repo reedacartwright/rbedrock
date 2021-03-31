@@ -4,7 +4,6 @@
 \alias{ChunkVersion}
 \alias{get_chunk_version_data}
 \alias{get_chunk_version_value}
-\alias{get_chunk_version_values}
 \alias{put_chunk_version_data}
 \alias{put_chunk_version_values}
 \alias{put_chunk_version_value}
@@ -15,8 +14,6 @@
 get_chunk_version_data(db, x, z, dimension, include_legacy = TRUE)
 
 get_chunk_version_value(db, x, z, dimension, include_legacy = TRUE)
-
-get_chunk_version_values(db, x, z, dimension, include_legacy = TRUE)
 
 put_chunk_version_data(db, data)
 

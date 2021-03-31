@@ -4,18 +4,18 @@
 \alias{create_chunk_key}
 \title{Create a database key from chunk information.}
 \usage{
-create_chunk_key(x, z, d, tag, subtag = NA_integer_)
+create_chunk_key(x, z, dimension, tag, subtag = NA_integer_)
 }
 \arguments{
 \item{x}{Chunk x-coordinate.}
 
 \item{z}{Chunk z-coordinate.}
 
-\item{d}{Chunk dimension.}
+\item{dimension}{Chunk dimension.}
 
 \item{tag}{The type of information the key holds.}
 
-\item{subtag}{The subchunk the key refers to. (Only used if \code{tag==47}).}
+\item{subtag}{The subchunk the key refers to. (Only used for tag 47).}
 }
 \value{
 The database key corresponding to the inputs.

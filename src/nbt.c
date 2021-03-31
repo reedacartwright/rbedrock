@@ -183,6 +183,8 @@ SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned char* e
         SEXP r_node = read_nbt_node(ptr, end);
         if(Rf_isNull(r_node)) {
             // we have encountered an END node
+            // rewind so we can inspect it in the parent function
+            *ptr -= 1;
             break;
         }
         if(Rf_isNull(r_ret)) {
@@ -244,7 +246,14 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
      case TAG_LIST:
         return read_nbt_list_payload(ptr, end);
      case TAG_COMPOUND:
-        return read_nbt_compound_payload(ptr, end, INT_MAX);
+     {
+        SEXP ret = read_nbt_compound_payload(ptr, end, INT_MAX);
+        if(**ptr == TAG_END) {
+            *ptr += 1;
+            return ret;
+        }
+        break;
+     }
      default:
         break;
     }

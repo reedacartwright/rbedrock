@@ -43,9 +43,10 @@ create_chunk_key <- function(x, z, dimension, tag, subtag = NA_integer_) {
     if(is.character(tag)) {
         tag <- chunk_tag_int(tag)
     }
-    arg <- vctrs::vec_recycle_common(x,z,d,tag,subtag)
-    tag <- ifelse(is.na(arg[[5]]), as.character(arg[[4]]), stringr::str_glue("{arg[[4]]}-{arg[[5]]}"))
-    stringr::str_glue("@{arg[[1]]}:{arg[[2]]}:{arg[[3]]}:{tag}")
+    arg <- vctrs::vec_recycle_common(x,z,dimension,tag,subtag)
+    tag <- stringr::str_c(arg[[4]], arg[[5]], sep="-") %|% as.character(arg[[4]])
+    ret <- stringr::str_glue("@{arg[[1]]}:{arg[[2]]}:{arg[[3]]}:{tag}")
+    as.character(ret)
 }
 
 #' Extract information from chunk keys.
