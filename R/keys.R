@@ -31,15 +31,15 @@ rawkeys_to_chrkeys <- function(keys) {
 #'
 #' @param x Chunk x-coordinate.
 #' @param z Chunk z-coordinate.
-#' @param d Chunk dimension.
+#' @param dimension Chunk dimension.
 #' @param tag The type of information the key holds.
-#' @param subtag The subchunk the key refers to. (Only used if \code{tag==47}).
+#' @param subtag The subchunk the key refers to. (Only used for tag 47).
 #' @return The database key corresponding to the inputs.
 #' @examples
 #' create_chunk_key(0, 0, 0, 47, 1)
 #'
 #' @export
-create_chunk_key <- function(x, z, d, tag, subtag = NA_integer_) {
+create_chunk_key <- function(x, z, dimension, tag, subtag = NA_integer_) {
     if(is.character(tag)) {
         tag <- chunk_tag_int(tag)
     }
