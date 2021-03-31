@@ -42,14 +42,10 @@ rawkeys_to_chrkeys <- function(keys) {
 create_chunk_key <- function(x, z, d, tag, subtag = NA_integer_) {
     if(is.character(tag)) {
         tag <- chunk_tag_int(tag)
-    } 
-    ret <- stringr::str_c(x, z, d, tag, sep = ":")
-    ret <- stringr::str_c("@", ret)
-    if(length(subtag) < length(ret)) {
-        subtag <- rep(subtag, length.out = length(ret))
     }
-    ret <- ifelse(is.na(subtag), ret, stringr::str_c(ret, subtag, sep = "-"))
-    ret
+    arg <- vctrs::vec_recycle_common(x,z,d,tag,subtag)
+    tag <- ifelse(is.na(arg[[5]]), as.character(arg[[4]]), stringr::str_glue("{arg[[4]]}-{arg[[5]]}"))
+    stringr::str_glue("@{arg[[1]]}:{arg[[2]]}:{arg[[3]]}:{tag}")
 }
 
 #' Extract information from chunk keys.
