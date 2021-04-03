@@ -179,14 +179,8 @@ SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned char* e
         int max_elements) {
     SEXP r_ret = R_NilValue;
     SEXP last = R_NilValue;
-    for(int i = 0; *ptr < end && i < max_elements; ++i) {
+    for(int i = 0; *ptr < end && **ptr != TAG_END && i < max_elements; ++i) {
         SEXP r_node = read_nbt_node(ptr, end);
-        if(Rf_isNull(r_node)) {
-            // we have encountered an END node
-            // rewind so we can inspect it in the parent function
-            *ptr -= 1;
-            break;
-        }
         if(Rf_isNull(r_ret)) {
             PROTECT(r_ret = r_node);
             last = r_ret;
