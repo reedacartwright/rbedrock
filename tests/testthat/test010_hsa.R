@@ -16,6 +16,21 @@ test_that("get_hsa_data can read HSA data.", {
     expect_equal(hsa, expected_hsa)
 })
 
+test_that("get_hsa_data returns an empty table if no HSA is found.", {
+    hsa <- get_hsa_data(db, "@0:0:0:57")
+    expected_hsa <- tibble::tibble(
+        tag = character(0),
+        x1 = integer(0), y1 = integer(0), z1 = integer(0), 
+        x2 = integer(0), y2 = integer(0), z2 = integer(0),
+        xspot = integer(0),
+        yspot = integer(0),
+        zspot = integer(0),
+        dimension = integer(0),
+        key = character(0)
+    )
+    expect_equal(hsa, expected_hsa)
+})
+
 test_that("get_hsa_value can read a single HSA data.", {
     hsa <- get_hsa_value(db, 36, 15, 0)
 
@@ -29,9 +44,24 @@ test_that("get_hsa_value can read a single HSA data.", {
         dimension = 0,
         key = "@36:15:0:57"
     )
-    expect_equal(hsa, expected_hsa)    
+    expect_equal(hsa, expected_hsa)
 
     expect_error(get_hsa_value(db, c("@36:15:0:57", "@36:16:0:57")))
+})
+
+test_that("get_hsa_value returns an empty table if no HSA is found.", {
+    hsa <- get_hsa_value(db, "@0:0:0:57")
+    expected_hsa <- tibble::tibble(
+        tag = character(0),
+        x1 = integer(0), y1 = integer(0), z1 = integer(0), 
+        x2 = integer(0), y2 = integer(0), z2 = integer(0),
+        xspot = integer(0),
+        yspot = integer(0),
+        zspot = integer(0),
+        dimension = integer(0),
+        key = character(0)
+    )
+    expect_equal(hsa, expected_hsa)
 })
 
 test_that("put_hsa_data can write HSA data.", {

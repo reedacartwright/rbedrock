@@ -37,6 +37,7 @@ get_hsa_data <- function(db, x=get_keys(db), z, dimension) {
     keys <- .process_key_args(x,z,dimension, tag=57L)
     dat <- get_values(db, keys)
     hsa <- purrr::map_dfr(dat, read_hsa_value, .id="key")
+
     hsa$dimension <- get_dimension_from_chunk_key(hsa$key)
     hsa <- dplyr::relocate(hsa, "key", .after = dplyr::last_col())
     hsa
@@ -82,7 +83,13 @@ get_hsa_value <- function(db, x, z, dimension) {
 #' @export
 read_hsa_value <- function(rawdata) {
     if(is.null(rawdata)) {
-        return(NULL)
+        hsa <- tibble::tibble(
+            tag = character(0L),
+            x1 = integer(0L), y1 = integer(0L), z1 = integer(0L),
+            x2 = integer(0L), y2 = integer(0L), z2 = integer(0L),
+            xspot = integer(0L), yspot = integer(0L), zspot = integer(0L)
+        )
+        return(hsa)
     }
     sz <- readBin(rawdata, integer(), n=1L, size= 4L, endian = "little")
     rawdata <- rawdata[-c(1:4)]
@@ -154,6 +161,9 @@ put_hsa_data <- function(db, data, merge = TRUE) {
             key = chunks$key
             )
         dat <- dplyr::bind_rows(dat, dati)
+    }
+    if(is.null(dat)) {
+        return(dat)
     }
     # merge existing values
     ret <- dat

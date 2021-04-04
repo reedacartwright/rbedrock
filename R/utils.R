@@ -8,14 +8,14 @@
 #' @usage lhs \%>\% rhs
 NULL
 
-#' Replace missing values operator
-#'
+## Replace missing values operator
+##
 #' @keywords internal
 #' @importFrom rlang %|%
 NULL
 
-# Silence warnings about undefined global variables
-#'
+## Silence warnings about undefined global variables
+##
 #' @importFrom rlang .data
 #' @keywords internal
 NULL

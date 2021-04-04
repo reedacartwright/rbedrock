@@ -1,73 +1,137 @@
-#' Get biome information from a world.
+#' Read and write biome data.
+#'
+#' Biome data is stored as the second map in the 2DMaps data (tag 45). Each
+#' chunk stores its biome data as 256 uint8s. 
+#'
+#' @name Biomes
+NULL
+
+#' @description
+#' `get_biomes_data()` loads biomes data from a `bedrockdb`.
+#'  It will silently drop and keys not representing 2DMaps data.
 #'
 #' @param db A bedrockdb object.
-#' @param x,z,dimension Chunk coordinates to extract biome data from.
-#'    x can also be a character vector of db keys and any keys not
-#'    representing biome data will be silently dropped.
-#' @param return_names if set to true, this will return character vectors containing
-#'    the names of each biome instead of biome ids.
-#' @return An list of arrays containing biome information of each key.
+#' @param x,z,dimension Chunk coordinates to extract data from.
+#'    `x` can also be a character vector of db keys.
 #'
+#' @param return_names return biome names instead of biome ids.
+#'
+#' @return `get_biomes_data()` returns a list of the of the values returned by 
+#'         `get_biome_value()`.
+#'
+#' @rdname Biomes
 #' @export
-get_biomes <- function(db, x, z, dimension, return_names=TRUE) {
+get_biomes_data <- function(db, x, z, dimension, return_names = TRUE) {
     keys <- .process_key_args(x,z,dimension, tag=45L)
     
-    dat <- get_values(db, keys) %>% purrr::compact()
+    dat <- get_values(db, keys)
 
-    biomes <- dat %>% purrr::map(function(x) {
-        y <- read_2dmaps_data(x)$biome_map
-        if(return_names) {
-            y <- .BIOME_LIST_INV[y+1]
+    biomes <- purrr::map(dat, function(x) {
+        if(is.null(x)) {
+            return(NULL)
         }
-        dim(y) <- c(16,16)
         # y[x+1,z+1] is biome of x,z
+        y <- read_2dmaps_value(x)$biome_map
+        if(isTRUE(return_names)) {
+            y[] <- .BIOME_LIST_INV[y+1]
+        }
         y
     })
 
     biomes
 }
 
-#' Put biome information into the world
+#' @description
+#' `get_biomes_value()` loads biome data from a `bedrockdb`.
+#' It only supports loading a single value.
 #'
-#' put_biomes updates the biome information of chunks.
-#' It will preserve any existing height data or use
-#' the missing_height value if no such data exists.
+#' @return An array containing biome information, with dimension "x" and "z".
+#'     The indexes of the array are a horizontal position relative to the
+#'     chunk origin.
+#' @rdname Biomes
+#' @export
+get_biomes_value <- function(db, x, z, dimension, return_names = TRUE) {
+    key <- .process_key_args(x, z, dimension, tag=45L)
+    stopifnot(rlang::is_scalar_character(key))
+
+    dat <- get_value(db, key)
+    if(is.null(dat)) {
+        return(NULL)
+    }
+    y <- .read_2dmaps_value_impl(dat)$biome_map
+    if(isTRUE(return_names)) {
+        y[] <- .BIOME_LIST_INV[y+1]
+    }
+    y
+}
+
+#' @description
+#' `put_biomes_data()` `put_biomes_values()`, and `put_biomes_value()` update
+#' the biome information of chunks. They preserve any existing height data.
 #'
-#' @param db A bedrockdb object.
 #' @param data A list of character or integer vectors. Each element of
 #'    the list must contain 256 values or an error will be raised.
-#' @param x,z,dimension Chunk coordinates to write biome data to.
-#'    `x` can also be a character vector of db keys and any keys not
-#'    representing biome data (tag 47) will be silently dropped.
-#'    `x` defaults to `names(data)`
-#' @param missing_height if there is no existing height data, use this value for the chunk.
+#' @param missing_height if there is no existing height data, use this value
+#'    for the chunk.
+#' @rdname Biomes
 #' @export
-put_biomes <- function(db, data, x = names(data), z, dimension, missing_height=0L) {
-    keys <- .process_key_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
+put_biomes_data <- function(db, data, missing_height = 0L) {
+    put_biomes_values(db, names(data), values=data)
+}
 
-    if(length(keys) != length(data)) {
-        stop("put_biomes: keys and data have different lengths")
-    }
+#' @param values a list of arrays containing biome names or ids.
+#' @rdname Biomes
+#' @export
+put_biomes_values <- function(db, x, z, dimension, values,
+    missing_height = 0L) {
+    keys <- .process_key_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
+    values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
 
     dat <- get_values(db, keys)
-    h <- dat %>% purrr::map(function(x) {
-        if(is.null(x)) {
-            rep(missing_height, 256L)
+    dat2 <- purrr::map2(dat, values, function(d, b) {
+        if(is.null(d)) {
+            h <- rep(missing_height, 256L)
         } else {
-            read_2dmaps_data(x)$height_map
+            stopifnot(rlang::is_raw(d, n = 768L))
+            h <- .read_2dmaps_value_impl(d)$height_map
         }
-    })
-    dat2 <- purrr::map2(h, data, function(x,y) {
-        if(is.character(y)) {
-            y <- .BIOME_LIST[y]
-            if(any(is.na(y))) {
-                stop("biome list contains unknown biome")
+        if(is.character(b)) {
+            b <- biome_id(b)
+            if(any(is.na(b))) {
+                stop("biome list contains unknown biome")                
             }
         }
-        .write_2dmaps_value_impl(x,y)
+        .write_2dmaps_value_impl(h,b)
     })
-    
+
     put_data(db, dat2)
+}
+
+#' @param value an array containing biome names or ids.
+#' @rdname Biomes
+#' @export
+put_biomes_value <- function(db, x, z, dimension, value,
+    missing_height = 0L) {
+    key <- .process_key_args(x, z, dimension, tag=45L)
+    stopifnot(rlang::is_scalar_character(key))
+
+    d <- get_value(db, key)
+    if(is.null(d)) {
+        h <- rep(missing_height, 256L)
+    } else {
+        stopifnot(rlang::is_raw(d, n = 768L))
+        h <- .read_2dmaps_value_impl(d)$height_map
+    }
+    b <- value
+    if(is.character(b)) {
+        b <- biome_id(b)
+        if(any(is.na(b))) {
+            stop("biome list contains unknown biome")                
+        }
+    }
+    dat <- .write_2dmaps_value_impl(h,b)
+
+    put_value(db, key, dat)
 }
 
 
