@@ -154,6 +154,7 @@ put_biomes <- function(db, data, x = names(data), z, dimension, missing_height=0
 # Some biomes don't have a color in BDS, and their color was copied from Java/Amidst.
 # Ocean colors in BDS are very similar or identical, and their colors were copied as
 # well.
+# Amidst Colors: https://git.io/JYD2c
 .BIOME_COLORS = c(
     plains = '#8db360',
     desert = '#fa9418',
@@ -181,7 +182,7 @@ put_biomes <- function(db, data, x = names(data), z, dimension, missing_height=0
     stone_beach = '#a2a284',
     cold_beach = '#faf0c0',
     birch_forest = '#307444', # color was missing
-    birch_forest_hills = '#1f5f32', # color was missing
+    birch_forest_hills = '#1F5F32', # color was missing
     roofed_forest = '#40511a',
     cold_taiga = '#31554a',
     cold_taiga_hills = '#243f36',
@@ -209,8 +210,8 @@ put_biomes <- function(db, data, x = names(data), z, dimension, missing_height=0
     swampland_mutated = '#b2f907',
     ice_plains_spikes = '#d2ffff',
     cold_taiga_mutated = '#4a5531',
-    savanna_mutated = '#e5da87', # color was missing
-    savanna_plateau_mutated = '#cfc58c', # color was missing
+    savanna_mutated = '#E5DA87', # color was missing
+    savanna_plateau_mutated = '#CFC58C', # color was missing
     roofed_forest_mutated = '#1a5140',
     desert_mutated = '#1894fa',
     flower_forest = '#6a7425',
@@ -220,8 +221,8 @@ put_biomes <- function(db, data, x = names(data), z, dimension, missing_height=0
     mesa_bryce = '#1545d9',
     mesa_plateau_stone_mutated = '#6597b0',
     mesa_plateau_mutated = '#658cca',
-    birch_forest_mutated = '#589c6c', # color was missing
-    birch_forest_hills_mutated = '#47875a', # color was missing
+    birch_forest_mutated = '#589C6C', # color was missing
+    birch_forest_hills_mutated = '#47875A', # color was missing
     redwood_taiga_mutated = '#596651',
     extreme_hills_mutated = '#606060',
     extreme_hills_plus_trees_mutated = '#507050',
