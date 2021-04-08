@@ -151,7 +151,7 @@ new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
 #'
 #' @param object An nbtnode
 #' @param value A new payload
-#''
+#'
 #' @export
 `payload` <- function(object) {
     UseMethod('payload',object)
@@ -272,3 +272,71 @@ new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
 #     INT_ARRAY = 11,
 #     LONG_ARRAY = 12
 # )
+
+tag_assert <- function(x, tag, list_tag) {
+
+    invisible(x)
+}
+
+#' @export
+#' @keywords internal
+new_nbt <- function(x = list(), tag = 0L) {
+    vec_assert(tag, ptype = integer(), size = 1L)
+
+    if(tag == 0L) {
+        vec_assert(x, ptype = list(), size = 0L)
+    } else if(tag == 1L || tag == 2L || tag == 3L) {
+        vec_assert(x, ptype = integer(), size = 1L)
+    } else if(tag == 4L) {
+        vec_assert(x, ptype = bit64::integer64(), size = 1L)
+    } else if(tag == 5L || tag == 6L) {
+        vec_assert(x, ptype = double(), size = 1L)
+    } else if(tag == 7L || tag == 11L ) {
+        vec_assert(x, ptype = integer())
+    } else if(tag == 8L) {
+        vec_assert(x, ptype = character(), size = 1L)
+    } else if(tag == 12L) {
+        vec_assert(x, ptype = bit64::integer64())
+    } else if(tag == 10L) {
+        vec_assert(x, ptype = list())
+        stopifnot(all(sapply(x, is_nbt)))
+    } else {
+        stopifnot(is_list_of(x))
+        validate_list_of(x)
+    }
+
+    new_vctr(x, tag = tag, list_tag = list_tag, class = "rbedrock_nbt")
+}
+
+#' @export
+nbt <- function(x = list(), tag = 0L) {
+    tag <- vec_recycle(vec_cast(tag, integer()), 1L, x_arg = "tag")
+
+    new_nbt(x, tag = tag)
+}
+
+tag <- function(x) attr(x, "tag")
+
+tag_str <- function(x) {
+    chr <- c("END", "BYTE", "SHORT", "INT", "LONG", "FLOAT",
+        "DOUBLE", "BYTE_ARRAY", "STRING", "LIST", "COMPOUND",
+        "INT_ARRAY", "LONG_ARRAY")
+    chr[1L+tag(x)]
+}
+
+#' @export
+is_nbt <- function(x) {
+    inherits(x, "rbedrock_nbt")
+}
+
+#' @export
+#' @importFrom vctrs vec_ptype_abbr
+vec_ptype_abbr.rbedrock_nbt <- function(x, ...) {
+    "nbt"
+}
+
+#' @export
+#' @importFrom vctrs vec_ptype_full
+vec_ptype_full.rbedrock_nbt <- function(x, ...) {
+    paste0("rbedrock_nbt<", tag_str(x), ">")
+}

@@ -12,8 +12,7 @@ payload(object) <- value
 \arguments{
 \item{object}{An nbtnode}
 
-\item{value}{A new payload
-'}
+\item{value}{A new payload}
 }
 \description{
 Read and write an \code{nbtnode}'s payload
