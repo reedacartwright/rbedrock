@@ -47,8 +47,9 @@ enum NBT_TYPE {
 typedef enum NBT_TYPE nbt_type_t;
 
 static SEXP read_nbt_payload(const unsigned char** p, const unsigned char* end, nbt_type_t tag);
-static SEXP make_nbtnode(SEXP r_payload, SEXP r_name, nbt_type_t tag);
-SEXP read_nbt_node(const unsigned char** ptr, const unsigned char* end);
+static SEXP make_nbt_value(SEXP r_payload, SEXP r_name, nbt_type_t tag);
+static SEXP nbt_value_set_tag(SEXP r_payload, nbt_type_t tag);
+SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end);
 
 static SEXP read_nbt_payload_character(const unsigned char** ptr, const unsigned char* end) {
     const unsigned char *p = *ptr;
@@ -113,6 +114,48 @@ static SEXP read_nbt_payload_real(const unsigned char** ptr, const unsigned char
     return res;
 }
 
+static SEXP nbt_value_set_tag(SEXP r_payload, nbt_type_t tag) {
+    SEXP r_class;
+    if(tag == TAG_LONG || tag == TAG_LONG_ARRAY) {
+        PROTECT(r_class = Rf_allocVector(STRSXP, 3));
+        SET_STRING_ELT(r_class, 0, Rf_mkChar("rbedrock_nbt"));
+        SET_STRING_ELT(r_class, 1, Rf_mkChar("integer64"));
+        SET_STRING_ELT(r_class, 2, Rf_mkChar("vctrs_vctr"));
+    } else if(tag == TAG_COMPOUND || tag == TAG_END) {
+        PROTECT(r_class = Rf_allocVector(STRSXP, 3));
+        SET_STRING_ELT(r_class, 0, Rf_mkChar("rbedrock_nbt"));
+        SET_STRING_ELT(r_class, 1, Rf_mkChar("vctrs_vctr"));
+        SET_STRING_ELT(r_class, 2, Rf_mkChar("list"));
+    } else if(tag == TAG_LIST) {
+        PROTECT(r_class = Rf_allocVector(STRSXP, 4));
+        SET_STRING_ELT(r_class, 0, Rf_mkChar("rbedrock_nbt"));
+        SET_STRING_ELT(r_class, 1, Rf_mkChar("vctrs_list_of"));
+        SET_STRING_ELT(r_class, 2, Rf_mkChar("vctrs_vctr"));
+        SET_STRING_ELT(r_class, 3, Rf_mkChar("list"));
+    } else {
+        PROTECT(r_class = Rf_allocVector(STRSXP, 2));
+        SET_STRING_ELT(r_class, 0, Rf_mkChar("rbedrock_nbt"));
+        SET_STRING_ELT(r_class, 1, Rf_mkChar("vctrs_vctr"));
+    }
+    Rf_setAttrib(r_payload, R_ClassSymbol, r_class);
+    Rf_setAttrib(r_payload, Rf_install("tag"), Rf_ScalarInteger(tag));
+    UNPROTECT(1);
+
+    return r_payload;
+}
+
+static SEXP make_nbt_value(SEXP r_payload, SEXP r_name, nbt_type_t tag) {
+    SEXP r_ret;
+    PROTECT(r_payload);
+    PROTECT(r_name);
+    PROTECT(r_ret = Rf_list1(nbt_value_set_tag(r_payload, tag)));
+    if(XLENGTH(r_name) > 0) {
+        SET_TAG(r_ret, Rf_installTrChar(r_name));
+    }
+    UNPROTECT(3);
+    return r_ret;
+}
+
 static SEXP read_nbt_list_payload(const unsigned char** ptr, const unsigned char* end) {
     const unsigned char *p = *ptr;
     if(end - p < 5) {
@@ -126,52 +169,27 @@ static SEXP read_nbt_list_payload(const unsigned char** ptr, const unsigned char
     SEXP r_ret = PROTECT(Rf_allocVector(VECSXP, list_len));
     for(int i = 0; i < list_len; ++i) {
         SET_VECTOR_ELT(r_ret, i, read_nbt_payload(&p, end, list_tag));
+        nbt_value_set_tag(VECTOR_ELT(r_ret, i), list_tag);
     }
     *ptr = p;
-    UNPROTECT(1);
-    switch(list_tag) {
-        case TAG_BYTE:
-        case TAG_SHORT:
-        case TAG_INT:
-            r_ret = Rf_coerceVector(r_ret, INTSXP);
-            break;
-        case TAG_LONG:
-        case TAG_FLOAT:
-        case TAG_DOUBLE:
-            r_ret = Rf_coerceVector(r_ret, REALSXP);
-            break;
-        case TAG_STRING:
-            r_ret = Rf_coerceVector(r_ret, STRSXP);
-            break;
-        default:
-            break;
-    }
-    PROTECT(r_ret);
-    Rf_setAttrib(r_ret, Rf_install("list_tag"), Rf_ScalarInteger(list_tag));
-    UNPROTECT(1);    
-    return r_ret;
-}
 
-static SEXP make_nbtnode(SEXP r_payload, SEXP r_name, nbt_type_t tag) {
-    SEXP r_ret;
-    PROTECT(r_payload);
-    PROTECT(r_name);
-    if(tag == TAG_LONG || tag == TAG_LONG_ARRAY) {
-        SEXP r_class;
-        PROTECT(r_class = Rf_allocVector(STRSXP, 2));
-        SET_STRING_ELT(r_class, 0, Rf_mkChar("nbtnode"));
-        SET_STRING_ELT(r_class, 1, Rf_mkChar("integer64"));
-        UNPROTECT(1);
-        Rf_setAttrib(r_payload, R_ClassSymbol, r_class);
+    // construct ptype attribute
+    SEXP r_ptype;
+    if(list_len == 0) {
+        // list_length is 0, so we will use an empty vector
+        r_ptype = PROTECT(Rf_allocVector(VECSXP, 0));
+        nbt_value_set_tag(r_ptype, list_tag);
+        if(list_tag != TAG_END) {
+            Rf_warning("Malformed NBT data. LIST has list_tag of '%d' instead of 0.", list_tag);
+        }
     } else {
-        Rf_setAttrib(r_payload, R_ClassSymbol, Rf_mkString("nbtnode"));
+        SEXP r_head = VECTOR_ELT(r_ret, 0);
+        r_ptype = PROTECT(Rf_allocVector(TYPEOF(r_head), 0));
+        Rf_setAttrib(r_ptype, R_ClassSymbol, Rf_getAttrib(r_head, R_ClassSymbol));
+        Rf_setAttrib(r_ptype, Rf_install("tag"), Rf_ScalarInteger(list_tag));
     }
-    Rf_setAttrib(r_payload, Rf_install("tag"), Rf_ScalarInteger(tag));
-    PROTECT(r_ret = Rf_list1(r_payload));
-    if(XLENGTH(r_name) > 0) {
-        SET_TAG(r_ret, Rf_installTrChar(r_name));
-    }
-    UNPROTECT(3);
+    Rf_setAttrib(r_ret, Rf_install("ptype"), r_ptype);
+    UNPROTECT(2);
     return r_ret;
 }
 
@@ -180,7 +198,7 @@ SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned char* e
     SEXP r_ret = R_NilValue;
     SEXP last = R_NilValue;
     for(int i = 0; *ptr < end && **ptr != TAG_END && i < max_elements; ++i) {
-        SEXP r_node = read_nbt_node(ptr, end);
+        SEXP r_node = read_nbt_value(ptr, end);
         if(Rf_isNull(r_ret)) {
             PROTECT(r_ret = r_node);
             last = r_ret;
@@ -196,8 +214,6 @@ SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned char* e
 
 static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end, nbt_type_t tag) {
     int array_len;
-    SEXP r_ret;
-    SEXP r_class;
 
     // load length for array values
     switch(tag) {
@@ -220,7 +236,7 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
     // read payloads
     switch(tag) {
      case TAG_END:
-        return R_NilValue;
+        return Rf_allocVector(VECSXP, 0);
      case TAG_BYTE:
      case TAG_BYTE_ARRAY:
         return read_nbt_payload_integer(ptr, end, 1, array_len);
@@ -255,7 +271,7 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
     return R_NilValue;
 }
 
-SEXP read_nbt_node(const unsigned char** ptr, const unsigned char* end) {
+SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end) {
     if(end-*ptr < 1) {
         return_nbt_error();
     }
@@ -276,7 +292,7 @@ SEXP read_nbt_node(const unsigned char** ptr, const unsigned char* end) {
         return_nbt_error();
     }
     UNPROTECT(2);
-    return make_nbtnode(payload,name,tag);
+    return make_nbt_value(payload,name,tag);
 }
 
 SEXP read_nbt(SEXP r_value, SEXP r_max_elements) {

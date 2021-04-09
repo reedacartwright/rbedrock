@@ -3,17 +3,17 @@
 \name{payload}
 \alias{payload}
 \alias{payload<-}
-\title{Read and write an \code{nbtnode}'s payload}
+\title{Read and write an \code{nbt}'s payload}
 \usage{
-payload(object)
+payload(x)
 
-payload(object) <- value
+payload(x) <- value
 }
 \arguments{
-\item{object}{An nbtnode}
+\item{x}{An nbt object}
 
 \item{value}{A new payload}
 }
 \description{
-Read and write an \code{nbtnode}'s payload
+Read and write an \code{nbt}'s payload
 }

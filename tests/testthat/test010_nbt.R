@@ -10,172 +10,165 @@ rawstr <- function(x) {
    as_raw(r, charToRaw(x))
 }
 
-tag <- list(
+tags <- list(
     end = 0L, byte = 1L, short = 2L, int = 3L, long = 4L,
     float = 5L, double = 6L, byte_array = 7L, string = 8L,
     list = 9L, compound = 10L, int_array = 11L, long_array = 12L
 )
 
 test_that("read_nbt can read bytes", {
-    dat <- as_raw(tag$byte, rawstr("test"), 100)
-    expect_equal(read_nbt(dat), list(test = structure(100L, class="nbtnode", tag=tag$byte)))
-    neg_dat <- as_raw(tag$byte, rawstr("test"), 254)
-    expect_equal(read_nbt(neg_dat), list(test  = structure(-2L, class="nbtnode", tag=tag$byte)))
+    dat <- as_raw(tags$byte, rawstr("test"), 100)
+    expect_equal(read_nbt(dat), list(test = nbt_byte(100)))
+    neg_dat <- as_raw(tags$byte, rawstr("test"), 254)
+    expect_equal(read_nbt(neg_dat), list(test = nbt_byte(-2)))
 })
 
 test_that("read_nbt can read shorts", {
-    dat <- as_raw(tag$short, rawstr("test"), 100, 2)
-    expect_equal(read_nbt(dat), list(test = structure(612L, class="nbtnode", tag=tag$short)))
-    neg_dat <- as_raw(tag$short, rawstr("test"), 156, 255)
-    expect_equal(read_nbt(neg_dat), list(test = structure(-100L, class="nbtnode", tag=tag$short)))
+    dat <- as_raw(tags$short, rawstr("test"), 100, 2)
+    expect_equal(read_nbt(dat), list(test = nbt_short(612)))
+    neg_dat <- as_raw(tags$short, rawstr("test"), 156, 255)
+    expect_equal(read_nbt(neg_dat), list(test = nbt_short(-100L)))
 })
 
 test_that("read_nbt can read ints", {
-    dat <- as_raw(tag$int, rawstr("test"), 100, 2, 3, 4)
-    expect_equal(read_nbt(dat), list(test = structure(67306084L, class="nbtnode", tag=tag$int)))
-    neg_dat <- as_raw(tag$int, rawstr("test"), 156, 255, 255, 255)
-    expect_equal(read_nbt(neg_dat), list(test = structure(-100L, class="nbtnode", tag=tag$int)))
+    dat <- as_raw(tags$int, rawstr("test"), 100, 2, 3, 4)
+    expect_equal(read_nbt(dat), list(test = nbt_int(67306084L)))
+    neg_dat <- as_raw(tags$int, rawstr("test"), 156, 255, 255, 255)
+    expect_equal(read_nbt(neg_dat), list(test = nbt_int(-100L)))
 })
 
 test_that("read_nbt can read longs", {
-    dat <- as_raw(tag$long, rawstr("test"), 1, 0, 0x20, 0x3b, 0x9d, 0xb5, 0x05, 0x6f)
+    dat <- as_raw(tags$long, rawstr("test"), 1, 0, 0x20, 0x3b, 0x9d, 0xb5, 0x05, 0x6f)
     val <- bit64::as.integer64("8000000000000000001")
-    expect_equal(read_nbt(dat), list(test = structure(val, class=c("nbtnode","integer64"), tag=tag$long)))
-    dat <- as_raw(tag$long, rawstr("test"), 0xff, 0xff, 0xdf, 0xc4, 0x62, 0x4a, 0xfa, 0x90)
+    expect_equal(read_nbt(dat), list(test = nbt_long(val)))
+    dat <- as_raw(tags$long, rawstr("test"), 0xff, 0xff, 0xdf, 0xc4, 0x62, 0x4a, 0xfa, 0x90)
     val <- bit64::as.integer64("-8000000000000000001")
-    expect_equal(read_nbt(dat), list(test = structure(val, class=c("nbtnode","integer64"), tag=tag$long)))
+    expect_equal(read_nbt(dat), list(test = nbt_long(val)))
 })
 
 test_that("read_nbt can read floats", {
-    dat <- as_raw(tag$float, rawstr("test"), 0, 0, 0x10, 0x42)
-    expect_equal(read_nbt(dat), list(test = structure(36.0, class="nbtnode", tag=tag$float)))
+    dat <- as_raw(tags$float, rawstr("test"), 0, 0, 0x10, 0x42)
+    expect_equal(read_nbt(dat), list(test = nbt_float(36.0)))
 })
 
 test_that("read_nbt can read doubles", {
-    dat <- as_raw(tag$double, rawstr("test"), 0, 0, 0, 0, 0, 0, 0x42, 0x40)
-    expect_equal(read_nbt(dat), list(test = structure(36.0, class="nbtnode", tag=tag$double)))
+    dat <- as_raw(tags$double, rawstr("test"), 0, 0, 0, 0, 0, 0, 0x42, 0x40)
+    expect_equal(read_nbt(dat), list(test = nbt_double(36.0)))
 })
 
 test_that("read_nbt can read byte arrays", {
-    dat <- as_raw(tag$byte_array, rawstr("test"), 8, 0, 0, 0, 10, 11, 12, 13, 14, 15, 16, 17)
-    expect_equal(read_nbt(dat), list(test = structure(10:17, class="nbtnode", tag=tag$byte_array)))
-    single_dat <- as_raw(tag$byte_array, rawstr("test"), 1, 0, 0, 0, 20)
-    expect_equal(read_nbt(single_dat), list(test = structure(20, class="nbtnode", tag=tag$byte_array)))
+    dat <- as_raw(tags$byte_array, rawstr("test"), 8, 0, 0, 0, 10, 11, 12, 13, 14, 15, 16, 17)
+    expect_equal(read_nbt(dat), list(test = nbt_byte_array(10:17)))
+    single_dat <- as_raw(tags$byte_array, rawstr("test"), 1, 0, 0, 0, 20)
+    expect_equal(read_nbt(single_dat), list(test = nbt_byte_array(20)))
 })
 
 test_that("read_nbt can read strings",{
-    dat <- as_raw(tag$string, rawstr("test"), rawstr("hello world"))
-    expect_equal(read_nbt(dat), list(test = structure("hello world", class="nbtnode", tag=tag$string)))    
-    blank_dat <- as_raw(tag$string, rawstr("test"), rawstr(""))
-    expect_equal(read_nbt(blank_dat), list(test = structure("", class="nbtnode", tag=tag$string)))
-    greek_dat <- as_raw(tag$string, rawstr("test"), rawstr("\u03B1\u03B2\u03B3"))
-    expect_equal(read_nbt(greek_dat), list(test = structure("\u03B1\u03B2\u03B3", class="nbtnode", tag=tag$string)))
+    dat <- as_raw(tags$string, rawstr("test"), rawstr("hello world"))
+    expect_equal(read_nbt(dat), list(test = nbt_string("hello world")))
+    blank_dat <- as_raw(tags$string, rawstr("test"), rawstr(""))
+    expect_equal(read_nbt(blank_dat), list(test = nbt_string("")))
+    greek_dat <- as_raw(tags$string, rawstr("test"), rawstr("\u03B1\u03B2\u03B3"))
+    expect_equal(read_nbt(greek_dat), list(test = nbt_string("\u03B1\u03B2\u03B3")))
 })
 
 test_that("read_nbt can read int arrays", {
-    dat <- as_raw(tag$int_array, rawstr("test"), 2, 0, 0, 0, 10, 0, 0, 0, 11, 0, 0, 0)
-    expect_equal(read_nbt(dat), list(test = structure(10:11, class="nbtnode", tag=tag$int_array)))
-    single_dat <- as_raw(tag$int_array, rawstr("test"), 1, 0, 0, 0, 20, 0, 0, 0)
-    expect_equal(read_nbt(single_dat), list(test = structure(20, class="nbtnode", tag=tag$int_array)))
+    dat <- as_raw(tags$int_array, rawstr("test"), 2, 0, 0, 0, 10, 0, 0, 0, 11, 0, 0, 0)
+    expect_equal(read_nbt(dat), list(test = nbt_int_array(10:11)))
+    single_dat <- as_raw(tags$int_array, rawstr("test"), 1, 0, 0, 0, 20, 0, 0, 0)
+    expect_equal(read_nbt(single_dat), list(test = nbt_int_array(20)))
 })
 
 test_that("read_nbt can read long arrays", {
-    dat <- as_raw(tag$long_array, rawstr("test"), 2, 0, 0, 0,
+    dat <- as_raw(tags$long_array, rawstr("test"), 2, 0, 0, 0,
         0x64, 0, 0, 0, 0, 0, 0, 0,
         0x9c, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff)
     val <- bit64::as.integer64(c("100","-100"))
-    expect_equal(read_nbt(dat), list(test = structure(val, class=c("nbtnode","integer64"), tag=tag$long_array)))
+    expect_equal(read_nbt(dat), list(test = nbt_long_array(val)))
 })
 
 test_that("read_nbt can read list values", {
-    dat <- as_raw(tag$list, rawstr("test"), tag$short, 4, 0, 0, 0, 
+    dat <- as_raw(tags$list, rawstr("test"), tags$short, 4, 0, 0, 0, 
         100, 0, 156, 255, 0, 1, 1, 0)
-    expect_equal(read_nbt(dat), list(test = structure(c(100, -100, 256, 1), class="nbtnode", tag=tag$list, list_tag=tag$short)))
-    empty_dat <- as_raw(tag$list, rawstr("test"), tag$end, 0, 0, 0, 0)
-    expect_equal(read_nbt(empty_dat), list(test = structure(list(), class="nbtnode", tag=tag$list, list_tag=tag$end)))
+    expect_equal(read_nbt(dat), 
+        list(test = nbt_list(nbt_short(100), nbt_short(-100), nbt_short(256), nbt_short(1))))
+
+    empty_dat <- as_raw(tags$list, rawstr("test"), tags$end, 0, 0, 0, 0)
+    expect_equal(read_nbt(empty_dat), list(test = nbt_list()))
 })
 
 test_that("read_nbt can read compound values", {
-    dat <- as_raw(tag$compound, rawstr("test"),
-            tag$byte, rawstr("A"), 0,
-            tag$byte, rawstr("B"), 1,
-            tag$end
+    dat <- as_raw(tags$compound, rawstr("test"),
+            tags$byte, rawstr("A"), 0,
+            tags$byte, rawstr("B"), 1,
+            tags$end
             )
-    a <- structure(0L, class="nbtnode", tag=tag$byte)
-    b <- structure(1L, class="nbtnode", tag=tag$byte)
-    com <- structure(list(A = a, B = b), class="nbtnode", tag=tag$compound)
-    expect_equal(read_nbt(dat), list(test = com))
+    expect_equal(read_nbt(dat), list(test = nbt_compound(A = nbt_byte(0), B = nbt_byte(1))))
 })
 
 test_that("read_nbt simplifies values without names", {
-    dat <- as_raw(tag$compound, rawstr(""),
-            tag$byte, rawstr("A"), 0,
-            tag$byte, rawstr("B"), 1,
-            tag$end
+    dat <- as_raw(tags$compound, rawstr(""),
+            tags$byte, rawstr("A"), 0,
+            tags$byte, rawstr("B"), 1,
+            tags$end
             )
-    a <- structure(0L, class="nbtnode", tag=tag$byte)
-    b <- structure(1L, class="nbtnode", tag=tag$byte)
-    com <- structure(list(A = a, B = b), class="nbtnode", tag=tag$compound)
+    a <- nbt_byte(0)
+    b <- nbt_byte(1)
+    com <- nbt_compound(A = a, B = b)
     expect_equal(read_nbt(dat), com)
     expect_equal(read_nbt(dat, simplify = FALSE), list(com))
 
-    unit_dat <- as_raw(tag$byte, rawstr(""), 0L)
-    expect_equal(read_nbt(unit_dat), structure(0L, class="nbtnode", tag=tag$byte))
-    expect_equal(read_nbt(unit_dat, simplify = FALSE), list(structure(0L, class="nbtnode", tag=tag$byte)))
+    unit_dat <- as_raw(tags$byte, rawstr(""), 0L)
+    expect_equal(read_nbt(unit_dat), nbt_byte(0))
+    expect_equal(read_nbt(unit_dat, simplify = FALSE), list(nbt_byte(0)))
 })
 
 test_that("read_nbt does not simplify multiple values", {
-    dat <- as_raw(tag$compound, rawstr(""),
-            tag$byte, rawstr("A"), 0,
-            tag$byte, rawstr("B"), 1,
-            tag$end,
-            tag$byte, rawstr(""), 2
+    dat <- as_raw(tags$compound, rawstr(""),
+            tags$byte, rawstr("A"), 0,
+            tags$byte, rawstr("B"), 1,
+            tags$end,
+            tags$byte, rawstr(""), 2
             )
-    a <- structure(0L, class="nbtnode", tag=tag$byte)
-    b <- structure(1L, class="nbtnode", tag=tag$byte)
-    d <- structure(2L, class="nbtnode", tag=tag$byte)
-    com <- structure(list(A = a, B = b), class="nbtnode", tag=tag$compound)
-    expect_equal(read_nbt(dat), list(com, d))
-    expect_equal(read_nbt(dat, simplify = FALSE), list(com, d))
-})
-
-test_that("read_nbt matches new_nbtnode", {
-    string_dat <- as_raw(tag$string, rawstr("strtest"), rawstr("hello world"))
-    expect_equal(read_nbt(string_dat), list(strtest = new_nbtnode("hello world", tag$string)))
-    
-    long_dat <- as_raw(tag$long, rawstr("lngtest"), 1, 0, 0x20, 0x3b, 0x9d, 0xb5, 0x05, 0x6f)
-    long_val <- bit64::as.integer64("8000000000000000001")
-    expect_equal(read_nbt(long_dat), list(lngtest = new_nbtnode(long_val, tag$long)))
-    
-    list_dat <- as_raw(tag$list, rawstr("lsttest"), tag$short, 4, 0, 0, 0, 
-        100, 0, 156, 255, 0, 1, 1, 0)
-    expect_equal(read_nbt(list_dat), list(lsttest = new_nbtnode(c(100L, -100L, 256L, 1L), tag$list, tag$short)))
+    a <- nbt_byte(0)
+    b <- nbt_byte(1)
+    c <- nbt_byte(2)
+    com <- nbt_compound(A = a, B = b)
+    expect_equal(read_nbt(dat), list(com, c))
+    expect_equal(read_nbt(dat, simplify = FALSE), list(com, c))
 })
 
 test_that("read_nbt reads a maximum number of values", {
     dat <- as_raw(
-            tag$byte, rawstr("A"), 0,
-            tag$byte, rawstr("B"), 1,
-            tag$byte, rawstr("C"), 2
+            tags$byte, rawstr("A"), 0,
+            tags$byte, rawstr("B"), 1,
+            tags$byte, rawstr("C"), 2
             )
-    a <- structure(0L, class="nbtnode", tag=tag$byte)
-    b <- structure(1L, class="nbtnode", tag=tag$byte)
-    c <- structure(2L, class="nbtnode", tag=tag$byte)
-    expect_equal(read_nbt(dat, max_elements = 0), structure(list(), bytes_read = 0L))
-    expect_equal(read_nbt(dat, max_elements = 1), structure(list(A = a), bytes_read = 5L))
-    expect_equal(read_nbt(dat, max_elements = 2), structure(list(A = a, B = b), bytes_read = 10L))
-    expect_equal(read_nbt(dat, max_elements = 3), structure(list(A = a, B = b, C = c), bytes_read = 15L))
-    expect_equal(read_nbt(dat, max_elements = 4), structure(list(A = a, B = b, C = c), bytes_read = 15L))
+    a <- nbt_byte(0)
+    b <- nbt_byte(1)
+    c <- nbt_byte(2)
+
+    expect_equal(read_nbt(dat, max_elements = 0),
+        structure(list(), bytes_read = 0L))
+    expect_equal(read_nbt(dat, max_elements = 1),
+        structure(list(A = a), bytes_read = 5L))
+    expect_equal(read_nbt(dat, max_elements = 2),
+        structure(list(A = a, B = b), bytes_read = 10L))
+    expect_equal(read_nbt(dat, max_elements = 3),
+        structure(list(A = a, B = b, C = c), bytes_read = 15L))
+    expect_equal(read_nbt(dat, max_elements = 4),
+        structure(list(A = a, B = b, C = c), bytes_read = 15L))
     
-    expect_equal(read_nbt(dat, max_elements = 1, simplify = TRUE), structure(list(A = a), bytes_read = 5L))
+    expect_equal(read_nbt(dat, max_elements = 1, simplify = TRUE),
+        structure(list(A = a), bytes_read = 5L))
 })
 
 test_that("read_nbt throws errors on malformed values", {
-    dat <- as_raw(tag$compound, rawstr(""),
-            tag$byte, rawstr("A"), 0,
-            tag$byte_array, rawstr("BCD"), 3, 0, 0, 0, 1, 2, 3,
-            tag$byte, rawstr(""), 2,
-            tag$end
+    dat <- as_raw(tags$compound, rawstr(""),
+            tags$byte, rawstr("A"), 0,
+            tags$byte_array, rawstr("BCD"), 3, 0, 0, 0, 1, 2, 3,
+            tags$byte, rawstr(""), 2,
+            tags$end
             )
     expect_silent(read_nbt(dat))
     for(i in seq.int(length(dat)-1)) {

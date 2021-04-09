@@ -111,71 +111,6 @@ write_nbt_data <- function(data) {
     purrr::map(data, write_nbt)
 }
 
-#' NBTnode constructor
-#'
-#' @description
-#' `nbtnode` is a convenient wrapper around `new_nbtnode` that supports
-#' type conversion.
-#' @param payload A nbtnode payload
-#' @param tag A numeric tag for the node.
-#' @param list_tag A numeric tag for values stored in the payload of an NBT "list" node.
-#' @param ... Additional parameters passed to `structure` when creating the object.
-#'
-#' @export
-nbtnode <- function(payload, tag, list_tag = NULL) {
-    tag <- as.integer(tag)
-    if(tag == 9L) {
-        list_tag <- as.integer(list_tag)
-    }
-    new_nbtnode(payload, tag, list_tag = list_tag)
-}
-
-#' @description
-#' `new_nbtnode` creates a new object with class `nbtnode`.
-#'
-#' @rdname nbtnode
-#' @export
-new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
-    stopifnot(is.integer(tag) && length(tag) == 1L && !is.na(tag))
-    if(!is.null(list_tag)) {
-        stopifnot(is.integer(list_tag) && length(list_tag) == 1L && !is.na(list_tag))
-    }
-    cls <- "nbtnode"
-    if(bit64::is.integer64(payload)) {
-        cls <- c(cls, "integer64")
-    }
-    structure(payload, class = cls, tag = tag, list_tag = list_tag, ...)
-}
-
-#' Read and write an `nbtnode`'s payload
-#'
-#' @param object An nbtnode
-#' @param value A new payload
-#'
-#' @export
-`payload` <- function(object) {
-    UseMethod('payload',object)
-}
-
-#' @export
-`payload.nbtnode` <- function(object) {
-    cls <- class(object)
-    cls <- cls[cls != 'nbtnode']
-    structure(object, class = cls, tag = NULL, list_tag = NULL)
-}
-
-#' @rdname payload
-#' @export
-`payload<-` <- function(object,value) {
-    UseMethod('payload<-',object)
-}
-
-#' @export
-`payload<-.nbtnode` <- function(object,value) {
-    object[] <- value
-    object
-}
-
 .write_nbt_tag <- function (tag, con) {
     writeBin(tag, con, size = 1, endian = "little")
 }
@@ -216,7 +151,7 @@ new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
 }
 
 .write_nbt_list_payload <- function(object, con) {
-    ntag <- attr(object, "list_tag")
+    ntag <- attr(attr(object, "ptype"), "tag")
     len <- length(object)
     .write_nbt_tag(ntag, con)
     writeBin(len, con, size = 4L, endian = "little")
@@ -225,57 +160,36 @@ new_nbtnode <- function(payload, tag, list_tag = NULL, ...) {
     }
 }
 
-.write_nbt_payload <- function(object, tag, con) {
+.write_nbt_payload <- function(x, tag, con) {
     switch(tag,
         # BYTE
-        .write_nbt_unit_payload(as.integer(object), con, size = 1L),
+        .write_nbt_unit_payload(vec_cast(x, integer()), con, size = 1L),
         # SHORT
-        .write_nbt_unit_payload(as.integer(object), con, size = 2L),
+        .write_nbt_unit_payload(vec_cast(x, integer()), con, size = 2L),
         # INT
-        .write_nbt_unit_payload(as.integer(object), con, size = 4L),
+        .write_nbt_unit_payload(vec_cast(x, integer()), con, size = 4L),
         # LONG
-        .write_nbt_unit_payload(bit64::as.integer64(object), con, size = 8L),
+        .write_nbt_unit_payload(vec_cast(x, bit64::integer64()), con, size = 8L),
         # FLOAT
-        .write_nbt_unit_payload(as.double(object), con, size = 4L),
+        .write_nbt_unit_payload(vec_cast(x, double()), con, size = 4L),
         # DOUBLE
-        .write_nbt_unit_payload(as.double(object), con, size = 8L),
+        .write_nbt_unit_payload(vec_cast(x, double()), con, size = 8L),
         # BYTEARRAY
-        .write_nbt_array_payload(as.integer(object), con, size = 1L),
+        .write_nbt_array_payload(vec_cast(x, integer()), con, size = 1L),
         # STRING
-        .write_nbt_name(as.character(object), con),
+        .write_nbt_name(vec_cast(x, character()), con),
         # LIST
-        .write_nbt_list_payload(object, con),
+        .write_nbt_list_payload(x, con),
         # COMPOUND
         {
-            .write_nbt_compound_payload(object, con)
+            .write_nbt_compound_payload(x, con)
             .write_nbt_tag(0L, con)
         },
         # INTARRAY
-        .write_nbt_array_payload(as.integer(object), con, size = 4L),
+        .write_nbt_array_payload(vec_cast(x, character()), con, size = 4L),
         # LONGARRAY
-        .write_nbt_array_payload(bit64::as.integer64(object), con, size = 8L)
+        .write_nbt_array_payload(vec_cast(x, bit64::integer64()), con, size = 8L)
     )
-}
-
-# nbt_type = list(
-#     END = 0,
-#     BYTE = 1,
-#     SHORT = 2,
-#     INT = 3,
-#     LONG = 4,
-#     FLOAT = 5,
-#     DOUBLE = 6,
-#     BYTE_ARRAY = 7,
-#     STRING = 8,
-#     LIST = 9,
-#     COMPOUND = 10,
-#     INT_ARRAY = 11,
-#     LONG_ARRAY = 12
-# )
-
-tag_assert <- function(x, tag, list_tag) {
-
-    invisible(x)
 }
 
 #' @export
@@ -283,12 +197,15 @@ tag_assert <- function(x, tag, list_tag) {
 new_nbt <- function(x = list(), tag = 0L) {
     vec_assert(tag, ptype = integer(), size = 1L)
 
+    cls = "rbedrock_nbt"
+
     if(tag == 0L) {
         vec_assert(x, ptype = list(), size = 0L)
     } else if(tag == 1L || tag == 2L || tag == 3L) {
         vec_assert(x, ptype = integer(), size = 1L)
     } else if(tag == 4L) {
         vec_assert(x, ptype = bit64::integer64(), size = 1L)
+        cls <- c(cls, "integer64")
     } else if(tag == 5L || tag == 6L) {
         vec_assert(x, ptype = double(), size = 1L)
     } else if(tag == 7L || tag == 11L ) {
@@ -297,16 +214,68 @@ new_nbt <- function(x = list(), tag = 0L) {
         vec_assert(x, ptype = character(), size = 1L)
     } else if(tag == 12L) {
         vec_assert(x, ptype = bit64::integer64())
+        cls <- c(cls, class(x))
     } else if(tag == 10L) {
         vec_assert(x, ptype = list())
         stopifnot(all(sapply(x, is_nbt)))
     } else {
-        stopifnot(is_list_of(x))
-        validate_list_of(x)
+        vec_assert(x, ptype = list())
+        stopifnot(all(sapply(x, is_nbt)))
+        stopifnot(is.null(names(x)))
+        if(length(x) == 0) {
+            ptype <- nbt_end()
+        } else {
+            # Strip ptype attributes when doing list of lists
+            y <- purrr::map(x, `attr<-`, "ptype", NULL )
+            ptype <- vec_ptype_common(!!!y)
+            if(is.null(ptype)) {
+                abort("Could not find common type for elements of `x`.")
+            }            
+        }
+        ret <- new_list_of(x, tag = tag, ptype = ptype, class = cls)
+        return(ret)
     }
-
-    new_vctr(x, tag = tag, list_tag = list_tag, class = "rbedrock_nbt")
+    new_vctr(x, tag = tag, class = cls)
 }
+
+#' @export
+nbt_end <- function() new_nbt(list(), tag = 0L)
+
+#' @export
+nbt_byte <- function(x = 0L) new_nbt(vec_cast(x, integer()), tag = 1L)
+
+#' @export
+nbt_short <- function(x = 0L) new_nbt(vec_cast(x, integer()), tag = 2L)
+
+#' @export
+nbt_int <- function(x = 0L) new_nbt(vec_cast(x, integer()), tag = 3L)
+
+#' @export
+nbt_long <- function(x = 0L) new_nbt(vec_cast(x, bit64::integer64()), tag = 4L)
+
+#' @export
+nbt_float <- function(x = 0) new_nbt(vec_cast(x, double()), tag = 5L)
+
+#' @export
+nbt_double <- function(x = 0) new_nbt(vec_cast(x, double()), tag = 6L)
+
+#' @export
+nbt_string <- function(x = "") new_nbt(vec_cast(x, character()), tag = 8L)
+
+#' @export
+nbt_byte_array <- function(x = integer()) new_nbt(vec_cast(x, integer()), tag = 7L)
+
+#' @export
+nbt_int_array <- function(x = integer()) new_nbt(vec_cast(x, integer()), tag = 11L)
+
+#' @export
+nbt_long_array <- function(x = bit64::integer64()) new_nbt(vec_cast(x, bit64::integer64()), tag = 12L)
+
+#' @export
+nbt_compound <- function(...) new_nbt(rlang::list2(...), tag = 10L)
+
+#' @export
+nbt_list <- function(...) new_nbt(rlang::list2(...), tag = 9L)
 
 #' @export
 nbt <- function(x = list(), tag = 0L) {
@@ -339,4 +308,67 @@ vec_ptype_abbr.rbedrock_nbt <- function(x, ...) {
 #' @importFrom vctrs vec_ptype_full
 vec_ptype_full.rbedrock_nbt <- function(x, ...) {
     paste0("rbedrock_nbt<", tag_str(x), ">")
+}
+
+#' Read and write an `nbt`'s payload
+#'
+#' @param x An nbt object
+#' @param value A new payload
+#'
+#' @export
+`payload` <- function(x) {
+    UseMethod('payload', x)
+}
+
+#' @export
+`payload.rbedrock_nbt` <- function(x) {
+    vec_data(x)
+}
+
+#' @rdname payload
+#' @export
+`payload<-` <- function(x, value) {
+    UseMethod('payload<-', x)
+}
+
+#' @export
+`payload<-.rbedrock_nbt` <- function(x,value) {
+    x[] <- value
+    x
+}
+
+#' @export
+vec_ptype2.rbedrock_nbt.character <- function(x, y, ...) character()
+
+#' @export
+vec_ptype2.character.rbedrock_nbt <- function(x, y, ...) character()
+
+#' @export
+vec_cast.rbedrock_nbt.rbedrock_nbt <- function(x, to, ...) x
+
+#' @export
+vec_cast.character.rbedrock_nbt <- function(x, to, ...) vec_data(x)
+
+#' @export
+vec_cast.integer.rbedrock_nbt <- function(x, to, ...) vec_data(x)
+
+#' @export
+vec_cast.integer64.rbedrock_nbt <- function(x, to, ...) {
+    structure(vec_data(x), class="integer64")
+}
+
+#' @export
+vec_cast.double.rbedrock_nbt <- function(x, to, ...) vec_data(x)
+
+# work around integer64 methods not stripping class variables
+#' @export
+is.na.rbedrock_nbt <- function(x, ...) {
+    y <- NextMethod()
+    vec_data(y)
+}
+
+#' @export
+`==.rbedrock_nbt` <- function(e1, e2) {
+    y <- NextMethod()
+    vec_data(y)
 }

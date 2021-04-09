@@ -98,11 +98,12 @@ import_world <- function(file, worlds_dir = worlds_dir_path(), levelname = NULL)
     }
 
     # update the last opened time to now
-    dat <- read_leveldat(path) 
-    payload(dat$LastPlayed) <- as.numeric(Sys.time())
+    dat <- read_leveldat(path)
+
+    dat$LastPlayed <- nbt_long(as.numeric(Sys.time()))
     # update levelname
     if(is.character(levelname) && length(levelname) == 1L && !is.na(levelname)) {
-        payload(dat$LevelName) <- levelname
+        dat$LevelName <- nbt_string(levelname)
     }
 
     write_leveldat(dat, path)
