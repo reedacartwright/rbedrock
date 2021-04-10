@@ -180,7 +180,7 @@ static SEXP read_nbt_list_payload(const unsigned char** ptr, const unsigned char
         r_ptype = PROTECT(Rf_allocVector(VECSXP, 0));
         nbt_value_set_tag(r_ptype, list_tag);
         if(list_tag != TAG_END) {
-            Rf_warning("Malformed NBT data. LIST has list_tag of '%d' instead of 0.", list_tag);
+            Rf_warning("Malformed NBT data. An empty LIST has list_tag of '%d' instead of 0.", list_tag);
         }
     } else {
         SEXP r_head = VECTOR_ELT(r_ret, 0);

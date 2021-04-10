@@ -338,13 +338,32 @@ vec_ptype_full.rbedrock_nbt <- function(x, ...) {
 }
 
 #' @export
-vec_ptype2.rbedrock_nbt.character <- function(x, y, ...) character()
-
-#' @export
-vec_ptype2.character.rbedrock_nbt <- function(x, y, ...) character()
-
-#' @export
 vec_cast.rbedrock_nbt.rbedrock_nbt <- function(x, to, ...) x
+
+#' @export
+vec_cast.rbedrock_nbt.character <- function(x, to, ...) {
+    nbt(x, tag(to))
+}
+
+#' @export
+vec_cast.rbedrock_nbt.integer64 <- function(x, to, ...) {
+    nbt(x, tag(to))
+}
+
+#' @export
+vec_cast.rbedrock_nbt.integer <- function(x, to, ...) {
+    nbt(x, tag(to))
+}
+
+#' @export
+vec_cast.rbedrock_nbt.double <- function(x, to, ...) {
+    nbt(x, tag(to))
+}
+
+#' @export
+vec_cast.rbedrock_nbt.list <- function(x, to, ...) {
+    nbt(x, tag(to))
+}
 
 #' @export
 vec_cast.character.rbedrock_nbt <- function(x, to, ...) vec_data(x)
