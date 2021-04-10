@@ -14,4 +14,3 @@ test_that("bedrockdb can open and close a database", {
     # clean up
     unlink(dirname(dbpath), recursive=TRUE, expand = FALSE)
 })
-

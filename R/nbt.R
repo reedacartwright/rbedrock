@@ -192,8 +192,34 @@ write_nbt_data <- function(data) {
     )
 }
 
+#' Create an NBT value
+#'
+#' @description
+#' The Named Binary Tag (NBT) format is used by Minecraft for various data
+#' types. An NBT value holds a 'payload' of data and a 'tag' indicating the type
+#' of data held.
+#'
+#' @description
+#' `nbt()` creates an nbt value. `nbt_*()` family of functions are wrappers
+#' around `nbt()` to create specific tags.
+#'
+#' @param x An nbt payload.
+#' @param tag The tag of the data.
+#' @param ... Arguments to collect into an NBT compound or NBT list value.
+#'     Supports dynamic dots via `rlang::list2()`.
 #' @export
+nbt <- function(x = list(), tag = 0L) {
+    tag <- vec_recycle(vec_cast(tag, integer()), 1L, x_arg = "tag")
+
+    new_nbt(x, tag = tag)
+}
+
+#' Create an NBT value
+#'
+#' @param x An nbt payload.
+#' @param tag An integer specifying the tag of the data.
 #' @keywords internal
+#' @export
 new_nbt <- function(x = list(), tag = 0L) {
     vec_assert(tag, ptype = integer(), size = 1L)
 
@@ -229,7 +255,7 @@ new_nbt <- function(x = list(), tag = 0L) {
             y <- purrr::map(x, `attr<-`, "ptype", NULL )
             ptype <- vec_ptype_common(!!!y)
             if(is.null(ptype)) {
-                abort("Could not find common type for elements of `x`.")
+                rlang::abort("Could not find common type for elements of `x`.")
             }            
         }
         ret <- new_list_of(x, tag = tag, ptype = ptype, class = cls)
@@ -238,51 +264,57 @@ new_nbt <- function(x = list(), tag = 0L) {
     new_vctr(x, tag = tag, class = cls)
 }
 
+#' @rdname nbt
 #' @export
 nbt_end <- function() new_nbt(list(), tag = 0L)
 
+#' @rdname nbt
 #' @export
 nbt_byte <- function(x = 0L) new_nbt(vec_cast(x, integer()), tag = 1L)
 
+#' @rdname nbt
 #' @export
 nbt_short <- function(x = 0L) new_nbt(vec_cast(x, integer()), tag = 2L)
 
+#' @rdname nbt
 #' @export
 nbt_int <- function(x = 0L) new_nbt(vec_cast(x, integer()), tag = 3L)
 
+#' @rdname nbt
 #' @export
 nbt_long <- function(x = 0L) new_nbt(vec_cast(x, bit64::integer64()), tag = 4L)
 
+#' @rdname nbt
 #' @export
 nbt_float <- function(x = 0) new_nbt(vec_cast(x, double()), tag = 5L)
 
+#' @rdname nbt
 #' @export
 nbt_double <- function(x = 0) new_nbt(vec_cast(x, double()), tag = 6L)
 
+#' @rdname nbt
 #' @export
 nbt_string <- function(x = "") new_nbt(vec_cast(x, character()), tag = 8L)
 
+#' @rdname nbt
 #' @export
 nbt_byte_array <- function(x = integer()) new_nbt(vec_cast(x, integer()), tag = 7L)
 
+#' @rdname nbt
 #' @export
 nbt_int_array <- function(x = integer()) new_nbt(vec_cast(x, integer()), tag = 11L)
 
+#' @rdname nbt
 #' @export
 nbt_long_array <- function(x = bit64::integer64()) new_nbt(vec_cast(x, bit64::integer64()), tag = 12L)
 
+#' @rdname nbt
 #' @export
 nbt_compound <- function(...) new_nbt(rlang::list2(...), tag = 10L)
 
+#' @rdname nbt
 #' @export
 nbt_list <- function(...) new_nbt(rlang::list2(...), tag = 9L)
-
-#' @export
-nbt <- function(x = list(), tag = 0L) {
-    tag <- vec_recycle(vec_cast(tag, integer()), 1L, x_arg = "tag")
-
-    new_nbt(x, tag = tag)
-}
 
 tag <- function(x) attr(x, "tag")
 
@@ -293,6 +325,7 @@ tag_str <- function(x) {
     chr[1L+tag(x)]
 }
 
+#' @rdname nbt
 #' @export
 is_nbt <- function(x) {
     inherits(x, "rbedrock_nbt")
@@ -310,31 +343,33 @@ vec_ptype_full.rbedrock_nbt <- function(x, ...) {
     paste0("rbedrock_nbt<", tag_str(x), ">")
 }
 
-#' Read and write an `nbt`'s payload
+#' @description
+#' `payload()` and `payload<-()` read and write an nbt value's payload.
 #'
-#' @param x An nbt object
+#' @param object An nbt value
 #' @param value A new payload
 #'
+#' @rdname nbt
 #' @export
-`payload` <- function(x) {
-    UseMethod('payload', x)
+`payload` <- function(object) {
+    UseMethod('payload', object)
 }
 
 #' @export
-`payload.rbedrock_nbt` <- function(x) {
-    vec_data(x)
+`payload.rbedrock_nbt` <- function(object) {
+    vec_data(object)
 }
 
-#' @rdname payload
+#' @rdname nbt
 #' @export
-`payload<-` <- function(x, value) {
-    UseMethod('payload<-', x)
+`payload<-` <- function(object, value) {
+    UseMethod('payload<-', object)
 }
 
 #' @export
-`payload<-.rbedrock_nbt` <- function(x,value) {
-    x[] <- value
-    x
+`payload<-.rbedrock_nbt` <- function(object, value) {
+    object[] <- value
+    object
 }
 
 #' @export

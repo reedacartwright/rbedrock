@@ -1,3 +1,5 @@
+#' @details
+#' rbedrock is currently under development.
 #' @keywords internal
 "_PACKAGE"
 

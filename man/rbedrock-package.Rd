@@ -9,6 +9,9 @@
 This package is an extension package for R that supports the analysis
   and management of Minecraft (Bedrock Edition) worlds. This includes Windows 10, Pocket Edition, XBox, and PS4 versions of the game. It does not include Minecraft: Java worlds.
 }
+\details{
+rbedrock is currently under development.
+}
 \seealso{
 Useful links:
 \itemize{
