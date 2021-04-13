@@ -92,10 +92,10 @@ block_palette <- function(object) {
 
 .block_string <- function(x, names_only = FALSE) {
     # convert block information in a palette entry into a string
-    if(length(x$states) == 0L || names_only) {
+    if(length(x$states) == 0L || isTRUE(names_only)) {
         return(x$name)
     }
-    states <- stringr::str_c(names(x$states),x$states,sep='=',collapse='@')
+    states <- stringr::str_c(names(x$states), x$states, sep="=", collapse="@")
     stringr::str_c(x$name, states, sep="@")
 }
 

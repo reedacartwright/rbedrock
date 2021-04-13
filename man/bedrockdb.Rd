@@ -56,16 +56,21 @@ higher-level functions. The handle to the database can be closed
 by passing it to \code{close}.
 }
 \examples{
-\dontrun{
-db <- bedrockdb("lrkkYFpUABA=") # open a world in the minecraftWorlds folder.
+# open an example works and get all keys
+dbpath <- rbedrock_example_world("example1.mcworld")
+db <- bedrockdb(dbpath)
+keys <- get_keys(db)
+close(db)
+
+if(FALSE) {
+# open a world in the minecraftWorlds folder using a world id.
+db <- bedrockdb("lrkkYFpUABA=") 
 # do something with db ...
 close(db)
 
-db <- bedrockdb("C:\\\\\\\\minecraftWorlds\\\\\\\\my_world") # open a world using absolute path
+# open a world using absolute path
+db <- bedrockdb("C:\\\\\\\\minecraftWorlds\\\\\\\\my_world") 
 # do something with db ...
 close(db)
 }
-dbpath <- rbedrock_example_world("example1.mcworld") # example world
-db <- bedrockdb(dbpath)
-close(db)
 }

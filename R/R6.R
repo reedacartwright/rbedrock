@@ -50,20 +50,25 @@
 #'
 #' @return On success, `bedrockdb` returns an R6 class of type 'bedrockdb'.
 #'         
+#' @export
 #' @examples
-#'\dontrun{
-#' db <- bedrockdb("lrkkYFpUABA=") # open a world in the minecraftWorlds folder.
+#' # open an example works and get all keys
+#' dbpath <- rbedrock_example_world("example1.mcworld")
+#' db <- bedrockdb(dbpath)
+#' keys <- get_keys(db)
+#' close(db)
+#'
+#' if(FALSE) {
+#' # open a world in the minecraftWorlds folder using a world id.
+#' db <- bedrockdb("lrkkYFpUABA=") 
 #' # do something with db ...
 #' close(db)
 #'
-#' db <- bedrockdb("C:\\\\minecraftWorlds\\\\my_world") # open a world using absolute path
+#' # open a world using absolute path
+#' db <- bedrockdb("C:\\\\minecraftWorlds\\\\my_world") 
 #' # do something with db ...
 #' close(db)
 #' }
-#' dbpath <- rbedrock_example_world("example1.mcworld") # example world
-#' db <- bedrockdb(dbpath)
-#' close(db)
-#' @export
 
 bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, paranoid_checks = NULL, 
     write_buffer_size = 4194304L, max_open_files = NULL, block_size = NULL, 
