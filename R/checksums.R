@@ -126,7 +126,7 @@ write_checksums_value <- function(object) {
 
     dat <- get_values(db, chunk_keys)
     obj <- purrr::map(dat, .checksum_impl)
-    names(obj) <- trim_stem_from_chunk_key(names(obj))
+    names(obj) <- .trim_stem_from_chunk_key(names(obj))
 
     val <- write_checksums_value(obj)
     put_value(db, key, val)

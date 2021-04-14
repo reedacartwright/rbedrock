@@ -85,7 +85,7 @@ read_2dmaps_value <- function(rawdata) {
 #' @rdname Maps2D
 #' @export
 put_2dmaps_data <- function(db, data) {
-    stopifnot(all(get_tag_from_chunk_key(names(data)) == 45L))
+    stopifnot(all(.get_tag_from_chunk_key(names(data)) == 45L))
     dat <- purrr::map(data, write_2dmaps_value)
     put_data(db, dat)
 }

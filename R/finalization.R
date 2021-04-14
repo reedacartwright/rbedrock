@@ -57,7 +57,7 @@ get_finalization_value <- function(db, x, z, dimension) {
 #' @rdname Finalization
 #' @export
 put_finalization_data <- function(db, data) {
-    stopifnot(all(get_tag_from_chunk_key(names(data)) == 54L))
+    stopifnot(all(.get_tag_from_chunk_key(names(data)) == 54L))
     dat <- purrr::map(data, write_finalization_value)
     put_data(db, dat)
 }

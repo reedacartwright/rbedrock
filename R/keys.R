@@ -10,6 +10,7 @@
 #'
 #'         `rawkeys_to_chrkeys()` returns a character vector.
 #'
+#' @keywords internal
 #' @export
 chrkeys_to_rawkeys <- function(keys) {
     if(!is.null(keys)) {
@@ -27,37 +28,26 @@ rawkeys_to_chrkeys <- function(keys) {
     .Call(Crawkeys_to_chrkeys, keys)
 }
 
-#' Create a database key from chunk information.
+#' Read and manipulate chunk keys
 #'
-#' @param x Chunk x-coordinate.
-#' @param z Chunk z-coordinate.
-#' @param dimension Chunk dimension.
-#' @param tag The type of information the key holds.
-#' @param subtag The subchunk the key refers to. (Only used for tag 47).
-#' @return The database key corresponding to the inputs.
-#' @examples
-#' create_chunk_key(0, 0, 0, 47, 1)
+#' @description
+#' Chunk keys are keys to chunk data. A chunk key has a format which indicates
+#' the chunk it holds data for and the type of data it holds. This format is
+#' either `@@x:z:d:t` or `@@x:z:d:t-s`, where `x` and `z` indicates the 
+#' coordinates of the chunk in chunk space, `d` indicates the dimension of
+#' the chunk, and `t` and `s` indicate the tag and subtag of the chunk.
 #'
-#' @export
-create_chunk_key <- function(x, z, dimension, tag, subtag = NA_integer_) {
-    if(is.character(tag)) {
-        tag <- chunk_tag_int(tag)
-    }
-    arg <- vctrs::vec_recycle_common(x,z,dimension,tag,subtag)
-    tag <- stringr::str_c(arg[[4]], arg[[5]], sep="-") %|% as.character(arg[[4]])
-    ret <- stringr::str_glue("@{arg[[1]]}:{arg[[2]]}:{arg[[3]]}:{tag}")
-    as.character(ret)
-}
+#' @name chunk_keys
+NULL
 
-#' Extract information from chunk keys.
-#'
+#' @description
+#' `parse_chunk_keys()` splits chunk keys into their individual elements and
+#' returns a table with the results. Keys that do not contain chunk data are
+#' silently dropped.
+#' 
 #' @param keys A character vector of database keys.
-#' @return
-#'   `parse_chunk_keys()` returns a tibble containing information extracted
-#'   from chunk keys. Keys that do not contain chunk data are dropped.
-#'   `chunk_pos()` return a matrix containing chunk coordinates.
-#'   `chunk_origins()` returns the block position of the NW corner of chunks.
-#'   `subchunk_origins()` returns the block position of the lower NW corner of subchunk.
+#'
+#' @rdname chunk_keys
 #' @examples
 #' parse_chunk_keys("@@0:0:0:47-1")
 #' @export
@@ -65,7 +55,7 @@ parse_chunk_keys <- function(keys) {
     if (!is.character(keys)) {
         stop("keys must be a character vector.")
     }
-    m <- keys %>% subset_chunk_keys() %>% split_chunk_keys()
+    m <- keys %>% .subset_chunk_keys() %>% .split_chunk_keys()
 
     tibble::tibble(key = m[, 1],
         x = as.integer(m[, 2]),
@@ -76,25 +66,57 @@ parse_chunk_keys <- function(keys) {
     )
 }
 
+#' @description
+#' `create_chunk_keys()` returns a vector of chunk keys formed from its
+#' arguments.
+#'
+#' @param x Chunk x-coordinate
+#' @param z Chunk z-coordinate
+#' @param dimension dimension
+#' @param tag The type of chunk data.
+#' @param subtag The subchunk the key refers to (Only used for tag 47).
+#' @examples
+#' create_chunk_keys(0, 0, 0, 47, 1)
+#'
+#' @rdname chunk_keys
 #' @export
-#' @rdname parse_chunk_keys
-chunk_pos <- function(keys) {
-    pos <- split_chunk_keys(keys)[,2:3, drop = FALSE]
+create_chunk_keys <- function(x, z, dimension, tag, subtag = NA_integer_) {
+    if(is.character(tag)) {
+        tag <- chunk_tag_int(tag)
+    }
+    arg <- vctrs::vec_recycle_common(x,z,dimension,tag,subtag)
+    tag <- stringr::str_c(arg[[4]], arg[[5]], sep="-") %|% as.character(arg[[4]])
+    ret <- stringr::str_glue("@{arg[[1]]}:{arg[[2]]}:{arg[[3]]}:{tag}")
+    as.character(ret)
+}
+
+#' @description
+#' `chunk_positions()` returns a matrix containing the chunk coordinates of keys.
+#' @export
+#' @rdname chunk_keys
+chunk_positions <- function(keys) {
+    pos <- .split_chunk_keys(keys)[,2:3, drop = FALSE]
     mode(pos) <- "integer"
     pos
 }
 
+#' @description
+#' `chunk_origins()` returns a matrix containing the block coordinate of the NW 
+#' corner of keys.
 #' @export
-#' @rdname parse_chunk_keys
+#' @rdname chunk_keys
 chunk_origins <- function(keys) {
-    pos <- chunk_pos(keys)
+    pos <- chunk_positions(keys)
     pos*16L
 }
 
+#' @description
+#' `subchunk_origins()` returns a matrix containing the block coordinate of the
+#' lower NW corner of subchunk keys.
 #' @export
-#' @rdname parse_chunk_keys
+#' @rdname chunk_keys
 subchunk_origins <- function(keys) {
-    pos <- split_chunk_keys(keys)[,c(2,6,3), drop = FALSE]
+    pos <- .split_chunk_keys(keys)[,c(2,6,3), drop = FALSE]
     mode(pos) <- "integer"
     pos <- pos*16L
 }
@@ -141,17 +163,26 @@ subchunk_origins <- function(keys) {
 .CHUNK_TAGS_INV <- rep(NA_character_, 128)
 .CHUNK_TAGS_INV[.CHUNK_TAGS] <- names(.CHUNK_TAGS)
 
+
+#' @description
+#' `chunk_tag_str()` and `chunk_tag_int()` convert between integer and character
+#' representations of chunk tags.
+#' @param tags a vector
+#' @export
+#' @rdname chunk_keys
 chunk_tag_str <- function(tags) {
     tags <- as.integer(tags)
     .CHUNK_TAGS_INV[tags]
 }
 
-chunk_tag_int <- function(str) {
-    str <- as.character(str)
-    unname(.CHUNK_TAGS[str])
+#' @export
+#' @rdname chunk_keys
+chunk_tag_int <- function(tags) {
+    tags <- as.character(tags)
+    unname(.CHUNK_TAGS[tags])
 }
 
-get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
+.get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
     m <- stringr::str_match(keys, "^@[^:]+:[^:]+:[^:]+:([^:-]+)(?:-[^:]+)?$")
     res <- as.integer(m[,2])
     if(as_string) {
@@ -160,18 +191,18 @@ get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
     res
 }
 
-get_dimension_from_chunk_key <- function(keys) {
+.get_dimension_from_chunk_key <- function(keys) {
     m <- stringr::str_match(keys, "^@[^:]+:[^:]+:([^:]+):[^:-]+(?:-[^:]+)?$")
     res <- as.integer(m[,2])
     res
 }
 
-trim_stem_from_chunk_key <- function(keys) {
+.trim_stem_from_chunk_key <- function(keys) {
     stringr::str_replace(keys, "^@[^:]+:[^:]+:[^:]+:", "")
 }
 
-check_chunk_key_tag <- function(keys, tag) {
-    ktag <- get_tag_from_chunk_key(keys)
+.check_chunk_key_tag <- function(keys, tag) {
+    ktag <- .get_tag_from_chunk_key(keys)
     b <- !is.na(ktag) & ktag == tag
     all(b)
 }
@@ -180,19 +211,20 @@ check_chunk_key_tag <- function(keys, tag) {
 .CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:-]+))?$"
 .CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?:-([^:-]+))?$"
 
-is_chunk_key <- function(keys) {
+.is_chunk_key <- function(keys) {
     stringr::str_detect(keys, .CHUNK_KEY_RE)
 }
 
-subset_chunk_keys <- function(keys, negate = FALSE) {
+.subset_chunk_keys <- function(keys, negate = FALSE) {
    stringr::str_subset(keys, .CHUNK_KEY_RE, negate = negate)
 }
 
-split_chunk_keys <- function(keys) {
+.split_chunk_keys <- function(keys) {
     stringr::str_match(keys, .CHUNK_KEY_MATCH)
 }
 
-.process_key_args <- function(x, z, d, tag, subtag = NA_integer_, stop_if_filtered = FALSE) {
+.process_key_args <- function(x, z, d, tag, subtag = NA_integer_,
+    stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
     if(missing(z) && is.character(x)) {
         # if tag exists, we are going to filter on data type
@@ -200,7 +232,7 @@ split_chunk_keys <- function(keys) {
             if(length(tag) != 1) {
                 stop("when filtering keys in x, tag must have length 1")
             }
-            ktag <- get_tag_from_chunk_key(x)
+            ktag <- .get_tag_from_chunk_key(x)
             b <- !is.na(ktag) & ktag == tag
             if(stop_if_filtered && any(!b)) {
                 stop(paste0("Some keys passed to .process_keys_args are not of type ", tag))
@@ -209,10 +241,11 @@ split_chunk_keys <- function(keys) {
         }
         return(x)
     }
-    create_chunk_key(x, z, d, tag, subtag)
+    create_chunk_keys(x, z, d, tag, subtag)
 }
 
-.process_key_args2 <- function(x, z, d, tag, subtag = NA_integer_, stop_if_filtered = FALSE) {
+.process_key_args2 <- function(x, z, d, tag, subtag = NA_integer_,
+    stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
     if(missing(z) && is.character(x)) {
         # if tag exists, we are going to filter on data type
@@ -220,7 +253,7 @@ split_chunk_keys <- function(keys) {
             if(length(tag) == 0L) {
                 stop("when filtering keys in x, tag must not be empty")
             }
-            ktag <- get_tag_from_chunk_key(x)
+            ktag <- .get_tag_from_chunk_key(x)
             b <- !is.na(ktag) & ktag %in% tag
             if(stop_if_filtered && any(!b)) {
                 stop(paste0("Some keys passed to .process_keys_args2 were filtered based on tag."))
@@ -232,7 +265,7 @@ split_chunk_keys <- function(keys) {
     # create keys and interleave tags.
     ret <- character(0L)
     for(atag in tag) {
-        keys <- create_chunk_key(x, z, d, atag, subtag)
+        keys <- create_chunk_keys(x, z, d, atag, subtag)
         ret <- rbind(ret,keys)
     }
     as.vector(ret)

@@ -38,7 +38,7 @@ get_hsa_data <- function(db, x=get_keys(db), z, dimension) {
     dat <- get_values(db, keys)
     hsa <- purrr::map_dfr(dat, read_hsa_value, .id="key")
 
-    hsa$dimension <- get_dimension_from_chunk_key(hsa$key)
+    hsa$dimension <- .get_dimension_from_chunk_key(hsa$key)
     hsa <- dplyr::relocate(hsa, "key", .after = dplyr::last_col())
     hsa
 }
@@ -60,7 +60,7 @@ get_hsa_value <- function(db, x, z, dimension) {
     stopifnot(rlang::is_scalar_character(key))
     dat <- get_value(db, key)
     hsa <- read_hsa_value(dat)
-    hsa$dimension <- get_dimension_from_chunk_key(key)
+    hsa$dimension <- .get_dimension_from_chunk_key(key)
     hsa$key <- key
     hsa
 }
@@ -147,7 +147,7 @@ put_hsa_data <- function(db, data, merge = TRUE) {
         a <- seq.int(x1[i] %/% 16L, x2[i] %/% 16L)
         b <- seq.int(z1[i] %/% 16L, z2[i] %/% 16L)
         chunks <- tidyr::expand_grid(x=a, z=b, d=dimension[i])
-        chunks$key <- create_chunk_key(chunks$x, chunks$z, chunks$d, 57L)
+        chunks$key <- create_chunk_keys(chunks$x, chunks$z, chunks$d, 57L)
         # identify intersection between hsa and chunks.
         a1 <- pmax(chunks$x*16L, x1[i])
         b1 <- pmax(chunks$z*16L, z1[i])

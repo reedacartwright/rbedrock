@@ -70,7 +70,7 @@ get_chunk_version_value <- function(db, x, z, dimension, include_legacy = TRUE) 
 #' @rdname ChunkVersion
 #' @export
 put_chunk_version_data <- function(db, data) {
-    stopifnot(all(get_tag_from_chunk_key(names(data)) %in% c(44L,118L)))
+    stopifnot(all(.get_tag_from_chunk_key(names(data)) %in% c(44L,118L)))
     dat <- purrr::map(data, write_chunk_version_value)
     put_data(db, dat)
 }
