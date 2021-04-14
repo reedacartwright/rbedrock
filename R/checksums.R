@@ -58,10 +58,10 @@ update_checksums_data <- function(db, x, z, dimension) {
 }
 
 #' @description
-#' `read_checksums_value()` parses a binary checksums record
+#' `read_checksums_value()` parses a binary Checksums record
 #' into a list of checksums.
 #'
-#' @param rawdata a raw vector holding binary chucksums data
+#' @param rawdata a raw vector holding binary Checksums data
 #'
 #' @rdname Checksums
 #' @export

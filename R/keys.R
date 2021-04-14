@@ -110,17 +110,6 @@ chunk_origins <- function(keys) {
     pos*16L
 }
 
-#' @description
-#' `subchunk_origins()` returns a matrix containing the block coordinate of the
-#' lower NW corner of subchunk keys.
-#' @export
-#' @rdname chunk_keys
-subchunk_origins <- function(keys) {
-    pos <- .split_chunk_keys(keys)[,c(2,6,3), drop = FALSE]
-    mode(pos) <- "integer"
-    pos <- pos*16L
-}
-
 # List of Tags that identify the contents of a chunk key.
 .CHUNK_TAGS <- c(
     "ChunkVersion" = 44L,

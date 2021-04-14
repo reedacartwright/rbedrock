@@ -6,7 +6,6 @@
 \alias{create_chunk_keys}
 \alias{chunk_positions}
 \alias{chunk_origins}
-\alias{subchunk_origins}
 \alias{chunk_tag_str}
 \alias{chunk_tag_int}
 \title{Read and manipulate chunk keys}
@@ -18,8 +17,6 @@ create_chunk_keys(x, z, dimension, tag, subtag = NA_integer_)
 chunk_positions(keys)
 
 chunk_origins(keys)
-
-subchunk_origins(keys)
 
 chunk_tag_str(tags)
 
@@ -58,9 +55,6 @@ arguments.
 
 \code{chunk_origins()} returns a matrix containing the block coordinate of the NW
 corner of keys.
-
-\code{subchunk_origins()} returns a matrix containing the block coordinate of the
-lower NW corner of subchunk keys.
 
 \code{chunk_tag_str()} and \code{chunk_tag_int()} convert between integer and character
 representations of chunk tags.

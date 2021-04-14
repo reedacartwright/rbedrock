@@ -25,7 +25,7 @@ write_checksums_value(object)
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{rawdata}{a raw vector holding binary chucksums data}
+\item{rawdata}{a raw vector holding binary Checksums data}
 
 \item{object}{a named character vector in the same format as returned by \code{read_checksums_value()}.}
 }
@@ -56,7 +56,7 @@ It calculates checksums for the specified chunks'
 SubchunkBlocks, 2DMaps, BlockEntities, and Entities
 records in \code{db} and updates the Checksums record to match.
 
-\code{read_checksums_value()} parses a binary checksums record
+\code{read_checksums_value()} parses a binary Checksums record
 into a list of checksums.
 
 \code{write_checksums_value()} converts Checksums from a named list into
