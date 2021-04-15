@@ -237,7 +237,6 @@ SEXP bedrock_leveldb_mget(SEXP r_db, SEXP r_keys, SEXP r_readoptions) {
     const char **key_data = NULL;
     size_t *key_len = NULL;
     size_t num_key = get_keys(r_keys, &key_data, &key_len);
-    bool *missing = NULL;
 
     SEXP ret = PROTECT(allocVector(VECSXP, num_key));
 
