@@ -163,7 +163,11 @@ vec_ptype_full.rbedrock_nbt <- function(x, ...) {
 
 #' @export
 `payload.rbedrock_nbt` <- function(object) {
-    vec_data(object)
+    if(bit64::is.integer64(object)) {
+        structure(vec_data(object), class="integer64")
+    } else {
+        vec_data(object)
+    }
 }
 
 #' @rdname nbt
