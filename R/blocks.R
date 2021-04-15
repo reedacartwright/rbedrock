@@ -187,7 +187,8 @@ block_palette <- function(object) {
     if(length(x$states) == 0L || isTRUE(names_only)) {
         return(x$name)
     }
-    states <- stringr::str_c(names(x$states), x$states, sep="=", collapse="@")
+    states <- stringr::str_c(names(x$states), as.character(x$states),
+        sep="=", collapse="@")
     stringr::str_c(x$name, states, sep="@")
 }
 
