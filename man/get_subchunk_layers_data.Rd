@@ -2,11 +2,22 @@
 % Please edit documentation in R/blocks.R
 \name{get_subchunk_layers_data}
 \alias{get_subchunk_layers_data}
+\alias{get_subchunk_layers_value}
 \alias{read_subchunk_layers_value}
 \alias{block_palette}
 \title{Load and store SubchunkBlocks layers}
 \usage{
 get_subchunk_layers_data(
+  db,
+  x,
+  z,
+  dimension,
+  subchunk,
+  layer = 1L,
+  simplify = TRUE
+)
+
+get_subchunk_layers_value(
   db,
   x,
   z,
@@ -40,13 +51,17 @@ results to an array instead of a list containing one array}
 \code{get_subchunk_layers_data()} returns a list of the of the values
 returned by \code{read_subchunk_layers_value()}.
 
-\code{read_subchunk_layers_value()} returns a list of block layers. Each
-block layer is a 16x16x16 array of integers associated with a block palette.
-The block palette is stored in the "palette" attribute of the array.
+\code{get_subchunk_layers_value()} and \code{read_subchunk_layers_value()}
+return a list of block layers. Each block layer is a 16x16x16 array of
+integers associated with a block palette. The block palette is stored in the
+"palette" attribute of the array.
 }
 \description{
 \code{get_subchunk_layers_data()} loads SubchunkBlocks data from a \code{bedrockdb}.
 It will silently drop and keys not representing SubchunkBlocks data.
+
+\code{get_subchunk_layers_value()} loads SubchunkBlocks data from a \code{bedrockdb}.
+It only supports loading a single value.
 
 \code{read_subchunk_layers_value()} decodes binary SubchunkBlock data
 into index-mapped arrays and associated block palettes.

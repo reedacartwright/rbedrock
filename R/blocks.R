@@ -50,6 +50,27 @@ get_subchunk_blocks_data <- function(db, x, z, dimension, subchunk,
 }
 
 #' @description
+#' `get_subchunk_blocks_value()` loads SubchunkBlocks data from a `bedrockdb`.
+#' It only supports loading a single value.
+#'
+#' @return `get_subchunk_blocks_value()` and `read_subchunk_blocks_value()`
+#' return a 16x16x16 character array. The axes represent the `x`, `y`, and `z`
+#' dimensions in that order.
+#'
+#' @rdname SubchunkBlocks
+#' @export
+get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
+        names_only = FALSE, extra_block = FALSE) {
+    key <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
+    stopifnot(rlang::is_scalar_character(key))
+
+    dat <- get_value(db, key)
+    
+    read_subchunk_blocks_value(dat, names_only = names_only,
+        extra_block = extra_block)
+}
+
+#' @description
 #' `read_subchunk_blocks_value()` decodes binary SubchunkBlock data.
 #'
 #' @param rawdata a raw vector holding binary SubchunkBlock data
@@ -110,12 +131,28 @@ get_subchunk_layers_data <- function(db, x, z, dimension, subchunk, layer = 1L,
 }
 
 #' @description
+#' `get_subchunk_layers_value()` loads SubchunkBlocks data from a `bedrockdb`.
+#' It only supports loading a single value.
+#'
+#' @return `get_subchunk_layers_value()` and `read_subchunk_layers_value()`
+#' return a list of block layers. Each block layer is a 16x16x16 array of
+#' integers associated with a block palette. The block palette is stored in the
+#' "palette" attribute of the array.
+#'
+#' @rdname get_subchunk_layers_data
+#' @export
+get_subchunk_layers_value <- function(db, x, z, dimension, subchunk, layer = 1L,
+        simplify = TRUE) {
+    key <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
+    stopifnot(rlang::is_scalar_character(key))
+
+    dat <- get_value(db, key)
+    read_subchunk_layers_value(dat, layer = layer, simplify = simplify)
+}
+
+#' @description
 #' `read_subchunk_layers_value()` decodes binary SubchunkBlock data
 #' into index-mapped arrays and associated block palettes.
-#'
-#' @return `read_subchunk_layers_value()` returns a list of block layers. Each
-#' block layer is a 16x16x16 array of integers associated with a block palette.
-#' The block palette is stored in the "palette" attribute of the array.
 #'
 #' @rdname get_subchunk_layers_data
 #' @export
@@ -154,8 +191,9 @@ block_palette <- function(object) {
     stringr::str_c(x$name, states, sep="@")
 }
 
-.read_subchunk <- function(rawval) {
-    .Call(Cread_subchunk, rawval)
+.read_subchunk <- function(rawdata) {
+    stopifnot(rlang::is_raw(rawdata))
+    .Call(Cread_subchunk, rawdata)
 }
 
 #' @description

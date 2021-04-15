@@ -3,12 +3,23 @@
 \name{SubchunkBlocks}
 \alias{SubchunkBlocks}
 \alias{get_subchunk_blocks_data}
+\alias{get_subchunk_blocks_value}
 \alias{read_subchunk_blocks_value}
 \alias{subchunk_origins}
 \alias{subchunk_coords}
 \title{Load and store SubchunkBlocks data}
 \usage{
 get_subchunk_blocks_data(
+  db,
+  x,
+  z,
+  dimension,
+  subchunk,
+  names_only = FALSE,
+  extra_block = FALSE
+)
+
+get_subchunk_blocks_value(
   db,
   x,
   z,
@@ -52,6 +63,10 @@ indexes for blocks in a subchunk.}
 \code{get_subchunk_blocks_data()} returns a list of the of the values
 returned by \code{read_subchunk_blocks_value()}.
 
+\code{get_subchunk_blocks_value()} and \code{read_subchunk_blocks_value()}
+return a 16x16x16 character array. The axes represent the \code{x}, \code{y}, and \code{z}
+dimensions in that order.
+
 \code{read_subchunk_blocks_value()} returns a 16x16x16 character array.
 The axes represent the \code{x}, \code{y}, and \code{z} dimensions in that order.
 
@@ -72,6 +87,9 @@ Blocks may have 0 or more states.
 
 \code{get_subchunk_blocks_data()} loads SubchunkBlocks data from a \code{bedrockdb}.
 It will silently drop and keys not representing SubchunkBlocks data.
+
+\code{get_subchunk_blocks_value()} loads SubchunkBlocks data from a \code{bedrockdb}.
+It only supports loading a single value.
 
 \code{read_subchunk_blocks_value()} decodes binary SubchunkBlock data.
 
