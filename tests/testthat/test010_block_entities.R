@@ -27,6 +27,19 @@ test_that("get_block_entities_data returns specific BlockEnties data", {
     }
 })
 
+test_that("MobSpawners can be identified and placed in a table", {
+    dat <- purrr::flatten(get_block_entities_data(db))
+    dat <- purrr::keep(dat, ~.$id == "MobSpawner")
+    dat <- purrr::map_dfr(dat, tibble::as_tibble)
+
+    expect_named(dat, c("Delay", "DisplayEntityHeight", "DisplayEntityScale",
+        "DisplayEntityWidth", "EntityIdentifier", "MaxNearbyEntities",
+        "MaxSpawnDelay", "MinSpawnDelay", "RequiredPlayerRange", "SpawnCount",
+        "SpawnRange", "id", "isMovable", "x", "y", "z"))
+
+    expect_equal(nrow(dat), 9L)
+})
+
 test_that("put_block_entities_data writes BlockEnties data", {
     dat <- get_block_entities_data(db, "@37:13:0:49")
     dat2 <- dat

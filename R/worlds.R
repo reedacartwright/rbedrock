@@ -111,8 +111,8 @@ import_world <- function(file, worlds_dir = worlds_dir_path(), levelname = NULL)
     invisible(ret)
 }
 
-.fixup_path <- function(path, worlds_dir = worlds_dir_path(), verify=FALSE) {
-    stopifnot(length(path) == 1)
+.fixup_path <- function(path, worlds_dir = worlds_dir_path(), verify = FALSE) {
+    stopifnot(rlang::is_scalar_character(path))
 
     if (file.exists(path)) {
         path <- normalizePath(path)

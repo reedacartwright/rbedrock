@@ -201,18 +201,53 @@ vec_cast.rbedrock_nbt.double <- function(x, to, ...) nbt(x, tag(to))
 vec_cast.rbedrock_nbt.list <- function(x, to, ...) nbt(x, tag(to))
 
 #' @export
-vec_cast.character.rbedrock_nbt <- function(x, to, ...) vec_data(x)
-
-#' @export
-vec_cast.integer.rbedrock_nbt <- function(x, to, ...) vec_data(x)
-
-#' @export
-vec_cast.integer64.rbedrock_nbt <- function(x, to, ...) {
-    structure(vec_data(x), class="integer64")
+vec_cast.character.rbedrock_nbt <- function(x, to, ...) {
+    vec_cast(payload(x), character())
 }
 
 #' @export
-vec_cast.double.rbedrock_nbt <- function(x, to, ...) vec_data(x)
+vec_cast.integer.rbedrock_nbt <- function(x, to, ...) {
+    vec_cast(payload(x), integer())
+}
+
+#' @export
+vec_cast.double.rbedrock_nbt <- function(x, to, ...) {
+    vec_cast(payload(x), double())
+}
+
+#' @export
+vec_cast.integer64.rbedrock_nbt <- function(x, to, ...) {
+    vec_cast(payload(x), bit64::integer64())
+}
+
+#' @export
+vec_cast.list.rbedrock_nbt <- function(x, to, ...) {
+    vec_cast(payload(x), list())
+}
+
+#' @export
+vec_ptype2.rbedrock_nbt.character <- function(x, y, ...) character()
+
+#' @export
+vec_ptype2.character.rbedrock_nbt <- function(x, y, ...) character()
+
+#' @export
+vec_ptype2.rbedrock_nbt.integer <- function(x, y, ...) integer()
+
+#' @export
+vec_ptype2.integer.rbedrock_nbt <- function(x, y, ...) integer()
+
+#' @export
+vec_ptype2.rbedrock_nbt.double <- function(x, y, ...) double()
+
+#' @export
+vec_ptype2.double.rbedrock_nbt <- function(x, y, ...) double()
+
+#' @export
+vec_ptype2.integer64.rbedrock_nbt <- function(x, y, ...) bit64::integer64()
+
+#' @export
+vec_ptype2.rbedrock_nbt.integer64 <- function(x, y, ...) bit64::integer64()
 
 # work around integer64 methods not stripping class variables
 #' @export
@@ -228,7 +263,6 @@ is.na.rbedrock_nbt <- function(x, ...) vec_data(NextMethod())
 #' @description
 #' `get_nbt_data()` and `get_nbt_value()` load nbt-formatted data from `db` and parses it.
 #' `get_nbt_values()` is a synonym for `get_nbt_data()`.
-#'
 #'
 #' @param db A `bedrockdb` object
 #' @param keys A character vector of keys.

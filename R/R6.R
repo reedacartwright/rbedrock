@@ -85,11 +85,10 @@ close.bedrockdb <- function(con, ...) {
 
 #' @importFrom R6 R6Class
 R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, levelname = NULL, 
-    mtime = NULL, initialize = function(path, ...) {
+    initialize = function(path, ...) {
         path <- .fixup_path(path)
         namefile <- paste0(path, "/levelname.txt")
         self$levelname <- readLines(namefile, 1L, warn = FALSE)
-        self$mtime <- as.character(file.mtime(namefile))
         self$path <- paste0(path, "/db")
         self$db <- bedrock_leveldb_open(self$path, ...)
     },
