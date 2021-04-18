@@ -206,7 +206,7 @@ block_palette <- function(object) {
 subchunk_origins <- function(keys) {
     pos <- .split_chunk_keys(keys)[,c(2,6,3), drop = FALSE]
     mode(pos) <- "integer"
-    pos <- pos*16L
+    pos*16L
 }
 
 #' @description
@@ -221,11 +221,15 @@ subchunk_origins <- function(keys) {
 #' @export
 #' @rdname SubchunkBlocks
 subchunk_coords <- function(ind, origins=subchunk_origins(names(ind))) {
+    if(is.character(origins)) {
+        origins <- subchunk_origins(origins)
+    }
+    
     f <- function(x,y) t(y - 1L + t(arrayInd(x,c(16,16,16))))
     if(is.list(ind)) {
         o <- purrr::array_tree(origins,1)
         purrr::map2(ind, o, f)
     } else {
-        f(ind,origins)
+        f(ind, as.vector(origins))
     }
 }
