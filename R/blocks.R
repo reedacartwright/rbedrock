@@ -265,7 +265,7 @@ block_palette <- function(object) {
 }
 
 .read_subchunk <- function(rawdata) {
-    stopifnot(rlang::is_raw(rawdata))
+    vec_assert(rawdata, raw())
     .Call(Cread_subchunk, rawdata)
 }
 
