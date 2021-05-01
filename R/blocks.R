@@ -1,3 +1,73 @@
+#' Load block data from one or more chunks
+#'
+#' @description
+#' These functions return block data as strings containing the
+#' block name and block states. The strings' format is
+#' `blockname@@state1=value1@@state2=value2` etc.
+#' Blocks may have 0 or more states.
+#'
+#' @param db A bedrockdb object.
+#' @param x,z,dimension Chunk coordinates to extract data from.
+#'    `x` can also be a character vector of db keys.
+#'
+#' @param names_only  A logical scalar. Return only the names of the blocks,
+#' ignoring block states.
+#' @param extra_block A logical scalar. Append the extra block layer to the
+#' output (separated by ";"). This is mostly useful if you have waterlogged
+#' blocks. If the extra block is air, it will not be appended.
+#'
+#' @return `get_chunk_blocks_data()` returns a list of the of the values
+#' returned by `read_chunk_blocks_value()`.
+#' @export
+get_chunk_blocks_data <- function(db, x, z, dimension,
+        names_only = FALSE, extra_block = FALSE) {
+    keys <- .process_key_args_prefix(x, z, dimension)
+    keys <- vec_unique(keys)
+
+    dat <- purrr::map(keys, ~.get_chunk_blocks_value_impl(db,
+        prefix = .,
+        names_only = names_only,
+        extra_block = extra_block
+    ))
+
+    rlang::set_names(dat, keys)
+}
+
+#' @description
+#' `get_chunk_blocks_value()` loads block data from a `bedrockdb`.
+#' It only supports loading a single value.
+#'
+#' @return `get_chunk_blocks_value()`
+#' return a 16xNx16 character array. The axes represent the `x`, `y`, and `z`
+#' dimensions in that order.
+#'
+#' @rdname get_chunk_blocks_data
+#' @export
+get_chunk_blocks_value <- function(db, x, z, dimension,
+        names_only = FALSE, extra_block = FALSE) {
+    keys <- .process_key_args_prefix(x, z, dimension)
+    keys <- vec_unique(keys)
+    vec_assert(keys, character(), 1L)
+
+    .get_chunk_blocks_value_impl(db, keys,
+        names_only = names_only,
+        extra_block = extra_block
+    )
+}
+
+.get_chunk_blocks_value_impl <- function(db, prefix, ...) {
+    prefix <- stringr::str_c(prefix, ":47", collapse="")
+    keys <- get_keys(db, starts_with = prefix)
+    dat <- get_subchunk_blocks_data(db, keys, ...)
+    pos <- .get_subtag_from_chunk_key(names(dat))
+    max_y <- 16*max(pos)+16
+    mat <- array("minecraft:air", c(16, max_y, 16))
+    for(i in seq_along(pos)) {
+        mat[,(pos[i]*16)+1:16,] <- dat[[i]]
+    }
+    mat
+}
+
 #' Load and store SubchunkBlocks data
 #'
 #' @description
@@ -8,7 +78,7 @@
 #' of blocks, and the extra layer is most-often used to store water for
 #' water-logged blocks.
 #'
-#' These functions represent return block data as strings containing the
+#' These functions return block data as strings containing the
 #' block name and block states. The strings' format is
 #' `blockname@@state1=value1@@state2=value2` etc.
 #' Blocks may have 0 or more states. 
@@ -62,7 +132,7 @@ get_subchunk_blocks_data <- function(db, x, z, dimension, subchunk,
 get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
         names_only = FALSE, extra_block = FALSE) {
     key <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
-    stopifnot(rlang::is_scalar_character(key))
+    vec_assert(key, character(), 1L)
 
     dat <- get_value(db, key)
     
@@ -144,7 +214,7 @@ get_subchunk_layers_data <- function(db, x, z, dimension, subchunk, layer = 1L,
 get_subchunk_layers_value <- function(db, x, z, dimension, subchunk, layer = 1L,
         simplify = TRUE) {
     key <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
-    stopifnot(rlang::is_scalar_character(key))
+    vec_assert(key, character(), 1L)
 
     dat <- get_value(db, key)
     read_subchunk_layers_value(dat, layer = layer, simplify = simplify)
@@ -184,12 +254,14 @@ block_palette <- function(object) {
 
 .block_string <- function(x, names_only = FALSE) {
     # convert block information in a palette entry into a string
-    if(length(x$states) == 0L || isTRUE(names_only)) {
-        return(x$name)
+    block_name <- payload(x$name)
+    states <- payload(x$states)
+    if(length(states) == 0L || isTRUE(names_only)) {
+        return(block_name)
     }
-    states <- stringr::str_c(names(x$states), as.character(x$states),
+    states <- stringr::str_c(names(states), as.character(states),
         sep="=", collapse="@")
-    stringr::str_c(x$name, states, sep="@")
+    stringr::str_c(block_name, states, sep="@")
 }
 
 .read_subchunk <- function(rawdata) {

@@ -16,6 +16,7 @@
 \alias{nbt_compound}
 \alias{nbt_list}
 \alias{is_nbt}
+\alias{unnbt}
 \alias{payload}
 \alias{payload<-}
 \title{Create an NBT value}
@@ -50,6 +51,8 @@ nbt_list(...)
 
 is_nbt(x)
 
+unnbt(x)
+
 payload(object)
 
 payload(object) <- value
@@ -72,7 +75,8 @@ types. An NBT value holds a 'payload' of data and a 'tag' indicating the type
 of data held.
 
 \code{nbt()} creates an nbt value. \verb{nbt_*()} family of functions are wrappers
-around \code{nbt()} to create specific tags.
+around \code{nbt()} to create specific tags. \code{unnbt()} recursively strips NBT
+metadata from an NBT value.
 
 \code{payload()} and \verb{payload<-()} read and write an nbt value's payload.
 }

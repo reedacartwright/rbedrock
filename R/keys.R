@@ -4,7 +4,7 @@
 #' format understood by most functions. `rawkeys` are used internally, by the methods
 #' of `bedrockdb` objects and `bedrock_leveldb_*` functions.
 #'
-#' @param keys a character vector of chrkeys or a list or rawkeys 
+#' @param keys a character vector of chrkeys or a list or rawkeys
 #'  
 #' @return `chrkeys_to_rawkeys()` returns a list of raw vectors.
 #'
@@ -13,9 +13,7 @@
 #' @keywords internal
 #' @export
 chrkeys_to_rawkeys <- function(keys) {
-    if(!is.null(keys)) {
-        keys <- as.character(keys)
-    }
+    keys <- vec_cast(keys, character())
     .Call(Cchrkeys_to_rawkeys, keys)
 }
 
@@ -52,17 +50,15 @@ NULL
 #' parse_chunk_keys("@@0:0:0:47-1")
 #' @export
 parse_chunk_keys <- function(keys) {
-    if (!is.character(keys)) {
-        stop("keys must be a character vector.")
-    }
+    vec_assert(keys, character())
     m <- keys %>% .subset_chunk_keys() %>% .split_chunk_keys()
 
     tibble::tibble(key = m[, 1],
         x = as.integer(m[, 2]),
         z = as.integer(m[, 3]),
         dimension = as.integer(m[, 4]),
-        tag = chunk_tag_str(m[, 5]),
-        subtag = as.integer(m[, 6]),
+        tag = chunk_tag_str(as.integer(m[, 5])),
+        subtag = as.integer(m[, 6])
     )
 }
 
@@ -84,9 +80,9 @@ create_chunk_keys <- function(x, z, dimension, tag, subtag = NA_integer_) {
     if(is.character(tag)) {
         tag <- chunk_tag_int(tag)
     }
-    arg <- vctrs::vec_recycle_common(x,z,dimension,tag,subtag)
-    tag <- stringr::str_c(arg[[4]], arg[[5]], sep="-") %|% as.character(arg[[4]])
-    ret <- stringr::str_glue("@{arg[[1]]}:{arg[[2]]}:{arg[[3]]}:{tag}")
+    args <- vec_recycle_common(x,z,dimension,tag,subtag)
+    tag <- stringr::str_c(args[[4]], args[[5]], sep="-") %|% as.character(args[[4]])
+    ret <- stringr::str_glue("@{args[[1]]}:{args[[2]]}:{args[[3]]}:{tag}")
     as.character(ret)
 }
 
@@ -160,14 +156,14 @@ chunk_origins <- function(keys) {
 #' @export
 #' @rdname chunk_keys
 chunk_tag_str <- function(tags) {
-    tags <- as.integer(tags)
+    tags <- vec_cast(tags, integer())
     .CHUNK_TAGS_INV[tags]
 }
 
 #' @export
 #' @rdname chunk_keys
 chunk_tag_int <- function(tags) {
-    tags <- as.character(tags)
+    tags <- vec_cast(tags, character())
     unname(.CHUNK_TAGS[tags])
 }
 
@@ -180,14 +176,22 @@ chunk_tag_int <- function(tags) {
     res
 }
 
+.get_subtag_from_chunk_key <- function(keys) {
+    m <- stringr::str_match(keys, "^@[^:]+:[^:]+:[^:]+:[^:-]+-([^:]+)$")
+    as.integer(m[,2])
+}
+
 .get_dimension_from_chunk_key <- function(keys) {
     m <- stringr::str_match(keys, "^@[^:]+:[^:]+:([^:]+):[^:-]+(?:-[^:]+)?$")
-    res <- as.integer(m[,2])
-    res
+    as.integer(m[,2])
 }
 
 .trim_stem_from_chunk_key <- function(keys) {
     stringr::str_replace(keys, "^@[^:]+:[^:]+:[^:]+:", "")
+}
+
+.get_stem_from_chunk_key <- function(keys) {
+    stringr::str_extract(keys, "^@[^:]+:[^:]+:[^:]+")
 }
 
 .check_chunk_key_tag <- function(keys, tag) {
@@ -218,9 +222,7 @@ chunk_tag_int <- function(tags) {
     if(missing(z) && is.character(x)) {
         # if tag exists, we are going to filter on data type
         if(!missing(tag)) {
-            if(length(tag) != 1) {
-                stop("when filtering keys in x, tag must have length 1")
-            }
+            vec_assert(tag, size = 1)
             ktag <- .get_tag_from_chunk_key(x)
             b <- !is.na(ktag) & ktag == tag
             if(stop_if_filtered && any(!b)) {
@@ -239,9 +241,7 @@ chunk_tag_int <- function(tags) {
     if(missing(z) && is.character(x)) {
         # if tag exists, we are going to filter on data type
         if(!missing(tag)) {
-            if(length(tag) == 0L) {
-                stop("when filtering keys in x, tag must not be empty")
-            }
+            vec_assert(tag, size = 1L)
             ktag <- .get_tag_from_chunk_key(x)
             b <- !is.na(ktag) & ktag %in% tag
             if(stop_if_filtered && any(!b)) {
@@ -260,13 +260,27 @@ chunk_tag_int <- function(tags) {
     as.vector(ret)
 }
 
+.process_key_args_prefix <- function(x, z, d, stop_if_filtered = FALSE) {
+    # is z is missing then x should contain keys as strings
+    if(missing(z) && is.character(x)) {
+        x <- .get_stem_from_chunk_key(x)
+        b <- !is.na(x)
+        if(stop_if_filtered && any(!b)) {
+            stop("Some keys passed to .process_key_arg_prefix are not chunk keys.")
+        }
+        return(x[b])
+    }
+    args <- vec_recycle_common(x, z, d)
+    ret <- stringr::str_glue("@{args[[1]]}:{args[[2]]}:{args[[3]]}")
+    as.character(ret)
+}
 
 #' @importFrom utils head
 .create_rawkey_prefix <- function(starts_with) {
     if(is.null(starts_with)) {
         return(NULL)
     }
-    stopifnot(length(starts_with) == 1L && is.character(starts_with))
+    vec_assert(starts_with, character(), 1L)
 
     if(stringr::str_starts(starts_with, pattern=stringr::fixed("@"))) {
         # Chunk-key prefixes must refer to a chunk

@@ -80,7 +80,7 @@ Blocks are stored in a palette-based format. Subchunks can have two layers
 of blocks, and the extra layer is most-often used to store water for
 water-logged blocks.
 
-These functions represent return block data as strings containing the
+These functions return block data as strings containing the
 block name and block states. The strings' format is
 \code{blockname@state1=value1@state2=value2} etc.
 Blocks may have 0 or more states.

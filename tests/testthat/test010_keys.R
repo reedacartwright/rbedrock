@@ -111,3 +111,9 @@ test_that("rawkeys_to_chrkeys signals errors", {
     expect_error(rawkeys_to_chrkeys("test"), "not a list")
     expect_error(rawkeys_to_chrkeys(list(charToRaw("test"),NULL,"test")), "not a raw type or NULL")
 })
+
+
+test_that("parse_chunk_keys parses correctly",{
+    expect_equal(parse_chunk_keys("@0:0:0:47-1"),
+        tibble::tibble(key="@0:0:0:47-1",x=0L,z=0L,dimension=0L,tag="SubchunkBlocks",subtag=1L))
+})

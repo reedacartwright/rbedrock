@@ -7,12 +7,14 @@
 #'
 #' @description
 #' `nbt()` creates an nbt value. `nbt_*()` family of functions are wrappers
-#' around `nbt()` to create specific tags.
+#' around `nbt()` to create specific tags. `unnbt()` recursively strips NBT
+#' metadata from an NBT value.
 #'
 #' @param x An nbt payload.
 #' @param tag The tag of the data.
 #' @param ... Arguments to collect into an NBT compound or NBT list value.
 #'     Supports dynamic dots via `rlang::list2()`.
+#'
 #' @export
 nbt <- function(x = list(), tag = 0L) {
     tag <- vec_recycle(vec_cast(tag, integer()), 1L, x_arg = "tag")
@@ -124,6 +126,8 @@ nbt_list <- function(...) new_nbt(rlang::list2(...), tag = 9L)
 
 tag <- function(x) attr(x, "tag")
 
+list_tag <- function(x) tag(attr(x, "ptype"))
+
 tag_str <- function(x) {
     chr <- c("END", "BYTE", "SHORT", "INT", "LONG", "FLOAT",
         "DOUBLE", "BYTE_ARRAY", "STRING", "LIST", "COMPOUND",
@@ -135,6 +139,12 @@ tag_str <- function(x) {
 #' @export
 is_nbt <- function(x) {
     inherits(x, "rbedrock_nbt")
+}
+
+#' @rdname nbt
+#' @export
+unnbt <- function(x) {
+    rapply(x, payload, how="list")
 }
 
 #' @export
@@ -223,6 +233,14 @@ vec_cast.integer64.rbedrock_nbt <- function(x, to, ...) {
 #' @export
 vec_cast.list.rbedrock_nbt <- function(x, to, ...) {
     vec_cast(payload(x), list())
+}
+
+#' @export
+vec_ptype2.rbedrock_nbt.rbedrock_nbt <- function(x, y, ..., x_arg = "", y_arg = "") {
+  if (tag(x) != tag(y) || (tag(x) == 9L && list_tag(x) != list_tag(y))) {
+    stop_incompatible_type(x, y, x_arg = x_arg, y_arg = y_arg)
+  }
+  x
 }
 
 #' @export
