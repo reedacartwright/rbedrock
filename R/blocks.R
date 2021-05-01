@@ -39,7 +39,8 @@ get_chunk_blocks_data <- function(db, x, z, dimension,
 #'
 #' @return `get_chunk_blocks_value()`
 #' return a 16xNx16 character array. The axes represent the `x`, `y`, and `z`
-#' dimensions in that order.
+#' dimensions in that order. The size of the y-axis is based on the highest
+#' subchunk in the coordinate. Missing subchunks are considered air.
 #'
 #' @rdname get_chunk_blocks_data
 #' @export

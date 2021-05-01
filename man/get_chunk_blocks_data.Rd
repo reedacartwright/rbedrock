@@ -42,7 +42,8 @@ returned by \code{read_chunk_blocks_value()}.
 
 \code{get_chunk_blocks_value()}
 return a 16xNx16 character array. The axes represent the \code{x}, \code{y}, and \code{z}
-dimensions in that order.
+dimensions in that order. The size of the y-axis is based on the highest
+subchunk in the coordinate. Missing subchunks are considered air.
 }
 \description{
 These functions return block data as strings containing the
