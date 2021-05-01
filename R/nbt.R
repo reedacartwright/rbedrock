@@ -144,7 +144,11 @@ is_nbt <- function(x) {
 #' @rdname nbt
 #' @export
 unnbt <- function(x) {
-    rapply(x, payload, how="list")
+    if(is.list(x)) {
+        rapply(x, payload, how="list")
+    } else {
+        payload(x)
+    }
 }
 
 #' @export

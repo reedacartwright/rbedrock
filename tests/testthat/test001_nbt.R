@@ -175,3 +175,13 @@ test_that("read_nbt throws errors on malformed values", {
         expect_error(read_nbt(dat[1:!!i]))
     }
 })
+
+test_that("unnbt() strips metadata from nbtdat",{
+    nbt_1 <- nbt_byte(10L)
+    nbt_2 <- nbt_compound(A = nbt_int(10), B = nbt_compound(nbt_long(10), nbt_float(10)))
+    nbt_3 <- nbt_compound(nbt_list(nbt_float(10), nbt_float(20), nbt_float(30)))
+
+    expect_equal(unnbt(nbt_1), 10L)
+    expect_equal(unnbt(nbt_2), list(A = 10L, B = list(bit64::as.integer64(10), 10)))
+    expect_equal(unnbt(nbt_3), list(list(10,20,30)))
+})
