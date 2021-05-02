@@ -27,6 +27,7 @@
 #include <R_ext/Rdynload.h>
 #include <R_ext/Visibility.h>
 #include <Rversion.h>
+#include <Rinternals.h>
 
 #include "bedrock_leveldb.h"
 #include "key_conv.h"
@@ -110,20 +111,27 @@ static const R_CallMethodDef call_methods[] = {
     {"Cchrkeys_to_rawkeys", (DL_FUNC)&chrkeys_to_rawkeys, 1},
 
     {"Cread_nbt", (DL_FUNC)&read_nbt, 2},
+    {"Cwrite_nbt", (DL_FUNC)&write_nbt, 1},
 
     {"Cread_subchunk", (DL_FUNC)&read_subchunk, 1},
 
     {NULL, NULL, 0}};
 
-void attribute_visible R_init_rbedrock(DllInfo *info) {
-    bedrock_leveldb_init();
+void rbedrock_init_nbt();
 
+void attribute_visible R_init_rbedrock(DllInfo *info) {
     R_registerRoutines(info, NULL, call_methods, NULL, NULL);
     R_useDynamicSymbols(info, FALSE);
     R_forceSymbols(info, TRUE);
+
+    bedrock_leveldb_init();
+
+    rbedrock_init_nbt();
 }
 
 // This can't be easily tested
 // # nocov start
-void R_unload_rbedrock(DllInfo *info) { bedrock_leveldb_cleanup(); }
+void R_unload_rbedrock(DllInfo *info) {
+    bedrock_leveldb_cleanup();
+}
 // # nocov end

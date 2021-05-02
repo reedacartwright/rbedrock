@@ -176,7 +176,7 @@ test_that("read_nbt throws errors on malformed values", {
     }
 })
 
-test_that("unnbt() strips metadata from nbtdat",{
+test_that("unnbt() strips metadata from nbtdat", {
     nbt_1 <- nbt_byte(10L)
     nbt_2 <- nbt_compound(A = nbt_int(10), B = nbt_compound(nbt_long(10), nbt_float(10)))
     nbt_3 <- nbt_compound(nbt_list(nbt_float(10), nbt_float(20), nbt_float(30)))

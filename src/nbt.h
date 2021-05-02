@@ -26,3 +26,6 @@
 SEXP read_nbt(SEXP r_rawval, SEXP r_max_elements);
 SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned char* end,
         int max_elements);
+
+SEXP write_nbt(SEXP r_value);
+
