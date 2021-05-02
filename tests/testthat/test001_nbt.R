@@ -176,7 +176,7 @@ test_that("read_nbt throws errors on malformed values", {
     }
 })
 
-test_that("unnbt() strips metadata from nbtdat", {
+test_that("unnbt() strips metadata from nbt data", {
     nbt_1 <- nbt_byte(10L)
     nbt_2 <- nbt_compound(A = nbt_int(10), B = nbt_compound(nbt_long(10), nbt_float(10)))
     nbt_3 <- nbt_compound(nbt_list(nbt_float(10), nbt_float(20), nbt_float(30)))
@@ -184,4 +184,41 @@ test_that("unnbt() strips metadata from nbtdat", {
     expect_equal(unnbt(nbt_1), 10L)
     expect_equal(unnbt(nbt_2), list(A = 10L, B = list(bit64::as.integer64(10), 10)))
     expect_equal(unnbt(nbt_3), list(list(10,20,30)))
+})
+
+test_that("write_nbt() correctly encodes nbt data", {
+    expect_equal(write_nbt(list(test = nbt_byte(10L))), as_raw(tags$byte, rawstr("test"), 10))
+
+    expect_equal(write_nbt(nbt_byte(10)), as_raw(tags$byte, rawstr(""), 10))
+    expect_equal(write_nbt(nbt_short(10)), as_raw(tags$short, rawstr(""), 10, 0))
+    expect_equal(write_nbt(nbt_int(10)), as_raw(tags$int, rawstr(""), 10, 0, 0, 0))
+    expect_equal(write_nbt(nbt_long(10)), as_raw(tags$long, rawstr(""), 10, 0, 0, 0, 0, 0, 0, 0))
+    expect_equal(write_nbt(nbt_float(10)), as_raw(tags$float, rawstr(""), 0, 0, 32, 65))
+    expect_equal(write_nbt(nbt_double(10)), as_raw(tags$double, rawstr(""), 0, 0, 0, 0, 0, 0, 36, 64))
+    expect_equal(write_nbt(nbt_string("10")), as_raw(tags$string, rawstr(""), rawstr("10")))
+
+    expect_equal(write_nbt(nbt_byte_array(c(10,20))),
+        as_raw(tags$byte_array, rawstr(""), 2, 0, 0, 0, 10, 20))
+    expect_equal(write_nbt(nbt_int_array(c(10,20))),
+        as_raw(tags$int_array, rawstr(""), 2, 0, 0, 0, 10, 0, 0, 0, 20, 0, 0, 0))
+    expect_equal(write_nbt(nbt_long_array(c(10,20))),
+        as_raw(tags$long_array, rawstr(""), 2, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0,
+            20, 0, 0, 0, 0, 0, 0, 0))
+
+    expect_equal(write_nbt(nbt_compound(A = nbt_byte(1), B = nbt_byte(2))), 
+        as_raw(tags$compound, rawstr(""),
+               tags$byte, rawstr("A"), 1,
+               tags$byte, rawstr("B"), 2,
+               tags$end)
+        )
+
+    expect_equal(write_nbt(nbt_compound(nbt_byte(1), nbt_byte(2))), 
+        as_raw(tags$compound, rawstr(""),
+               tags$byte, rawstr(""), 1,
+               tags$byte, rawstr(""), 2,
+               tags$end)
+        )
+
+    expect_equal(write_nbt(nbt_list(nbt_byte(1), nbt_byte(2))),
+        as_raw(tags$list, rawstr(""), tags$byte, 2, 0, 0, 0, 1, 2))
 })

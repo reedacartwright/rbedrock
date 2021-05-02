@@ -43,7 +43,7 @@ put_nbt_value(db, key, value, writeoptions = NULL)
 
 put_nbt_data(db, data, writeoptions = NULL)
 
-read_nbt(rawval, max_elements = NULL, simplify = TRUE)
+read_nbt(rawdata, max_elements = NULL, simplify = TRUE)
 
 write_nbt(object)
 
@@ -72,9 +72,9 @@ write_nbt_data(data)
 
 \item{data}{A named-list specifying key-value pairs.}
 
-\item{rawval}{A \code{raw} vector of binary data to parse.}
+\item{rawdata}{A \code{raw} vector}
 
-\item{object}{A single object of class \code{nbtnode} or a named list of such objects.}
+\item{object}{An nbt object or a list of nbt objects}
 }
 \description{
 \code{get_nbt_data()} and \code{get_nbt_value()} load nbt-formatted data from \code{db} and parses it.
@@ -84,7 +84,7 @@ write_nbt_data(data)
 
 \code{read_nbt} reads NBT data from a \code{raw} vector.
 
-\code{write_nbt} writes a single \code{nbtnode} or a list of \code{nbtnodes} into \code{raw} vector.
+\code{write_nbt} encodes NBT data into a \code{raw} vector.
 
 \code{read_nbt_data} calls \code{read_nbt} on each element of a list.
 

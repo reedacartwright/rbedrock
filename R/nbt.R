@@ -340,14 +340,14 @@ put_nbt_data <- function(db, data, writeoptions = NULL) {
 #' @description
 #' `read_nbt` reads NBT data from a `raw` vector.
 #'
-#' @param rawval A `raw` vector of binary data to parse.
+#' @param rawdata A `raw` vector
 #' @rdname get_nbt_data
 #' @export
-read_nbt <- function(rawval, max_elements = NULL, simplify = TRUE) {
+read_nbt <- function(rawdata, max_elements = NULL, simplify = TRUE) {
     if(!is.null(max_elements)) {
         stopifnot(length(max_elements) == 1L && !is.na(max_elements))
     }
-    res <- .Call(Cread_nbt, rawval, max_elements)
+    res <- .Call(Cread_nbt, rawdata, max_elements)
     if(isTRUE(simplify) && length(res) == 1L && is.null(attributes(res))) {
         res <- res[[1]]
     }
@@ -355,20 +355,16 @@ read_nbt <- function(rawval, max_elements = NULL, simplify = TRUE) {
 }
 
 #' @description
-#' `write_nbt` writes a single `nbtnode` or a list of `nbtnodes` into `raw` vector.
+#' `write_nbt` encodes NBT data into a `raw` vector.
 #'
-#' @param object A single object of class `nbtnode` or a named list of such objects.
+#' @param object An nbt object or a list of nbt objects
 #' @rdname get_nbt_data
 #' @export
-write_nbt <- function (object) {
-    con <- rawConnection(raw(), "wb")
-    on.exit(close(con))
-    if(inherits(object,"nbtnode")) {
+write_nbt <- function(object) {
+    if(is_nbt(object)) {
         object <- list(object)
     }
-    .write_nbt_compound_payload(object, con)
-
-    rawConnectionValue(con)
+    .Call(Cwrite_nbt, object)
 }
 
 #' @description
@@ -388,85 +384,4 @@ read_nbt_data <- function(data, max_elements = NULL, simplify=TRUE) {
 #' @export
 write_nbt_data <- function(data) {
     purrr::map(data, write_nbt)
-}
-
-.write_nbt_tag <- function (tag, con) {
-    writeBin(tag, con, size = 1, endian = "little")
-}
-
-.write_nbt_name <- function (name, con) {
-    if(is.null(name)) {
-        name <- ""
-    }
-    stopifnot(length(name) == 1L)
-    name <- enc2utf8(name)
-    len <- nchar(name, type = "bytes")
-    writeBin(len, con, size = 2, endian = "little")
-    if(len > 0) {
-        writeChar(name, con, eos = NULL, useBytes = TRUE)
-    }
-}
-
-.write_nbt_compound_payload <- function(object, con) {
-    for (k in seq_along(object)) {
-        name <- names(object)[k]
-        value <- object[[k]]
-        tag <- attr(value, "tag", exact = TRUE)
-        .write_nbt_tag(tag, con)
-        .write_nbt_name(name, con)
-        .write_nbt_payload(value, tag, con)
-    }
-}
-
-.write_nbt_unit_payload <- function(object, con, ...) {
-    stopifnot(length(object) == 1L)
-    writeBin(as.vector(object), con, endian = "little", ...)
-}
-
-.write_nbt_array_payload <- function(object, con, ...) {
-    len <- length(object)
-    writeBin(len, con, size = 4L, endian = "little")
-    writeBin(as.vector(object), con, endian = "little", ...)
-}
-
-.write_nbt_list_payload <- function(object, con) {
-    ntag <- attr(attr(object, "ptype"), "tag")
-    len <- length(object)
-    .write_nbt_tag(ntag, con)
-    writeBin(len, con, size = 4L, endian = "little")
-    for(v in object) {
-        .write_nbt_payload(v, ntag, con)
-    }
-}
-
-.write_nbt_payload <- function(x, tag, con) {
-    switch(tag,
-        # BYTE
-        .write_nbt_unit_payload(vec_cast(x, integer()), con, size = 1L),
-        # SHORT
-        .write_nbt_unit_payload(vec_cast(x, integer()), con, size = 2L),
-        # INT
-        .write_nbt_unit_payload(vec_cast(x, integer()), con, size = 4L),
-        # LONG
-        .write_nbt_unit_payload(vec_cast(x, bit64::integer64()), con, size = 8L),
-        # FLOAT
-        .write_nbt_unit_payload(vec_cast(x, double()), con, size = 4L),
-        # DOUBLE
-        .write_nbt_unit_payload(vec_cast(x, double()), con, size = 8L),
-        # BYTEARRAY
-        .write_nbt_array_payload(vec_cast(x, integer()), con, size = 1L),
-        # STRING
-        .write_nbt_name(vec_cast(x, character()), con),
-        # LIST
-        .write_nbt_list_payload(x, con),
-        # COMPOUND
-        {
-            .write_nbt_compound_payload(x, con)
-            .write_nbt_tag(0L, con)
-        },
-        # INTARRAY
-        .write_nbt_array_payload(vec_cast(x, character()), con, size = 4L),
-        # LONGARRAY
-        .write_nbt_array_payload(vec_cast(x, bit64::integer64()), con, size = 8L)
-    )
 }
