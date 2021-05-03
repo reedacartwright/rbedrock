@@ -4,6 +4,7 @@
 \alias{get_subchunk_layers_data}
 \alias{get_subchunk_layers_value}
 \alias{read_subchunk_layers_value}
+\alias{write_subchunk_layers_value}
 \alias{block_palette}
 \title{Load and store SubchunkBlocks layers}
 \usage{
@@ -28,6 +29,8 @@ get_subchunk_layers_value(
 )
 
 read_subchunk_layers_value(rawdata, layer = 1L, simplify = TRUE)
+
+write_subchunk_layers_value(object)
 
 block_palette(object)
 }
@@ -65,6 +68,9 @@ It only supports loading a single value.
 
 \code{read_subchunk_layers_value()} decodes binary SubchunkBlock data
 into index-mapped arrays and associated block palettes.
+
+\code{write_subchunk_layers_value()} encode SubchunkBlock data
+into binary form.
 
 \code{block_palette()} returns the NBT palette associated with a block storage layer.
 }

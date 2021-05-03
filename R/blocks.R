@@ -170,6 +170,32 @@ read_subchunk_blocks_value <- function(rawdata, names_only = FALSE,
     b
 }
 
+#' @param object A 16x16x16 character array.
+#' @rdname SubchunkBlocks
+#' @export
+write_subchunk_blocks_value <- function(object) {
+    vec_assert(object, array(character(), c(0,16,16)), 16)
+    # check to see if we have extra blocks and split as needed
+    n <- max(stringr::str_count(object, stringr::fixed(";")))+1
+    if(n == 1) {
+        block_layers <- list(c(object))
+    } else {
+        s <- stringr::str_split(object, stringr::fixed(";"))
+        block_layers <- list()
+        for(i in 1:n) {
+            block_layers[[i]] <- purrr::map_chr(s, i, .default = "minecraft:air")
+        }
+    }
+
+    # construct palettes and maps
+    block_layers <- purrr::map(block_layers, function(x) {
+        u <- vec_unique(x)
+        structure(match(x,u), "palette" = purrr::map(u, .block_nbt))
+    })
+    #block_layers
+    .write_subchunk(block_layers)
+}
+
 #' Load and store SubchunkBlocks layers
 #'
 #' @description
@@ -244,6 +270,22 @@ read_subchunk_layers_value <- function(rawdata, layer = 1L, simplify = TRUE) {
 }
 
 #' @description
+#' `write_subchunk_layers_value()` encode SubchunkBlock data
+#' into binary form.
+#'
+#' @rdname get_subchunk_layers_data
+#' @export
+write_subchunk_layers_value <- function(object) {
+    if(is.null(object)) {
+        return(NULL)
+    }
+    if(!is.list(object)) {
+        object <- list(object)
+    }
+    .write_subchunk(object)
+}
+
+#' @description
 #' `block_palette()` returns the NBT palette associated with a block storage layer.
 #'
 #' @param object A storage layer returned from `read_subchunk` or `get_subchunk`.
@@ -265,9 +307,32 @@ block_palette <- function(object) {
     stringr::str_c(block_name, states, sep="@")
 }
 
+.block_nbt <- function(x) {
+    # convert block string back into palette information
+    s <- stringr::str_split(x, stringr::fixed('@'))[[1]]
+    name <- s[1]
+    if(length(s) > 1) {
+        s <- stringr::str_split(s[-1], stringr::fixed("="))
+        s <- purrr::transpose(s)
+        states <- rlang::set_names(s[[2]],s[[1]])
+        states <- nbt_compound(!!!purrr::map(states, nbt_string))
+    } else {
+        states <- nbt_compound()
+    }
+
+    nbt_compound(name = nbt_string(name),
+        states = states,
+        version = nbt_int(0x1100010)) # 1.16.0.16 ??
+}
+
 .read_subchunk <- function(rawdata) {
     vec_assert(rawdata, raw())
     .Call(Cread_subchunk, rawdata)
+}
+
+.write_subchunk <- function(object) {
+    vec_assert(object, list())
+    .Call(Cwrite_subchunk, object)
 }
 
 #' @description

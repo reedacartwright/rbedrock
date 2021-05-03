@@ -24,3 +24,4 @@
 #include <Rinternals.h>
 
 SEXP read_subchunk(SEXP r_value);
+SEXP write_subchunk(SEXP r_value);

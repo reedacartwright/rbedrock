@@ -114,10 +114,12 @@ static const R_CallMethodDef call_methods[] = {
     {"Cwrite_nbt", (DL_FUNC)&write_nbt, 1},
 
     {"Cread_subchunk", (DL_FUNC)&read_subchunk, 1},
+    {"Cwrite_subchunk", (DL_FUNC)&write_subchunk, 1},
 
     {NULL, NULL, 0}};
 
 void rbedrock_init_nbt();
+void rbedrock_block_nbt();
 
 void attribute_visible R_init_rbedrock(DllInfo *info) {
     R_registerRoutines(info, NULL, call_methods, NULL, NULL);
@@ -127,6 +129,7 @@ void attribute_visible R_init_rbedrock(DllInfo *info) {
     bedrock_leveldb_init();
 
     rbedrock_init_nbt();
+    rbedrock_block_nbt();
 }
 
 // This can't be easily tested

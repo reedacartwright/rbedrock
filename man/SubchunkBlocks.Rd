@@ -5,6 +5,7 @@
 \alias{get_subchunk_blocks_data}
 \alias{get_subchunk_blocks_value}
 \alias{read_subchunk_blocks_value}
+\alias{write_subchunk_blocks_value}
 \alias{subchunk_origins}
 \alias{subchunk_coords}
 \title{Load and store SubchunkBlocks data}
@@ -31,6 +32,8 @@ get_subchunk_blocks_value(
 
 read_subchunk_blocks_value(rawdata, names_only = FALSE, extra_block = FALSE)
 
+write_subchunk_blocks_value(object)
+
 subchunk_origins(keys)
 
 subchunk_coords(ind, origins = subchunk_origins(names(ind)))
@@ -51,6 +54,8 @@ output (separated by ";"). This is mostly useful if you have waterlogged
 blocks. If the extra block is air, it will not be appended.}
 
 \item{rawdata}{a raw vector holding binary SubchunkBlock data}
+
+\item{object}{A 16x16x16 character array.}
 
 \item{keys}{A character vector of database keys.}
 
