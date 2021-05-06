@@ -134,10 +134,8 @@ write_2dmaps_value <- function(height_map, biome_map) {
         height_map <- object[["height_map"]]
         biome_map <- object[["biome_map"]]
     }
-    height_map <- as.integer(height_map)
-    biome_map <- as.integer(biome_map)
-
-    stopifnot(length(height_map) == 256L && length(biome_map) == 256L)
+    height_map <- vec_recycle(as.integer(height_map), 256, x_arg="height_map")
+    biome_map <- vec_recycle(as.integer(biome_map), 256, x_arg="biome_map")
 
     .write_2dmaps_value_impl(height_map, biome_map)
 }

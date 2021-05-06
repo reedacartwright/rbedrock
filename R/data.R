@@ -72,6 +72,8 @@ has_values <- function(db, keys, readoptions = NULL) {
 #' @return An invisible copy of `db`.
 #' @export
 put_values <- function(db, keys, values, writeoptions = NULL) {
+    values <- vec_recycle(values, length(keys))
+    
     rawkeys <- chrkeys_to_rawkeys(keys)
     db$mput(rawkeys, values, writeoptions)
 }

@@ -37,7 +37,7 @@ get_checksums_data <- function(db, x=get_keys(db), z, dimension) {
 #' @export
 get_checksums_value <- function(db, x, z, dimension) {
     key <- .process_key_args(x,z,dimension, tag=59L)
-    stopifnot(rlang::is_scalar_character(key))
+    vec_assert(key, character(), 1)
 
     dat <- get_value(db, key)
     read_checksums_value(dat)
@@ -66,21 +66,26 @@ update_checksums_data <- function(db, x, z, dimension) {
 #' @rdname Checksums
 #' @export
 read_checksums_value <- function(rawdata) {
+    if(is.null(rawdata)) {
+        return(NULL)
+    }
     sz <- readBin(rawdata, integer(), n=1L, size= 4L, endian = "little")
-    rawdata <- rawdata[-c(1:4)]
-    stopifnot(length(rawdata) == sz*11L)
-    ret <- list()
-    for(i in 1:sz) {
-        tag <- readBin(rawdata, integer(), n=1L, size=2L, endian = "little")
-        subtag <- as.integer(rawdata[3])
-        hash <- rawdata[4:11]
+    vec_assert(rawdata, raw(), sz*11+4)
+    if(sz == 0) {
+        return(character())
+    }
+    rawdata <- rawdata[-c(1:4)] %>% split(rep(seq_len(sz), each=11))
+    ret <- purrr::map(rawdata, function(x) {
+        tag <- readBin(x, integer(), n=1L, size=2L, endian = "little")
+        subtag <- as.integer(x[3])
+        hash <- x[4:11]
         hash <- paste0(rev(as.character(hash)), collapse="")
         k <- ifelse(tag == 47L, paste(tag, subtag, sep="-"), as.character(tag))
-        ret[[k]] <- hash
-        rawdata <- rawdata[-c(1:11)]
-    }
-    storage.mode(ret) <- "character"
-    ret
+        list(hash, k)
+    })
+    ret <- purrr::transpose(ret)
+
+    rlang::set_names(purrr::as_vector(ret[[1]]), ret[[2]])
 }
 
 #' @description
@@ -102,20 +107,27 @@ write_checksums_value <- function(object) {
 
     subtag[is.na(subtag)] <- 0L
 
-    hash <- purrr::map(object, function(x){
+    hash <- purrr::map(object, function(x) {
         h <- strsplit(x, character(0L))[[1]]
         h <- paste(h[c(TRUE,FALSE)], h[c(FALSE,TRUE)], sep="")
         as.raw(as.hexmode(rev(h)))
     })
 
     ret <- writeBin(length(object), raw(), size=4L, endian="little")
-    for(i in 1:length(object)) {
-        ret <- c(ret,
-            writeBin(tag[i], raw(), size=2L, endian="little"),
-            as.raw(subtag[i]),
-            hash[[i]])
-    }
-    ret
+    retp <- purrr::map(seq_along(object), function(i) {
+        c(writeBin(tag[i], raw(), size=2L, endian="little"),
+            as.raw(subtag[i]), hash[[i]])
+    })
+    c(ret, purrr::flatten_raw(retp))
+
+
+    # for(i in seq_along(object)) {
+    #     ret <- c(ret,
+    #         writeBin(tag[i], raw(), size=2L, endian="little"),
+    #         as.raw(subtag[i]),
+    #         hash[[i]])
+    # }
+    #ret
 }
 
 .update_checksums_value_impl <- function(db, key) {

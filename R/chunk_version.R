@@ -82,7 +82,7 @@ put_chunk_version_data <- function(db, data) {
 put_chunk_version_values <- function(db, x, z, dimension, values) {
     keys <- .process_key_args(x, z, dimension, tag=44L, stop_if_filtered = TRUE)
     values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
-    values <- purrr::map(values, write_finalization_value)
+    values <- purrr::map(values, write_chunk_version_value)
     put_values(db, keys, values)
 }
 
@@ -93,7 +93,7 @@ put_chunk_version_values <- function(db, x, z, dimension, values) {
 put_chunk_version_value <- function(db, x, z, dimension, value) {
     key <- .process_key_args(x, z, dimension, tag=44L)
     stopifnot(rlang::is_scalar_character(key))
-    value <- write_finalization_value(value)
+    value <- write_chunk_version_value(value)
     put_value(db, key, value)
 }
 

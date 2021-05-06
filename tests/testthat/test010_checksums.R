@@ -52,6 +52,14 @@ test_that("update_checksums_data works", {
     }
 })
 
+test_that("update_checksums_data() and get_checksums_value() handle missing data", {
+    dat <- get_checksums_value(db, -10, -10, 0)
+    expect_equal(dat, NULL)
+    update_checksums_data(db, -10, -10, 0)
+    dat <- get_checksums_value(db, -10, -10, 0)
+    expect_equal(dat, character())
+})
+
 test_that("update_checksums_data throws an error if filtering", {
     expect_error(update_checksums_data(db,c("@36:16:0:47-0", "@37:15:0:59")))
 })
