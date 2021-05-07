@@ -46,7 +46,8 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
 #' @rdname minecraft_worlds
 #' @export
 export_world <- function(id, file, worlds_dir = worlds_dir_path()) {
-    stopifnot(is.character(file) && length(file) == 1L && !is.na(file))
+    vec_assert(file, character(), 1L)
+    stopifnot(!is.na(file))
 
     world_path <- .fixup_path(id, worlds_dir, verify=TRUE)
     
@@ -112,7 +113,7 @@ import_world <- function(file, worlds_dir = worlds_dir_path(), levelname = NULL)
 }
 
 .fixup_path <- function(path, worlds_dir = worlds_dir_path(), verify = FALSE) {
-    stopifnot(rlang::is_scalar_character(path))
+    vec_assert(path, character(), 1L)
 
     if (file.exists(path)) {
         path <- normalizePath(path)

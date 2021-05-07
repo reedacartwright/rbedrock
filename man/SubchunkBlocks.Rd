@@ -4,6 +4,9 @@
 \alias{SubchunkBlocks}
 \alias{get_subchunk_blocks_data}
 \alias{get_subchunk_blocks_value}
+\alias{put_subchunk_blocks_data}
+\alias{put_subchunk_blocks_values}
+\alias{put_subchunk_blocks_value}
 \alias{read_subchunk_blocks_value}
 \alias{write_subchunk_blocks_value}
 \alias{subchunk_origins}
@@ -30,6 +33,12 @@ get_subchunk_blocks_value(
   extra_block = FALSE
 )
 
+put_subchunk_blocks_data(db, data)
+
+put_subchunk_blocks_values(db, x, z, dimension, subchunk, values)
+
+put_subchunk_blocks_value(db, x, z, dimension, subchunk, value)
+
 read_subchunk_blocks_value(rawdata, names_only = FALSE, extra_block = FALSE)
 
 write_subchunk_blocks_value(object)
@@ -52,6 +61,12 @@ ignoring block states.}
 \item{extra_block}{A logical scalar. Append the extra block layer to the
 output (separated by ";"). This is mostly useful if you have waterlogged
 blocks. If the extra block is air, it will not be appended.}
+
+\item{data}{A named list of 16x16x16 character() arrays}
+
+\item{values}{A list of 16x16x16 character() arrays}
+
+\item{value}{A 16x16x16 character array}
 
 \item{rawdata}{a raw vector holding binary SubchunkBlock data}
 
@@ -95,6 +110,9 @@ It will silently drop and keys not representing SubchunkBlocks data.
 
 \code{get_subchunk_blocks_value()} loads SubchunkBlocks data from a \code{bedrockdb}.
 It only supports loading a single value.
+
+\code{put_subchunk_blocks_data()}, \code{put_subchunk_blocks_values()}, and
+\code{put_subchunk_blocks_value()} store SubchunkBlocks data into a \code{bedrockdb}.
 
 \code{read_subchunk_blocks_value()} decodes binary SubchunkBlock data.
 

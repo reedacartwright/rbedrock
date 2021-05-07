@@ -29,6 +29,6 @@ get_pending_block_ticks_data <- function(db, x=get_keys(db), z, dimension) {
 #' @rdname PendingBlockTicks
 #' @export
 put_pending_block_ticks_data <- function(db, data) {
-    stopifnot(.check_chunk_key_tag(names(data), 51L))
+    .check_chunk_key_tag(names(data), 51L)
     put_nbt_data(db, data)
 }

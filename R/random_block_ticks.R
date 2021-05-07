@@ -29,6 +29,6 @@ get_random_block_ticks_data <- function(db, x=get_keys(db), z, dimension) {
 #' @export
 #' @rdname RandomBlockTicks
 put_random_block_ticks_data <- function(db, data) {
-    stopifnot(.check_chunk_key_tag(names(data), 58L))
+    .check_chunk_key_tag(names(data), 58L)
     put_nbt_data(db, data)
 }

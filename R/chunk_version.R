@@ -47,11 +47,11 @@ get_chunk_version_data <- function(db, x, z, dimension, include_legacy = TRUE) {
 #' @export
 get_chunk_version_value <- function(db, x, z, dimension, include_legacy = TRUE) {
     key <- .process_key_args(x, z, dimension, tag=44L)
-    stopifnot(rlang::is_scalar_character(key))
+    vec_assert(key, character(), 1L)
     val <- get_value(db, key)
     if(is.null(val) && isTRUE(include_legacy)) {
         key <- .process_key_args(x, z, dimension, tag=118L)
-        stopifnot(rlang::is_scalar_character(key))
+        vec_assert(key, character(), 1L)
         val <- get_value(db, key)
     }
     read_chunk_version_value(val)
@@ -70,7 +70,7 @@ get_chunk_version_value <- function(db, x, z, dimension, include_legacy = TRUE) 
 #' @rdname ChunkVersion
 #' @export
 put_chunk_version_data <- function(db, data) {
-    stopifnot(all(.get_tag_from_chunk_key(names(data)) %in% c(44L,118L)))
+    .check_chunk_key_tag(names(data), c(44L,118L))
     dat <- purrr::map(data, write_chunk_version_value)
     put_data(db, dat)
 }
@@ -92,7 +92,7 @@ put_chunk_version_values <- function(db, x, z, dimension, values) {
 #' @export
 put_chunk_version_value <- function(db, x, z, dimension, value) {
     key <- .process_key_args(x, z, dimension, tag=44L)
-    stopifnot(rlang::is_scalar_character(key))
+    vec_assert(key, character(), 1L)
     value <- write_chunk_version_value(value)
     put_value(db, key, value)
 }
@@ -108,7 +108,7 @@ read_chunk_version_value <- function(rawdata) {
     if(is.null(rawdata)) {
         return(NULL)
     }
-    stopifnot(rlang::is_scalar_raw(rawdata))
+    vec_assert(rawdata, raw())
     as.integer(rawdata)
 }
 

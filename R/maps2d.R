@@ -46,8 +46,7 @@ get_2dmaps_data <- function(db, x, z, dimension) {
 #' @export
 get_2dmaps_value <- function(db, x, z, dimension) {
     key <- .process_key_args(x, z, dimension, tag=45L)
-    stopifnot(rlang::is_scalar_character(key))
-
+    vec_assert(key, character(), 1L)
     dat <- get_value(db, key)
     read_2dmaps_value(dat)
 }
@@ -63,8 +62,7 @@ read_2dmaps_value <- function(rawdata) {
     if(is.null(rawdata)) {
         return(NULL)
     }
-    stopifnot(rlang::is_raw(rawdata, n = 768L))
-    
+    vec_assert(rawdata, raw(), 768L)    
     .read_2dmaps_value_impl(rawdata)
 }
 
@@ -107,7 +105,7 @@ put_2dmaps_values <- function(db, x, z, dimension, values) {
 #' @export
 put_2dmaps_value <- function(db, x, z, dimension, value) {
     key <- .process_key_args(x, z, dimension, tag=45L)
-    stopifnot(rlang::is_scalar_character(key))
+    vec_assert(key, character(), 1L)
     value <- write_2dmaps_value(value)
     put_value(db, key, value)
 }

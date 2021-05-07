@@ -57,7 +57,7 @@ get_hsa_data <- function(db, x=get_keys(db), z, dimension) {
 #' @export
 get_hsa_value <- function(db, x, z, dimension) {
     key <- .process_key_args(x,z,dimension, tag=57L)
-    stopifnot(rlang::is_scalar_character(key))
+    vec_assert(key, character(), 1L)
     dat <- get_value(db, key)
     hsa <- read_hsa_value(dat)
     hsa$dimension <- .get_dimension_from_chunk_key(key)
@@ -92,6 +92,8 @@ read_hsa_value <- function(rawdata) {
         return(hsa)
     }
     sz <- readBin(rawdata, integer(), n=1L, size= 4L, endian = "little")
+    vec_assert(rawdata, raw(), sz*25L+4)
+    
     rawdata <- rawdata[-c(1:4)]
     stopifnot(length(rawdata) == sz*25L)
     mat <- matrix(0L, nrow=sz, ncol=7)
@@ -202,7 +204,7 @@ put_hsa_values <- function(db, x, z, dimension, values) {
 #' @export
 put_hsa_value <- function(db, x, z, dimension, value) {
     key <- .process_key_args(x, z, dimension, tag=57L)
-    stopifnot(rlang::is_scalar_character(key))
+    vec_assert(key, character(), 1L)
     value <- write_hsa_value(value)
     put_value(db, key, value)
 }

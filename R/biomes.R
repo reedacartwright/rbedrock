@@ -52,8 +52,7 @@ get_biomes_data <- function(db, x, z, dimension, return_names = TRUE) {
 #' @export
 get_biomes_value <- function(db, x, z, dimension, return_names = TRUE) {
     key <- .process_key_args(x, z, dimension, tag=45L)
-    stopifnot(rlang::is_scalar_character(key))
-
+    vec_assert(key, character(), 1L)
     dat <- get_value(db, key)
     if(is.null(dat)) {
         return(NULL)
@@ -92,7 +91,7 @@ put_biomes_values <- function(db, x, z, dimension, values,
         if(is.null(d)) {
             h <- rep(missing_height, 256L)
         } else {
-            stopifnot(rlang::is_raw(d, n = 768L))
+            vec_assert(d, raw(), 768L)
             h <- .read_2dmaps_value_impl(d)$height_map
         }
         if(is.character(b)) {
@@ -113,13 +112,13 @@ put_biomes_values <- function(db, x, z, dimension, values,
 put_biomes_value <- function(db, x, z, dimension, value,
     missing_height = 0L) {
     key <- .process_key_args(x, z, dimension, tag=45L)
-    stopifnot(rlang::is_scalar_character(key))
+    vec_assert(key, character(), 1L)
 
     d <- get_value(db, key)
     if(is.null(d)) {
         h <- rep(missing_height, 256L)
     } else {
-        stopifnot(rlang::is_raw(d, n = 768L))
+        vec_assert(d, raw(), 768L)
         h <- .read_2dmaps_value_impl(d)$height_map
     }
     b <- value

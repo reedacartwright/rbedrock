@@ -42,8 +42,7 @@ get_finalization_data <- function(db, x, z, dimension) {
 #' @export
 get_finalization_value <- function(db, x, z, dimension) {
     key <- .process_key_args(x, z, dimension, tag=54L)
-    stopifnot(rlang::is_scalar_character(key))
-
+    vec_assert(key, character(), 1L)
     dat <- get_value(db, key)
     read_finalization_value(dat)
 }
@@ -57,7 +56,7 @@ get_finalization_value <- function(db, x, z, dimension) {
 #' @rdname Finalization
 #' @export
 put_finalization_data <- function(db, data) {
-    stopifnot(all(.get_tag_from_chunk_key(names(data)) == 54L))
+    .check_chunk_key_tag(names(data), 54L)
     dat <- purrr::map(data, write_finalization_value)
     put_data(db, dat)
 }
@@ -79,7 +78,7 @@ put_finalization_values <- function(db, x, z, dimension, values) {
 #' @export
 put_finalization_value <- function(db, x, z, dimension, value) {
     key <- .process_key_args(x, z, dimension, tag=54L)
-    stopifnot(rlang::is_scalar_character(key))
+    vec_assert(key, character(), 1L)
     value <- write_finalization_value(value)
     put_value(db, key, value)
 }

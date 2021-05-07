@@ -30,6 +30,6 @@ get_entities_data <- function(db, x=get_keys(db), z, dimension) {
 #' @rdname Entities
 #' @export
 put_entities_data <- function(db, data) {
-    stopifnot(.check_chunk_key_tag(names(data), 50L))
+    .check_chunk_key_tag(names(data), 50L)
     put_nbt_data(db, data)
 }

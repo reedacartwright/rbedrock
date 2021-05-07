@@ -194,10 +194,14 @@ chunk_tag_int <- function(tags) {
     stringr::str_extract(keys, "^@[^:]+:[^:]+:[^:]+")
 }
 
-.check_chunk_key_tag <- function(keys, tag) {
+.check_chunk_key_tag <- function(keys, tag, silent = FALSE) {
     ktag <- .get_tag_from_chunk_key(keys)
-    b <- !is.na(ktag) & ktag == tag
-    all(b)
+    b <- !is.na(ktag) & ktag %in% tag
+    isgood <- all(b)
+    if(isFALSE(silent) && !isgood) {
+        rlang::abort(stringr::str_glue("Invalid key: tag is not {tag}."))
+    }
+    isgood
 }
 
 .CHUNK_KEY_RE = "^@[^:]+:[^:]+:[^:]+:[^:-]+(?:-[^:-]+)?$"

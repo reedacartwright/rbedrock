@@ -8,7 +8,6 @@ test_that("SubchunkBlocks is chunk tag 47.", {
     expect_equal(chunk_tag_str(47L), "SubchunkBlocks")
 })
 
-
 test_that("write_subchunk_layers_value() encodes subchunk data.", {
     raw1_orig <- get_value(db, "@31:2:0:47-0")
     layer1 <- read_subchunk_layers_value(raw1_orig, layer = NULL, simplify = FALSE)
@@ -24,6 +23,50 @@ test_that(".block_nbt() and .block_string() are inverses.", {
     pal_test <- purrr::map(text, .block_nbt)
 
     expect_equal(pal_orig, pal_test)
+})
+
+test_that("put_subchunk_blocks_value() writes subchunk data.", {
+    val <- array("minecraft:air", c(16,16,16))
+    val[,1,] <- "minecraft:bedrock@infiniburn_bit=false"
+    val[,2,] <- "minecraft:stone@stone_type=stone"
+    val[,3,] <- "minecraft:iron_ore"
+    val[,4,] <- "minecraft:snow_layer@height=5@covered_bit=true"
+
+    put_subchunk_blocks_value(db, 0, 0, 0, 0, val)
+    dat <- get_subchunk_blocks_value(db, 0, 0, 0, 0)
+    expect_equal(dat, val)
+})
+
+test_that("put_subchunk_blocks_values() writes subchunk data.", {
+    val <- array("minecraft:air", c(16,16,16))
+    val[,1,] <- "minecraft:bedrock@infiniburn_bit=false"
+    val[,2,] <- "minecraft:stone@stone_type=granite"
+    val[,3,] <- "minecraft:iron_ore"
+    val[,4,] <- "minecraft:snow_layer@height=5@covered_bit=true"
+
+    put_subchunk_blocks_values(db, 0, 0, 0, 1:4, list(val))
+    dat <- get_subchunk_blocks_data(db, 0, 0, 0, 1:4)
+
+    val <- rlang::set_names(rep(list(val), 4),
+        stringr::str_glue("@0:0:0:47-{1:4}"))
+
+    expect_equal(dat, val)
+})
+
+test_that("put_subchunk_blocks_data() writes subchunk data.", {
+    val <- array("minecraft:air", c(16,16,16))
+    val[,1,] <- "minecraft:bedrock@infiniburn_bit=false"
+    val[,2,] <- "minecraft:stone@stone_type=andesite"
+    val[,3,] <- "minecraft:iron_ore"
+    val[,4,] <- "minecraft:snow_layer@height=5@covered_bit=true"
+
+    val <- rlang::set_names(rep(list(val), 4),
+        stringr::str_glue("@1:1:0:47-{1:4}"))
+
+    put_subchunk_blocks_data(db, val)
+    dat <- get_subchunk_blocks_data(db, names(val))
+
+    expect_equal(dat, val)
 })
 
 # clean up

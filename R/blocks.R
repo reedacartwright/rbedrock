@@ -142,6 +142,42 @@ get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
 }
 
 #' @description
+#' `put_subchunk_blocks_data()`, `put_subchunk_blocks_values()`, and
+#' `put_subchunk_blocks_value()` store SubchunkBlocks data into a `bedrockdb`.
+#'
+#' @param data A named list of 16x16x16 character() arrays
+#'
+#' @rdname SubchunkBlocks
+#' @export
+put_subchunk_blocks_data <- function(db, data) {
+    .check_chunk_key_tag(names(data), 47L)
+    dat <- purrr::map(data, write_subchunk_blocks_value)
+    put_data(db, dat)
+}
+
+#' @param values A list of 16x16x16 character() arrays
+#'
+#' @rdname SubchunkBlocks
+#' @export
+put_subchunk_blocks_values <- function(db, x, z, dimension, subchunk, values) {
+    keys <- .process_key_args(x, z, dimension, tag=47L, subtag = subchunk, stop_if_filtered = TRUE)
+    values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
+    values <- purrr::map(values, write_subchunk_blocks_value)
+    put_values(db, keys, values)
+}
+
+#' @param value A 16x16x16 character array
+#'
+#' @rdname SubchunkBlocks
+#' @export
+put_subchunk_blocks_value <- function(db, x, z, dimension, subchunk, value) {
+    key <- .process_key_args(x, z, dimension, tag=47L, subtag = subchunk)
+    vec_assert(key, character(), 1L)
+    value <- write_subchunk_blocks_value(value)
+    put_value(db, key, value)
+}
+
+#' @description
 #' `read_subchunk_blocks_value()` decodes binary SubchunkBlock data.
 #'
 #' @param rawdata a raw vector holding binary SubchunkBlock data
@@ -245,6 +281,42 @@ get_subchunk_layers_value <- function(db, x, z, dimension, subchunk, layer = 1L,
 
     dat <- get_value(db, key)
     read_subchunk_layers_value(dat, layer = layer, simplify = simplify)
+}
+
+#' @description
+#' `put_subchunk_layers_data()`, `put_subchunk_layers_values()`, and
+#' `put_subchunk_layers_value()` store SubchunkBlocks data into a `bedrockdb`.
+#'
+#' @param data A named-vector of key-value pairs for SubchunkBlocks data.
+#'
+#' @rdname get_subchunk_layers_data
+#' @export
+put_subchunk_layers_data <- function(db, data) {
+    .check_chunk_key_tag(names(data), 47L)
+    dat <- purrr::map(data, write_subchunk_layers_value)
+    put_data(db, dat)
+}
+
+#' @param values A list of lists of 16x16x16 integer indexes with associated block_palettes.
+#'
+#' @rdname get_subchunk_layers_data
+#' @export
+put_subchunk_layers_values <- function(db, x, z, dimension, subchunk, values) {
+    keys <- .process_key_args(x, z, dimension, tag=47L, subtag = subchunk, stop_if_filtered = TRUE)
+    values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
+    values <- purrr::map(values, write_subchunk_layers_value)
+    put_values(db, keys, values)
+}
+
+#' @param value A list of 16x16x16 integer indexes with associated block_palettes.
+#'
+#' @rdname get_subchunk_layers_data
+#' @export
+put_subchunk_layers_value <- function(db, x, z, dimension, subchunk, value) {
+    key <- .process_key_args(x, z, dimension, tag=47L, subtag = subchunk)
+    vec_assert(key, character(), 1L)
+    value <- write_subchunk_layers_value(value)
+    put_value(db, key, value)
 }
 
 #' @description
