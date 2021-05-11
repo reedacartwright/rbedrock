@@ -31,14 +31,15 @@ Imports:
     dplyr,
     purrr,
     magrittr,
-    jsonlite,
     readr,
     utils,
     digest,
     vctrs,
-    tidyr
+    tidyr,
+    fs
 Suggests:
     zip,
-    testthat
+    testthat,
+    jsonlite,
 URL: http://github.com/reedacartwright/rbedrock/
 BugReports: http://github.com/reedacartwright/rbedrock/issues

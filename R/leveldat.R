@@ -14,7 +14,7 @@
 #' @export
 read_leveldat <- function(path, old = FALSE) {
     path <- .fixup_path(path, verify=TRUE)
-    path <- file.path(path, "level.dat")
+    path <- fs::path(path, "level.dat")
     if (old) {
         path <- paste0(path, "_old")
     }
@@ -32,7 +32,7 @@ read_leveldat <- function(path, old = FALSE) {
 #' @rdname read_leveldat
 write_leveldat <- function(object, path, old = FALSE, version = 8L) {
     path <- .fixup_path(path)
-    path <- file.path(path, "level.dat")
+    path <- fs::path(path, "level.dat")
     if (old) {
         path <- paste0(path, "_old")
     }

@@ -12,9 +12,10 @@
 
 rbedrock_example <- function(path = NULL) {
   if (is.null(path)) {
-    dir(system.file("extdata", package = "rbedrock"))
+    extdata <- fs::path_package("rbedrock", "extdata")
+    fs::path_file(fs::dir_ls(extdata))
   } else {
-    system.file("extdata", path, package = "rbedrock", mustWork = TRUE)
+    fs::path_package("rbedrock", "extdata", path)
   }
 }
 
@@ -22,7 +23,6 @@ rbedrock_example <- function(path = NULL) {
 #' @rdname rbedrock_example
 rbedrock_example_world <- function(path) {
     path <- rbedrock_example(path)
-    destdir <- tempfile("exampleWorld")
-    worldname <- import_world(path, destdir)
-    file.path(destdir,worldname)
+    destdir <- tempfile("world")
+    suppressMessages(import_world(path, destdir))
 }

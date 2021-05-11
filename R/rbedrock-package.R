@@ -1,6 +1,9 @@
 #' @details
 #' rbedrock is currently under development.
 #' @keywords internal
+#' @import vctrs
+#' @import rlang
+#' @import stringr
 "_PACKAGE"
 
 #' Pipe operator
@@ -11,25 +14,6 @@
 #' @export
 #' @importFrom magrittr %>%
 #' @usage lhs \%>\% rhs
-NULL
-
-#' Internal vctrs methods
-#'
-#' @import vctrs
-#' @keywords internal
-#' @name rbedrock-vctrs
-NULL
-
-## Replace missing values operator
-##
-#' @keywords internal
-#' @importFrom rlang %|%
-NULL
-
-## Silence warnings about undefined global variables
-##
-#' @importFrom rlang .data
-#' @keywords internal
 NULL
 
 # The following block is used by usethis to automatically manage

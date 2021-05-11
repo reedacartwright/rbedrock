@@ -18,7 +18,6 @@
 #' @export
 nbt <- function(x = list(), tag = 0L) {
     tag <- vec_recycle(vec_cast(tag, integer()), 1L, x_arg = "tag")
-
     new_nbt(x, tag = tag)
 }
 
@@ -63,8 +62,8 @@ new_nbt <- function(x = list(), tag = 0L) {
             y <- purrr::map(x, `attr<-`, "ptype", NULL )
             ptype <- vec_ptype_common(!!!y)
             if(is.null(ptype)) {
-                rlang::abort("Could not find common type for elements of `x`.")
-            }            
+                abort("Could not find common type for elements of `x`.")
+            }
         }
         ret <- new_list_of(x, tag = tag, ptype = ptype, class = cls)
         return(ret)

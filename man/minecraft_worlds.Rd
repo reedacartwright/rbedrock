@@ -12,28 +12,34 @@ worlds_dir_path(default = FALSE)
 
 list_worlds(worlds_dir = worlds_dir_path())
 
-export_world(id, file, worlds_dir = worlds_dir_path())
+export_world(id, file, worlds_dir = worlds_dir_path(), replace = FALSE)
 
-import_world(file, worlds_dir = worlds_dir_path(), levelname = NULL)
+import_world(file, id = NULL, worlds_dir = worlds_dir_path(), levelname = NULL)
 }
 \arguments{
 \item{default}{If \code{TRUE}, return most likely world path on the system.}
 
 \item{worlds_dir}{The path of a \code{minecraftWorlds} directory.}
 
-\item{id}{The path to a world folder. If the path does not exist, it is
-assumed to be the base name of a world folder in \code{worlds_dir}.}
+\item{id}{The path to a world folder. If the path is not absolute or does not
+exist, it is assumed to be the base name of a world folder in \code{worlds_dir}.
+For \code{import_world()}, if \code{id} is \code{NULL} a unique world id will be
+generated. How it is generated is controlled by the
+\code{rbedrock.rand_world_id} global options. Possible values are "pretty" and
+"mcpe".}
 
-\item{file}{The path to an mcworld file. If exporting, it will be created
-and overwritten if it exists. If importing, it will be extracted.}
+\item{file}{The path to an mcworld file. If exporting, it will be created.
+If importing, it will be extracted.}
+
+\item{replace}{If \code{TRUE}, overwrite an existing file if necessary.}
 
 \item{levelname}{Rename the imported world to this name.}
 }
 \value{
-\code{world_dir_path} returns the path to the \code{minecraftWorlds} directory.
+\code{world_dir_path()} returns the path to the \code{minecraftWorlds} directory.
 You can use \code{options(rbedrock.worlds_dir_path = "custom/path")} to customize the path
 as needed.
-\code{list_worlds} returns a \code{data.frame} containing information about Minecraft saved games.
+\code{list_worlds()} returns a \code{data.frame} containing information about Minecraft saved games.
 }
 \description{
 Utilities for working with Minecraft world folders.

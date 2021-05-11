@@ -12,10 +12,12 @@
 }
 
 op.rbedrock <- list(
-    rbedrock.worlds_dir_path = .worlds_dir_path_def()
+    rbedrock.worlds_dir_path = .worlds_dir_path_def(),
+    rbedrock.rand_world_id = "pretty"
 )
 
 rbedrock_opt <- function(x) {
+    vec_assert(x, character(), 1L)
     x_rbedrock <- paste0("rbedrock.", x)
     res <- getOption(x_rbedrock)
     if (!is.null(res)) {
