@@ -126,7 +126,7 @@ import_world <- function(file, id = NULL, worlds_dir = worlds_dir_path(), leveln
     path <- vec_cast(path, character())
 
     # if path is absolute, or it already exists don't append it to worlds_dir
-    if(!(str_detect(path, "^\\s*/") || fs::file_exists(path))) {
+    if(!(fs::is_absolute_path(path) || fs::file_exists(path))) {
         path <- fs::path(worlds_dir, path)
     }
     path <- fs::path_abs(path)
