@@ -71,4 +71,4 @@ test_that("put_subchunk_blocks_data() writes subchunk data.", {
 
 # clean up
 close(db)
-unlink(dirname(dbpath), recursive=TRUE, expand = FALSE)
+fs::dir_delete(dbpath)

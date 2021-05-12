@@ -45,4 +45,4 @@ test_that("put_entities_data throws error if asked to write non Entities data", 
 
 # clean up
 close(db)
-unlink(dirname(dbpath), recursive=TRUE, expand = FALSE)
+fs::dir_delete(dbpath)

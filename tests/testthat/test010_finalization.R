@@ -87,3 +87,7 @@ test_that("write_finalizaton_value requires integerish values", {
     expect_error(write_finalization_value(2.1))
     expect_error(write_finalization_value(c(2L,3L)))
 })
+
+# clean up
+close(db)
+fs::dir_delete(dbpath)

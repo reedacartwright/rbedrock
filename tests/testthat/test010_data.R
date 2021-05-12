@@ -95,5 +95,5 @@ test_that("delete_values removes data from the db", {
 
 # clean up
 close(db)
-unlink(dirname(dbpath), recursive=TRUE, expand = FALSE)
+fs::dir_delete(dbpath)
 

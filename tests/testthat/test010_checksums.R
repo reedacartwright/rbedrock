@@ -104,4 +104,4 @@ test_that("write_checksums_value encodes correctly",{
 
 # clean up
 close(db)
-unlink(dirname(dbpath), recursive=TRUE, expand = FALSE)
+fs::dir_delete(dbpath)

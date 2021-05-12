@@ -117,11 +117,11 @@ nbt_long_array <- function(x = bit64::integer64()) new_nbt(vec_cast(x, bit64::in
 
 #' @rdname nbt
 #' @export
-nbt_compound <- function(...) new_nbt(rlang::list2(...), tag = 10L)
+nbt_compound <- function(...) new_nbt(list2(...), tag = 10L)
 
 #' @rdname nbt
 #' @export
-nbt_list <- function(...) new_nbt(rlang::list2(...), tag = 9L)
+nbt_list <- function(...) new_nbt(list2(...), tag = 9L)
 
 tag <- function(x) attr(x, "tag")
 
@@ -151,13 +151,27 @@ unnbt <- function(x) {
 }
 
 #' @export
-#' @importFrom vctrs vec_ptype_abbr
+`$<-.rbedrock_nbt` <- function(x, i, value) {
+    if(tag(x) == 10L) {
+        value <- vec_cast(value, vec_ptype(x[[i]]))
+    }
+    NextMethod()
+}
+
+#' @export
+`[[<-.rbedrock_nbt` <- function(x, i, value) {
+    if(tag(x) == 10L) {
+        value <- vec_cast(value, vec_ptype(x[[i]]))
+    }
+    NextMethod()    
+}
+
+#' @export
 vec_ptype_abbr.rbedrock_nbt <- function(x, ...) {
     "nbt"
 }
 
 #' @export
-#' @importFrom vctrs vec_ptype_full
 vec_ptype_full.rbedrock_nbt <- function(x, ...) {
     paste0("rbedrock_nbt<", tag_str(x), ">")
 }
@@ -196,7 +210,16 @@ vec_ptype_full.rbedrock_nbt <- function(x, ...) {
 }
 
 #' @export
-vec_cast.rbedrock_nbt.rbedrock_nbt <- function(x, to, ...) x
+vec_cast.rbedrock_nbt.rbedrock_nbt <- function(x, to, ...) {
+    if (tag(x) != tag(to) || (tag(x) == 9L && list_tag(x) != list_tag(to))) {
+        # try to convert payloads if different nbt types
+        nbt(payload(x), tag(to))
+    } else {
+        # return x unchanged if it matches to. This allows casts with
+        # matching zero-length vectors to bypass asserts in nbt().
+        x
+    }
+}
 
 #' @export
 vec_cast.rbedrock_nbt.character <- function(x, to, ...) nbt(x, tag(to))
@@ -240,10 +263,10 @@ vec_cast.list.rbedrock_nbt <- function(x, to, ...) {
 
 #' @export
 vec_ptype2.rbedrock_nbt.rbedrock_nbt <- function(x, y, ..., x_arg = "", y_arg = "") {
-  if (tag(x) != tag(y) || (tag(x) == 9L && list_tag(x) != list_tag(y))) {
-    stop_incompatible_type(x, y, x_arg = x_arg, y_arg = y_arg)
-  }
-  x
+    if (tag(x) != tag(y) || (tag(x) == 9L && list_tag(x) != list_tag(y))) {
+        stop_incompatible_type(x, y, x_arg = x_arg, y_arg = y_arg)
+    }
+    x
 }
 
 #' @export

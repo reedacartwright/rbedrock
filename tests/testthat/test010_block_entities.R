@@ -58,4 +58,4 @@ test_that("put_block_entities_data throws error if asked to write non BlockEntie
 
 # clean up
 close(db)
-unlink(dirname(dbpath), recursive=TRUE, expand = FALSE)
+fs::dir_delete(dbpath)

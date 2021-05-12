@@ -5,5 +5,5 @@ test_that("bedrockdb can open and close a database", {
     close(db)
     expect_false(db$is_open())
     # clean up
-    unlink(dirname(dbpath), recursive=TRUE, expand = FALSE)
+    fs::dir_delete(dbpath)
 })
