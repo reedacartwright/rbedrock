@@ -170,3 +170,21 @@ import_world <- function(file, id = NULL, worlds_dir = worlds_dir_path(), leveln
     y <- jsonlite::base64_enc(y)
     str_replace(y, "/", "-")
 }
+
+#' Compact a world database.
+#'
+#' @keywords internal
+#' @export
+compact_world <- function(db) {
+    db$compact_range()
+}
+
+#' Try to repair a world database.
+#'
+#' @keywords internal
+#' @export
+repair_world <- function(id) {
+    path <- .fixup_path(id)
+    path <- fs::path(path, "db")
+    bedrock_leveldb_repair(path)
+}
