@@ -14,11 +14,10 @@
 #' @export
 read_leveldat <- function(path, old = FALSE) {
     path <- .fixup_path(path, verify=TRUE)
-    path <- fs::path(path, "level.dat")
-    if (old) {
-        path <- paste0(path, "_old")
+    # if path is a directory append filename
+    if(fs::is_dir(path)) {
+        path <- fs::path(path, if(isFALSE(old)) "level.dat" else "level.dat_old")
     }
-
     rawval <- readr::read_file_raw(path)
 
     # remove the first 8 bytes
@@ -32,9 +31,9 @@ read_leveldat <- function(path, old = FALSE) {
 #' @rdname read_leveldat
 write_leveldat <- function(object, path, old = FALSE, version = 8L) {
     path <- .fixup_path(path)
-    path <- fs::path(path, "level.dat")
-    if (old) {
-        path <- paste0(path, "_old")
+    # if path is a directory append filename
+    if(fs::is_dir(path)) {
+        path <- fs::path(path, if(isFALSE(old)) "level.dat" else "level.dat_old")
     }
     dat <- write_nbt(object)
     len <- length(dat)

@@ -2,7 +2,8 @@ test_that("rbedrock_example shows all example data", {
     dat <- rbedrock_example()
     expect_setequal(dat, c(
         "block_states.csv",
-        "example1.mcworld"
+        "example1.mcworld",
+        "default_level.dat"
     ))
 })
 

@@ -88,7 +88,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
     initialize = function(path, ...) {
         path <- .fixup_path(path)
         namefile <- fs::path(path, "levelname.txt")
-        self$levelname <- readLines(namefile, 1L, warn = FALSE)
+        self$levelname <- readr::read_file(namefile)
         self$path <- fs::path(path, "db")
         self$db <- bedrock_leveldb_open(self$path, ...)
     },

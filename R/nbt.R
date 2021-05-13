@@ -18,6 +18,18 @@
 #' @export
 nbt <- function(x = list(), tag = 0L) {
     tag <- vec_recycle(vec_cast(tag, integer()), 1L, x_arg = "tag")
+    if(tag == 0L || tag == 9L || tag == 10L) {
+        x <- vec_cast(x, list())
+    } else if(tag == 1L || tag == 2L || tag == 3L ||
+        tag == 7L || tag == 11L) {
+        x <- vec_cast(x, integer())
+    } else if(tag == 4L || tag == 12L) {
+        x <- vec_cast(x, bit64::integer64())
+    } else if(tag == 5L || tag == 6L) {
+        x <- vec_cast(x, double())
+    } else if(tag == 8L) {
+        x <- vec_cast(x, character())
+    }
     new_nbt(x, tag = tag)
 }
 
@@ -222,6 +234,9 @@ vec_cast.rbedrock_nbt.rbedrock_nbt <- function(x, to, ...) {
 }
 
 #' @export
+vec_cast.rbedrock_nbt.logical <- function(x, to, ...) nbt(x, tag(to))
+
+#' @export
 vec_cast.rbedrock_nbt.character <- function(x, to, ...) nbt(x, tag(to))
 
 #' @export
@@ -235,6 +250,11 @@ vec_cast.rbedrock_nbt.double <- function(x, to, ...) nbt(x, tag(to))
 
 #' @export
 vec_cast.rbedrock_nbt.list <- function(x, to, ...) nbt(x, tag(to))
+
+#' @export
+vec_cast.logical.rbedrock_nbt <- function(x, to, ...) {
+    vec_cast(payload(x), logical())
+}
 
 #' @export
 vec_cast.character.rbedrock_nbt <- function(x, to, ...) {
@@ -274,6 +294,12 @@ vec_ptype2.rbedrock_nbt.character <- function(x, y, ...) character()
 
 #' @export
 vec_ptype2.character.rbedrock_nbt <- function(x, y, ...) character()
+
+#' @export
+vec_ptype2.rbedrock_nbt.logical <- function(x, y, ...) logical()
+
+#' @export
+vec_ptype2.logical.rbedrock_nbt <- function(x, y, ...) logical()
 
 #' @export
 vec_ptype2.rbedrock_nbt.integer <- function(x, y, ...) integer()

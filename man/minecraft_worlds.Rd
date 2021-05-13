@@ -4,17 +4,23 @@
 \alias{minecraft_worlds}
 \alias{worlds_dir_path}
 \alias{list_worlds}
+\alias{create_world}
 \alias{export_world}
 \alias{import_world}
+\alias{get_world_path}
 \title{Utilities for working with Minecraft world folders.}
 \usage{
 worlds_dir_path(default = FALSE)
 
 list_worlds(worlds_dir = worlds_dir_path())
 
+create_world(id = NULL, ..., worlds_dir = worlds_dir_path())
+
 export_world(id, file, worlds_dir = worlds_dir_path(), replace = FALSE)
 
-import_world(file, id = NULL, worlds_dir = worlds_dir_path(), levelname = NULL)
+import_world(file, id = NULL, ..., worlds_dir = worlds_dir_path())
+
+get_world_path(id, worlds_dir = worlds_dir_path())
 }
 \arguments{
 \item{default}{If \code{TRUE}, return most likely world path on the system.}
@@ -28,19 +34,29 @@ generated. How it is generated is controlled by the
 \code{rbedrock.rand_world_id} global options. Possible values are "pretty" and
 "mcpe".}
 
+\item{...}{Arguments to customize \code{level.dat} settings.
+Supports dynamic dots via \code{rlang::list2()}.}
+
 \item{file}{The path to an mcworld file. If exporting, it will be created.
 If importing, it will be extracted.}
 
 \item{replace}{If \code{TRUE}, overwrite an existing file if necessary.}
-
-\item{levelname}{Rename the imported world to this name.}
-}
-\value{
-\code{world_dir_path()} returns the path to the \code{minecraftWorlds} directory.
-You can use \code{options(rbedrock.worlds_dir_path = "custom/path")} to customize the path
-as needed.
-\code{list_worlds()} returns a \code{data.frame} containing information about Minecraft saved games.
 }
 \description{
-Utilities for working with Minecraft world folders.
+\code{world_dir_path()} returns the path to the \code{minecraftWorlds} directory. Use
+\code{options(rbedrock.worlds_dir_path = "custom/path")} to customize the path
+as needed.
+
+\code{list_worlds()} returns a \code{data.frame()} containing information about
+Minecraft saved games.
+
+Create a new Minecraft world.
+
+\code{export_world()} exports a world to an archive file.
+}
+\examples{
+if(FALSE) {
+create_world(LevelName = "My World", RandomSeed = 10)
+
+}
 }
