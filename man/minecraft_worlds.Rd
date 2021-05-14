@@ -50,7 +50,7 @@ as needed.
 \code{list_worlds()} returns a \code{data.frame()} containing information about
 Minecraft saved games.
 
-Create a new Minecraft world.
+\code{create_world()} creates a new Minecraft world.
 
 \code{export_world()} exports a world to an archive file.
 }

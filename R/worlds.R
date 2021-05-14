@@ -52,7 +52,7 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
 }
 
 #' @description
-#' Create a new Minecraft world.
+#' `create_world()` creates a new Minecraft world.
 #'
 #' @param id The path to a world folder. If the path is not absolute or does not
 #'   exist, it is assumed to be the base name of a world folder in `worlds_dir`.
