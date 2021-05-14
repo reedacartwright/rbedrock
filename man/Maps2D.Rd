@@ -19,9 +19,9 @@ read_2dmaps_value(rawdata)
 
 put_2dmaps_data(db, data)
 
-put_2dmaps_values(db, x, z, dimension, values)
+put_2dmaps_values(db, x, z, dimension, height_maps, biome_maps)
 
-put_2dmaps_value(db, x, z, dimension, value)
+put_2dmaps_value(db, x, z, dimension, height_map, biome_map)
 
 write_2dmaps_value(height_map, biome_map)
 }
@@ -35,22 +35,21 @@ write_2dmaps_value(height_map, biome_map)
 
 \item{data}{A named-vector of key-value pairs for 2DMaps data.}
 
-\item{values}{A list of lists.}
+\item{height_maps, biome_maps}{Lists of height and biome data.
+Values will be recycled if necessary to match the number of keys
+to be written to. If \code{biome_maps} is missing, \code{height_maps} should
+be in the same format as returned by \code{get_2dmaps_data()}.}
 
-\item{value}{A list.}
-
-\item{height_map}{If \code{biome_map} is missing, a \code{list} with both "height_map"
-and "biome_map" values. Otherwise, a 16x16 array of height
-data for a chunk.}
-
-\item{biome_map}{A 16x16 array of biome data for a chunk}
+\item{height_map, biome_map}{16x16 arrays containing height and biome data.
+Values will be recycled if necessary. If \code{biome_map} is missing, \code{height-map}
+should be a list a \code{list()} with both "height_map" and "biome_map" elements.}
 }
 \value{
 \code{get_2dmaps_data()} returns a list of the of the values returned by
 \code{get_2dmaps_value()}.
 
-\code{get_2dmaps_value()} and \code{read_2dmaps_value()}
-return a list with components "height_map" and "biome_map".
+\code{get_2dmaps_values()} returns a list with components "height_map"
+and "biome_map".
 }
 \description{
 2DMaps data (tag 45) stores information about surface heights and biomes in a
@@ -78,5 +77,6 @@ write_2dmaps_value(heights, biomes)
 # Pass them as a list.
 obj <- list(height_map = heights, biome_map = biomes)
 write_2dmaps_value(obj)
-
+# Pass them as scalars
+write_2dmaps_value(63, 1)
 }

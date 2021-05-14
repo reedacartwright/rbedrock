@@ -14,7 +14,8 @@
 #' # Pass them as a list.
 #' obj <- list(height_map = heights, biome_map = biomes)
 #' write_2dmaps_value(obj)
-#'
+#' # Pass them as scalars
+#' write_2dmaps_value(63, 1)
 NULL
 
 #' @description
@@ -40,8 +41,8 @@ get_2dmaps_data <- function(db, x, z, dimension) {
 #' `get_2dmaps_value()` loads 2DMaps data from a `bedrockdb`.
 #' It only supports loading a single value.
 #'
-#' @return `get_2dmaps_value()` and `read_2dmaps_value()`
-#'         return a list with components "height_map" and "biome_map".
+#' @return `get_2dmaps_values()` returns a list with components "height_map"
+#' and "biome_map".
 #' @rdname Maps2D
 #' @export
 get_2dmaps_value <- function(db, x, z, dimension) {
@@ -88,35 +89,41 @@ put_2dmaps_data <- function(db, data) {
     put_data(db, dat)
 }
 
-#' @param values A list of lists.
+#' @param height_maps,biome_maps Lists of height and biome data.
+#' Values will be recycled if necessary to match the number of keys
+#' to be written to. If `biome_maps` is missing, `height_maps` should
+#' be in the same format as returned by `get_2dmaps_data()`.
 #'
 #' @rdname Maps2D
 #' @export
-put_2dmaps_values <- function(db, x, z, dimension, values) {
+put_2dmaps_values <- function(db, x, z, dimension, height_maps, biome_maps) {
     keys <- .process_key_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
-    values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
-    values <- purrr::map(values, write_2dmaps_value)
+    if(missing(biome_maps)) {
+        values <- vctrs::vec_recycle(height_maps, length(keys), x_arg="height_maps")
+        values <- purrr::map(values, write_2dmaps_value)
+    } else {
+        h <- vctrs::vec_recycle(height_maps, length(keys), x_arg="height_maps")
+        b <- vctrs::vec_recycle(biome_maps, length(keys), x_arg="biome_maps")
+        values <- purrr::map2(h, b, write_2dmaps_value)
+    }
     put_values(db, keys, values)
 }
 
-#' @param value A list.
+#' @param height_map,biome_map 16x16 arrays containing height and biome data.
+#' Values will be recycled if necessary. If `biome_map` is missing, `height-map`
+#' should be a list a `list()` with both "height_map" and "biome_map" elements.
 #'
 #' @rdname Maps2D
 #' @export
-put_2dmaps_value <- function(db, x, z, dimension, value) {
+put_2dmaps_value <- function(db, x, z, dimension, height_map, biome_map) {
     key <- .process_key_args(x, z, dimension, tag=45L)
     vec_assert(key, character(), 1L)
-    value <- write_2dmaps_value(value)
+    value <- write_2dmaps_value(height_map, biome_map)
     put_value(db, key, value)
 }
 
 #' @description
 #' `write_2dmaps_value` encodes 2dMaps data into a raw vector.
-#'
-#' @param height_map If `biome_map` is missing, a `list` with both "height_map"
-#'                   and "biome_map" values. Otherwise, a 16x16 array of height
-#'                   data for a chunk.
-#' @param biome_map  A 16x16 array of biome data for a chunk
 #'
 #' @rdname Maps2D
 #' @export
@@ -127,13 +134,19 @@ write_2dmaps_value <- function(height_map, biome_map) {
             return(NULL)
         }
         object <- height_map
-        stopifnot(rlang::is_list(object, n = 2) && rlang::has_name(object, "height_map")
-                                                && rlang::has_name(object, "biome_map"))       
-        height_map <- object[["height_map"]]
-        biome_map <- object[["biome_map"]]
+        height_map <- object$height_map
+        biome_map <- object$biome_map
+    } else if(is.null(height_map) && is.null(biome_map)) {
+        return(NULL)
     }
-    height_map <- vec_recycle(as.integer(height_map), 256, x_arg="height_map")
-    biome_map <- vec_recycle(as.integer(biome_map), 256, x_arg="biome_map")
+    if(is.null(height_map) || is.null(biome_map)) {
+        abort("Invalid 2dMaps data.")
+    }
+
+    height_map <- vec_cast(c(height_map), integer(), x_arg="height_map")
+    biome_map <- vec_cast(c(biome_map), integer(), x_arg="biome_map")
+    height_map <- vec_recycle(height_map, 256, x_arg="height_map")
+    biome_map <- vec_recycle(biome_map, 256, x_arg="biome_map")
 
     .write_2dmaps_value_impl(height_map, biome_map)
 }

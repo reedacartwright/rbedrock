@@ -1,5 +1,3 @@
-library(rbedrock)
-
 as_raw <- function(...) {
     as.raw(c(...))
 }
