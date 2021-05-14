@@ -86,7 +86,7 @@ close.bedrockdb <- function(con, ...) {
 #' @importFrom R6 R6Class
 R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, levelname = NULL, 
     initialize = function(path, ...) {
-        path <- .fixup_path(path)
+        path <- fs::path_real(.fixup_path(path))
         namefile <- fs::path(path, "levelname.txt")
         self$levelname <- readr::read_file(namefile)
         self$path <- fs::path(path, "db")
