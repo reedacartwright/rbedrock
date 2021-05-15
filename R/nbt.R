@@ -146,6 +146,40 @@ tag_str <- function(x) {
     chr[1L+tag(x)]
 }
 
+#' @export
+print.rbedrock_nbt <- function(x, ...) {
+  obj_print(x, ...)
+  invisible(x)
+}
+
+#' @export
+str.rbedrock_nbt <- function(object, ...) {
+  obj_str(object, ...)
+}
+
+#' @export
+format.rbedrock_nbt <- function(x, ...) {
+    tag <- tag(x)
+
+    suffix <- c("B","S","", "L", "F", "", "B", "", "", "", "", "L")
+
+    if(tag == 0L) {
+        NA_character_
+    } else if(1L <= tag && tag <= 6L) {
+        paste0(format(payload(x), nsmall=1), suffix[tag])
+    } else if(tag == 7L || tag == 11L || tag == 12L) {
+        paste0(format(payload(x), nsmall=1), suffix[tag])
+    } else if(tag == 8L) {
+        paste0("\"", payload(x), "\"")
+    } else if(tag == 9L) {
+        lapply(payload(x), format)
+    } else if(tag == 10L) {
+        lapply(payload(x), format)
+    } else {
+        NA_character_
+    }
+}
+
 #' @rdname nbt
 #' @export
 is_nbt <- function(x) {
