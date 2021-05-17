@@ -185,8 +185,8 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
     unsigned int u = 0;
     int x = 0, z = 0;
     unsigned int dimension = 0;
-    char tag = 0;
-    char subtag = -1;
+    signed char tag = 0;
+    signed char subtag = -1;
 
     size_t sz = 0;
     size_t i = 0;
@@ -281,8 +281,8 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
     unsigned int dimension = 0;
     int x = 0;
     int z = 0;
-    char tag = 0;
-    char subtag = -1;
+    signed char tag = 0;
+    signed char subtag = -1;
     bool is_chunk_key = true;
 
     switch(key_len) {
