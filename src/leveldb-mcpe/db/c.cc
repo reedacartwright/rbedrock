@@ -424,7 +424,7 @@ void leveldb_options_set_max_file_size(leveldb_options_t* opt, size_t s) {
   opt->rep.max_file_size = s;
 }
 
-void leveldb_options_set_compression(leveldb_options_t* opt, int t) {
+void leveldb_options_set_compression(leveldb_options_t* opt, int t, int l) {
   switch(t) {
     case 0:
       opt->rep.compressors[0] = nullptr;
@@ -435,11 +435,11 @@ void leveldb_options_set_compression(leveldb_options_t* opt, int t) {
       break;
 #endif
     case leveldb_zlib_compression:
-      opt->rep.compressors[0] = new leveldb::ZlibCompressor();
+      opt->rep.compressors[0] = new leveldb::ZlibCompressor(l);
       break;
     case leveldb_zlib_raw_compression:
-      opt->rep.compressors[0] = new leveldb::ZlibCompressorRaw();
-      opt->rep.compressors[1] = new leveldb::ZlibCompressor();
+      opt->rep.compressors[0] = new leveldb::ZlibCompressorRaw(l);
+      opt->rep.compressors[1] = new leveldb::ZlibCompressor(l);
       break;
   }
 }

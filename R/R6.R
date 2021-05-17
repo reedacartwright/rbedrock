@@ -45,8 +45,7 @@
 #' @param block_size Internal leveldb option
 #' @param cache_capacity Internal leveldb option
 #' @param bloom_filter_bits_per_key Internal leveldb option
-#' @param con An database object created by bedrockdb.
-#' @param ... arguments passed to or from other methods.
+#' @param compression_level Internal leveldb option
 #'
 #' @return On success, `bedrockdb` returns an R6 class of type 'bedrockdb'.
 #'         
@@ -72,14 +71,21 @@
 
 bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, paranoid_checks = NULL, 
     write_buffer_size = 4194304L, max_open_files = NULL, block_size = NULL, 
-    cache_capacity = 41943040L, bloom_filter_bits_per_key = 10L) {
+    cache_capacity = 41943040L, bloom_filter_bits_per_key = 10L, compression_level = -1L) {
     R6_bedrockdb$new(path, create_if_missing, error_if_exists, paranoid_checks, write_buffer_size, 
-        max_open_files, block_size, cache_capacity, bloom_filter_bits_per_key)
+        max_open_files, block_size, cache_capacity, bloom_filter_bits_per_key, compression_level)
 }
 
 #' @export
+#' @param compact Compact database before closing.
+#' @param con An database object created by bedrockdb.
+#' @param ... arguments passed to or from other methods.
+#'
 #' @rdname bedrockdb
-close.bedrockdb <- function(con, ...) {
+close.bedrockdb <- function(con, compact = TRUE, ...) {
+    if(isTRUE(compact)) {
+        con$compact_range()
+    }
     con$close()
 }
 

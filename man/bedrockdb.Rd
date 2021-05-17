@@ -14,10 +14,11 @@ bedrockdb(
   max_open_files = NULL,
   block_size = NULL,
   cache_capacity = 41943040L,
-  bloom_filter_bits_per_key = 10L
+  bloom_filter_bits_per_key = 10L,
+  compression_level = -1L
 )
 
-\method{close}{bedrockdb}(con, ...)
+\method{close}{bedrockdb}(con, compact = TRUE, ...)
 }
 \arguments{
 \item{path}{The path to a world folder. If the path does not exist, it is
@@ -40,7 +41,11 @@ directory.}
 
 \item{bloom_filter_bits_per_key}{Internal leveldb option}
 
+\item{compression_level}{Internal leveldb option}
+
 \item{con}{An database object created by bedrockdb.}
+
+\item{compact}{Compact database before closing.}
 
 \item{...}{arguments passed to or from other methods.}
 }

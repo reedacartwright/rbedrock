@@ -13,7 +13,8 @@ bedrock_leveldb_open(
   max_open_files = NULL,
   block_size = NULL,
   cache_capacity = NULL,
-  bloom_filter_bits_per_key = NULL
+  bloom_filter_bits_per_key = NULL,
+  compression_level = NULL
 )
 }
 \arguments{

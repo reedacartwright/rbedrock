@@ -95,14 +95,15 @@
 #' @useDynLib rbedrock, .registration = TRUE
 bedrock_leveldb_open <- function(path, create_if_missing = NULL, error_if_exists = NULL, 
     paranoid_checks = NULL, write_buffer_size = NULL, max_open_files = NULL, block_size = NULL, 
-    cache_capacity = NULL, bloom_filter_bits_per_key = NULL) {
+    cache_capacity = NULL, bloom_filter_bits_per_key = NULL, compression_level = NULL) {
     ptr <- .Call(Cbedrock_leveldb_open, path, create_if_missing, error_if_exists, 
         paranoid_checks, write_buffer_size, max_open_files, block_size, 
-        cache_capacity, bloom_filter_bits_per_key)
+        cache_capacity, bloom_filter_bits_per_key, compression_level)
     attr(ptr, "options") <- list(path = path, create_if_missing = create_if_missing, 
         error_if_exists = error_if_exists, paranoid_checks = paranoid_checks, write_buffer_size = write_buffer_size, 
         max_open_files = max_open_files, block_size = block_size, 
-        cache_capacity = cache_capacity, bloom_filter_bits_per_key = bloom_filter_bits_per_key)
+        cache_capacity = cache_capacity, bloom_filter_bits_per_key = bloom_filter_bits_per_key,
+        compression_level = compression_level)
     class(ptr) <- c("bedrock_leveldb_connection", "bedrock_leveldb_options")
     ptr
 }

@@ -62,7 +62,9 @@ static void bedrock_leveldb_filterpolicy_finalize(SEXP r_filterpolicy);
 void bedrock_leveldb_handle_error(char *err);
 leveldb_options_t *bedrock_leveldb_collect_options(
     SEXP r_create_if_missing, SEXP r_error_if_exists, SEXP r_paranoid_checks,
-    SEXP r_write_buffer_size, SEXP r_max_open_files, SEXP r_block_size);
+    SEXP r_write_buffer_size, SEXP r_max_open_files, SEXP r_block_size,
+    SEXP r_compression_level);
+
 bool iter_key_starts_with(leveldb_iterator_t *it, const char *starts_with,
                           size_t starts_with_len);
 
@@ -88,7 +90,8 @@ SEXP bedrock_leveldb_open(SEXP r_path, SEXP r_create_if_missing,
                           SEXP r_write_buffer_size, SEXP r_max_open_files,
                           SEXP r_block_size,
                           SEXP r_cache_capacity,
-                          SEXP r_bloom_filter_bits_per_key) {
+                          SEXP r_bloom_filter_bits_per_key,
+                          SEXP r_compression_level) {
     // Unimplemented options:
     // * a general set_filter_policy
     // * set_env
@@ -120,7 +123,8 @@ SEXP bedrock_leveldb_open(SEXP r_path, SEXP r_create_if_missing,
     const char *path = scalar_character(r_path);
     leveldb_options_t *options = bedrock_leveldb_collect_options(
         r_create_if_missing, r_error_if_exists, r_paranoid_checks,
-        r_write_buffer_size, r_max_open_files, r_block_size);
+        r_write_buffer_size, r_max_open_files, r_block_size,
+        r_compression_level);
     if(has_cache) {
         leveldb_options_set_cache(options, cache);
     }
@@ -951,7 +955,8 @@ void bedrock_leveldb_get_exists(leveldb_t *db, size_t num_key,
 
 leveldb_options_t *bedrock_leveldb_collect_options(
     SEXP r_create_if_missing, SEXP r_error_if_exists, SEXP r_paranoid_checks,
-    SEXP r_write_buffer_size, SEXP r_max_open_files, SEXP r_block_size) {
+    SEXP r_write_buffer_size, SEXP r_max_open_files, SEXP r_block_size,
+    SEXP r_compression_level) {
     leveldb_options_t *options = leveldb_options_create();
     // TODO: put a finaliser on options so that we can error safely in
     // the scalar_logical commands on early exit.  Otherwise there is
@@ -982,7 +987,12 @@ leveldb_options_t *bedrock_leveldb_collect_options(
         leveldb_options_set_block_size(options, scalar_size(r_block_size));
     }
 
-    leveldb_options_set_compression(options, leveldb_zlib_raw_compression);
+    int compression_level = -1;
+    if(!Rf_isNull(r_compression_level)) {
+        compression_level = scalar_int(r_compression_level);
+    }
+    leveldb_options_set_compression(options, leveldb_zlib_raw_compression,
+        compression_level);
 
     return options;
 }

@@ -38,4 +38,5 @@ size_t get_starts_with(SEXP starts_with, const char **starts_with_data);
 SEXP raw_string_to_sexp(const char *str, size_t len);
 bool scalar_logical(SEXP x);
 size_t scalar_size(SEXP x);
+int scalar_int(SEXP x);
 const char *scalar_character(SEXP x);

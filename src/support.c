@@ -147,3 +147,27 @@ const char *scalar_character(SEXP x) {
         return NULL;
     }
 }
+
+int scalar_int(SEXP x) {
+    int len = LENGTH(x);
+    int value = 0;
+    if(len == 1) {
+        if(TYPEOF(x) == INTSXP) {
+            value = INTEGER(x)[0];
+            if(value == NA_INTEGER) {
+                Rf_error("Expected a non-missing integer.");
+            }
+        } else if(TYPEOF(x) == REALSXP) {
+            double rvalue = REAL(x)[0];
+            if(!R_FINITE(rvalue)) {
+                Rf_error("Expected a non-missing integer.");
+            }
+            value = (int)rvalue;
+        } else {
+            Rf_error("Expected a scalar integer.");
+        }
+    } else {
+        Rf_error("Expected a scalar integer.");
+    }
+    return value;
+}

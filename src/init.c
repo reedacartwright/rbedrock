@@ -42,7 +42,7 @@ SEXP bedrock_leveldb_test_cleanup() {
 }
 
 static const R_CallMethodDef call_methods[] = {
-    {"Cbedrock_leveldb_open", (DL_FUNC)&bedrock_leveldb_open, 9},
+    {"Cbedrock_leveldb_open", (DL_FUNC)&bedrock_leveldb_open, 10},
     {"Cbedrock_leveldb_close", (DL_FUNC)&bedrock_leveldb_close, 2},
     {"Cbedrock_leveldb_destroy", (DL_FUNC)&bedrock_leveldb_destroy, 1},
     {"Cbedrock_leveldb_is_open", (DL_FUNC)&bedrock_leveldb_is_open, 1},
