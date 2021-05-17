@@ -87,7 +87,7 @@ static SEXP read_nbt_payload_integer(const unsigned char** ptr, const unsigned c
     int *x = INTEGER(res);
     for(int i=0; i < n; ++i) {
         if(size == 1) {
-            char y;
+            signed char y;
             memcpy(&y, p, 1);
             x[i] = y;
         } else if(size == 2) {
@@ -361,7 +361,7 @@ static R_xlen_t write_nbt_integer_payload(SEXP r_value, unsigned char** ptr,
     switch(size) {
      case 1:
         for(R_xlen_t i=0; i < len; ++i) {
-            char y = (char)data[i];
+            signed char y = (signed char)data[i];
             memcpy(p, &y, sizeof(y));
             p += sizeof(y);
         }
@@ -476,7 +476,7 @@ static int get_nbt_list_tag(SEXP r_value) {
 
 static R_xlen_t write_nbt_tag(int tag, unsigned char** ptr, unsigned char* end) {
     if(end-*ptr >= 1) {
-        **ptr = (char)tag;
+        **ptr = (unsigned char)tag;
         *ptr += 1;
     }
     return 1;
