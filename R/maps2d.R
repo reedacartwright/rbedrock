@@ -64,14 +64,12 @@ read_2dmaps_value <- function(rawdata) {
         return(NULL)
     }
     vec_assert(rawdata, raw(), 768L)    
-    .read_2dmaps_value_impl(rawdata)
-}
 
-.read_2dmaps_value_impl <- function(x) {
-    h <- readBin(x[1L:512L], integer(), n=256L, size=2L, endian="little", signed = TRUE)
-    b <- readBin(x[513L:768L], integer(), n=256L, size=1L, endian="little", signed = FALSE)
+    h <- readBin(rawdata[1L:512L], integer(), n=256L, size=2L, endian="little", signed = TRUE)
+    b <- readBin(rawdata[513L:768L], integer(), n=256L, size=1L, endian="little", signed = FALSE)
     dim(h) <- c(16L,16L)
     dim(b) <- c(16L,16L)
+    
     list(height_map = h, biome_map = b)
 }
 
@@ -99,11 +97,11 @@ put_2dmaps_data <- function(db, data) {
 put_2dmaps_values <- function(db, x, z, dimension, height_maps, biome_maps) {
     keys <- .process_key_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
     if(missing(biome_maps)) {
-        values <- vctrs::vec_recycle(height_maps, length(keys), x_arg="height_maps")
+        values <- vec_recycle(height_maps, length(keys), x_arg="height_maps")
         values <- purrr::map(values, write_2dmaps_value)
     } else {
-        h <- vctrs::vec_recycle(height_maps, length(keys), x_arg="height_maps")
-        b <- vctrs::vec_recycle(biome_maps, length(keys), x_arg="biome_maps")
+        h <- vec_recycle(height_maps, length(keys), x_arg="height_maps")
+        b <- vec_recycle(biome_maps, length(keys), x_arg="biome_maps")
         values <- purrr::map2(h, b, write_2dmaps_value)
     }
     put_values(db, keys, values)
@@ -148,11 +146,9 @@ write_2dmaps_value <- function(height_map, biome_map) {
     height_map <- vec_recycle(height_map, 256, x_arg="height_map")
     biome_map <- vec_recycle(biome_map, 256, x_arg="biome_map")
 
-    .write_2dmaps_value_impl(height_map, biome_map)
-}
+    h <- writeBin(height_map, raw(), size = 2L, endian="little")
+    b <- writeBin(biome_map, raw(), size = 1L, endian="little")
 
-.write_2dmaps_value_impl <- function(h, b) {
-    h <- writeBin(h, raw(), size = 2L, endian="little")
-    b <- writeBin(b, raw(), size = 1L, endian="little")
     c(h,b)
 }
+

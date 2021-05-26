@@ -22,16 +22,14 @@ NULL
 #' @rdname Biomes
 #' @export
 get_biomes_data <- function(db, x, z, dimension, return_names = TRUE) {
-    keys <- .process_key_args(x,z,dimension, tag=45L)
+    dat <- get_2dmaps_data(db, x, z, dimension)
     
-    dat <- get_values(db, keys)
-
     biomes <- purrr::map(dat, function(x) {
         if(is.null(x)) {
             return(NULL)
         }
         # y[x+1,z+1] is biome of x,z
-        y <- read_2dmaps_value(x)$biome_map
+        y <- x$biome_map
         if(isTRUE(return_names)) {
             y[] <- .BIOME_LIST_INV[y+1]
         }
@@ -51,13 +49,11 @@ get_biomes_data <- function(db, x, z, dimension, return_names = TRUE) {
 #' @rdname Biomes
 #' @export
 get_biomes_value <- function(db, x, z, dimension, return_names = TRUE) {
-    key <- .process_key_args(x, z, dimension, tag=45L)
-    vec_assert(key, character(), 1L)
-    dat <- get_value(db, key)
+    dat <- get_2dmaps_value(db, x, z, dimension)
     if(is.null(dat)) {
         return(NULL)
     }
-    y <- .read_2dmaps_value_impl(dat)$biome_map
+    y <- dat$biome_map
     if(isTRUE(return_names)) {
         y[] <- .BIOME_LIST_INV[y+1]
     }
@@ -75,7 +71,7 @@ get_biomes_value <- function(db, x, z, dimension, return_names = TRUE) {
 #' @rdname Biomes
 #' @export
 put_biomes_data <- function(db, data, missing_height = 0L) {
-    put_biomes_values(db, names(data), values=data)
+    put_biomes_values(db, names(data), values=data, missing_height = missing_height)
 }
 
 #' @param values a list of arrays containing biome names or ids.
@@ -86,24 +82,21 @@ put_biomes_values <- function(db, x, z, dimension, values,
     keys <- .process_key_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
     values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
 
-    dat <- get_values(db, keys)
-    dat2 <- purrr::map2(dat, values, function(d, b) {
-        if(is.null(d)) {
-            h <- rep(missing_height, 256L)
-        } else {
-            vec_assert(d, raw(), 768L)
-            h <- .read_2dmaps_value_impl(d)$height_map
-        }
-        if(is.character(b)) {
-            b <- biome_id(b)
-            if(any(is.na(b))) {
-                stop("biome list contains unknown biome")                
+    dat <- get_2dmaps_data(db, keys)
+
+    dat2 <- purrr::map2(dat, values, function(d, value) {
+        h <- d$height_map %||% missing_height
+
+        if(is.character(value)) {
+            value <- biome_id(value)
+            if(any(is.na(value))) {
+                abort("`values` contains unknown biome")                 
             }
         }
-        .write_2dmaps_value_impl(h,b)
+        list(height_map = h, biome_map = value)
     })
 
-    put_data(db, dat2)
+    put_2dmaps_data(db, dat2)
 }
 
 #' @param value an array containing biome names or ids.
@@ -114,23 +107,16 @@ put_biomes_value <- function(db, x, z, dimension, value,
     key <- .process_key_args(x, z, dimension, tag=45L)
     vec_assert(key, character(), 1L)
 
-    d <- get_value(db, key)
-    if(is.null(d)) {
-        h <- rep(missing_height, 256L)
-    } else {
-        vec_assert(d, raw(), 768L)
-        h <- .read_2dmaps_value_impl(d)$height_map
-    }
-    b <- value
-    if(is.character(b)) {
-        b <- biome_id(b)
-        if(any(is.na(b))) {
-            stop("biome list contains unknown biome")                
+    d <- get_2dmaps_value(db, key)
+    h <- d$height_map %||% missing_height
+
+    if(is.character(value)) {
+        value <- biome_id(value)
+        if(any(is.na(value))) {
+            abort("`value` contains unknown biome")
         }
     }
-    dat <- .write_2dmaps_value_impl(h,b)
-
-    put_value(db, key, dat)
+    put_2dmaps_value(db, key, height_map = h, biome_map = value)
 }
 
 
