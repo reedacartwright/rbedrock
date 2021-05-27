@@ -133,7 +133,7 @@ export_world <- function(id, file, worlds_dir = worlds_dir_path(),
         ret <- utils::zip(file, f, flags = "-r9Xq")
     }
     
-    inform(str_glue("Success: World '{world_path}' exported to '{file}'."))
+    inform(str_glue("Success: World '{dirpath}' exported to '{file}'."))
     invisible(ret)
 }
 
