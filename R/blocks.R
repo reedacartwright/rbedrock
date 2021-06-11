@@ -30,7 +30,7 @@ get_chunk_blocks_data <- function(db, x, z, dimension,
         extra_block = extra_block
     ))
 
-    rlang::set_names(dat, keys)
+    set_names(dat, keys)
 }
 
 #' @description
@@ -59,6 +59,9 @@ get_chunk_blocks_value <- function(db, x, z, dimension,
 .get_chunk_blocks_value_impl <- function(db, prefix, ...) {
     prefix <- stringr::str_c(prefix, ":47", collapse="")
     keys <- get_keys(db, starts_with = prefix)
+    if(length(keys) == 0L) {
+        return(NULL)
+    }
     dat <- get_subchunk_blocks_data(db, keys, ...)
     pos <- .get_subtag_from_chunk_key(names(dat))
     max_y <- 16*max(pos)+16
@@ -68,6 +71,25 @@ get_chunk_blocks_value <- function(db, x, z, dimension,
     }
     mat
 }
+
+# .put_chunk_blocks_value_impl <- function(db, x, z, dimension, value) {
+#     d <- dim(value)
+#     if(!is.character(value) || is.null(d) || length(d) != 3L || 
+#         d[1] != 16L || d[3] != 16L) {
+#         abort("`value` must be a 16xNx16 character array".)
+#     }
+#     max_y <- d[2]
+#     if((max_y %% 16L) != 0L) {
+#         # increase the vector
+#         max_y <- ((d[2]-1L) %/% 16L)*16L+16L
+#         old_value <- value
+#         value <- array("minecraft:air", c(16L,max_y,16L))
+#         value[,1:d[2],] <- old_value
+#     }
+
+
+# }
+
 
 #' Load and store SubchunkBlocks data
 #'
