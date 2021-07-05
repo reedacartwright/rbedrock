@@ -104,41 +104,41 @@ static void mcpe_random_seed_impl(uint32_t value) {
     }  
 }
 
-SEXP mcpe_random_seed(SEXP seed) {
-    mcpe_random_seed_impl(Rf_asInteger(seed));
+SEXP mcpe_random_seed(SEXP r_seed) {
+    mcpe_random_seed_impl(Rf_asInteger(r_seed));
     return R_NilValue;
 }
 
 // returns g_state as a raw vector
 // can set it as well
-SEXP mcpe_random_state(SEXP state) {
+SEXP mcpe_random_state(SEXP r_state) {
     SEXP ret = PROTECT(Rf_allocVector(RAWSXP, sizeof(g_state)));
     memcpy(RAW(ret), &g_state, sizeof(g_state));
-    if(!Rf_isNull(state)) {
-        if((TYPEOF(state) != RAWSXP) || XLENGTH(state) != sizeof(g_state)) {
+    if(!Rf_isNull(r_state)) {
+        if((TYPEOF(r_state) != RAWSXP) || XLENGTH(r_state) != sizeof(g_state)) {
             Rf_error("mcpe_random_state: value 'state' is not a raw vector of length %d.", sizeof(g_state));
             return R_NilValue;
         }
-        memcpy(&g_state, RAW(state), sizeof(g_state));
+        memcpy(&g_state, RAW(r_state), sizeof(g_state));
     }
     UNPROTECT(1);
     return ret;
 }
 
 // fill a numeric vector with unsigned integers
-SEXP mcpe_random_get_uint(SEXP n, SEXP hi) {
-    size_t num = Rf_asInteger(n);
+SEXP mcpe_random_get_uint(SEXP r_n, SEXP r_max) {
+    size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(REALSXP, num));
     double *p = REAL(ret);
-    if(Rf_isNull(hi)) {
+    if(Rf_isNull(r_max)) {
         for(size_t i=0; i < num; ++i) {
             p[i] = (double)mcpe_random_next();
 
         }
     } else {
-        uint32_t hival = Rf_asInteger(hi);
+        uint32_t maxval = Rf_asInteger(r_max);
         for(size_t i=0; i < num; ++i) {
-            uint32_t u = mcpe_random_next() % hival;
+            uint32_t u = mcpe_random_next() % maxval;
             p[i] = (double)u;
         }
     }
@@ -148,23 +148,23 @@ SEXP mcpe_random_get_uint(SEXP n, SEXP hi) {
 
 
 // fill a numeric vector with integers
-SEXP mcpe_random_get_int(SEXP n, SEXP lo, SEXP hi) {
-    size_t num = Rf_asInteger(n);
+SEXP mcpe_random_get_int(SEXP r_n, SEXP r_min, SEXP r_max) {
+    size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(INTSXP, num));
     int *p = INTEGER(ret);
-    if(!Rf_isNull(hi) && !Rf_isNull(lo)) {
-        int32_t hival = Rf_asInteger(hi);
-        int32_t loval = Rf_asInteger(lo);
-        uint32_t width = (uint32_t)(hival-loval);
+    if(!Rf_isNull(r_max) && !Rf_isNull(r_min)) {
+        int32_t maxval = Rf_asInteger(r_max);
+        int32_t minval = Rf_asInteger(r_min);
+        uint32_t width = (uint32_t)(maxval-minval);
         for(size_t i=0; i < num; ++i) {
-            p[i] = loval;
-            if(loval < hival) {
+            p[i] = minval;
+            if(minval < maxval) {
                 int val = (int)(mcpe_random_next() % width);
                 p[i] +=  val;
             }
         }
-    } else if(!Rf_isNull(hi)) {
-        uint32_t width = (uint32_t)Rf_asInteger(hi);
+    } else if(!Rf_isNull(r_max)) {
+        uint32_t width = (uint32_t)Rf_asInteger(r_max);
         for(size_t i=0; i < num; ++i) {       
             if(width == 0) {
                 p[i] = 0;
@@ -183,8 +183,8 @@ SEXP mcpe_random_get_int(SEXP n, SEXP lo, SEXP hi) {
     return ret;
 }
 
-SEXP mcpe_random_get_double(SEXP n) {
-    size_t num = Rf_asInteger(n);
+SEXP mcpe_random_get_double(SEXP r_n) {
+    size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(REALSXP, num));
     double *p = REAL(ret);
     for(size_t i=0; i < num; ++i) {
@@ -195,27 +195,39 @@ SEXP mcpe_random_get_double(SEXP n) {
 }
 
 // fill a numeric vector with floats
-SEXP mcpe_random_get_float(SEXP n, SEXP lo, SEXP hi) {
-    size_t num = Rf_asInteger(n);
+SEXP mcpe_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max) {
+    size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(REALSXP, num));
     double *p = REAL(ret);
     for(size_t i=0; i < num; ++i) {
         p[i] = (float)(mcpe_random_next()/4294967296.0);
     }
 
-    if(!Rf_isNull(hi) && !Rf_isNull(lo)) {
-        float hival = Rf_asReal(hi);
-        float loval = Rf_asReal(lo);
-        float width = hival-loval;
+    if(!Rf_isNull(r_max) && !Rf_isNull(r_min)) {
+        float maxval = Rf_asReal(r_max);
+        float minval = Rf_asReal(r_min);
+        float width = maxval-minval;
         for(size_t i=0; i < num; ++i) {
-            p[i] = loval + ((float)p[i])*width;
+            p[i] = minval + ((float)p[i])*width;
         }
-    } else if(!Rf_isNull(hi)) {
-        float width = Rf_asReal(hi);
+    } else if(!Rf_isNull(r_max)) {
+        float width = Rf_asReal(r_max);
         for(size_t i=0; i < num; ++i) {       
             p[i] = ((float)p[i])*width;
         }
     }
     UNPROTECT(1);
     return ret;
+}
+
+SEXP mcpe_random_create_seed1(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt) {
+    int x = Rf_asInteger(r_x);
+    int z = Rf_asInteger(r_z);
+    int a = Rf_asInteger(r_a);
+    int b = Rf_asInteger(r_b);
+    int salt = Rf_asInteger(r_salt);
+
+    int seed = (x * a) ^ (z * b) ^ salt;
+
+    return Rf_ScalarInteger(seed);
 }
