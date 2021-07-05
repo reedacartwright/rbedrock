@@ -33,6 +33,7 @@
 #include "key_conv.h"
 #include "nbt.h"
 #include "blocks.h"
+#include "random.h"
 
 // for testing:
 SEXP bedrock_leveldb_test_cleanup() {
@@ -118,10 +119,18 @@ static const R_CallMethodDef call_methods[] = {
     {"Cread_subchunk", (DL_FUNC)&read_subchunk, 1},
     {"Cwrite_subchunk", (DL_FUNC)&write_subchunk, 1},
 
+    {"Cmcpe_random_seed", (DL_FUNC)&mcpe_random_seed, 1},
+    {"Cmcpe_random_state", (DL_FUNC)&mcpe_random_state, 1},
+    {"Cmcpe_random_get_uint", (DL_FUNC)&mcpe_random_get_uint, 2},
+    {"Cmcpe_random_get_int", (DL_FUNC)&mcpe_random_get_int, 3},
+    {"Cmcpe_random_get_double", (DL_FUNC)&mcpe_random_get_double, 1},
+    {"Cmcpe_random_get_float", (DL_FUNC)&mcpe_random_get_float, 3},
+
     {NULL, NULL, 0}};
 
 void rbedrock_init_nbt();
-void rbedrock_block_nbt();
+void rbedrock_init_blocks();
+void rbedrock_init_random();
 
 void attribute_visible R_init_rbedrock(DllInfo *info) {
     R_registerRoutines(info, NULL, call_methods, NULL, NULL);
@@ -131,7 +140,8 @@ void attribute_visible R_init_rbedrock(DllInfo *info) {
     bedrock_leveldb_init();
 
     rbedrock_init_nbt();
-    rbedrock_block_nbt();
+    rbedrock_init_blocks();
+    rbedrock_init_random();
 }
 
 // This can't be easily tested

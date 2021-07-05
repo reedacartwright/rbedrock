@@ -4,7 +4,7 @@
 
 static SEXP g_palette_symbol = NULL;
 
-void rbedrock_block_nbt() {
+void rbedrock_init_blocks() {
     g_palette_symbol = Rf_install("palette");
 }
 
