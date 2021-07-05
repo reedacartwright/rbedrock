@@ -69,6 +69,77 @@ test_that("put_subchunk_blocks_data() writes subchunk data.", {
     expect_equal(dat, val)
 })
 
+test_that("put_chunk_blocks_value() writes chunk data.",{
+    val <- array("minecraft:air", c(16,32,16))
+    val[,21,] <- "minecraft:bedrock@infiniburn_bit=false"
+    val[,22,] <- "minecraft:stone@stone_type=andesite"
+    val[,23,] <- "minecraft:iron_ore"
+    val[,24,] <- "minecraft:snow_layer@height=5@covered_bit=true"
+
+    put_chunk_blocks_value(db, "@10:12:0:47", value=val)
+    dat <- get_chunk_blocks_value(db, "@10:12:0:47")
+
+    expect_equal(dat, val)
+
+    dat <- get_keys(db, starts_with="@10:12:0:47")
+    expect_equal(dat, "@10:12:0:47-1")
+})
+
+test_that("put_chunk_blocks_value() overwrites chunk data.", {
+    dat <- get_chunk_blocks_value(db, 31, 4, 0)
+    put_chunk_blocks_value(db, 31, 4, 0, dat[,1:20,])
+
+    val <- array("minecraft:air", c(16,32,16))
+    val[,1:20,] <- dat[,1:20,]
+    dat <- get_chunk_blocks_value(db, 31, 4, 0)
+
+    expect_equal(dat, val)
+
+    dat <- get_keys(db, starts_with="@31:4:0:47")
+    expect_equal(dat, c("@31:4:0:47-0","@31:4:0:47-1"))
+})
+
+test_that("put_chunk_blocks_values() writes chunk data.",{
+    val <- array("minecraft:air", c(16,32,16))
+    val[,21,] <- "minecraft:bedrock@infiniburn_bit=false"
+    val[,22,] <- "minecraft:stone@stone_type=andesite"
+    val[,23,] <- "minecraft:iron_ore"
+    val[,24,] <- "minecraft:snow_layer@height=5@covered_bit=true"
+
+    put_chunk_blocks_values(db, 11:12, 12, 0, value=list(val))
+    dat <- get_chunk_blocks_values(db, 11:12, 12, 0)
+
+    expect_equal(dat[[1]], val)
+    expect_equal(dat[[2]], val)
+
+    dat <- get_keys(db, starts_with="@11:12:0:47")
+    expect_equal(dat, "@11:12:0:47-1")
+    dat <- get_keys(db, starts_with="@12:12:0:47")
+    expect_equal(dat, "@12:12:0:47-1")
+})
+
+test_that("put_chunk_blocks_data() writes chunk data.",{
+    val <- list()
+    val[["@13:12:0:47"]] <- array("minecraft:air", c(16,32,16))
+    val[["@14:12:0:47"]] <- array("minecraft:air", c(16,32,16))
+
+    val[["@13:12:0:47"]][,21,] <- "minecraft:bedrock@infiniburn_bit=false"
+    val[["@14:12:0:47"]][,1,] <- "minecraft:bedrock@infiniburn_bit=false"
+
+    put_chunk_blocks_data(db, val)
+
+    val[["@14:12:0:47"]] <- val[["@14:12:0:47"]][,1:16,]
+    
+    dat <- get_chunk_blocks_values(db, c("@13:12:0:47","@14:12:0:47"))
+
+    expect_equal(dat, val)
+
+    dat <- get_keys(db, starts_with="@13:12:0:47")
+    expect_equal(dat, "@13:12:0:47-1")
+    dat <- get_keys(db, starts_with="@14:12:0:47")
+    expect_equal(dat, "@14:12:0:47-0")
+})
+
 # clean up
 close(db)
 fs::dir_delete(dbpath)

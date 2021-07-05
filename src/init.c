@@ -84,6 +84,8 @@ static const R_CallMethodDef call_methods[] = {
      (DL_FUNC)&bedrock_leveldb_writebatch_mput, 3},
     {"Cbedrock_leveldb_writebatch_delete",
      (DL_FUNC)&bedrock_leveldb_writebatch_delete, 2},
+    {"Cbedrock_leveldb_writebatch_mdelete",
+     (DL_FUNC)&bedrock_leveldb_writebatch_mdelete, 2},
     {"Cbedrock_leveldb_write", (DL_FUNC)&bedrock_leveldb_write, 3},
 
     {"Cbedrock_leveldb_approximate_sizes",

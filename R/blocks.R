@@ -23,6 +23,7 @@ get_chunk_blocks_data <- function(db, x, z, dimension,
         names_only = FALSE, extra_block = FALSE) {
     keys <- .process_key_args_prefix(x, z, dimension)
     keys <- vec_unique(keys)
+    keys <- str_c(keys, ":47")
 
     dat <- purrr::map(keys, ~.get_chunk_blocks_value_impl(db,
         prefix = .,
@@ -32,6 +33,12 @@ get_chunk_blocks_data <- function(db, x, z, dimension,
 
     set_names(dat, keys)
 }
+
+#' @description
+#' `get_chunk_blocks_value()` is an alias for `get_chunk_blocks_data()`
+#' @export
+#' @rdname get_chunk_blocks_data
+get_chunk_blocks_values <- get_chunk_blocks_data
 
 #' @description
 #' `get_chunk_blocks_value()` loads block data from a `bedrockdb`.
@@ -56,8 +63,44 @@ get_chunk_blocks_value <- function(db, x, z, dimension,
     )
 }
 
+#' @description
+#' `put_chunk_blocks_data()`, `put_chunk_blocks_values()`, and
+#' `put_chunk_blocks_value()` stores block data into a `bedrockdb`.
+#'
+#' @param data A named list of 16xNx16 character() arrays
+#'
+#' @rdname get_chunk_blocks_data
+#' @export
+put_chunk_blocks_data <- function(db, data) {
+    .check_chunk_key_tag(names(data), tag = 47L)
+
+    purrr::iwalk(data, ~.put_chunk_blocks_value_impl(db, .y, .x))
+}
+
+#' @param values A list of 16xNx16 character() arrays
+#'
+#' @rdname get_chunk_blocks_data
+#' @export
+put_chunk_blocks_values <- function(db, x, z, dimension, values) {
+    keys <- .process_key_args(x, z, dimension, tag = 47L, stop_if_filtered = TRUE)
+    values <- vec_recycle(values, length(keys), x_arg = "values")
+
+    purrr::walk2(keys, values, ~.put_chunk_blocks_value_impl(db, .x, .y))
+}
+
+#' @param value A 16xNx16 character array
+#'
+#' @rdname get_chunk_blocks_data
+#' @export
+put_chunk_blocks_value <- function(db, x, z, dimension, value) {
+    key <- .process_key_args(x, z, dimension, tag=47L)
+    vec_assert(key, character(), 1L)
+
+    .put_chunk_blocks_value_impl(db, key, value)
+}
+
+
 .get_chunk_blocks_value_impl <- function(db, prefix, ...) {
-    prefix <- stringr::str_c(prefix, ":47", collapse="")
     keys <- get_keys(db, starts_with = prefix)
     if(length(keys) == 0L) {
         return(NULL)
@@ -72,24 +115,50 @@ get_chunk_blocks_value <- function(db, x, z, dimension,
     mat
 }
 
-# .put_chunk_blocks_value_impl <- function(db, x, z, dimension, value) {
-#     d <- dim(value)
-#     if(!is.character(value) || is.null(d) || length(d) != 3L || 
-#         d[1] != 16L || d[3] != 16L) {
-#         abort("`value` must be a 16xNx16 character array".)
-#     }
-#     max_y <- d[2]
-#     if((max_y %% 16L) != 0L) {
-#         # increase the vector
-#         max_y <- ((d[2]-1L) %/% 16L)*16L+16L
-#         old_value <- value
-#         value <- array("minecraft:air", c(16L,max_y,16L))
-#         value[,1:d[2],] <- old_value
-#     }
+.put_chunk_blocks_value_impl <- function(db, prefix, value) {
+    d <- dim(value)
+    if(!is.character(value) || is.null(d) || length(d) != 3L || 
+        d[1] != 16L || d[3] != 16L) {
+        abort("`value` must be a 16xNx16 character array.")
+    }
 
+    max_y <- d[2]
+    if((max_y %% 16L) != 0L) {
+        # increase the vector
+        max_y <- ((d[2]-1L) %/% 16L)*16L+16L
+        old_value <- value
+        value <- array("minecraft:air", c(16L,max_y,16L))
+        value[,1:d[2],] <- old_value
+    }
+    
+    # identify existing chunk data.
+    old_keys <- get_keys(db, starts_with = prefix)
+    
+    # construct new chunk data
+    data <- list()
+    subtags <- seq.int(length.out=(max_y %/% 16L))
+    new_keys <- str_c(prefix, "-", subtags-1L)
+    for(s in subtags) {
+        subchunk <- value[,(s-1L)*16L+(1:16),]
+        # skip empty chunks
+        if(all(subchunk == "minecraft:air")) {
+            next
+        }
+        # extract and encode subchunk data
+        data[[new_keys[s]]] <- write_subchunk_blocks_value(subchunk)
+    }
+    put_keys <- names(data)
+    del_keys <- old_keys[!(old_keys %in% put_keys)]
+    # write a batch
+    batch <- db$writebatch()
+    batch$mdelete(chrkeys_to_rawkeys(del_keys))
+    batch$mput(chrkeys_to_rawkeys(put_keys), data)
+    batch$write()
+    # clean up
+    batch$destroy()
 
-# }
-
+    invisible()
+}
 
 #' Load and store SubchunkBlocks data
 #'
@@ -183,7 +252,7 @@ put_subchunk_blocks_data <- function(db, data) {
 #' @export
 put_subchunk_blocks_values <- function(db, x, z, dimension, subchunk, values) {
     keys <- .process_key_args(x, z, dimension, tag=47L, subtag = subchunk, stop_if_filtered = TRUE)
-    values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
+    values <- vec_recycle(values, length(keys), x_arg="values")
     values <- purrr::map(values, write_subchunk_blocks_value)
     put_values(db, keys, values)
 }
@@ -223,7 +292,7 @@ read_subchunk_blocks_value <- function(rawdata, names_only = FALSE,
             purrr::map_chr(.block_string, names_only = names_only)
         pal2[pal2 == 'minecraft:air'] <- NA_character_
         b2 <- array(pal2[blocks[[2]]], dim = dim(blocks[[2]]))
-        b[] <- stringr::str_c(b, b2, sep=";") %|% b
+        b[] <- str_c(b, b2, sep=";") %|% b
     }
     b
 }
@@ -234,11 +303,11 @@ read_subchunk_blocks_value <- function(rawdata, names_only = FALSE,
 write_subchunk_blocks_value <- function(object) {
     vec_assert(object, array(character(), c(0,16,16)), 16)
     # check to see if we have extra blocks and split as needed
-    n <- max(stringr::str_count(object, stringr::fixed(";")))+1
+    n <- max(str_count(object, fixed(";")))+1
     if(n == 1) {
         block_layers <- list(c(object))
     } else {
-        s <- stringr::str_split(object, stringr::fixed(";"))
+        s <- str_split(object, fixed(";"))
         block_layers <- list()
         for(i in 1:n) {
             block_layers[[i]] <- purrr::map_chr(s, i, .default = "minecraft:air")
@@ -298,7 +367,7 @@ get_subchunk_layers_data <- function(db, x, z, dimension, subchunk, layer = 1L,
 #' @export
 get_subchunk_layers_value <- function(db, x, z, dimension, subchunk, layer = 1L,
         simplify = TRUE) {
-    key <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
+    key <- .process_key_args(x, z, dimension, tag=47L, subtag = subchunk)
     vec_assert(key, character(), 1L)
 
     dat <- get_value(db, key)
@@ -325,7 +394,7 @@ put_subchunk_layers_data <- function(db, data) {
 #' @export
 put_subchunk_layers_values <- function(db, x, z, dimension, subchunk, values) {
     keys <- .process_key_args(x, z, dimension, tag=47L, subtag = subchunk, stop_if_filtered = TRUE)
-    values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
+    values <- vec_recycle(values, length(keys), x_arg="values")
     values <- purrr::map(values, write_subchunk_layers_value)
     put_values(db, keys, values)
 }
@@ -404,7 +473,7 @@ block_palette <- function(object) {
         } else if(xtag == 3 || xtag == 8) {
             as.character(p)
         } else {
-            msg <- stringr::str_glue(
+            msg <- str_glue(
                 "Block State '{y}' has NBT tag '{xtag}'. ",
                 "Possible loss of information when converting to a string."
             )
@@ -412,9 +481,9 @@ block_palette <- function(object) {
             as.character(p)
         }
     })
-    states <- stringr::str_c(names(states), states,
+    states <- str_c(names(states), states,
         sep="=", collapse="@")
-    stringr::str_c(block_name, states, sep="@")
+    str_c(block_name, states, sep="@")
 }
 
 .BIT_STATES <- c(
@@ -477,7 +546,7 @@ block_palette <- function(object) {
     } else if(name %in% .INTEGER_STATES) {
         p <- as.integer(state)
         if(is.na(p)) {
-            msg <- stringr::str_glue("Block State '{name}={state}' could not ",
+            msg <- str_glue("Block State '{name}={state}' could not ",
                 "be converted to an integer.")
             rlang::warn(msg)
         }
@@ -485,26 +554,26 @@ block_palette <- function(object) {
     } else if(name %in% .BIT_STATES) {
         p <- .as_bit(state)
         if(is.na(p)) {
-            msg <- stringr::str_glue("Block State '{name}={state}' could not ",
+            msg <- str_glue("Block State '{name}={state}' could not ",
                 "be converted to a boolean bit.")
             rlang::warn(msg)
         }
         return(nbt_byte(p))
     }
-    msg <- stringr::str_glue("Unknown Block State '{name}={state}' ",
+    msg <- str_glue("Unknown Block State '{name}={state}' ",
         "converted to an ")
 
     p <- suppressWarnings(as.integer(state))
     if(!is.na(p)) {
-        msg <- stringr::str_glue(msg, "nbt_int.")
+        msg <- str_glue(msg, "nbt_int.")
         ret <- nbt_int(p)
     } else {
         p <- .as_bit(state, strict=TRUE)
         if(!is.na(p)) {
-            msg <- stringr::str_glue(msg, "nbt_byte.")
+            msg <- str_glue(msg, "nbt_byte.")
             ret <- nbt_byte(as.integer(p))
         } else {
-            msg <- stringr::str_glue(msg, "nbt_string.")
+            msg <- str_glue(msg, "nbt_string.")
             ret <- nbt_string(state)
         }        
     }
@@ -514,10 +583,10 @@ block_palette <- function(object) {
 
 .block_nbt <- function(x) {
     # convert block string back into palette information
-    s <- stringr::str_split(x, stringr::fixed('@'))[[1]]
+    s <- str_split(x, fixed('@'))[[1]]
     name <- s[1]
     if(length(s) > 1) {
-        s <- stringr::str_split(s[-1], stringr::fixed("="))
+        s <- str_split(s[-1], fixed("="))
         s <- purrr::transpose(s)
         s[[1]] <- tolower(s[[1]])
         states <- rlang::set_names(s[[2]], s[[1]])

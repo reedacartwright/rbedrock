@@ -2,10 +2,23 @@
 % Please edit documentation in R/blocks.R
 \name{get_chunk_blocks_data}
 \alias{get_chunk_blocks_data}
+\alias{get_chunk_blocks_values}
 \alias{get_chunk_blocks_value}
+\alias{put_chunk_blocks_data}
+\alias{put_chunk_blocks_values}
+\alias{put_chunk_blocks_value}
 \title{Load block data from one or more chunks}
 \usage{
 get_chunk_blocks_data(
+  db,
+  x,
+  z,
+  dimension,
+  names_only = FALSE,
+  extra_block = FALSE
+)
+
+get_chunk_blocks_values(
   db,
   x,
   z,
@@ -22,6 +35,12 @@ get_chunk_blocks_value(
   names_only = FALSE,
   extra_block = FALSE
 )
+
+put_chunk_blocks_data(db, data)
+
+put_chunk_blocks_values(db, x, z, dimension, values)
+
+put_chunk_blocks_value(db, x, z, dimension, value)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -35,6 +54,12 @@ ignoring block states.}
 \item{extra_block}{A logical scalar. Append the extra block layer to the
 output (separated by ";"). This is mostly useful if you have waterlogged
 blocks. If the extra block is air, it will not be appended.}
+
+\item{data}{A named list of 16xNx16 character() arrays}
+
+\item{values}{A list of 16xNx16 character() arrays}
+
+\item{value}{A 16xNx16 character array}
 }
 \value{
 \code{get_chunk_blocks_data()} returns a list of the of the values
@@ -51,6 +76,11 @@ block name and block states. The strings' format is
 \code{blockname@state1=value1@state2=value2} etc.
 Blocks may have 0 or more states.
 
+\code{get_chunk_blocks_value()} is an alias for \code{get_chunk_blocks_data()}
+
 \code{get_chunk_blocks_value()} loads block data from a \code{bedrockdb}.
 It only supports loading a single value.
+
+\code{put_chunk_blocks_data()}, \code{put_chunk_blocks_values()}, and
+\code{put_chunk_blocks_value()} stores block data into a \code{bedrockdb}.
 }

@@ -558,6 +558,20 @@ SEXP bedrock_leveldb_writebatch_delete(SEXP r_writebatch, SEXP r_key) {
     return R_NilValue;
 }
 
+SEXP bedrock_leveldb_writebatch_mdelete(SEXP r_writebatch, SEXP r_keys) {
+    leveldb_writebatch_t *writebatch =
+        bedrock_leveldb_get_writebatch(r_writebatch, true);
+    const char **key_data = NULL;
+    size_t *key_len = NULL;
+    size_t num_key = get_keys(r_keys, &key_data, &key_len);
+
+    for(size_t i = 0; i < num_key; ++i) {
+        leveldb_writebatch_delete(writebatch, key_data[i], key_len[i]);
+    }
+
+    return R_NilValue;
+}
+
 // NOTE: arguments 2 & 3 transposed with respect to leveldb API
 SEXP bedrock_leveldb_write(SEXP r_db, SEXP r_writebatch, SEXP r_writeoptions) {
     leveldb_t *db = bedrock_leveldb_get_db(r_db, true);

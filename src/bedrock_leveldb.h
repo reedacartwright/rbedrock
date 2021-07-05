@@ -78,6 +78,7 @@ SEXP bedrock_leveldb_writebatch_put(SEXP r_writebatch, SEXP r_key,
 SEXP bedrock_leveldb_writebatch_mput(SEXP r_writebatch, SEXP r_key,
                                      SEXP r_value);
 SEXP bedrock_leveldb_writebatch_delete(SEXP r_writebatch, SEXP r_key);
+SEXP bedrock_leveldb_writebatch_mdelete(SEXP r_writebatch, SEXP r_keys);
 SEXP bedrock_leveldb_write(SEXP r_db, SEXP r_writebatch, SEXP r_writeoptions);
 
 SEXP bedrock_leveldb_approximate_sizes(SEXP r_db, SEXP r_start_key,

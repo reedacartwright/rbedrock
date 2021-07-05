@@ -16,7 +16,7 @@ get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
     res <- rawkeys_to_chrkeys(rawkeys)
     if(!is.null(starts_with)) {
         # filter out keys from the wrong dimension
-        res <- stringr::str_subset(res, stringr::fixed(starts_with))
+        res <- str_subset(res, fixed(starts_with))
     }
     res
 }

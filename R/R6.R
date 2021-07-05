@@ -179,7 +179,7 @@ R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(it = NU
         invisible(self)
     },
     seek = function(key) {
-        bedrock_leveldb_iter_seek(self$it, .from_strkey(key))
+        bedrock_leveldb_iter_seek(self$it, key)
         invisible(self)
     },
     move_next = function(error_if_invalid = FALSE) {
@@ -212,17 +212,21 @@ R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(ptr
         invisible(self)
     },
     put = function(key, value) {
-        bedrock_leveldb_writebatch_put(self$ptr, .from_strkey(key), value)
+        bedrock_leveldb_writebatch_put(self$ptr, key, value)
         invisible(self)
     },
-    mput = function(key, value) {
-        bedrock_leveldb_writebatch_mput(self$ptr, .from_strkey(key), value)
+    mput = function(keys, values) {
+        bedrock_leveldb_writebatch_mput(self$ptr, keys, values)
         invisible(self)
     },
     delete = function(key) {
-        bedrock_leveldb_writebatch_delete(self$ptr, .from_strkey(key))
+        bedrock_leveldb_writebatch_delete(self$ptr, key)
         invisible(self)
     },
+    mdelete = function(keys) {
+        bedrock_leveldb_writebatch_mdelete(self$ptr, keys)
+        invisible(self)
+    },    
     write = function(writeoptions = NULL) {
         bedrock_leveldb_write(self$db, self$ptr, writeoptions)
         invisible(self)

@@ -12,7 +12,7 @@
 \usage{
 parse_chunk_keys(keys)
 
-create_chunk_keys(x, z, dimension, tag, subtag = NA_integer_)
+create_chunk_keys(x, z, dimension, tag, subtag)
 
 chunk_positions(keys)
 

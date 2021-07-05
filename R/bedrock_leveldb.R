@@ -191,6 +191,9 @@ bedrock_leveldb_writebatch_mput <- function(writebatch, key, value) {
 bedrock_leveldb_writebatch_delete <- function(writebatch, key) {
     .Call(Cbedrock_leveldb_writebatch_delete, writebatch, key)
 }
+bedrock_leveldb_writebatch_mdelete <- function(writebatch, keys) {
+    .Call(Cbedrock_leveldb_writebatch_mdelete, writebatch, keys)
+}
 bedrock_leveldb_write <- function(db, writebatch, writeoptions = NULL) {
     .Call(Cbedrock_leveldb_write, db, writebatch, writeoptions)
 }

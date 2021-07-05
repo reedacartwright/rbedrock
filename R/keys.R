@@ -76,13 +76,16 @@ parse_chunk_keys <- function(keys) {
 #'
 #' @rdname chunk_keys
 #' @export
-create_chunk_keys <- function(x, z, dimension, tag, subtag = NA_integer_) {
+create_chunk_keys <- function(x, z, dimension, tag, subtag) {
     if(is.character(tag)) {
         tag <- chunk_tag_int(tag)
     }
+    if(missing(subtag)) {
+        subtag <- NA_character_
+    }
     args <- vec_recycle_common(x,z,dimension,tag,subtag)
-    tag <- stringr::str_c(args[[4]], args[[5]], sep="-") %|% as.character(args[[4]])
-    ret <- stringr::str_glue("@{args[[1]]}:{args[[2]]}:{args[[3]]}:{tag}")
+    tag <- str_c(args[[4]], args[[5]], sep="-") %|% as.character(args[[4]])
+    ret <- str_glue("@{args[[1]]}:{args[[2]]}:{args[[3]]}:{tag}")
     as.character(ret)
 }
 
@@ -168,7 +171,7 @@ chunk_tag_int <- function(tags) {
 }
 
 .get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
-    m <- stringr::str_match(keys, "^@[^:]+:[^:]+:[^:]+:([^:-]+)(?:-[^:]+)?$")
+    m <- str_match(keys, "^@[^:]+:[^:]+:[^:]+:([^:-]+)(?:-[^:]+)?$")
     res <- as.integer(m[,2])
     if(as_string) {
         res <- chunk_tag_str(res)
@@ -177,29 +180,31 @@ chunk_tag_int <- function(tags) {
 }
 
 .get_subtag_from_chunk_key <- function(keys) {
-    m <- stringr::str_match(keys, "^@[^:]+:[^:]+:[^:]+:[^:-]+-([^:]+)$")
+    m <- str_match(keys, "^@[^:]+:[^:]+:[^:]+:[^:-]+-([^:]+)$")
     as.integer(m[,2])
 }
 
 .get_dimension_from_chunk_key <- function(keys) {
-    m <- stringr::str_match(keys, "^@[^:]+:[^:]+:([^:]+):[^:-]+(?:-[^:]+)?$")
+    m <- str_match(keys, "^@[^:]+:[^:]+:([^:]+):[^:-]+(?:-[^:]+)?$")
     as.integer(m[,2])
 }
 
 .trim_stem_from_chunk_key <- function(keys) {
-    stringr::str_replace(keys, "^@[^:]+:[^:]+:[^:]+:", "")
+    str_replace(keys, "^@[^:]+:[^:]+:[^:]+:", "")
 }
 
 .get_stem_from_chunk_key <- function(keys) {
-    stringr::str_extract(keys, "^@[^:]+:[^:]+:[^:]+")
+    str_extract(keys, "^@[^:]+:[^:]+:[^:]+")
 }
 
-.check_chunk_key_tag <- function(keys, tag, silent = FALSE) {
-    ktag <- .get_tag_from_chunk_key(keys)
-    b <- !is.na(ktag) & ktag %in% tag
+.check_chunk_key_tag <- function(keys, tag, subtag, silent = FALSE) {
+    if(missing(subtag)) {
+        subtag <- if(tag == 47L) "(?:-[^:-]+)?" else ""
+    }
+    b <- .is_chunk_key(keys, tag=tag, subtag=subtag)
     isgood <- all(b)
     if(isFALSE(silent) && !isgood) {
-        rlang::abort(stringr::str_glue("Invalid key: tag is not {tag}."))
+        abort(str_glue("Invalid key: tag is not {tag}."))
     }
     isgood
 }
@@ -208,29 +213,35 @@ chunk_tag_int <- function(tags) {
 .CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:-]+))?$"
 .CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?:-([^:-]+))?$"
 
-.is_chunk_key <- function(keys) {
-    stringr::str_detect(keys, .CHUNK_KEY_RE)
+.is_chunk_key <- function(keys, tag = "[^:-]+", subtag = "(?:-[^:-]+)?") {
+    re <- str_c("^@[^:]+:[^:]+:[^:]+:", tag, subtag)
+    str_detect(keys, re)
 }
 
 .subset_chunk_keys <- function(keys, negate = FALSE) {
-   stringr::str_subset(keys, .CHUNK_KEY_RE, negate = negate)
+   str_subset(keys, .CHUNK_KEY_RE, negate = negate)
 }
 
 .split_chunk_keys <- function(keys) {
-    stringr::str_match(keys, .CHUNK_KEY_MATCH)
+    str_match(keys, .CHUNK_KEY_MATCH)
 }
 
-.process_key_args <- function(x, z, d, tag, subtag = NA_integer_,
+.process_key_args <- function(x, z, d, tag, subtag,
     stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
     if(missing(z) && is.character(x)) {
         # if tag exists, we are going to filter on data type
         if(!missing(tag)) {
             vec_assert(tag, size = 1)
-            ktag <- .get_tag_from_chunk_key(x)
-            b <- !is.na(ktag) & ktag == tag
-            if(stop_if_filtered && any(!b)) {
-                stop(paste0("Some keys passed to .process_keys_args are not of type ", tag))
+            if(missing(subtag)) {
+                subtag <- if(tag == 47L) "(?:-[^:-]+)?" else ""
+            }
+            vec_assert(subtag, size = 1)
+
+            b <- .is_chunk_key(x, tag=tag, subtag=subtag)
+            isgood <- all(b)
+            if(stop_if_filtered && !isgood) {
+                abort(str_c("Some keys passed to .process_keys_args are not of type ", tag))
             }
             x <- x[b]
         }
@@ -275,7 +286,7 @@ chunk_tag_int <- function(tags) {
         return(x[b])
     }
     args <- vec_recycle_common(x, z, d)
-    ret <- stringr::str_glue("@{args[[1]]}:{args[[2]]}:{args[[3]]}")
+    ret <- str_glue("@{args[[1]]}:{args[[2]]}:{args[[3]]}")
     as.character(ret)
 }
 
@@ -286,11 +297,11 @@ chunk_tag_int <- function(tags) {
     }
     vec_assert(starts_with, character(), 1L)
 
-    if(stringr::str_starts(starts_with, pattern=stringr::fixed("@"))) {
+    if(str_starts(starts_with, pattern=fixed("@"))) {
         # Chunk-key prefixes must refer to a chunk
-        v <- stringr::str_count(starts_with, stringr::fixed(":"))
+        v <- str_count(starts_with, fixed(":"))
         if(v < 2) {
-            stop("Argument 'starts_with' does not identify a chunk")
+            abort("Argument 'starts_with' does not identify a chunk")
         }
         if(v == 2) {
             #append a dummy tag
