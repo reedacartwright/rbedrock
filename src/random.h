@@ -11,5 +11,4 @@ SEXP mcpe_random_get_int(SEXP r_n, SEXP r_min, SEXP r_max);
 SEXP mcpe_random_get_double(SEXP r_n);
 SEXP mcpe_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max);
 
-
-SEXP mcpe_random_create_seed1(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt);
+SEXP mcpe_random_create_seed(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt, SEXP r_type);

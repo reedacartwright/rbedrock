@@ -126,7 +126,7 @@ static const R_CallMethodDef call_methods[] = {
     {"Cmcpe_random_get_double", (DL_FUNC)&mcpe_random_get_double, 1},
     {"Cmcpe_random_get_float", (DL_FUNC)&mcpe_random_get_float, 3},
 
-    {"Cmcpe_random_create_seed1", (DL_FUNC)&mcpe_random_create_seed1, 5},
+    {"Cmcpe_random_create_seed", (DL_FUNC)&mcpe_random_create_seed, 6},
 
     {NULL, NULL, 0}};
 

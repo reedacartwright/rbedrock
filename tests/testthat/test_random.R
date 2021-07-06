@@ -103,7 +103,7 @@ test_that("bedrock_random_float works with a minimum and a maximum value", {
 test_that("bedrock_random_create_seed1 finds slime chunks", {
 
     is_slime_chunk <- function(x,z) {
-        seed <- bedrock_random_create_seed1(x,z,0x1f1f1f1f,1,0)
+        seed <- bedrock_random_create_seed(x, z, 0x1f1f1f1f, 1, 0, type=1)
         bedrock_random_seed(seed)
         bedrock_random_get_uint(1,10) == 0
     }

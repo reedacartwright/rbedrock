@@ -2,10 +2,9 @@
 % Please edit documentation in R/random.R
 \name{bedrock_random_create_seed}
 \alias{bedrock_random_create_seed}
-\alias{bedrock_random_create_seed1}
 \title{Random Number Seeds for Minecraft}
 \usage{
-bedrock_random_create_seed1(x, z, a, b, salt)
+bedrock_random_create_seed(x, z, a, b, salt, type)
 }
 \arguments{
 \item{x, z}{chunk coordinates}
@@ -13,10 +12,13 @@ bedrock_random_create_seed1(x, z, a, b, salt)
 \item{a, b}{seed parameters}
 
 \item{salt}{seed parameter}
+
+\item{type}{which seed type to use}
 }
 \description{
-\code{bedrock_random_create_seed1()} constructs a seed using the formula
-\code{x*a ^ z*b ^ salt}
+\code{bedrock_random_create_seed()} constructs a seed using the formulas
+type 1: \code{x*a ^ z*b ^ salt}, type 2: \code{x*a + z*b + salt}, and type 3:
+\code{x*a + z*b ^ salt}.
 }
 \details{
 Minecraft uses several different kind of seeds during world generation and
@@ -26,7 +28,7 @@ gameplay.
 # identify slime chunks
 g <- tidyr::expand_grid(x=1:10, z=1:10)
 is_slime_chunk <- purrr::pmap_lgl(g, function(x,z) {
-  seed <- bedrock_random_create_seed1(x,z,0x1f1f1f1f,1,0)
+  seed <- bedrock_random_create_seed(x,z,0x1f1f1f1f,1,0,type=1)
   bedrock_random_seed(seed)
   bedrock_random_get_uint(1,10) == 0
 })

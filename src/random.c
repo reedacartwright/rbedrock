@@ -220,14 +220,25 @@ SEXP mcpe_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max) {
     return ret;
 }
 
-SEXP mcpe_random_create_seed1(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt) {
+SEXP mcpe_random_create_seed(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt, SEXP r_type) {
     int x = Rf_asInteger(r_x);
     int z = Rf_asInteger(r_z);
     int a = Rf_asInteger(r_a);
     int b = Rf_asInteger(r_b);
     int salt = Rf_asInteger(r_salt);
+    int type = Rf_asInteger(r_type);
+    int seed = 0;
 
-    int seed = (x * a) ^ (z * b) ^ salt;
-
+    switch(type) {
+     case 1:
+        seed = (x * a) ^ (z * b) ^ salt;
+        break;
+     case 2:
+        seed = (x * a) + (z * b) + salt;
+        break;
+     case 3:
+        seed = (x * a) + (z * b) ^ salt;
+        break;
+    }
     return Rf_ScalarInteger(seed);
 }
