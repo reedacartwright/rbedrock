@@ -6,8 +6,7 @@
 \alias{rbedrock-package}
 \title{rbedrock: Analysis and Manipulation of Data from Minecraft Bedrock Edition}
 \description{
-This package is an extension package for R that supports the analysis
-  and management of Minecraft (Bedrock Edition) worlds. This includes Windows 10, Pocket Edition, XBox, and PS4 versions of the game. It does not include Minecraft: Java worlds.
+Implements an interface to Minecraft (Bedrock Edition) worlds. Supports the analysis and management of these worlds and game saves.
 }
 \details{
 rbedrock is currently under development.

@@ -9,8 +9,7 @@ Authors@R: c(
     person(given = "Rich", family = "FitzJohn",
            role = "aut", email = "rich.fitzjohn@gmail.com")
            )
-Description: This package is an extension package for R that supports the analysis
-  and management of Minecraft (Bedrock Edition) worlds. This includes Windows 10, Pocket Edition, XBox, and PS4 versions of the game. It does not include Minecraft: Java worlds.
+Description: Implements an interface to Minecraft (Bedrock Edition) worlds. Supports the analysis and management of these worlds and game saves.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
