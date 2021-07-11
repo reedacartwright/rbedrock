@@ -9,7 +9,10 @@
 
 There were no ERRRORs or WARNINGS.
 
-There was NOTEs.
+There were NOTEs.
 
- - GNU make is a SystemRequirement.
- - installed size is 7.3Mb (on ubuntu)
+ - "GNU make is a SystemRequirements."
+   * This is listed as a system requirement because on some systems the CMake configuration of a dependent library creates a GNU make file.
+
+ - installed size is 7.3Mb
+  * The package contains a dependent library (Mojang's fork of leveldb) and on some systems (ubuntu) this library large when compiled.
