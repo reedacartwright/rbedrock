@@ -237,7 +237,7 @@ SEXP mcpe_random_create_seed(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt
         seed = (x * a) + (z * b) + salt;
         break;
      case 3:
-        seed = (x * a) + (z * b) ^ salt;
+        seed = ((x * a) + (z * b)) ^ salt;
         break;
     }
     return Rf_ScalarInteger(seed);
