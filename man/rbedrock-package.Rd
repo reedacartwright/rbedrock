@@ -21,7 +21,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Reed Cartwright \email{reed@cartwrig.ht} (\href{https://orcid.org/0000-0002-0837-9380}{ORCID})
+\strong{Maintainer}: Reed Cartwright \email{racartwright@gmail.com} (\href{https://orcid.org/0000-0002-0837-9380}{ORCID})
 
 Authors:
 \itemize{

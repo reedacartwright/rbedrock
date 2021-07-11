@@ -9,4 +9,4 @@
 ^\.github$
 ^\.clang-format$
 ^\.clang_complete$
-^\cran-comments.md$
+^cran-comments.md$
