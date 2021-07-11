@@ -2,13 +2,15 @@ Package: rbedrock
 Title: Analysis and Manipulation of Data from Minecraft Bedrock Edition
 Version: 0.1.0
 Authors@R: c(
-    person(given = "Reed", family = "Cartwright",
+    person("Reed", "Cartwright",
            role = c("aut", "cre"),
            email = "racartwright@gmail.com",
            comment = c(ORCID = "0000-0002-0837-9380")),
-    person(given = "Rich", family = "FitzJohn",
-           role = "aut", email = "rich.fitzjohn@gmail.com")
-           )
+    person("Rich", "FitzJohn",
+           role = "ctb",
+           email = "rich.fitzjohn@gmail.com"),
+    person("The LevelDB Authors", "", role="cph")
+    )
 Description: Implements an interface to Minecraft (Bedrock Edition) worlds. Supports the analysis and management of these worlds and game saves.
 License: MIT + file LICENSE
 Encoding: UTF-8

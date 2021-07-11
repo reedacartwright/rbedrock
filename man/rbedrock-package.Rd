@@ -22,9 +22,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Reed Cartwright \email{racartwright@gmail.com} (\href{https://orcid.org/0000-0002-0837-9380}{ORCID})
 
-Authors:
+Other contributors:
 \itemize{
-  \item Rich FitzJohn \email{rich.fitzjohn@gmail.com}
+  \item Rich FitzJohn \email{rich.fitzjohn@gmail.com} [contributor]
+  \item The LevelDB Authors [copyright holder]
 }
 
 }
