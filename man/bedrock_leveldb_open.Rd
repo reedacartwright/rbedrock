@@ -53,7 +53,7 @@ large working set (budget one open file per 2MB of working set).
 \item{block_size}{The approximate size of user data packed per
 block (user data is stored in a set of blocks, and a block is
 the unit of reading from disk).  The block size here corresponds
-to uncompressed data; the actual size of the unit read frmo disk
+to uncompressed data; the actual size of the unit read from disk
 may be smaller if compression is enabled (LevelDB default: 4K)}
 
 \item{cache_capacity}{The size of the cache to use.  If

@@ -67,7 +67,7 @@ It only supports loading a single value.
 \code{put_2dmaps_data()}, \code{put_2dmaps_values()}, and
 \code{put_2dmaps_value()} store 2DMaps data into a \code{bedrockdb}.
 
-\code{write_2dmaps_value} encodes 2dMaps data into a raw vector.
+\code{write_2dmaps_value} encodes 2DMaps data into a raw vector.
 }
 \examples{
 heights <- matrix(63,16,16)

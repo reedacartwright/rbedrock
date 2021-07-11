@@ -14,6 +14,7 @@ Authors@R: c(
 Description: Implements an interface to Minecraft (Bedrock Edition) worlds. Supports the analysis and management of these worlds and game saves.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 RoxygenNote: 7.1.1
 SystemRequirements: C++11, cmake, zlib, GNU make

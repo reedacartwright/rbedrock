@@ -121,7 +121,7 @@ put_2dmaps_value <- function(db, x, z, dimension, height_map, biome_map) {
 }
 
 #' @description
-#' `write_2dmaps_value` encodes 2dMaps data into a raw vector.
+#' `write_2dmaps_value` encodes 2DMaps data into a raw vector.
 #'
 #' @rdname Maps2D
 #' @export
@@ -138,7 +138,7 @@ write_2dmaps_value <- function(height_map, biome_map) {
         return(NULL)
     }
     if(is.null(height_map) || is.null(biome_map)) {
-        abort("Invalid 2dMaps data.")
+        abort("Invalid 2DMaps data.")
     }
 
     height_map <- vec_cast(c(height_map), integer(), x_arg="height_map")
