@@ -74,3 +74,8 @@ vignettes/*.pdf
 *.exe
 *.out
 *.app
+
+
+# local files
+*.sublime-workspace
+/check/
