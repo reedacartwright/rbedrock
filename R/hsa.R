@@ -180,7 +180,7 @@ put_hsa_data <- function(db, data, merge = TRUE) {
     dat <- purrr::map(dat, write_hsa_value)
     put_data(db, dat)
     ret$tag <- .HSA_LIST[ret$tag]
-    ret
+    invisible(ret)
 }
 
 #' @description

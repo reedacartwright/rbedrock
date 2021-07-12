@@ -73,10 +73,10 @@ It only supports loading a single value.
 heights <- matrix(63,16,16)
 biomes <- matrix(1,16,16)
 # Pass heights and biomes as separate parameters
-write_2dmaps_value(heights, biomes)
+dat <- write_2dmaps_value(heights, biomes)
 # Pass them as a list.
 obj <- list(height_map = heights, biome_map = biomes)
-write_2dmaps_value(obj)
+dat <- write_2dmaps_value(obj)
 # Pass them as scalars
-write_2dmaps_value(63, 1)
+dat <- write_2dmaps_value(63, 1)
 }
