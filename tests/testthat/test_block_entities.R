@@ -30,7 +30,7 @@ test_that("get_block_entities_data returns specific BlockEnties data", {
 test_that("MobSpawners can be identified and placed in a table", {
     dat <- purrr::flatten(get_block_entities_data(db))
     dat <- purrr::keep(dat, ~.$id == "MobSpawner")
-    dat <- purrr::map_dfr(dat, tibble::as_tibble)
+    dat <- purrr::map_dfr(unnbt(dat), tibble::as_tibble)
 
     expect_named(dat, c("Delay", "DisplayEntityHeight", "DisplayEntityScale",
         "DisplayEntityWidth", "EntityIdentifier", "MaxNearbyEntities",
