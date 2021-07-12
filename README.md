@@ -1,4 +1,4 @@
-[![Discord Chat](https://img.shields.io/discord/710697981677928479.svg)](https://discord.gg/sWb4YmX)
+[![Discord Chat](https://img.shields.io/discord/710697981677928479.svg)](https://discord.com/invite/sWb4YmX)
 
 ## Overview
 
@@ -22,7 +22,7 @@ devtools::install_github("reedacartwright/rbedrock")
 
 ## Windows Installation
 
-Install the latest [R](https://cloud.r-project.org/bin/windows/base/) and [RStudio](https://rstudio.com/products/rstudio/download/#download). On Windows, you will also need to install the [Rtools40](https://cran.r-project.org/bin/windows/Rtools/) package to build rbedrock from source. This can be accomplished with the code below.
+Install the latest [R](https://cran.r-project.org/bin/windows/base/) and [RStudio](https://www.rstudio.com/products/rstudio/download/#download). On Windows, you will also need to install the [Rtools40](https://cran.r-project.org/bin/windows/Rtools/) package to build rbedrock from source. This can be accomplished with the code below.
 
 
 ``` r
