@@ -452,8 +452,10 @@ static R_xlen_t write_nbt_character_payload(SEXP r_value, unsigned char** ptr, u
     // write data
     memcpy(p, &len, sizeof(len));
     p += sizeof(len);
-    memcpy(p, str, len);
-    p += len;
+    if(len > 0) {
+        memcpy(p, str, len);
+        p += len;
+    }
     // update start ptr and return size
     *ptr = p;
     return retsz;
