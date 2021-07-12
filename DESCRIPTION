@@ -9,6 +9,7 @@ Authors@R: c(
     person("Rich", "FitzJohn",
            role = "ctb",
            email = "rich.fitzjohn@gmail.com"),
+    person(c("Christian", "Stigen"), "Larsen", role = "ctb"),
     person("The LevelDB Authors", "", role="cph")
     )
 Description: Implements an interface to Minecraft (Bedrock Edition) worlds. Supports the analysis and management of these worlds and game saves.

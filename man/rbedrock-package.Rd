@@ -25,6 +25,7 @@ Useful links:
 Other contributors:
 \itemize{
   \item Rich FitzJohn \email{rich.fitzjohn@gmail.com} [contributor]
+  \item Christian Stigen Larsen [contributor]
   \item The LevelDB Authors [copyright holder]
 }
 

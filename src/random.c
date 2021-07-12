@@ -50,7 +50,7 @@ void rbedrock_init_random() {
 
 #define UNROLL(expr) \
     y = M32(g_state.mt[i]) | L31(g_state.mt[i+1]); \
-    g_state.mt[i] = g_state.mt[expr] ^ (y >> 1) ^ ((((int32_t)(y) << 31) >> 31) & MAGIC); \
+    g_state.mt[i] = g_state.mt[expr] ^ (y >> 1) ^ ((((int32_t)((y) << 31)) >> 31) & MAGIC); \
     ++i;
 
 static void mcpe_random_update_state() {
@@ -70,7 +70,7 @@ static void mcpe_random_update_state() {
     {
     // i = 623, last step rolls over
         y = M32(g_state.mt[SIZE-1]) | L31(g_state.mt[0]);
-        g_state.mt[SIZE-1] = g_state.mt[PERIOD-1] ^ (y >> 1) ^ ((((int32_t)(y) << 31) >>
+        g_state.mt[SIZE-1] = g_state.mt[PERIOD-1] ^ (y >> 1) ^ ((((int32_t)((y) << 31)) >>
             31) & MAGIC);
     }
 
