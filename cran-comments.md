@@ -16,3 +16,11 @@ There were NOTEs.
 
  - installed size is 7.3Mb
   * The package contains a dependent library (Mojang's fork of leveldb) and on some systems (ubuntu) this library large when compiled.
+
+## Resubmission
+
+This is a resubmission. I have fixed the following issues:
+
+* changed http --> https, added trailing slashes, and followed moved content as appropriate.
+
+* devtools::check(remote=TRUE) no longer emits NOTEs for the README.md.
