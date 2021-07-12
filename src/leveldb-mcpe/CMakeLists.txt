@@ -32,7 +32,7 @@ set(CMAKE_C_FLAGS_INIT "${cc_cmdflags} ${CMAKE_C_FLAGS_INIT}")
 set(CMAKE_CXX_FLAGS_INIT "${cxx_cmdflags} ${CMAKE_CXX_FLAGS_INIT}")
 
 # Keep the version below in sync with the one in db.h
-project(leveldb VERSION 1.22.0 LANGUAGES C CXX)
+project(leveldb VERSION 1.23.0 LANGUAGES C CXX)
 
 # C standard can be overridden when this is used as a sub-project.
 if(NOT CMAKE_C_STANDARD)
@@ -61,9 +61,6 @@ endif (WIN32)
 option(LEVELDB_BUILD_TESTS "Build LevelDB's unit tests" ON)
 option(LEVELDB_BUILD_BENCHMARKS "Build LevelDB's benchmarks" ON)
 option(LEVELDB_INSTALL "Install LevelDB's header and library" ON)
-
-include(TestBigEndian)
-test_big_endian(LEVELDB_IS_BIG_ENDIAN)
 
 include(CheckIncludeFile)
 check_include_file("unistd.h" HAVE_UNISTD_H)
@@ -338,6 +335,11 @@ if(LEVELDB_BUILD_TESTS)
   # This project is tested using GoogleTest.
   add_subdirectory("third_party/googletest")
 
+  # This project uses Google benchmark for benchmarking.
+  set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+  set(BENCHMARK_ENABLE_EXCEPTIONS OFF CACHE BOOL "" FORCE)
+  add_subdirectory("third_party/benchmark")
+
   # GoogleTest triggers a missing field initializers warning.
   if(LEVELDB_HAVE_NO_MISSING_FIELD_INITIALIZERS)
     set_property(TARGET gtest
@@ -358,7 +360,7 @@ if(LEVELDB_BUILD_TESTS)
 
         "${test_file}"
     )
-    target_link_libraries("${test_target_name}" leveldb gtest gmock)
+    target_link_libraries("${test_target_name}" leveldb gtest gmock benchmark)
     target_compile_definitions("${test_target_name}"
       PRIVATE
         ${LEVELDB_PLATFORM_NAME}=1
