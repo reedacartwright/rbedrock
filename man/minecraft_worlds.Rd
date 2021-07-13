@@ -55,8 +55,8 @@ Minecraft saved games.
 \code{export_world()} exports a world to an archive file.
 }
 \examples{
-if(FALSE) {
-create_world(LevelName = "My World", RandomSeed = 10)
+\dontrun{
 
+create_world(LevelName = "My World", RandomSeed = 10)
 }
 }

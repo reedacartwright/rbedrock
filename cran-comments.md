@@ -21,6 +21,4 @@ There were NOTEs.
 
 This is a resubmission. I have fixed the following issues:
 
-* changed http --> https, added trailing slashes, and followed moved content as appropriate.
-
-* devtools::check(remote=TRUE) no longer emits NOTEs for the README.md.
+ * Use `\dontrun` to prevent example code from running that reads or writes the user's files.

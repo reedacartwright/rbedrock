@@ -67,7 +67,8 @@ db <- bedrockdb(dbpath)
 keys <- get_keys(db)
 close(db)
 
-if(FALSE) {
+\dontrun{
+
 # open a world in the minecraftWorlds folder using a world id.
 db <- bedrockdb("lrkkYFpUABA=") 
 # do something with db ...

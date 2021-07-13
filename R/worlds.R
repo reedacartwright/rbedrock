@@ -2,9 +2,9 @@
 #'
 #' @name minecraft_worlds
 #' @examples
-#' if(FALSE) {
+#' \dontrun{
+#'
 #' create_world(LevelName = "My World", RandomSeed = 10)
-#' 
 #' }
 NULL
 
