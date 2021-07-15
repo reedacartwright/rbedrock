@@ -28,7 +28,6 @@ Imports:
     R6,
     stringr,
     bit64,
-    bitops,
     rappdirs,
     rlang,
     dplyr,

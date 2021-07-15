@@ -270,6 +270,9 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
      case TAG_COMPOUND:
      {
         SEXP ret = read_nbt_compound_payload(ptr, end, INT_MAX);
+        if(*ptr == end) {
+            break;
+        }
         if(**ptr == TAG_END) {
             *ptr += 1;
             return ret;
