@@ -33,18 +33,6 @@ devtools::install_github("reedacartwright/rbedrock")
 
 To install the development version you will need to have suitable development tools installed on your machine. This includes [CMake](https://cmake.org/download/) on Unix.
 
-``` r
-# Install from CRAN
-install.packages("rbedrock")
-
-# Or the development version from GitHub
-# If you are installing on Windows for the first time, see section below
-if (!require(devtools)) {
-    install.packages("devtools")
-}
-devtools::install_github("reedacartwright/rbedrock")
-```
-
 ## Development Version (Windows)
 
 ``` r
