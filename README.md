@@ -10,7 +10,7 @@ To install the development version you will need to have suitable development to
 
 ``` r
 # Install from CRAN
-install.packages("rbedrock") 
+install.packages("rbedrock")
 
 # Or the development version from GitHub
 # If you are installing on Windows for the first time, see section below
