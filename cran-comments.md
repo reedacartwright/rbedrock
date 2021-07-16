@@ -1,9 +1,12 @@
 ## Test environments
 * Arch Linux (Local Install) - R 4.1.0
+* FreeBSD 12.2 (Local Install) - R 4.1.0
 * Windows-Latest (GitHub Actions) - R 4.1.0
 * MacOS-Latest (GitHub Actions) - R 4.1.0
 * Ubuntu-20.04 (GitHub Actions) - R 4.1.0
 * Ubuntu-20.04 (GitHub Actions) - R (devel)
+* rhub::check_for_cran()
+* rhub::check_with_valgrind()
 
 ## R CMD check results
 
