@@ -375,9 +375,7 @@ void leveldb_writebatch_append(leveldb_writebatch_t* destination,
 
 leveldb_options_t* leveldb_options_create() { return new leveldb_options_t; }
 
-void leveldb_options_destroy(leveldb_options_t* options) { 
-  delete options;
-}
+void leveldb_options_destroy(leveldb_options_t* options) { delete options; }
 
 void leveldb_options_set_comparator(leveldb_options_t* opt,
                                     leveldb_comparator_t* cmp) {
