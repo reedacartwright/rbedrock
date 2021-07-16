@@ -68,6 +68,7 @@ typedef struct leveldb_snapshot_t leveldb_snapshot_t;
 typedef struct leveldb_writablefile_t leveldb_writablefile_t;
 typedef struct leveldb_writebatch_t leveldb_writebatch_t;
 typedef struct leveldb_writeoptions_t leveldb_writeoptions_t;
+typedef struct leveldb_compressor_t leveldb_compressor_t;
 
 /* DB operations */
 
@@ -189,14 +190,17 @@ LEVELDB_EXPORT void leveldb_options_set_block_restart_interval(
     leveldb_options_t*, int);
 LEVELDB_EXPORT void leveldb_options_set_max_file_size(leveldb_options_t*,
                                                       size_t);
-
+/* Compression */
 enum {
   leveldb_no_compression = 0,
   leveldb_snappy_compression = 1,
   leveldb_zlib_compression = 2,
+  /* leveldb_zstd_compression = 3, */
   leveldb_zlib_raw_compression = 4
 };
-LEVELDB_EXPORT void leveldb_options_set_compression(leveldb_options_t*, int, int);
+LEVELDB_EXPORT leveldb_compressor_t* leveldb_compressor_create(int, int);
+LEVELDB_EXPORT void leveldb_compressor_destroy(leveldb_compressor_t *);
+LEVELDB_EXPORT void leveldb_options_set_compressor(leveldb_options_t*, size_t, leveldb_compressor_t*);
 
 /* Comparator */
 
