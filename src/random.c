@@ -221,13 +221,13 @@ SEXP mcpe_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max) {
 }
 
 SEXP mcpe_random_create_seed(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt, SEXP r_type) {
-    int x = Rf_asInteger(r_x);
-    int z = Rf_asInteger(r_z);
-    int a = Rf_asInteger(r_a);
-    int b = Rf_asInteger(r_b);
-    int salt = Rf_asInteger(r_salt);
+    unsigned int x = Rf_asInteger(r_x);
+    unsigned int z = Rf_asInteger(r_z);
+    unsigned int a = Rf_asInteger(r_a);
+    unsigned int b = Rf_asInteger(r_b);
+    unsigned int salt = Rf_asInteger(r_salt);
     int type = Rf_asInteger(r_type);
-    int seed = 0;
+    unsigned int seed = 0;
 
     switch(type) {
      case 1:

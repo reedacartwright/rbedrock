@@ -110,4 +110,6 @@ test_that("bedrock_random_create_seed1 finds slime chunks", {
 
     expect_equal(is_slime_chunk(0,0), FALSE)
     expect_equal(is_slime_chunk(3,1), TRUE)
+    expect_equal(is_slime_chunk(-61,-59), TRUE)
+    expect_equal(is_slime_chunk(-61,-60), FALSE)
 })
