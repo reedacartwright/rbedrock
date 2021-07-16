@@ -9,8 +9,8 @@ rbedrock is an extension package for [R](https://www.r-project.org/) that suppor
 To install the development version you will need to have suitable development tools installed on your machine. This includes [CMake](https://cmake.org/download/) on Unix.
 
 ``` r
-# Install from CRAN [NOT CURRENTLY AVAILABLE]
-# install.packages("rbedrock") 
+# Install from CRAN
+install.packages("rbedrock") 
 
 # Or the development version from GitHub
 # If you are installing on Windows for the first time, see section below
