@@ -15,6 +15,9 @@ There were no ERRRORs or WARNINGS.
 
 There were NOTEs.
 
+ - Days since last update: 3
+  * This submission is a patch to correct issues identified by UBSAN and Valgrind checks.
+
  - "GNU make is a SystemRequirements."
    * This is listed as a system requirement because on some systems the CMake configuration of a dependent library creates a GNU make file.
 
