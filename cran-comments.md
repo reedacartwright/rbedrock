@@ -7,6 +7,7 @@
 * Ubuntu-20.04 (GitHub Actions) - R (devel)
 * rhub::check_for_cran()
 * rhub::check_with_valgrind()
+* rhub::check_with_sanitizers()
 
 ## R CMD check results
 
