@@ -20,8 +20,3 @@ There were NOTEs.
  - installed size is 7.3Mb
   * The package contains a dependent library (Mojang's fork of leveldb) and on some systems (ubuntu) this library large when compiled.
 
-## Resubmission
-
-This is a resubmission. I have fixed the following issues:
-
- * Use `\dontrun` to prevent example code from running that reads or writes the user's files.

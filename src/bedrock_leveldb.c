@@ -691,9 +691,8 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with,
     const char *starts_with = NULL;
     const size_t starts_with_len = get_starts_with(r_starts_with, &starts_with);
 
-    SEXP ret = R_NilValue;
-    SEXP last = R_NilValue;
-    SEXP value;
+    SEXP r_ret = PROTECT(create_stretchy_list());
+    SEXP r_value;
 
     leveldb_iterator_t *it = leveldb_create_iterator(db, readoptions);
     if(starts_with_len == 0) {
@@ -701,27 +700,21 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with,
     } else {
         leveldb_iter_seek(it, starts_with, starts_with_len);
     }
+
     for(; leveldb_iter_valid(it); leveldb_iter_next(it)) {
         if(!iter_key_starts_with(it, starts_with, starts_with_len)) {
             break;
         }
         size_t key_len;
         const char *key_data = leveldb_iter_key(it, &key_len);
-        value = raw_string_to_sexp(key_data, key_len);
-        if(Rf_isNull(ret)) {
-            PROTECT(ret = list1(value));
-            last = ret;
-        } else {
-            last = SETCDR(last, list1(value));
-        }
+        r_value = PROTECT(raw_string_to_sexp(key_data, key_len));
+        grow_stretchy_list(r_ret, r_value);
+        UNPROTECT(1);
     }
     leveldb_iter_destroy(it);
 
-    if(!Rf_isNull(ret)) {
-        UNPROTECT(1);
-    }
-
-    return PairToVectorList(ret);
+    UNPROTECT(1);
+    return Rf_PairToVectorList(CDR(r_ret));
 }
 
 SEXP bedrock_leveldb_keys_len(SEXP r_db, SEXP r_starts_with,

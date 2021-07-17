@@ -171,3 +171,62 @@ int scalar_int(SEXP x) {
     }
     return value;
 }
+
+/*
+ *  R : A Computer Language for Statistical Data Analysis
+ *  Copyright (C) 1995, 1996, 1997  Robert Gentleman and Ross Ihaka
+ *  Copyright (C) 1997--2021  The R Core Team
+ *  Copyright (C) 2009--2011  Romain Francois
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, a copy is available at
+ *  https://www.R-project.org/Licenses/
+ */
+
+/* Stretchy List Structures : Lists are created and grown using a special */
+/* dotted pair.  The CAR of the list points to the last cons-cell in the */
+/* list and the CDR points to the first.  The list can be extracted from */
+/* the pair by taking its CDR, while the CAR gives fast access to the end */
+/* of the list. */
+
+/* These functions must be called with arguments protected */
+
+/* Create a stretchy-list dotted pair */
+SEXP create_stretchy_list() {
+    SEXP s = CONS(R_NilValue, R_NilValue);
+    SETCAR(s, s);
+    return s;
+}
+
+/* Add a new element at the end of a stretchy list */
+void grow_stretchy_list(SEXP l, SEXP s) {
+    SEXP tmp = CONS(s, R_NilValue);
+    SETCDR(CAR(l), tmp);
+    SETCAR(l, tmp);
+}
+
+/* Create a stretchy list with a single named element */
+SEXP create_stretchy_list_with_name(SEXP s, SEXP tag) {
+    SEXP tmp;
+    PROTECT(tmp = create_stretchy_list());
+    grow_stretchy_list(tmp, s);
+    SET_TAG(CAR(tmp), tag);
+    UNPROTECT(1); /* tmp */
+    return tmp;
+}
+
+/* Add named element to the end of a stretchy list */
+void grow_stretchy_list_with_name(SEXP l, SEXP s, SEXP tag) {
+    grow_stretchy_list(l, s);
+    SET_TAG(CAR(l), tag);
+}

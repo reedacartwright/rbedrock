@@ -26,6 +26,7 @@
 #include <stdbool.h>
 
 #include "nbt.h"
+#include "support.h"
 
 #define return_nbt_error() { Rf_error("Malformed NBT data: at %s, line %d.",  __FILE__, __LINE__ ); return R_NilValue; }
 #define return_nbt_error0() { Rf_error("Malformed NBT data: at %s, line %d.",  __FILE__, __LINE__ ); return 0; }
@@ -59,9 +60,7 @@ enum NBT_TYPE {
 typedef enum NBT_TYPE nbt_type_t;
 
 static SEXP read_nbt_payload(const unsigned char** p, const unsigned char* end, nbt_type_t tag);
-static SEXP make_nbt_value(SEXP r_payload, SEXP r_name, nbt_type_t tag);
 static SEXP nbt_value_set_tag(SEXP r_payload, nbt_type_t tag);
-SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end);
 
 static SEXP read_nbt_payload_character(const unsigned char** ptr, const unsigned char* end) {
     const unsigned char *p = *ptr;
@@ -156,18 +155,6 @@ static SEXP nbt_value_set_tag(SEXP r_payload, nbt_type_t tag) {
     return r_payload;
 }
 
-static SEXP make_nbt_value(SEXP r_payload, SEXP r_name, nbt_type_t tag) {
-    SEXP r_ret;
-    PROTECT(r_payload);
-    PROTECT(r_name);
-    PROTECT(r_ret = Rf_list1(nbt_value_set_tag(r_payload, tag)));
-    if(XLENGTH(r_name) > 0) {
-        SET_TAG(r_ret, Rf_installTrChar(r_name));
-    }
-    UNPROTECT(3);
-    return r_ret;
-}
-
 static SEXP read_nbt_list_payload(const unsigned char** ptr, const unsigned char* end) {
     const unsigned char *p = *ptr;
     if(end - p < 5) {
@@ -205,23 +192,14 @@ static SEXP read_nbt_list_payload(const unsigned char** ptr, const unsigned char
     return r_ret;
 }
 
-SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned char* end,
-        int max_elements) {
-    SEXP r_ret = R_NilValue;
-    SEXP last = R_NilValue;
-    for(int i = 0; *ptr < end && **ptr != TAG_END && i < max_elements; ++i) {
-        SEXP r_node = read_nbt_value(ptr, end);
-        if(Rf_isNull(r_ret)) {
-            PROTECT(r_ret = r_node);
-            last = r_ret;
-        } else {
-            last = SETCDR(last, r_node);
-        }
+static SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned char* end) {
+    SEXP r_ret = read_nbt_values(ptr, end, INT_MAX, true);
+    if(*ptr != end && **ptr == TAG_END) {
+        *ptr += 1;
+        return r_ret;
     }
-    if(!Rf_isNull(r_ret)) {
-        UNPROTECT(1);
-    }
-    return Rf_PairToVectorList(r_ret);
+    Rf_error("Malformed NBT compound payload");
+    return R_NilValue;
 }
 
 static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end, nbt_type_t tag) {
@@ -268,17 +246,7 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
      case TAG_LIST:
         return read_nbt_list_payload(ptr, end);
      case TAG_COMPOUND:
-     {
-        SEXP ret = read_nbt_compound_payload(ptr, end, INT_MAX);
-        if(*ptr == end) {
-            break;
-        }
-        if(**ptr == TAG_END) {
-            *ptr += 1;
-            return ret;
-        }
-        break;
-     }
+        return read_nbt_compound_payload(ptr, end);
      default:
         break;
     }
@@ -286,28 +254,46 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
     return R_NilValue;
 }
 
-SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end) {
-    if(end-*ptr < 1) {
-        return_nbt_error();
+SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end,
+        int max_elements, bool stop_on_end) {
+    SEXP r_ret = PROTECT(create_stretchy_list());
+    SEXP r_name;
+    SEXP r_payload;
+
+    for(int i = 0; *ptr < end && i < max_elements; ++i) {
+        nbt_type_t tag = **ptr;
+        if(tag == TAG_END) {
+            if(stop_on_end) {
+                break;
+            }
+            grow_stretchy_list(r_ret, R_NilValue);
+            *ptr += 1;
+            continue;
+        }
+        *ptr += 1;
+        if( (unsigned int)tag >= TAG_CHECK) {
+            Rf_error("Malformed NBT tag: '%d'", tag);
+            return R_NilValue;
+        }
+        r_name = PROTECT(read_nbt_payload_character(ptr, end));
+        if(Rf_isNull(r_name)) {
+            return_nbt_error();
+        }
+        r_payload = read_nbt_payload(ptr, end, tag);
+        if(Rf_isNull(r_payload)) {
+            return_nbt_error();
+        }
+        r_payload = PROTECT(nbt_value_set_tag(r_payload, tag));
+        if(XLENGTH(r_name) > 0) {
+            grow_stretchy_list_with_name(r_ret, r_payload, Rf_installTrChar(r_name));
+        } else {
+            grow_stretchy_list(r_ret, r_payload);
+        }
+        UNPROTECT(2);
     }
-    nbt_type_t tag = **ptr;
-    *ptr += 1;
-    if(tag == TAG_END) {
-        return R_NilValue;
-    } else if( (unsigned int)tag >= TAG_CHECK) {
-        Rf_error("Malformed NBT tag: '%d'", tag);
-        return R_NilValue;
-    }
-    SEXP name = PROTECT(read_nbt_payload_character(ptr, end));
-    if(Rf_isNull(name)) {
-        return_nbt_error();
-    }
-    SEXP payload = PROTECT(read_nbt_payload(ptr, end, tag));
-    if(Rf_isNull(payload)) {
-        return_nbt_error();
-    }
-    UNPROTECT(2);
-    return make_nbt_value(payload,name,tag);
+
+    UNPROTECT(1);
+    return Rf_PairToVectorList(CDR(r_ret));
 }
 
 SEXP read_nbt(SEXP r_value, SEXP r_max_elements) {
@@ -315,8 +301,10 @@ SEXP read_nbt(SEXP r_value, SEXP r_max_elements) {
         return R_NilValue;
     }
     int max_elements = INT_MAX;
+    bool stop_on_end = true;
     if(!Rf_isNull(r_max_elements)) {
         max_elements = Rf_asInteger(r_max_elements);
+        stop_on_end = false;
     }
     if(TYPEOF(r_value) != RAWSXP) {
         error_return("Argument is not a raw type or NULL.");
@@ -325,14 +313,16 @@ SEXP read_nbt(SEXP r_value, SEXP r_max_elements) {
     size_t len = XLENGTH(r_value);
     const unsigned char *buffer = RAW(r_value);
     const unsigned char *p = buffer;
-    SEXP r_ret = read_nbt_compound_payload(&p, buffer+len, max_elements);
+    SEXP r_ret = PROTECT(read_nbt_values(&p, buffer+len, max_elements, stop_on_end));
     R_xlen_t bytes_read = p-buffer;
     if(!Rf_isNull(r_max_elements) && bytes_read <= len) {
         Rf_setAttrib(r_ret, g_bytes_read_symbol, Rf_ScalarInteger(bytes_read));
     } else if(bytes_read != len) {
         Rf_error("Malformed NBT data: %d bytes were read out of %d bytes total", (int)(bytes_read), (int)len);
+        UNPROTECT(1);
         return R_NilValue;
     }
+    UNPROTECT(1);
     return r_ret;
 }
 

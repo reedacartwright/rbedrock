@@ -84,7 +84,7 @@ SEXP read_subchunk(SEXP r_value) {
         int palette_size;
         memcpy(&palette_size, p, 4);
         p += 4;
-        SEXP r_palette = PROTECT(read_nbt_compound_payload(&p, end, palette_size));
+        SEXP r_palette = PROTECT(read_nbt_values(&p, end, palette_size, false));
         if(XLENGTH(r_palette) != palette_size) {
             return_block_error();
         }
