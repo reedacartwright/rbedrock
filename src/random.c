@@ -208,12 +208,12 @@ SEXP mcpe_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max) {
         float minval = Rf_asReal(r_min);
         float width = maxval-minval;
         for(size_t i=0; i < num; ++i) {
-            p[i] = minval + ((float)p[i])*width;
+            p[i] = (float)(minval + ((float)p[i])*width);
         }
     } else if(!Rf_isNull(r_max)) {
         float width = Rf_asReal(r_max);
         for(size_t i=0; i < num; ++i) {       
-            p[i] = ((float)p[i])*width;
+            p[i] = (float)(((float)p[i])*width);
         }
     }
     UNPROTECT(1);

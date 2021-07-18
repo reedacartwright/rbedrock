@@ -5,9 +5,11 @@
 * MacOS-Latest (GitHub Actions) - R 4.1.0
 * Ubuntu-20.04 (GitHub Actions) - R 4.1.0
 * Ubuntu-20.04 (GitHub Actions) - R (devel)
+* rhub::check()
 * rhub::check_for_cran()
 * rhub::check_with_valgrind()
 * rhub::check_with_sanitizers()
+* rhub::rhub::check_on_solaris()
 
 ## R CMD check results
 
@@ -16,11 +18,11 @@ There were no ERRRORs or WARNINGS.
 There were NOTEs.
 
  - Days since last update: 3
-  * This submission is a patch to correct issues identified by UBSAN and Valgrind checks.
+  * This submission is a patch to correct issues identified by post-submission CRAN checks, including UBSAN and Valgrind checks.
 
  - "GNU make is a SystemRequirements."
    * This is listed as a system requirement because on some systems the CMake configuration of a dependent library creates a GNU make file.
 
  - installed size is 7.3Mb
-  * The package contains a dependent library (Mojang's fork of leveldb) and on some systems (ubuntu) this library large when compiled.
+  * The package contains a dependent library (Mojang's fork of leveldb) and on some systems (ubuntu) this library is large when compiled.
 
