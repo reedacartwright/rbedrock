@@ -76,28 +76,28 @@ test_that("bedrock_random_double works", {
     bedrock_random_seed(5489L)
 
     values <- bedrock_random_get_double(10000)
-    expect_equal(values[10000], 4123659995 / 4294967296.0)
+    expect_equal(values[10000], 4123659995 / 4294967296.0, tolerance=2^-23)
 })
 
 test_that("bedrock_random_float works", {
     bedrock_random_seed(5489L)
 
     values <- bedrock_random_get_float(10000)
-    expect_equal(values[10000], 4123659995 / 4294967296.0)
+    expect_equal(values[10000], 4123659995 / 4294967296.0, tolerance=2^-23)
 })
 
 test_that("bedrock_random_float works with a maximum value", {
     bedrock_random_seed(5489L)
 
     values <- bedrock_random_get_float(10000, 10)
-    expect_equal(values[10000], 9.60114383697509765625)
+    expect_equal(values[10000], 9.60114383697509765625, tolerance=2^-23)
 })
 
 test_that("bedrock_random_float works with a minimum and a maximum value", {
     bedrock_random_seed(5489L)
 
     values <- bedrock_random_get_float(10000, 10, 20)
-    expect_equal(values[10000], 19.60114288330078125)
+    expect_equal(values[10000], 19.60114288330078125, tolerance=2^-23)
 })
 
 test_that("bedrock_random_create_seed1 finds slime chunks", {
