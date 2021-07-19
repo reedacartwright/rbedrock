@@ -79,4 +79,3 @@ vignettes/*.pdf
 # local files
 *.sublime-workspace
 /check/
-/src/Makevars

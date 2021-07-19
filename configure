@@ -1,20 +1,55 @@
-# check if CMAKE_BIN is non-empty and quit early if it is
-if [ -n "$CMAKE_BIN" ]
-then
-  exit 0
+echo ==== Configuring rbedrock R package ====
+
+#### R CONFIGURATION ####
+
+: ${R_HOME=`R RHOME`}
+if test -z "${R_HOME}"; then
+    echo >&2 "Could not determine R_HOME"
+    exit 1
 fi
 
-# Look for a cmake binary in the current path
-CMAKE_BIN=`which cmake 2>/dev/null`
+CC=`"${R_HOME}/bin/R" CMD config CC` ; echo set CC=$CC ; export CC
 
-if [ -z "$CMAKE_BIN" ]
-then
+CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
+CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
+CPICFLAGS=`"${R_HOME}/bin/R" CMD config CPICFLAGS`
+
+CFLAGS="$CPPFLAGS $CPICFLAGS $CFLAGS"; echo set CFLAGS=$CFLAGS; export CFLAGS
+
+CXX=`"${R_HOME}/bin/R" CMD config CXX11` ;  echo set CXX=$CXX ; export CXX
+
+CXXSTD=`"${R_HOME}/bin/R" CMD config CXX11STD`
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
+CXXPICFLAGS=`"${R_HOME}/bin/R" CMD config CXX11PICFLAGS`
+
+CXXFLAGS="$CXXSTD $CPPFLAGS $CXXPICFLAGS $CXXFLAGS"; echo set CXXFLAGS=$CXXFLAGS; export CXXFLAGS
+
+LDFLAGS=`"${R_HOME}/bin/R" CMD config LDFLAGS`;  echo set LDFLAGS=$LDFLAGS; export LDFLAGS
+
+if test -z "$CXX"; then
+    echo >&2 "Could not detect C++ compiler with R CMD config."
+fi
+
+AR=`"${R_HOME}/bin/R" CMD config AR`
+AR=`which $AR`
+
+RANLIB=`"${R_HOME}/bin/R" CMD config RANLIB`
+RANLIB=`which $RANLIB`
+
+
+#### CMAKE CONFIGURATION ####
+
+if test -z "$CMAKE_BIN"; then
+  # Look for a cmake binary in the current path
+  CMAKE_BIN=`which cmake 2>/dev/null`
+fi
+
+if test -z "$CMAKE_BIN"; then
   # Check for a MacOS specific path
   CMAKE_BIN=`which /Applications/CMake.app/Contents/bin/cmake 2>/dev/null`
 fi
 
-if [ -z "$CMAKE_BIN" ]
-then
+if test -z "$CMAKE_BIN"; then
   echo ""
   echo "------------------ CMAKE NOT FOUND --------------------"
   echo ""
@@ -34,6 +69,23 @@ then
   exit 1
 fi
 
+echo ==== Configuring src/leveldb-mcpe via CMake ====
 
-# Replace Variables
-sed "s|@CMAKE_BIN@|${CMAKE_BIN}|g" src/Makevars.in > src/Makevars
+echo set CMAKE_BIN=$CMAKE_BIN
+
+build_dir=src/leveldb-mcpe/build
+
+(mkdir -p "${build_dir}" &&
+  cd "${build_dir}" &&
+  "${CMAKE_BIN}" -G "Unix Makefiles" .. \
+    "-DCMAKE_AR=${AR}" \
+    "-DCMAKE_RANLIB=${RANLIB}" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLEVELDB_BUILD_TESTS:BOOL=OFF \
+    -DLEVELDB_BUILD_BENCHMARKS:BOOL=OFF \
+    -Wno-dev
+)
+
+if test $? -ne 0 ; then
+  exit 1
+fi

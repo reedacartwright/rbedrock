@@ -4,32 +4,32 @@
 
 cmake_minimum_required(VERSION 3.9)
 
-# Extract compilers and flags from R's CXX and C variables
-separate_arguments(cxx_cmdline UNIX_COMMAND "${R_CXX_COMPILER}")
-separate_arguments(cc_cmdline UNIX_COMMAND "${R_C_COMPILER}")
+# # Extract compilers and flags from R's CXX and C variables
+# separate_arguments(cxx_cmdline UNIX_COMMAND "${R_CXX_COMPILER}")
+# separate_arguments(cc_cmdline UNIX_COMMAND "${R_C_COMPILER}")
 
-list(GET cc_cmdline 0 cc_bin)
-list(GET cxx_cmdline 0 cxx_bin)
-list(REMOVE_AT cc_cmdline 0)
-list(REMOVE_AT cxx_cmdline 0)
+# list(GET cc_cmdline 0 cc_bin)
+# list(GET cxx_cmdline 0 cxx_bin)
+# list(REMOVE_AT cc_cmdline 0)
+# list(REMOVE_AT cxx_cmdline 0)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  set(osx_target ${cxx_cmdline})
-  list(FILTER cxx_cmdline EXCLUDE REGEX "macosx-version-min")
-  list(FILTER cc_cmdline EXCLUDE REGEX "macosx-version-min")
-  list(FILTER osx_target INCLUDE REGEX "macosx-version-min")
-  string(REGEX REPLACE "^.*=" "" osx_targetmin "${osx_target}")
+# if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+#   set(osx_target ${cxx_cmdline})
+#   list(FILTER cxx_cmdline EXCLUDE REGEX "macosx-version-min")
+#   list(FILTER cc_cmdline EXCLUDE REGEX "macosx-version-min")
+#   list(FILTER osx_target INCLUDE REGEX "macosx-version-min")
+#   string(REGEX REPLACE "^.*=" "" osx_targetmin "${osx_target}")
 
-  set(CMAKE_OSX_DEPLOYMENT_TARGET ${osx_targetmin})
-endif()
+#   set(CMAKE_OSX_DEPLOYMENT_TARGET ${osx_targetmin})
+# endif()
 
-string(REPLACE ";" " " cc_cmdflags "${cc_cmdline}")
-string(REPLACE ";" " " cxx_cmdflags "${cxx_cmdline}")
+# string(REPLACE ";" " " cc_cmdflags "${cc_cmdline}")
+# string(REPLACE ";" " " cxx_cmdflags "${cxx_cmdline}")
 
-set(CMAKE_C_COMPILER "${cc_bin}")
-set(CMAKE_CXX_COMPILER "${cxx_bin}")
-set(CMAKE_C_FLAGS_INIT "${cc_cmdflags} ${CMAKE_C_FLAGS_INIT}")
-set(CMAKE_CXX_FLAGS_INIT "${cxx_cmdflags} ${CMAKE_CXX_FLAGS_INIT}")
+# set(CMAKE_C_COMPILER "${cc_bin}")
+# set(CMAKE_CXX_COMPILER "${cxx_bin}")
+# set(CMAKE_C_FLAGS_INIT "${cc_cmdflags} ${CMAKE_C_FLAGS_INIT}")
+# set(CMAKE_CXX_FLAGS_INIT "${cxx_cmdflags} ${CMAKE_CXX_FLAGS_INIT}")
 
 # Keep the version below in sync with the one in db.h
 project(leveldb VERSION 1.23.0 LANGUAGES C CXX)

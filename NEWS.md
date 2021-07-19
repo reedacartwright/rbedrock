@@ -1,3 +1,7 @@
+## RBedrock 0.1.1.9000
+
+ * Improve MacOS support
+
 ## RBedrock 0.1.1
 
  * Fixed errors identified by UBSAN and Valgrind
