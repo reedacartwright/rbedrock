@@ -69,9 +69,9 @@ if test -z "$CMAKE_BIN"; then
   exit 1
 fi
 
-echo ==== Configuring src/leveldb-mcpe via CMake ====
-
 echo set CMAKE_BIN=$CMAKE_BIN
+
+echo ==== Configuring src/leveldb-mcpe via CMake ====
 
 build_dir=src/leveldb-mcpe/build
 
@@ -82,7 +82,6 @@ build_dir=src/leveldb-mcpe/build
     "-DCMAKE_RANLIB=${RANLIB}" \
     -DCMAKE_BUILD_TYPE=Release \
     -DLEVELDB_BUILD_TESTS:BOOL=OFF \
-    -DLEVELDB_BUILD_BENCHMARKS:BOOL=OFF \
     -Wno-dev
 )
 
