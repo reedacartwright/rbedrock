@@ -6,9 +6,13 @@
 * Ubuntu-20.04 (GitHub Actions) - R 4.1.0
 * Ubuntu-20.04 (GitHub Actions) - R (devel)
 * devtools::check_rhub(interactive=FALSE)
+* devtools::check_win_release()
+* devtools::check_win_devel()
 * rhub::check_with_valgrind(show_status=FALSE)
 * rhub::check_with_sanitizers(show_status=FALSE)
-* rhub::rhub::check_on_solaris(show_status=FALSE)
+* rhub::check_on_solaris(show_status=FALSE)
+* rhub::check(platform="macos-highsierra-release-cran",show_status=FALSE)
+* rhub::check_on_windows(show_status=FALSE)
 
 ## R CMD check results
 
@@ -16,8 +20,9 @@ There were no ERRRORs or WARNINGS.
 
 There were NOTEs.
 
- - Days since last update: 4
+ - Days since last update: 5
   * This submission is a patch to correct issues identified by post-submission CRAN checks, including UBSAN and Valgrind checks.
+  * This patch also enables binary MacOS packages from CRAN.
   * This patch also improves Solaris support, and g++ is now marked as a Solaris requirement.
 
  - "GNU make is a SystemRequirements."
