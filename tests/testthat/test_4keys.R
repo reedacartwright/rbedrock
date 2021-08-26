@@ -24,11 +24,14 @@ test_that("chrkeys_to_rawkeys supports percent encoding", {
 })
 
 test_that("chrkeys_to_rawkeys supports chunk keys", {
-    expect_equal(chrkeys_to_rawkeys(c("@-1:1:0:50","@-1:1:1:47-3","@-1:1:2:50","@-1:1:0:47-3")),
+    expect_equal(chrkeys_to_rawkeys(c("@-1:1:0:50","@-1:1:1:47-3","@-1:1:2:50","@-1:1:0:47-3",
+        "@-1:1:0:47--1","@-1:1:0:47--4")),
         list(as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,50)),
              as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,1,0,0,0,47,3)),
              as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,2,0,0,0,50)),
-             as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,47,3))
+             as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,47,3)),
+             as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,47,255)),
+             as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,47,252))
         ))
 })
 
@@ -45,7 +48,6 @@ test_that("chrkeys_to_rawkeys treats invalid chunk keys as strings", {
     expect_equal(chrkeys_to_rawkeys("@"), list(charToRaw("@")))
     expect_equal(chrkeys_to_rawkeys("@0:a:0:0"), list(charToRaw("@0:a:0:0")))
     expect_equal(chrkeys_to_rawkeys("@0:0:0a:0"), list(charToRaw("@0:0:0a:0")))
-    expect_equal(chrkeys_to_rawkeys("@0:0:0:44-32"), list(charToRaw("@0:0:0:44-32")))
     expect_equal(chrkeys_to_rawkeys("@0:0:0:100"), list(charToRaw("@0:0:0:100")))
     expect_equal(chrkeys_to_rawkeys("@0:0:-1:44"), list(charToRaw("@0:0:-1:44")))
     expect_equal(chrkeys_to_rawkeys("@0:0:3:44"), list(charToRaw("@0:0:3:44")))
@@ -89,9 +91,12 @@ test_that("rawkeys_to_chrkeys supports chunk keys", {
         list(as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,50)),
              as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,1,0,0,0,47,3)),
              as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,2,0,0,0,50)),
-             as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,47,3))
+             as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,47,3)),
+             as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,47,255)),
+             as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,47,252))             
         )),
-        c("@-1:1:0:50","@-1:1:1:47-3","@-1:1:2:50","@-1:1:0:47-3"))
+        c("@-1:1:0:50","@-1:1:1:47-3","@-1:1:2:50","@-1:1:0:47-3",
+            "@-1:1:0:47--1","@-1:1:0:47--4"))
 })
 
 test_that("rawkeys_to_chrkeys treats invalid chunk keys as strings", {

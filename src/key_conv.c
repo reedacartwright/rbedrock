@@ -183,10 +183,12 @@ static size_t percent_decode(const char *key, size_t key_len, unsigned char *buf
 
 size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, size_t buffer_len) {
     unsigned int u = 0;
+    int d = 0;
     int x = 0, z = 0;
     unsigned int dimension = 0;
     signed char tag = 0;
-    signed char subtag = -1;
+    signed char subtag = 0;
+    bool has_subtag = false;
 
     size_t sz = 0;
     size_t i = 0;
@@ -229,12 +231,13 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
             return 0;
         }
         i += 1;
-        sz = str_to_uint(key+i, key_len-i, &u);
+        sz = str_to_int(key+i, key_len-i, &d);
         i += sz;
         if(sz == 0 || i != key_len) {
             return 0;
         }
-        subtag = u;
+        subtag = d;
+        has_subtag = true;
     }
     // Validate values
     if(tag < CHUNK_KEY_TAG_MIN) {
@@ -243,12 +246,10 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
         return 0;
     } else if(dimension > CHUNK_KEY_DIM_MAX) {
         return 0;
-    } else if(subtag != -1 && subtag > CHUNK_KEY_SUBCHUNK_MAX) {
-        return 0;
     }
 
     // Check buffer space
-    size_t decode_len = 8+4*(dimension != 0)+1+(subtag != -1);
+    size_t decode_len = 8+4*(dimension != 0)+1+(has_subtag);
     if(buffer_len < decode_len) {
         return decode_len; // # nocov
     }
@@ -263,7 +264,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
         i += 4;
     }
     buffer[i] = tag;
-    if(subtag != -1) {
+    if(has_subtag) {
         buffer[i+1] = subtag;
     }
     return decode_len;
@@ -282,12 +283,14 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
     int x = 0;
     int z = 0;
     signed char tag = 0;
-    signed char subtag = -1;
+    signed char subtag = 0;
     bool is_chunk_key = true;
+    bool has_subtag = false;
 
     switch(key_len) {
     case 10:
         subtag = key[9];
+        has_subtag = true;
     case 9:
         tag = key[8];
         memcpy(&x, key + 0, 4);
@@ -295,6 +298,7 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
         break;
     case 14:
         subtag = key[13];
+        has_subtag = true;
     case 13:
         tag = key[12];
         memcpy(&x, key + 0, 4);
@@ -317,9 +321,9 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
     }
     if(!is_chunk_key) {
         return percent_encode(key, key_len, buffer, buffer_len);
-    } else if(subtag != -1) {
-        return snprintf(buffer, buffer_len, "@%d:%d:%u:%u-%u", x, z, dimension,
-                                (unsigned int)tag, (unsigned int)subtag);
+    } else if(has_subtag) {
+        return snprintf(buffer, buffer_len, "@%d:%d:%u:%u-%d", x, z, dimension,
+                                (unsigned int)tag, (int)subtag);
     }
     return snprintf(buffer, buffer_len, "@%d:%d:%u:%u", x, z, dimension,
                                 (unsigned int)tag);
@@ -327,7 +331,7 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
 
 // Take a VECSXP of raw, internal keys and covert them to human-readable keys.
 SEXP rawkeys_to_chrkeys(SEXP r_keys) {
-    // Maximum chunk data key size is 44 = 1+11+1+11+1+10+1+3+1+3+1
+    // Maximum chunk data key size is 45 = 1+11+1+11+1+10+1+3+1+4+1
     // Maximum other key size is 3*len.
     char buffer[2048];
     const int buffer_len = 2048;
