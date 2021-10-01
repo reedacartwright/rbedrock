@@ -1,4 +1,7 @@
 [![Discord Chat](https://img.shields.io/discord/710697981677928479.svg)](https://discord.com/invite/sWb4YmX)
+![Latest Version](https://www.r-pkg.org/badges/version/rbedrock)
+![Downloads per Month](https://cranlogs.r-pkg.org/badges/rbedrock)
+![Total Downloads](https://cranlogs.r-pkg.org/badges/grand-total/rbedrock)
 
 ## Overview
 
