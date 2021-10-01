@@ -57,7 +57,7 @@ if test -z "$CMAKE_BIN"; then
   echo ""
   echo " - yum install cmake          (Fedora/CentOS; inside a terminal)"
   echo " - apt install cmake          (Debian/Ubuntu; inside a terminal)."
-  ehco " - pacman -S cmake            (Arch Linux; inside a terminal)."
+  echo " - pacman -S cmake            (Arch Linux; inside a terminal)."
   echo " - brew install cmake         (MacOS; inside a terminal with Homebrew)"
   echo " - port install cmake         (MacOS; inside a terminal with MacPorts)"
   echo ""
