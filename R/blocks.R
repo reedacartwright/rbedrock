@@ -284,6 +284,7 @@ read_subchunk_blocks_value <- function(rawdata, names_only = FALSE,
         return(NULL)
     }
     blocks <- .read_subchunk(rawdata)
+    offset <- attr(blocks,"offset")
     pal <- block_palette(blocks[[1]]) %>%
         purrr::map_chr(.block_string, names_only = names_only)
     b <- array(pal[blocks[[1]]], dim = dim(blocks[[1]]))
@@ -294,13 +295,15 @@ read_subchunk_blocks_value <- function(rawdata, names_only = FALSE,
         b2 <- array(pal2[blocks[[2]]], dim = dim(blocks[[2]]))
         b[] <- str_c(b, b2, sep=";") %|% b
     }
-    b
+    structure(b,offset=offset)
 }
 
 #' @param object A 16x16x16 character array.
 #' @rdname SubchunkBlocks
 #' @export
 write_subchunk_blocks_value <- function(object) {
+    # we don't writ this yet, so strip it
+    attr(object,"offset") <- NULL
     vec_assert(object, array(character(), c(0,16,16)), 16)
     # check to see if we have extra blocks and split as needed
     n <- max(str_count(object, fixed(";")))+1
@@ -421,6 +424,7 @@ read_subchunk_layers_value <- function(rawdata, layer = 1L, simplify = TRUE) {
         return(NULL)
     }
     blocks <- .read_subchunk(rawdata)
+    offset <- attr(blocks, "offset")
     # subset the storage layers
     if (!is.null(layer)) {
         blocks <- blocks[layer]
@@ -429,7 +433,7 @@ read_subchunk_layers_value <- function(rawdata, layer = 1L, simplify = TRUE) {
     if (isTRUE(simplify) && length(blocks) == 1) {
         blocks <- blocks[[1]]
     }
-    blocks
+    structure(blocks,offset=offset)
 }
 
 #' @description
@@ -442,6 +446,8 @@ write_subchunk_layers_value <- function(object) {
     if(is.null(object)) {
         return(NULL)
     }
+    # we don't writ this yet, so strip it
+    attr(object,"offset") <- NULL
     if(!is.list(object)) {
         object <- list(object)
     }

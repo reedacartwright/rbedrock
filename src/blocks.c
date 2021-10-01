@@ -3,9 +3,11 @@
 #include "nbt.h"
 
 static SEXP g_palette_symbol = NULL;
+static SEXP g_offset_symbol = NULL;
 
 void rbedrock_init_blocks() {
     g_palette_symbol = Rf_install("palette");
+    g_offset_symbol = Rf_install("offset");
 }
 
 #define return_block_error() error_return("Malformed subchunk data.")
@@ -26,17 +28,24 @@ SEXP read_subchunk(SEXP r_value) {
     const unsigned char *p = buffer;
     const unsigned char *end = buffer+len;
 
-    if(end-p < 2) {
+    if(end-p < 3) {
         return_block_error();
     }
     int version = p[0];
+    if(version < 8 || version > 9) {
+        Rf_error("Subchunk data version '%d' is not supported.", version);
+        return R_NilValue;        
+    }
     int num_layers = p[1];
     p += 2;
-    if(version != 8) {
-        Rf_error("Subchunk data version '%d' is not supported.", version);
-        return R_NilValue;
+    int subchunk_offset = NA_INTEGER;
+    if(version >= 9) {
+        subchunk_offset = (signed char)p[0];
+        p += 1;
     }
     SEXP r_ret = PROTECT(Rf_allocVector(VECSXP, num_layers));
+    // store offset as an attribute
+    Rf_setAttrib(r_ret, g_offset_symbol, Rf_ScalarInteger(subchunk_offset));
     // read each layer of subchunk block storage
     for(int i = 0; i < num_layers; ++i) {
         if(end-p < 1) {

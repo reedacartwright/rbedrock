@@ -31,6 +31,7 @@ test_that("put_subchunk_blocks_value() writes subchunk data.", {
     val[,2,] <- "minecraft:stone@stone_type=stone"
     val[,3,] <- "minecraft:iron_ore"
     val[,4,] <- "minecraft:snow_layer@height=5@covered_bit=true"
+    attr(val, "offset") <- NA_integer_
 
     put_subchunk_blocks_value(db, 0, 0, 0, 0, val)
     dat <- get_subchunk_blocks_value(db, 0, 0, 0, 0)
@@ -43,6 +44,7 @@ test_that("put_subchunk_blocks_values() writes subchunk data.", {
     val[,2,] <- "minecraft:stone@stone_type=granite"
     val[,3,] <- "minecraft:iron_ore"
     val[,4,] <- "minecraft:snow_layer@height=5@covered_bit=true"
+    attr(val, "offset") <- NA_integer_
 
     put_subchunk_blocks_values(db, 0, 0, 0, 1:4, list(val))
     dat <- get_subchunk_blocks_data(db, 0, 0, 0, 1:4)
@@ -59,6 +61,7 @@ test_that("put_subchunk_blocks_data() writes subchunk data.", {
     val[,2,] <- "minecraft:stone@stone_type=andesite"
     val[,3,] <- "minecraft:iron_ore"
     val[,4,] <- "minecraft:snow_layer@height=5@covered_bit=true"
+    attr(val, "offset") <- NA_integer_
 
     val <- rlang::set_names(rep(list(val), 4),
         stringr::str_glue("@1:1:0:47-{1:4}"))
