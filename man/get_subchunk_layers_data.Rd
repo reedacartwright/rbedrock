@@ -8,40 +8,21 @@
 \alias{put_subchunk_layers_value}
 \alias{read_subchunk_layers_value}
 \alias{write_subchunk_layers_value}
-\alias{block_palette}
 \title{Load and store SubchunkBlocks layers}
 \usage{
-get_subchunk_layers_data(
-  db,
-  x,
-  z,
-  dimension,
-  subchunk,
-  layer = 1L,
-  simplify = TRUE
-)
+get_subchunk_layers_data(db, x, z, dimension, subchunk)
 
-get_subchunk_layers_value(
-  db,
-  x,
-  z,
-  dimension,
-  subchunk,
-  layer = 1L,
-  simplify = TRUE
-)
+get_subchunk_layers_value(db, x, z, dimension, subchunk)
 
-put_subchunk_layers_data(db, data)
+put_subchunk_layers_data(db, data, ...)
 
-put_subchunk_layers_values(db, x, z, dimension, subchunk, values)
+put_subchunk_layers_values(db, x, z, dimension, subchunk, values, ...)
 
-put_subchunk_layers_value(db, x, z, dimension, subchunk, value)
+put_subchunk_layers_value(db, x, z, dimension, subchunk, value, ...)
 
-read_subchunk_layers_value(rawdata, layer = 1L, simplify = TRUE)
+read_subchunk_layers_value(rawdata)
 
-write_subchunk_layers_value(object)
-
-block_palette(object)
+write_subchunk_layers_value(object, version = 9L, default_offset = NA_integer_)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -51,19 +32,11 @@ block_palette(object)
 
 \item{subchunk}{Subchunk indexes to extract data from.}
 
-\item{layer}{an integer vector specifying which layers of storage to return
-or \code{NULL} to return all layers}
-
-\item{simplify}{a logical scalar indicating whether to simplify single-layer
-results to an array instead of a list containing one array}
-
 \item{data}{A named-vector of key-value pairs for SubchunkBlocks data.}
 
 \item{values}{A list of lists of 16x16x16 integer indexes with associated block_palettes.}
 
 \item{value}{A list of 16x16x16 integer indexes with associated block_palettes.}
-
-\item{object}{A storage layer returned from \code{read_subchunk} or \code{get_subchunk}.}
 }
 \value{
 \code{get_subchunk_layers_data()} returns a list of the of the values
@@ -89,7 +62,5 @@ into index-mapped arrays and associated block palettes.
 
 \code{write_subchunk_layers_value()} encode SubchunkBlock data
 into binary form.
-
-\code{block_palette()} returns the NBT palette associated with a block storage layer.
 }
 \keyword{internal}

@@ -97,10 +97,13 @@ SEXP read_subchunk(SEXP r_value) {
         if(XLENGTH(r_palette) != palette_size) {
             return_block_error();
         }
-        // store palette as an attribute
-        Rf_setAttrib(r_blocks, g_palette_symbol, r_palette);
-        SET_VECTOR_ELT(r_ret, i, r_blocks);
-        UNPROTECT(2);
+        // construct a list to hold this layer
+        const char *names[] = {"values", "palette",""};
+        SEXP r_layer = PROTECT(Rf_mkNamed(VECSXP, names));
+        SET_VECTOR_ELT(r_layer, 0, r_blocks);
+        SET_VECTOR_ELT(r_layer, 1, r_palette);
+        SET_VECTOR_ELT(r_ret, i, r_layer);
+        UNPROTECT(3);
     }
     if(p != end) {
         Rf_error("Malformed NBT data: %d bytes were read out of %d bytes total", (int)(end-p), (int)len);
@@ -115,24 +118,21 @@ static int calc_bits_per_block(int sz) {
     int z[8] = {2,4,8,16,32,64,256,65536};
 
     int i;
-    for(i=0;i<7 && z[i] < sz; ++i) {
+    for(i = 0; i < 7 && z[i] < sz; ++i) {
         /*noop*/;        
     }
     return p[i];
 }
 
-SEXP write_subchunk(SEXP r_value) {
-    if(Rf_isNull(r_value)) {
-        return R_NilValue;
+SEXP write_subchunk(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
+    R_xlen_t num_layers = XLENGTH(r_values);
+    if(XLENGTH(r_palettes) != num_layers) {
+        return_block_error();
     }
-    if(TYPEOF(r_value) != VECSXP) {
-        error_return("Argument is not a list.");
-    }
-    R_xlen_t num_layers = XLENGTH(r_value);
     SEXP r_retv = PROTECT(Rf_allocVector(VECSXP, 2*num_layers));
     for(R_xlen_t i=0; i < num_layers; ++i) {
-        SEXP r_layer = VECTOR_ELT(r_value, i);
-        SEXP r_pal = PROTECT(Rf_getAttrib(r_layer, g_palette_symbol));
+        SEXP r_layer = VECTOR_ELT(r_values, i);
+        SEXP r_pal = VECTOR_ELT(r_palettes, i);
         if(!Rf_isInteger(r_layer) || XLENGTH(r_layer) != 4096 || Rf_isNull(r_pal)) {
             return_block_error();
         }
@@ -174,18 +174,27 @@ SEXP write_subchunk(SEXP r_value) {
         memcpy(buffer, &palette_size, 4);
         // write palette
         SET_VECTOR_ELT(r_retv, 2*i+1, write_nbt(r_pal));
-        UNPROTECT(1);
     }
+
+    int version = Rf_asInteger(r_version);
+    int offset = Rf_asInteger(r_offset);
     // Measure total length
     R_xlen_t len = 2;
+    if(version >= 9) {
+        len += 1;
+    }
     for(R_xlen_t i = 0; i < XLENGTH(r_retv); ++i) {
         len += XLENGTH(VECTOR_ELT(r_retv, i));
     }
     SEXP r_ret = PROTECT(Rf_allocVector(RAWSXP, len));
     unsigned char *p = RAW(r_ret);
-    p[0] = 8;
+    p[0] = version;
     p[1] = num_layers;
     p += 2;
+    if(version >= 9) {
+        p[0] = (signed char)(offset);
+        p += 1;
+    }
     for(R_xlen_t i = 0; i < XLENGTH(r_retv); ++i) {
         SEXP r = VECTOR_ELT(r_retv, i);
         memcpy(p, RAW(r), XLENGTH(r));

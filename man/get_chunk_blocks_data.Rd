@@ -36,11 +36,11 @@ get_chunk_blocks_value(
   extra_block = FALSE
 )
 
-put_chunk_blocks_data(db, data)
+put_chunk_blocks_data(db, data, ...)
 
-put_chunk_blocks_values(db, x, z, dimension, values)
+put_chunk_blocks_values(db, x, z, dimension, values, ...)
 
-put_chunk_blocks_value(db, x, z, dimension, value)
+put_chunk_blocks_value(db, x, z, dimension, value, ...)
 }
 \arguments{
 \item{db}{A bedrockdb object.}

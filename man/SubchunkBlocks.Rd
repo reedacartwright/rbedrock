@@ -33,15 +33,15 @@ get_subchunk_blocks_value(
   extra_block = FALSE
 )
 
-put_subchunk_blocks_data(db, data)
+put_subchunk_blocks_data(db, data, ...)
 
-put_subchunk_blocks_values(db, x, z, dimension, subchunk, values)
+put_subchunk_blocks_values(db, x, z, dimension, subchunk, values, ...)
 
-put_subchunk_blocks_value(db, x, z, dimension, subchunk, value)
+put_subchunk_blocks_value(db, x, z, dimension, subchunk, value, ...)
 
 read_subchunk_blocks_value(rawdata, names_only = FALSE, extra_block = FALSE)
 
-write_subchunk_blocks_value(object)
+write_subchunk_blocks_value(object, ...)
 
 subchunk_origins(keys)
 

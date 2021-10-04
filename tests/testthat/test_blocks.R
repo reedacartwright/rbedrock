@@ -10,15 +10,15 @@ test_that("SubchunkBlocks is chunk tag 47.", {
 
 test_that("write_subchunk_layers_value() encodes subchunk data.", {
     raw1_orig <- get_value(db, "@31:2:0:47-0")
-    layer1 <- read_subchunk_layers_value(raw1_orig, layer = NULL, simplify = FALSE)
-    raw1_test <- write_subchunk_layers_value(layer1)
+    layer1 <- read_subchunk_layers_value(raw1_orig)
+    raw1_test <- write_subchunk_layers_value(layer1, version=8L)
 
     expect_equal(raw1_test, raw1_orig)
 })
 
 test_that(".block_nbt() and .block_string() are inverses.", {
     dat <- get_subchunk_layers_value(db, "@31:2:0:47-4")
-    pal_orig <- block_palette(dat)
+    pal_orig <- dat[[1]]$palette
     text <- purrr::map_chr(pal_orig, .block_string)
     pal_test <- purrr::map(text, .block_nbt)
 
@@ -33,7 +33,7 @@ test_that("put_subchunk_blocks_value() writes subchunk data.", {
     val[,4,] <- "minecraft:snow_layer@height=5@covered_bit=true"
     attr(val, "offset") <- NA_integer_
 
-    put_subchunk_blocks_value(db, 0, 0, 0, 0, val)
+    put_subchunk_blocks_value(db, 0, 0, 0, 0, val, version=8L)
     dat <- get_subchunk_blocks_value(db, 0, 0, 0, 0)
     expect_equal(dat, val)
 })
@@ -46,7 +46,7 @@ test_that("put_subchunk_blocks_values() writes subchunk data.", {
     val[,4,] <- "minecraft:snow_layer@height=5@covered_bit=true"
     attr(val, "offset") <- NA_integer_
 
-    put_subchunk_blocks_values(db, 0, 0, 0, 1:4, list(val))
+    put_subchunk_blocks_values(db, 0, 0, 0, 1:4, list(val), version=8L)
     dat <- get_subchunk_blocks_data(db, 0, 0, 0, 1:4)
 
     val <- rlang::set_names(rep(list(val), 4),
@@ -66,7 +66,7 @@ test_that("put_subchunk_blocks_data() writes subchunk data.", {
     val <- rlang::set_names(rep(list(val), 4),
         stringr::str_glue("@1:1:0:47-{1:4}"))
 
-    put_subchunk_blocks_data(db, val)
+    put_subchunk_blocks_data(db, val, version=8L)
     dat <- get_subchunk_blocks_data(db, names(val))
 
     expect_equal(dat, val)
@@ -79,7 +79,7 @@ test_that("put_chunk_blocks_value() writes chunk data.",{
     val[,23,] <- "minecraft:iron_ore"
     val[,24,] <- "minecraft:snow_layer@height=5@covered_bit=true"
 
-    put_chunk_blocks_value(db, "@10:12:0:47", value=val)
+    put_chunk_blocks_value(db, "@10:12:0:47", value=val, version=8L)
     dat <- get_chunk_blocks_value(db, "@10:12:0:47")
 
     expect_equal(dat, val)
@@ -90,7 +90,7 @@ test_that("put_chunk_blocks_value() writes chunk data.",{
 
 test_that("put_chunk_blocks_value() overwrites chunk data.", {
     dat <- get_chunk_blocks_value(db, 31, 4, 0)
-    put_chunk_blocks_value(db, 31, 4, 0, dat[,1:20,])
+    put_chunk_blocks_value(db, 31, 4, 0, dat[,1:20,], version=8L)
 
     val <- array("minecraft:air", c(16,32,16))
     val[,1:20,] <- dat[,1:20,]
@@ -109,7 +109,7 @@ test_that("put_chunk_blocks_values() writes chunk data.",{
     val[,23,] <- "minecraft:iron_ore"
     val[,24,] <- "minecraft:snow_layer@height=5@covered_bit=true"
 
-    put_chunk_blocks_values(db, 11:12, 12, 0, value=list(val))
+    put_chunk_blocks_values(db, 11:12, 12, 0, value=list(val), version=8L)
     dat <- get_chunk_blocks_values(db, 11:12, 12, 0)
 
     expect_equal(dat[[1]], val)
@@ -129,7 +129,7 @@ test_that("put_chunk_blocks_data() writes chunk data.",{
     val[["@13:12:0:47"]][,21,] <- "minecraft:bedrock@infiniburn_bit=false"
     val[["@14:12:0:47"]][,1,] <- "minecraft:bedrock@infiniburn_bit=false"
 
-    put_chunk_blocks_data(db, val)
+    put_chunk_blocks_data(db, val, version=8L)
 
     val[["@14:12:0:47"]] <- val[["@14:12:0:47"]][,1:16,]
     

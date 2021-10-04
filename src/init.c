@@ -117,7 +117,7 @@ static const R_CallMethodDef call_methods[] = {
     {"Cwrite_nbt", (DL_FUNC)&write_nbt, 1},
 
     {"Cread_subchunk", (DL_FUNC)&read_subchunk, 1},
-    {"Cwrite_subchunk", (DL_FUNC)&write_subchunk, 1},
+    {"Cwrite_subchunk", (DL_FUNC)&write_subchunk, 4},
 
     {"Cmcpe_random_seed", (DL_FUNC)&mcpe_random_seed, 1},
     {"Cmcpe_random_state", (DL_FUNC)&mcpe_random_state, 1},
