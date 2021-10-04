@@ -60,6 +60,9 @@ SEXP read_subchunk(SEXP r_value) {
         SEXP r_blocks = PROTECT(Rf_alloc3DArray(INTSXP, 16,16,16));
         // calculate storage structure.
         int bits_per_block = flags >> 1;
+        if(bits_per_block <= 0) {
+            return_block_error();
+        }
         int blocks_per_word = 32 / bits_per_block; // floor using integer math
         int word_count = (4095 / blocks_per_word)+1; // ceiling using integer math
         int mask = (1 << bits_per_block)-1;
