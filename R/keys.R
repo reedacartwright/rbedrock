@@ -31,7 +31,7 @@ rawkeys_to_chrkeys <- function(keys) {
 #' @description
 #' Chunk keys are keys to chunk data. A chunk key has a format which indicates
 #' the chunk it holds data for and the type of data it holds. This format is
-#' either `@@x:z:d:t` or `@@x:z:d:t-s`, where `x` and `z` indicates the 
+#' either `@@x:z:d:t` or `@@x:z:d:t:s`, where `x` and `z` indicates the 
 #' coordinates of the chunk in chunk space, `d` indicates the dimension of
 #' the chunk, and `t` and `s` indicate the tag and subtag of the chunk.
 #'
@@ -84,7 +84,7 @@ create_chunk_keys <- function(x, z, dimension, tag, subtag) {
         subtag <- NA_character_
     }
     args <- vec_recycle_common(x,z,dimension,tag,subtag)
-    tag <- str_c(args[[4]], args[[5]], sep="-") %|% as.character(args[[4]])
+    tag <- str_c(args[[4]], args[[5]], sep=":") %|% as.character(args[[4]])
     ret <- str_glue("@{args[[1]]}:{args[[2]]}:{args[[3]]}:{tag}")
     as.character(ret)
 }
@@ -171,7 +171,7 @@ chunk_tag_int <- function(tags) {
 }
 
 .get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
-    m <- str_match(keys, "^@[^:]+:[^:]+:[^:]+:([^:-]+)(?:-[^:]+)?$")
+    m <- str_match(keys, "^@[^:]+:[^:]+:[^:]+:([^:-]+)(?::[^:]+)?$")
     res <- as.integer(m[,2])
     if(as_string) {
         res <- chunk_tag_str(res)
@@ -180,12 +180,12 @@ chunk_tag_int <- function(tags) {
 }
 
 .get_subtag_from_chunk_key <- function(keys) {
-    m <- str_match(keys, "^@[^:]+:[^:]+:[^:]+:[^:-]+-([^:]+)$")
+    m <- str_match(keys, "^@[^:]+:[^:]+:[^:]+:[^:-]+:([^:]+)$")
     as.integer(m[,2])
 }
 
 .get_dimension_from_chunk_key <- function(keys) {
-    m <- str_match(keys, "^@[^:]+:[^:]+:([^:]+):[^:-]+(?:-[^:]+)?$")
+    m <- str_match(keys, "^@[^:]+:[^:]+:([^:]+):[^:-]+(?::[^:]+)?$")
     as.integer(m[,2])
 }
 
@@ -199,7 +199,7 @@ chunk_tag_int <- function(tags) {
 
 .check_chunk_key_tag <- function(keys, tag, subtag, silent = FALSE) {
     if(missing(subtag)) {
-        subtag <- if(tag == 47L) "(?:-[^:-]+)?" else ""
+        subtag <- if(tag == 47L) "(?::[^:]+)?" else ""
     }
     b <- .is_chunk_key(keys, tag=tag, subtag=subtag)
     isgood <- all(b)
@@ -209,11 +209,11 @@ chunk_tag_int <- function(tags) {
     isgood
 }
 
-.CHUNK_KEY_RE = "^@[^:]+:[^:]+:[^:]+:[^:-]+(?:-[^:-]+)?$"
-.CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:-]+)(?:-([^:-]+))?$"
-.CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?:-([^:-]+))?$"
+.CHUNK_KEY_RE = "^@[^:]+:[^:]+:[^:]+:[^:]+(?::[^:]+)?$"
+.CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:]+)(?::([^:]+))?$"
+.CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?::([^:]+))?$"
 
-.is_chunk_key <- function(keys, tag = "[^:-]+", subtag = "(?:-[^:-]+)?") {
+.is_chunk_key <- function(keys, tag = "[^:]+", subtag = "(?::[^:]+)?") {
     re <- str_c("^@[^:]+:[^:]+:[^:]+:", tag, subtag)
     str_detect(keys, re)
 }
@@ -234,7 +234,7 @@ chunk_tag_int <- function(tags) {
         if(!missing(tag)) {
             vec_assert(tag, size = 1)
             if(missing(subtag)) {
-                subtag <- if(tag == 47L) "(?:-[^:-]+)?" else ""
+                subtag <- if(tag == 47L) "(?::[^:]+)?" else ""
             }
             vec_assert(subtag, size = 1)
 

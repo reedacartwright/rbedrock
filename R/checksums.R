@@ -80,7 +80,7 @@ read_checksums_value <- function(rawdata) {
         subtag <- as.integer(x[3])
         hash <- x[4:11]
         hash <- paste0(rev(as.character(hash)), collapse="")
-        k <- ifelse(tag == 47L, paste(tag, subtag, sep="-"), as.character(tag))
+        k <- ifelse(tag == 47L, paste(tag, subtag, sep=":"), as.character(tag))
         list(hash, k)
     })
     ret <- purrr::transpose(ret)
@@ -134,7 +134,7 @@ write_checksums_value <- function(object) {
     # 45, 47, 49, 50 all need to be updated if they exist
     stem <- stringr::str_replace(key, ":59$", "")
     chunk_keys <- get_keys(db, stem)
-    chunk_keys <- stringr::str_subset(chunk_keys, ":(?:47-[^-:]+|45|49|50)$")
+    chunk_keys <- stringr::str_subset(chunk_keys, ":(?:47:[^:]+|45|49|50)$")
 
     dat <- get_values(db, chunk_keys)
     obj <- purrr::map(dat, .checksum_impl)

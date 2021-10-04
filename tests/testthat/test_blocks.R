@@ -9,7 +9,7 @@ test_that("SubchunkBlocks is chunk tag 47.", {
 })
 
 test_that("write_subchunk_layers_value() encodes subchunk data.", {
-    raw1_orig <- get_value(db, "@31:2:0:47-0")
+    raw1_orig <- get_value(db, "@31:2:0:47:0")
     layer1 <- read_subchunk_layers_value(raw1_orig)
     raw1_test <- write_subchunk_layers_value(layer1, version=8L)
 
@@ -17,7 +17,7 @@ test_that("write_subchunk_layers_value() encodes subchunk data.", {
 })
 
 test_that(".block_nbt() and .block_string() are inverses.", {
-    dat <- get_subchunk_layers_value(db, "@31:2:0:47-4")
+    dat <- get_subchunk_layers_value(db, "@31:2:0:47:4")
     pal_orig <- dat[[1]]$palette
     text <- purrr::map_chr(pal_orig, .block_string)
     pal_test <- purrr::map(text, .block_nbt)
@@ -50,7 +50,7 @@ test_that("put_subchunk_blocks_values() writes subchunk data.", {
     dat <- get_subchunk_blocks_data(db, 0, 0, 0, 1:4)
 
     val <- rlang::set_names(rep(list(val), 4),
-        stringr::str_glue("@0:0:0:47-{1:4}"))
+        stringr::str_glue("@0:0:0:47:{1:4}"))
 
     expect_equal(dat, val)
 })
@@ -64,7 +64,7 @@ test_that("put_subchunk_blocks_data() writes subchunk data.", {
     attr(val, "offset") <- NA_integer_
 
     val <- rlang::set_names(rep(list(val), 4),
-        stringr::str_glue("@1:1:0:47-{1:4}"))
+        stringr::str_glue("@1:1:0:47:{1:4}"))
 
     put_subchunk_blocks_data(db, val, version=8L)
     dat <- get_subchunk_blocks_data(db, names(val))
@@ -85,7 +85,7 @@ test_that("put_chunk_blocks_value() writes chunk data.",{
     expect_equal(dat, val)
 
     dat <- get_keys(db, starts_with="@10:12:0:47")
-    expect_equal(dat, "@10:12:0:47-1")
+    expect_equal(dat, "@10:12:0:47:1")
 })
 
 test_that("put_chunk_blocks_value() overwrites chunk data.", {
@@ -99,7 +99,7 @@ test_that("put_chunk_blocks_value() overwrites chunk data.", {
     expect_equal(dat, val)
 
     dat <- get_keys(db, starts_with="@31:4:0:47")
-    expect_equal(dat, c("@31:4:0:47-0","@31:4:0:47-1"))
+    expect_equal(dat, c("@31:4:0:47:0","@31:4:0:47:1"))
 })
 
 test_that("put_chunk_blocks_values() writes chunk data.",{
@@ -116,9 +116,9 @@ test_that("put_chunk_blocks_values() writes chunk data.",{
     expect_equal(dat[[2]], val)
 
     dat <- get_keys(db, starts_with="@11:12:0:47")
-    expect_equal(dat, "@11:12:0:47-1")
+    expect_equal(dat, "@11:12:0:47:1")
     dat <- get_keys(db, starts_with="@12:12:0:47")
-    expect_equal(dat, "@12:12:0:47-1")
+    expect_equal(dat, "@12:12:0:47:1")
 })
 
 test_that("put_chunk_blocks_data() writes chunk data.",{
@@ -138,9 +138,9 @@ test_that("put_chunk_blocks_data() writes chunk data.",{
     expect_equal(dat, val)
 
     dat <- get_keys(db, starts_with="@13:12:0:47")
-    expect_equal(dat, "@13:12:0:47-1")
+    expect_equal(dat, "@13:12:0:47:1")
     dat <- get_keys(db, starts_with="@14:12:0:47")
-    expect_equal(dat, "@14:12:0:47-0")
+    expect_equal(dat, "@14:12:0:47:0")
 })
 
 # clean up

@@ -136,7 +136,7 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, ...) {
     # construct new chunk data
     data <- list()
     subtags <- seq.int(length.out=(max_y %/% 16L))
-    new_keys <- str_c(prefix, "-", subtags-1L)
+    new_keys <- str_c(prefix, ":", subtags-1L)
     for(s in subtags) {
         subchunk <- value[,(s-1L)*16L+(1:16),]
         # skip empty chunks

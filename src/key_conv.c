@@ -227,7 +227,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
     i += sz;
     if(i < key_len) {
         // decode subtag
-        if(key[i] != '-') {
+        if(key[i] != ':') {
             return 0;
         }
         i += 1;
@@ -272,7 +272,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
 }
 
 // convert an internal rawkey to a human-readable format
-// keys for chunk data are converted to @x:z:d:t-s
+// keys for chunk data are converted to @x:z:d:t:s
 // everything else is percent encoded.
 // Writes up to buffer_len-1 characters into buffer.
 // Appends '\0' to written string.
@@ -322,7 +322,7 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
     if(!is_chunk_key) {
         return percent_encode(key, key_len, buffer, buffer_len);
     } else if(has_subtag) {
-        return snprintf(buffer, buffer_len, "@%d:%d:%u:%u-%d", x, z, dimension,
+        return snprintf(buffer, buffer_len, "@%d:%d:%u:%u:%d", x, z, dimension,
                                 (unsigned int)tag, (int)subtag);
     }
     return snprintf(buffer, buffer_len, "@%d:%d:%u:%u", x, z, dimension,

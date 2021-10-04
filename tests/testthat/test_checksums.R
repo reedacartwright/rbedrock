@@ -61,7 +61,7 @@ test_that("update_checksums_data() and get_checksums_value() handle missing data
 })
 
 test_that("update_checksums_data throws an error if filtering", {
-    expect_error(update_checksums_data(db,c("@36:16:0:47-0", "@37:15:0:59")))
+    expect_error(update_checksums_data(db,c("@36:16:0:47:0", "@37:15:0:59")))
 })
 
 helper_checksum_impl <- function(x) {
@@ -77,7 +77,7 @@ helper_checksum_as_raw <- function(x) {
 test_that("read_checksums_value decodes correctly", {
     correct_val <- c(
         '45' = helper_checksum_impl(as.raw(0:10)),
-        '47-1' = helper_checksum_impl(as.raw(0:255))
+        '47:1' = helper_checksum_impl(as.raw(0:255))
     )
     raw_val <- as_raw(2, 0, 0, 0,
         45, 0, 0, helper_checksum_as_raw(correct_val[[1]]),
@@ -90,7 +90,7 @@ test_that("read_checksums_value decodes correctly", {
 test_that("write_checksums_value encodes correctly",{
     correct_val <- c(
         '45' = helper_checksum_impl(as.raw(0:10)),
-        '47-1' = helper_checksum_impl(as.raw(0:255))
+        '47:1' = helper_checksum_impl(as.raw(0:255))
     )
     correct_raw <- as_raw(2, 0, 0, 0,
         45, 0, 0, helper_checksum_as_raw(correct_val[[1]]),
