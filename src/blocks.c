@@ -59,43 +59,49 @@ SEXP read_subchunk(SEXP r_value) {
         }
         SEXP r_blocks = PROTECT(Rf_alloc3DArray(INTSXP, 16,16,16));
         // calculate storage structure.
-        int bits_per_block = flags >> 1;
-        if(bits_per_block <= 0) {
-            return_block_error();
-        }
-        int blocks_per_word = 32 / bits_per_block; // floor using integer math
-        int word_count = (4095 / blocks_per_word)+1; // ceiling using integer math
-        int mask = (1 << bits_per_block)-1;
-        if(end-p < 4*word_count) {
-            return_block_error();
-        }
-        // read palette ids
-        unsigned int u = 0;
-        int *v = INTEGER(r_blocks);
-        for(int j = 0; j < word_count; ++j) {
-            // read current word and parse
-            unsigned int temp = 0;
-            memcpy(&temp, p, 4);
-            p += 4;
-            for(int k = 0; k < blocks_per_word && u < 4096; ++k) {
-                // calculate position as if we did aperm(v, c(3,1,2))
-                unsigned int x = (u >> 8) & 0xf;
-                unsigned int y = u & 0xf;
-                unsigned int z = (u >> 4) & 0xf;
-                unsigned int pos = x + 16*y + 256*z;
-                // store block id
-                v[pos] = (temp & mask) + 1;
-                temp = temp >> bits_per_block;
-                u += 1;
-            }
-        }
-        // read NBT palette data
-        if(end-p < 4) {
-            return_block_error();
-        }
         int palette_size;
-        memcpy(&palette_size, p, 4);
-        p += 4;
+        int bits_per_block = flags >> 1;
+        if(bits_per_block > 0) {
+            int blocks_per_word = 32 / bits_per_block; // floor using integer math
+            int word_count = (4095 / blocks_per_word)+1; // ceiling using integer math
+            int mask = (1 << bits_per_block)-1;
+            if(end-p < 4*word_count) {
+                return_block_error();
+            }
+            // read palette ids
+            unsigned int u = 0;
+            int *v = INTEGER(r_blocks);
+            for(int j = 0; j < word_count; ++j) {
+                // read current word and parse
+                unsigned int temp = 0;
+                memcpy(&temp, p, 4);
+                p += 4;
+                for(int k = 0; k < blocks_per_word && u < 4096; ++k) {
+                    // calculate position as if we did aperm(v, c(3,1,2))
+                    unsigned int x = (u >> 8) & 0xf;
+                    unsigned int y = u & 0xf;
+                    unsigned int z = (u >> 4) & 0xf;
+                    unsigned int pos = x + 16*y + 256*z;
+                    // store block id
+                    v[pos] = (temp & mask) + 1;
+                    temp = temp >> bits_per_block;
+                    u += 1;
+                }
+            }
+            // read NBT palette data
+            if(end-p < 4) {
+                return_block_error();
+            }
+            memcpy(&palette_size, p, 4);
+            p += 4;
+        } else {
+            // Handle special case of bits_per_block == 0
+            int *v = INTEGER(r_blocks);
+            for(int u=0; u < 4096; ++u) {
+                v[u] = 1;
+            }
+            palette_size = 1;
+        }
         SEXP r_palette = PROTECT(read_nbt_values(&p, end, palette_size, false));
         if(XLENGTH(r_palette) != palette_size) {
             return_block_error();
