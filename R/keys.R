@@ -170,9 +170,32 @@ chunk_tag_int <- function(tags) {
     unname(.CHUNK_TAGS[tags])
 }
 
+.CHUNK_KEY_RE = "^@[^:]+:[^:]+:[^:]+:[^:]+(?::[^:]+)?$"
+.CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:]+)(?::([^:]+))?$"
+.CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?::([^:]+))?$"
+.CHUNK_STEM_MATCH = "^@([^:]+):([^:]+):([^:]+)$"
+.CHUNK_STEM_MATCH2 = "^@([^:]+):([^:]+):([^:]+)(?::([^:]+)(?::([^:]+))?)?$"
+
+.is_chunk_key <- function(keys, tag = "[^:]+", subtag = "(?::[^:]+)?") {
+    re <- str_c("^@[^:]+:[^:]+:[^:]+:", tag, subtag)
+    str_detect(keys, re)
+}
+
+.subset_chunk_keys <- function(keys, negate = FALSE) {
+   str_subset(keys, .CHUNK_KEY_RE, negate = negate)
+}
+
+.split_chunk_keys <- function(keys) {
+    str_match(keys, .CHUNK_KEY_MATCH)
+}
+
+.split_chunk_stems <- function(keys) {
+    str_match(keys, .CHUNK_STEM_MATCH2)
+}
+
 .get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
-    m <- str_match(keys, "^@[^:]+:[^:]+:[^:]+:([^:-]+)(?::[^:]+)?$")
-    res <- as.integer(m[,2])
+    m <- .split_chunk_keys(keys)
+    res <- as.integer(m[,5])
     if(as_string) {
         res <- chunk_tag_str(res)
     }
@@ -180,13 +203,13 @@ chunk_tag_int <- function(tags) {
 }
 
 .get_subtag_from_chunk_key <- function(keys) {
-    m <- str_match(keys, "^@[^:]+:[^:]+:[^:]+:[^:-]+:([^:]+)$")
-    as.integer(m[,2])
+    m <- .split_chunk_keys(keys)
+    as.integer(m[,6])
 }
 
 .get_dimension_from_chunk_key <- function(keys) {
-    m <- str_match(keys, "^@[^:]+:[^:]+:([^:]+):[^:-]+(?::[^:]+)?$")
-    as.integer(m[,2])
+    m <- .split_chunk_keys(keys)
+    as.integer(m[,4])
 }
 
 .trim_stem_from_chunk_key <- function(keys) {
@@ -207,23 +230,6 @@ chunk_tag_int <- function(tags) {
         abort(str_glue("Invalid key: tag is not {tag}."))
     }
     isgood
-}
-
-.CHUNK_KEY_RE = "^@[^:]+:[^:]+:[^:]+:[^:]+(?::[^:]+)?$"
-.CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:]+)(?::([^:]+))?$"
-.CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?::([^:]+))?$"
-
-.is_chunk_key <- function(keys, tag = "[^:]+", subtag = "(?::[^:]+)?") {
-    re <- str_c("^@[^:]+:[^:]+:[^:]+:", tag, subtag)
-    str_detect(keys, re)
-}
-
-.subset_chunk_keys <- function(keys, negate = FALSE) {
-   str_subset(keys, .CHUNK_KEY_RE, negate = negate)
-}
-
-.split_chunk_keys <- function(keys) {
-    str_match(keys, .CHUNK_KEY_MATCH)
 }
 
 .process_key_args <- function(x, z, d, tag, subtag,
@@ -248,31 +254,6 @@ chunk_tag_int <- function(tags) {
         return(x)
     }
     create_chunk_keys(x, z, d, tag, subtag)
-}
-
-.process_key_args2 <- function(x, z, d, tag, subtag = NA_integer_,
-    stop_if_filtered = FALSE) {
-    # is z is missing then x should contain keys as strings
-    if(missing(z) && is.character(x)) {
-        # if tag exists, we are going to filter on data type
-        if(!missing(tag)) {
-            vec_assert(tag, size = 1L)
-            ktag <- .get_tag_from_chunk_key(x)
-            b <- !is.na(ktag) & ktag %in% tag
-            if(stop_if_filtered && any(!b)) {
-                stop(paste0("Some keys passed to .process_keys_args2 were filtered based on tag."))
-            }
-            x <- x[b]
-        }
-        return(x)
-    }
-    # create keys and interleave tags.
-    ret <- character(0L)
-    for(atag in tag) {
-        keys <- create_chunk_keys(x, z, d, atag, subtag)
-        ret <- rbind(ret,keys)
-    }
-    as.vector(ret)
 }
 
 .process_key_args_prefix <- function(x, z, d, stop_if_filtered = FALSE) {

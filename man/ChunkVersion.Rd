@@ -11,9 +11,9 @@
 \alias{write_chunk_version_value}
 \title{Read and write chunk version data}
 \usage{
-get_chunk_version_data(db, x, z, dimension, include_legacy = TRUE)
+get_chunk_version_data(db, x, z, dimension)
 
-get_chunk_version_value(db, x, z, dimension, include_legacy = TRUE)
+get_chunk_version_value(db, x, z, dimension)
 
 put_chunk_version_data(db, data)
 
@@ -31,9 +31,7 @@ write_chunk_version_value(num)
 \item{x, z, dimension}{Chunk coordinates to extract version data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{include_legacy}{If true, \code{ChunkVersionLegacy} tags will be included.}
-
-\item{data}{A named-vector of key-value pairs for Finalization data.}
+\item{data}{A named-vector of key-value pairs for ChunkVersion data.}
 
 \item{values}{An integer vector}
 
@@ -52,11 +50,7 @@ chunk version data was moved from tag 118 to tag 44.
 It will silently drop and keys not representing ChunkVersion data.
 
 \code{put_chunk_version_data()}, \code{put_chunk_version_values()}, and
-\code{put_chunk_version_value()} store Finalization data into a \code{bedrockdb}.
-\code{put_chunk_version_data()} supports writing both ChunkVersion and
-ChunkVersionLegacy tags.
-\code{put_chunk_version_values()} and \code{put_chunk_version_value()}
-only support ChunkVersion tags.
+\code{put_chunk_version_value()} store ChunkVersion data into a \code{bedrockdb}.
 
 \code{read_chunk_version_value()} decodes ChunkVersion data.
 

@@ -105,39 +105,57 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, ...) {
         return(NULL)
     }
     dat <- get_subchunk_blocks_data(db, keys, ...)
-    pos <- .get_subtag_from_chunk_key(names(dat))
-    max_y <- 16*max(pos)+16
+    pos <- purrr::map_int(dat, attr, "offset")
+    # calculate the lowest subchunk and adjust as necessary
+    # ideally calculation should be based on dimension
+    # and chunk version
+    bottom <- min(pos)
+    if(bottom < 0) {
+       bottom <- min(bottom, -4)
+    } else if(bottom != 0) {
+        bottom <- 0
+    }
+    max_y <- 16*(max(pos)-bottom)+16
     mat <- array("minecraft:air", c(16, max_y, 16))
     for(i in seq_along(pos)) {
-        mat[,(pos[i]*16)+1:16,] <- dat[[i]]
+        mat[,((pos[i]-bottom)*16)+1:16,] <- dat[[i]]
     }
+    o <- as.integer(.split_chunk_stems(prefix)[2:3])
+    attr(mat,"origin") <- c(o[1], bottom, o[2])*16L
     mat
+}
+
+chunk_origin <- function(obj) {
+    attr(obj, "origin", exact = TRUE)
+}
+
+`chunk_origin<-` <- function (obj, value) {
+    attr(obj, "origin") <- value
+    return(obj)
 }
 
 .put_chunk_blocks_value_impl <- function(db, prefix, value, ...) {
     d <- dim(value)
     if(!is.character(value) || is.null(d) || length(d) != 3L || 
-        d[1] != 16L || d[3] != 16L) {
-        abort("`value` must be a 16xNx16 character array.")
+        d[1] != 16L || d[3] != 16L || (d[2] %% 16L) != 0L ) {
+        abort("`value` must be a 16 x 16*N x 16 character array.")
     }
 
-    max_y <- d[2]
-    if((max_y %% 16L) != 0L) {
-        # increase the vector
-        max_y <- ((d[2]-1L) %/% 16L)*16L+16L
-        old_value <- value
-        value <- array("minecraft:air", c(16L,max_y,16L))
-        value[,1:d[2],] <- old_value
+    origin <- chunk_origin(value)
+    if(is.null(origin)) {
+        abort("`value` must have an origin.")
     }
+    
+    bottom <- origin[2] %/% 16L
     
     # identify existing chunk data.
     old_keys <- get_keys(db, starts_with = prefix)
     
     # construct new chunk data
     data <- list()
-    subtags <- seq.int(length.out=(max_y %/% 16L))
-    new_keys <- str_c(prefix, ":", subtags-1L)
-    for(s in subtags) {
+    subtags <- seq.int(bottom, length.out=(d[2] %/% 16L))
+    new_keys <- str_c(prefix, ":", subtags)
+    for(s in seq_along(subtags)) {
         subchunk <- value[,(s-1L)*16L+(1:16),]
         # skip empty chunks
         if(all(subchunk == "minecraft:air")) {
@@ -205,7 +223,8 @@ get_subchunk_blocks_data <- function(db, x, z, dimension, subchunk,
         names_only = FALSE, extra_block = FALSE) {
     keys <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
     dat <- get_values(db, keys)
-    ret <- purrr::map(dat, read_subchunk_blocks_value, names_only = names_only,
+    offsets <- .get_subtag_from_chunk_key(keys)
+    ret <- purrr::map2(dat, offsets, read_subchunk_blocks_value, names_only = names_only,
         extra_block = extra_block)
     ret
 }
@@ -226,8 +245,9 @@ get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
     vec_assert(key, character(), 1L)
 
     dat <- get_value(db, key)
+    offset <- .get_subtag_from_chunk_key(key)
     
-    read_subchunk_blocks_value(dat, names_only = names_only,
+    read_subchunk_blocks_value(dat, offset, names_only = names_only,
         extra_block = extra_block)
 }
 
@@ -275,13 +295,13 @@ put_subchunk_blocks_value <- function(db, x, z, dimension, subchunk, value, ...)
 #' 
 #' @rdname SubchunkBlocks
 #' @export
-read_subchunk_blocks_value <- function(rawdata, names_only = FALSE,
+read_subchunk_blocks_value <- function(rawdata, missing_offset=NA, names_only = FALSE,
         extra_block = FALSE) {
     if(is.null(rawdata)) {
         return(NULL)
     }
     subchunk <- read_subchunk_layers_value(rawdata)
-    offset <- attr(subchunk,"offset")
+    offset <- attr(subchunk,"offset") %|% missing_offset
     blocks <- purrr::map(subchunk, function(x) {
         pal <- purrr::map_chr(x$palette, .block_string, names_only = names_only)
         array(pal[x$values], dim = dim(x$values))
@@ -412,7 +432,7 @@ read_subchunk_layers_value <- function(rawdata) {
 #'
 #' @rdname get_subchunk_layers_data
 #' @export
-write_subchunk_layers_value <- function(object, version=9L, default_offset=NA_integer_) {
+write_subchunk_layers_value <- function(object, version=9L, missing_offset=NA_integer_) {
     if(is_null(object)) {
         return(NULL)
     }
@@ -424,7 +444,7 @@ write_subchunk_layers_value <- function(object, version=9L, default_offset=NA_in
     }
     if(version >= 9L) {
         # identify offset
-        offset <- attr(object, "offset") %||% default_offset
+        offset <- attr(object, "offset") %||% missing_offset
         offset <- vec_cast(offset, integer())
         if(is.na(offset)) {
             abort("subchunk format 9 requires a valid subchunk offset.")

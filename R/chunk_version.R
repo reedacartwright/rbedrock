@@ -14,63 +14,53 @@ NULL
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract version data from.
 #'    `x` can also be a character vector of db keys.
-#' @param include_legacy If true, `ChunkVersionLegacy` tags will be included.
 #'
 #' @rdname ChunkVersion
 #' @export
-get_chunk_version_data <- function(db, x, z, dimension, include_legacy = TRUE) {
-    tags <- 44L
-    if(isTRUE(include_legacy)) {
-        tags <- c(tags, 118L)
-    }
-
-    keys <- .process_key_args2(x,z,dimension, tag=tags)
+get_chunk_version_data <- function(db, x, z, dimension) {
+    keys <- .process_chunk_version_key_args(x, z, dimension)
     dat <- get_values(db, keys)
-    
-    # remove any legacy tags if the current tag is not null
-    legkey <- stringr::str_subset(keys, ":118$")
-    k <- stringr::str_replace(legkey, ":118$", ":44")
-    b <- !purrr::map_lgl(dat[k], is.null)
-    dat[legkey[b]] <- NULL
-    # remove any current tags that are null if the legacy tag is not null
-    curkey <- stringr::str_subset(keys, ":44$")
-    b <- purrr::map_lgl(dat[curkey], is.null)
-    nullkey <- curkey[b]
-    k <- stringr::str_replace(nullkey, ":44$", ":118")
-    b <- !purrr::map_lgl(dat[k], is.null)
-    dat[nullkey[b]] <- NULL
+    # if any results are null, fallback to reading legacy key
+    null_val <- purrr::map_lgl(dat, is.null)
+    legkeys <- keys[null_val] %>% str_replace(":44$", ":118")
+    dat[null_val] <- get_values(db, legkeys)
 
+    # read versions
     purrr::map_int(dat, read_chunk_version_value)
 }
 
 #' @rdname ChunkVersion
 #' @export
-get_chunk_version_value <- function(db, x, z, dimension, include_legacy = TRUE) {
-    key <- .process_key_args(x, z, dimension, tag=44L)
+get_chunk_version_value <- function(db, x, z, dimension) {
+    key <- .process_chunk_version_key_args(x, z, dimension)
     vec_assert(key, character(), 1L)
     val <- get_value(db, key)
-    if(is.null(val) && isTRUE(include_legacy)) {
-        key <- .process_key_args(x, z, dimension, tag=118L)
-        vec_assert(key, character(), 1L)
+    if(is.null(val)) {
+        key <- str_replace(key, ":44$", ":118")
         val <- get_value(db, key)
     }
     read_chunk_version_value(val)
 }
 
+.process_chunk_version_key_args <- function(x, z, dimension) {
+    if(missing(z) && is.character(x)) {
+        # replace legacy keys with new
+        x <- str_replace(x, "(^@[^:]+:[^:]+:[^:]+):118$", "\\1:44")
+        x <- unique(x)
+    }
+    .process_key_args(x, z, dimension, tag=44L)
+}
+
 #' @description
 #' `put_chunk_version_data()`, `put_chunk_version_values()`, and
-#' `put_chunk_version_value()` store Finalization data into a `bedrockdb`.
-#' `put_chunk_version_data()` supports writing both ChunkVersion and
-#' ChunkVersionLegacy tags.
-#' `put_chunk_version_values()` and `put_chunk_version_value()`
-#' only support ChunkVersion tags.
+#' `put_chunk_version_value()` store ChunkVersion data into a `bedrockdb`.
 #'
-#' @param data A named-vector of key-value pairs for Finalization data.
+#' @param data A named-vector of key-value pairs for ChunkVersion data.
 #'
 #' @rdname ChunkVersion
 #' @export
 put_chunk_version_data <- function(db, data) {
-    .check_chunk_key_tag(names(data), c(44L,118L))
+    .check_chunk_key_tag(names(data), 44L)
     dat <- purrr::map(data, write_chunk_version_value)
     put_data(db, dat)
 }
@@ -81,7 +71,7 @@ put_chunk_version_data <- function(db, data) {
 #' @export
 put_chunk_version_values <- function(db, x, z, dimension, values) {
     keys <- .process_key_args(x, z, dimension, tag=44L, stop_if_filtered = TRUE)
-    values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
+    values <- vec_recycle(values, length(keys), x_arg="values")
     values <- purrr::map(values, write_chunk_version_value)
     put_values(db, keys, values)
 }
@@ -120,6 +110,6 @@ read_chunk_version_value <- function(rawdata) {
 #' @rdname ChunkVersion
 #' @export
 write_chunk_version_value <- function(num) {
-    stopifnot(rlang::is_scalar_integerish(num))
+    stopifnot(is_scalar_integerish(num))
     as.raw(num)
 }
