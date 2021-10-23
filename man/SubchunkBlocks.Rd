@@ -39,7 +39,12 @@ put_subchunk_blocks_values(db, x, z, dimension, subchunk, values, ...)
 
 put_subchunk_blocks_value(db, x, z, dimension, subchunk, value, ...)
 
-read_subchunk_blocks_value(rawdata, names_only = FALSE, extra_block = FALSE)
+read_subchunk_blocks_value(
+  rawdata,
+  missing_offset = NA,
+  names_only = FALSE,
+  extra_block = FALSE
+)
 
 write_subchunk_blocks_value(object, ...)
 
@@ -64,11 +69,15 @@ blocks. If the extra block is air, it will not be appended.}
 
 \item{data}{A named list of 16x16x16 character() arrays}
 
+\item{...}{arguments passed to write_subchunk_blocks_value}
+
 \item{values}{A list of 16x16x16 character() arrays}
 
 \item{value}{A 16x16x16 character array}
 
 \item{rawdata}{a raw vector holding binary SubchunkBlock data}
+
+\item{missing_offset}{subchunk offset to use if one is not found in \code{rawdata}}
 
 \item{object}{A 16x16x16 character array.}
 

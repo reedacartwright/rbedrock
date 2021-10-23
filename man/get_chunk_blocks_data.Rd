@@ -57,6 +57,8 @@ blocks. If the extra block is air, it will not be appended.}
 
 \item{data}{A named list of 16xNx16 character() arrays}
 
+\item{...}{Arguments passed to write_subchunk_blocks_value}
+
 \item{values}{A list of 16xNx16 character() arrays}
 
 \item{value}{A 16xNx16 character array}

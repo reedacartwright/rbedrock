@@ -68,6 +68,7 @@ get_chunk_blocks_value <- function(db, x, z, dimension,
 #' `put_chunk_blocks_value()` stores block data into a `bedrockdb`.
 #'
 #' @param data A named list of 16xNx16 character() arrays
+#' @param ... Arguments passed to write_subchunk_blocks_value
 #'
 #' @rdname get_chunk_blocks_data
 #' @export
@@ -125,13 +126,20 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, ...) {
     mat
 }
 
-chunk_origin <- function(obj) {
-    attr(obj, "origin", exact = TRUE)
+#' Get or set the coordinates of the origin of a chunk
+#'
+#' @param x an array of block data
+#' @param value an integer vector
+#' @export
+chunk_origin <- function(x) {
+    attr(x, "origin", exact = TRUE)
 }
 
-`chunk_origin<-` <- function (obj, value) {
-    attr(obj, "origin") <- value
-    return(obj)
+#' @export
+#' @rdname chunk_origin
+`chunk_origin<-` <- function (x, value) {
+    attr(x, "origin") <- value
+    return(x)
 }
 
 .put_chunk_blocks_value_impl <- function(db, prefix, value, ...) {
@@ -175,6 +183,24 @@ chunk_origin <- function(obj) {
     batch$destroy()
 
     invisible()
+}
+
+#' Locate the coordinates of blocks in a chunk
+#'
+#' @param blocks A character array containing block data.
+#' @param pattern The pattern to look for. Passed to `stringr::str_detect`.
+#' @param negate  If `TRUE`, return non-matching elements.
+#'
+#' @export
+locate_blocks <- function(blocks, pattern, negate = FALSE) {
+    ind <- which(str_detect(blocks, pattern, negate))
+    aind <- arrayInd(ind, dim(blocks))
+    coords <- chunk_origin(blocks) + t(aind) - 1
+
+    ret <- tibble::tibble(x = coords[1,],
+        y = coords[2,], z = coords[3,],
+        block = blocks[ind])
+    dplyr::arrange(ret, .data$y, .data$x, .data$z)
 }
 
 #' Load and store SubchunkBlocks data
@@ -256,6 +282,7 @@ get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
 #' `put_subchunk_blocks_value()` store SubchunkBlocks data into a `bedrockdb`.
 #'
 #' @param data A named list of 16x16x16 character() arrays
+#' @param ... arguments passed to write_subchunk_blocks_value
 #'
 #' @rdname SubchunkBlocks
 #' @export
@@ -289,6 +316,7 @@ put_subchunk_blocks_value <- function(db, x, z, dimension, subchunk, value, ...)
 #' `read_subchunk_blocks_value()` decodes binary SubchunkBlock data.
 #'
 #' @param rawdata a raw vector holding binary SubchunkBlock data
+#' @param missing_offset subchunk offset to use if one is not found in `rawdata`
 #'
 #' @return `read_subchunk_blocks_value()` returns a 16x16x16 character array.
 #' The axes represent the `x`, `y`, and `z` dimensions in that order.
@@ -429,6 +457,8 @@ read_subchunk_layers_value <- function(rawdata) {
 #' @description
 #' `write_subchunk_layers_value()` encode SubchunkBlock data
 #' into binary form.
+#'
+#' @param missing_offset subchunk offset to use if one is not found in `rawdata`
 #'
 #' @rdname get_subchunk_layers_data
 #' @export

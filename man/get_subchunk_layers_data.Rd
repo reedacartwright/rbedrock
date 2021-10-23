@@ -22,7 +22,7 @@ put_subchunk_layers_value(db, x, z, dimension, subchunk, value, ...)
 
 read_subchunk_layers_value(rawdata)
 
-write_subchunk_layers_value(object, version = 9L, default_offset = NA_integer_)
+write_subchunk_layers_value(object, version = 9L, missing_offset = NA_integer_)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -37,6 +37,8 @@ write_subchunk_layers_value(object, version = 9L, default_offset = NA_integer_)
 \item{values}{A list of lists of 16x16x16 integer indexes with associated block_palettes.}
 
 \item{value}{A list of 16x16x16 integer indexes with associated block_palettes.}
+
+\item{missing_offset}{subchunk offset to use if one is not found in \code{rawdata}}
 }
 \value{
 \code{get_subchunk_layers_data()} returns a list of the of the values
