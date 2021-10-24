@@ -16,3 +16,11 @@ locate_blocks(blocks, pattern, negate = FALSE)
 \description{
 Locate the coordinates of blocks in a chunk
 }
+\examples{
+dbpath <- rbedrock_example_world("example1.mcworld")
+db <- bedrockdb(dbpath)
+blocks <- get_chunk_blocks_value(db, x=37, z=10, dimension=0)
+locate_blocks(blocks, "ore")
+close(db)
+
+}

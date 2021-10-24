@@ -36,11 +36,11 @@ get_chunk_blocks_value(
   extra_block = FALSE
 )
 
-put_chunk_blocks_data(db, data, ...)
+put_chunk_blocks_data(db, data, version = 9L)
 
-put_chunk_blocks_values(db, x, z, dimension, values, ...)
+put_chunk_blocks_values(db, x, z, dimension, values, version = 9L)
 
-put_chunk_blocks_value(db, x, z, dimension, value, ...)
+put_chunk_blocks_value(db, x, z, dimension, value, version = 9L)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -57,7 +57,7 @@ blocks. If the extra block is air, it will not be appended.}
 
 \item{data}{A named list of 16xNx16 character() arrays}
 
-\item{...}{Arguments passed to write_subchunk_blocks_value}
+\item{version}{Which format of subchunk data to use}
 
 \item{values}{A list of 16xNx16 character() arrays}
 

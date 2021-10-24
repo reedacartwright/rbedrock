@@ -36,6 +36,10 @@ test_that("put_subchunk_blocks_value() writes subchunk data.", {
     put_subchunk_blocks_value(db, 0, 0, 0, 0, val, version=8L)
     dat <- get_subchunk_blocks_value(db, 0, 0, 0, 0)
     expect_equal(dat, val)
+
+    put_subchunk_blocks_value(db, 0, 0, 0, 0, val)
+    dat <- get_subchunk_blocks_value(db, 0, 0, 0, 0)
+    expect_equal(dat, val)
 })
 
 test_that("put_subchunk_blocks_values() writes subchunk data.", {
@@ -76,6 +80,15 @@ test_that("put_subchunk_blocks_data() writes subchunk data.", {
     dat <- get_subchunk_blocks_data(db, names(val))
 
     expect_equal(dat, val)
+
+    names(val) <- stringr::str_glue("@1:2:0:47:{-4:-1}")
+    for(i in seq_along(val)) {
+        attr(val[[i]], "offset") <- i-5
+    }
+    put_subchunk_blocks_data(db, val)
+    dat <- get_subchunk_blocks_data(db, names(val))
+
+    expect_equal(dat, val)
 })
 
 test_that("put_chunk_blocks_value() writes chunk data.", {
@@ -93,6 +106,15 @@ test_that("put_chunk_blocks_value() writes chunk data.", {
 
     dat <- get_keys(db, starts_with="@10:12:0:47")
     expect_equal(dat, "@10:12:0:47:1")
+
+    chunk_origin(val) <- c(10,0,13)*16L
+    put_chunk_blocks_value(db, "@10:13:0:47", value=val)
+    dat <- get_chunk_blocks_value(db, "@10:13:0:47")
+
+    expect_equal(dat, val)
+
+    dat <- get_keys(db, starts_with="@10:13:0:47")
+    expect_equal(dat, "@10:13:0:47:1")
 })
 
 test_that("put_chunk_blocks_value() overwrites chunk data.", {

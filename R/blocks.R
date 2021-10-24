@@ -68,35 +68,32 @@ get_chunk_blocks_value <- function(db, x, z, dimension,
 #' `put_chunk_blocks_value()` stores block data into a `bedrockdb`.
 #'
 #' @param data A named list of 16xNx16 character() arrays
-#' @param ... Arguments passed to write_subchunk_blocks_value
+#' @param version Which format of subchunk data to use
 #'
 #' @rdname get_chunk_blocks_data
 #' @export
-put_chunk_blocks_data <- function(db, data, ...) {
-    put_chunk_blocks_values(db, names(data), values=data, ...)
+put_chunk_blocks_data <- function(db, data, version=9L) {
+    put_chunk_blocks_values(db, names(data), values=data, version=version)
 }
 
 #' @param values A list of 16xNx16 character() arrays
 #'
 #' @rdname get_chunk_blocks_data
 #' @export
-put_chunk_blocks_values <- function(db, x, z, dimension, values, ...) {
+put_chunk_blocks_values <- function(db, x, z, dimension, values, version=9L) {
     keys <- .process_key_args(x, z, dimension, tag = 47L, stop_if_filtered = TRUE)
     values <- vec_recycle(values, length(keys), x_arg = "values")
-
-    purrr::walk2(keys, values, function(x,y) {
-        .put_chunk_blocks_value_impl(db, x, y, ...)
-    })
+    purrr::walk2(keys, values, ~.put_chunk_blocks_value_impl(db, .x, .y, version=version))
 }
 
 #' @param value A 16xNx16 character array
 #'
 #' @rdname get_chunk_blocks_data
 #' @export
-put_chunk_blocks_value <- function(db, x, z, dimension, value, ...) {
+put_chunk_blocks_value <- function(db, x, z, dimension, value, version=9L) {
     key <- .process_key_args(x, z, dimension, tag=47L)
     vec_assert(key, character(), 1L)
-    .put_chunk_blocks_value_impl(db, key, value, ...)
+    .put_chunk_blocks_value_impl(db, key, value, version=version)
 }
 
 
@@ -142,7 +139,7 @@ chunk_origin <- function(x) {
     return(x)
 }
 
-.put_chunk_blocks_value_impl <- function(db, prefix, value, ...) {
+.put_chunk_blocks_value_impl <- function(db, prefix, value, version=9L) {
     d <- dim(value)
     if(!is.character(value) || is.null(d) || length(d) != 3L || 
         d[1] != 16L || d[3] != 16L || (d[2] %% 16L) != 0L ) {
@@ -170,7 +167,8 @@ chunk_origin <- function(x) {
             next
         }
         # extract and encode subchunk data
-        data[[new_keys[s]]] <- write_subchunk_blocks_value(subchunk, ...)
+        data[[new_keys[s]]] <- write_subchunk_blocks_value(subchunk,
+            version=version, missing_offset=subtags[s])
     }
     put_keys <- names(data)
     del_keys <- old_keys[!(old_keys %in% put_keys)]
@@ -191,15 +189,25 @@ chunk_origin <- function(x) {
 #' @param pattern The pattern to look for. Passed to `stringr::str_detect`.
 #' @param negate  If `TRUE`, return non-matching elements.
 #'
+#' @examples
+#' dbpath <- rbedrock_example_world("example1.mcworld")
+#' db <- bedrockdb(dbpath)
+#' blocks <- get_chunk_blocks_value(db, x=37, z=10, dimension=0)
+#' locate_blocks(blocks, "ore")
+#' close(db)
+#'
 #' @export
 locate_blocks <- function(blocks, pattern, negate = FALSE) {
     ind <- which(str_detect(blocks, pattern, negate))
+
     aind <- arrayInd(ind, dim(blocks))
     coords <- chunk_origin(blocks) + t(aind) - 1
-
+    if(length(coords) == 0) {
+        dim(coords) <- c(3,0)
+    }
     ret <- tibble::tibble(x = coords[1,],
         y = coords[2,], z = coords[3,],
-        block = blocks[ind])
+        block = as.character(blocks[ind]))
     dplyr::arrange(ret, .data$y, .data$x, .data$z)
 }
 
@@ -282,22 +290,23 @@ get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
 #' `put_subchunk_blocks_value()` store SubchunkBlocks data into a `bedrockdb`.
 #'
 #' @param data A named list of 16x16x16 character() arrays
-#' @param ... arguments passed to write_subchunk_blocks_value
+#' @param version Which format of subchunk data to use
 #'
 #' @rdname SubchunkBlocks
 #' @export
-put_subchunk_blocks_data <- function(db, data, ...) {
-    put_subchunk_blocks_values(db, names(data), values=data, ...)
+put_subchunk_blocks_data <- function(db, data, version=9L) {
+    put_subchunk_blocks_values(db, names(data), values=data, version=version)
 }
 
 #' @param values A list of 16x16x16 character() arrays
 #'
 #' @rdname SubchunkBlocks
 #' @export
-put_subchunk_blocks_values <- function(db, x, z, dimension, subchunk, values, ...) {
+put_subchunk_blocks_values <- function(db, x, z, dimension, subchunk, values, version=9L) {
     keys <- .process_key_args(x, z, dimension, tag=47L, subtag = subchunk, stop_if_filtered = TRUE)
     values <- vec_recycle(values, length(keys), x_arg="values")
-    values <- purrr::map(values, write_subchunk_blocks_value, ...)
+    offsets <- .get_subtag_from_chunk_key(keys)
+    values <- purrr::map2(values, offsets, ~write_subchunk_blocks_value(.x,version=version,missing_offset=.y))
     put_values(db, keys, values)
 }
 
@@ -305,10 +314,11 @@ put_subchunk_blocks_values <- function(db, x, z, dimension, subchunk, values, ..
 #'
 #' @rdname SubchunkBlocks
 #' @export
-put_subchunk_blocks_value <- function(db, x, z, dimension, subchunk, value, ...) {
+put_subchunk_blocks_value <- function(db, x, z, dimension, subchunk, value, version=9L) {
     key <- .process_key_args(x, z, dimension, tag=47L, subtag = subchunk)
+    offset <- .get_subtag_from_chunk_key(key)
     vec_assert(key, character(), 1L)
-    value <- write_subchunk_blocks_value(value, ...)
+    value <- write_subchunk_blocks_value(value, version=version, missing_offset=offset)
     put_value(db, key, value)
 }
 
@@ -347,7 +357,7 @@ read_subchunk_blocks_value <- function(rawdata, missing_offset=NA, names_only = 
 #' @param object A 16x16x16 character array.
 #' @rdname SubchunkBlocks
 #' @export
-write_subchunk_blocks_value <- function(object, ...) {
+write_subchunk_blocks_value <- function(object, version=9L, missing_offset=NA_integer_) {
     if(!is_character(object, n=16*16*16)) {
         abort("`object` is not a character vector of length 4096")
     }
@@ -362,7 +372,7 @@ write_subchunk_blocks_value <- function(object, ...) {
     })
     # copy attribute
     attr(block_layers, "offset") <- attr(object, "offset")
-    write_subchunk_layers_value(block_layers, ...)
+    write_subchunk_layers_value(block_layers, version=version, missing_offset=missing_offset)
 }
 
 #' Load and store SubchunkBlocks layers

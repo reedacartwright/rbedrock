@@ -33,11 +33,11 @@ get_subchunk_blocks_value(
   extra_block = FALSE
 )
 
-put_subchunk_blocks_data(db, data, ...)
+put_subchunk_blocks_data(db, data, version = 9L)
 
-put_subchunk_blocks_values(db, x, z, dimension, subchunk, values, ...)
+put_subchunk_blocks_values(db, x, z, dimension, subchunk, values, version = 9L)
 
-put_subchunk_blocks_value(db, x, z, dimension, subchunk, value, ...)
+put_subchunk_blocks_value(db, x, z, dimension, subchunk, value, version = 9L)
 
 read_subchunk_blocks_value(
   rawdata,
@@ -46,7 +46,7 @@ read_subchunk_blocks_value(
   extra_block = FALSE
 )
 
-write_subchunk_blocks_value(object, ...)
+write_subchunk_blocks_value(object, version = 9L, missing_offset = NA_integer_)
 
 subchunk_origins(keys)
 
@@ -69,7 +69,7 @@ blocks. If the extra block is air, it will not be appended.}
 
 \item{data}{A named list of 16x16x16 character() arrays}
 
-\item{...}{arguments passed to write_subchunk_blocks_value}
+\item{version}{Which format of subchunk data to use}
 
 \item{values}{A list of 16x16x16 character() arrays}
 
