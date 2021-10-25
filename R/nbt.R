@@ -467,3 +467,55 @@ read_nbt_data <- function(data, max_elements = NULL, simplify=TRUE) {
 write_nbt_data <- function(data) {
     purrr::map(data, write_nbt)
 }
+
+#' @export
+`$.rbedrock_nbt_container` <- function(x,i) {
+    NextMethod()
+}
+
+#' @export
+`$<-.rbedrock_nbt_container` <- function(x,i,value) {
+    if(!is_nbt(value)) {
+        value <- vec_cast(value, vec_ptype(x[[i]]), x_arg="value")
+        if(!is_nbt(value)) {
+            abort("conversion of value to nbt failed.")
+        }
+    }
+    NextMethod()
+}
+
+tag_assert <- function(tag, allowed) {
+    if(!tag %in% allowed) {
+        msg <- paste0("invalid tag `", tag, "`")
+        abort(msg)
+    }
+    return()
+}
+
+#' @export
+new_nbt_integer <- function(x, tag) {
+    vec_assert(x, ptype = integer())
+    tag_assert(tag, c(1,2,3,7,11,9))
+    new_vctr(x, tag = tag, class=c("rbedrock_nbt_integer", "rbedrock_nbt"))
+}
+
+#' @export
+new_nbt_double <- function(x, tag) {
+    vec_assert(x, ptype = double())
+    tag_assert(tag, c(5,6,9))
+    new_vctr(x, tag = tag, class=c("rbedrock_nbt_double", "rbedrock_nbt"))
+}
+
+#' @export
+new_nbt_character <- function(x, tag) {
+    vec_assert(x, ptype = character())
+    tag_assert(tag, c(8,9))
+    new_vctr(x, tag = tag, class=c("rbedrock_nbt_character", "rbedrock_nbt"))
+}
+
+#' @export
+new_nbt_integer64 <- function(x, tag) {
+    vec_assert(x, ptype = integer64())
+    tag_assert(tag, c(4,12,9))
+    new_vctr(x, tag = tag, class=c("rbedrock_nbt_integer64", "rbedrock_nbt"))
+}
