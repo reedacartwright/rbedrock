@@ -424,6 +424,10 @@ is_nbt_list <- function(x) {
     inherits(x, "rbedrock_nbt_list")
 }
 
+is_nbt_compound <- function(x) {
+    inherits(x, "rbedrock_nbt_compound")
+}
+
 #' @export
 `$.rbedrock_nbt_container` <- function(x,i) {
     NextMethod()
@@ -455,222 +459,26 @@ is_nbt_list <- function(x) {
 # #' @param tag An integer specifying the tag of the data.
 # #' @keywords internal
 # #' @export
-# new_nbt <- function(x = list(), tag = 0L) {
-#     vec_assert(tag, ptype = integer(), size = 1L)
-
-#     cls = "rbedrock_nbt"
-
-#     if(tag == 0L) {
-#         vec_assert(x, ptype = list(), size = 0L)
-#     } else if(tag == 1L || tag == 2L || tag == 3L) {
-#         vec_assert(x, ptype = integer(), size = 1L)
-#     } else if(tag == 4L) {
-#         vec_assert(x, ptype = bit64::integer64(), size = 1L)
-#         cls <- c(cls, "integer64")
-#     } else if(tag == 5L || tag == 6L) {
-#         vec_assert(x, ptype = double(), size = 1L)
-#     } else if(tag == 7L || tag == 11L ) {
-#         vec_assert(x, ptype = integer())
-#     } else if(tag == 8L) {
-#         vec_assert(x, ptype = character(), size = 1L)
-#     } else if(tag == 12L) {
-#         vec_assert(x, ptype = bit64::integer64())
-#         cls <- c(cls, class(x))
-#     } else if(tag == 10L) {
-#         vec_assert(x, ptype = list())
-#         stopifnot(all(sapply(x, is_nbt)))
-#     } else {
-#         vec_assert(x, ptype = list())
-#         stopifnot(all(sapply(x, is_nbt)))
-#         stopifnot(is.null(names(x)))
-#         if(length(x) == 0) {
-#             ptype <- nbt_end()
-#         } else {
-#             # Strip ptype attributes when doing list of lists
-#             y <- purrr::map(x, `attr<-`, "ptype", NULL )
-#             ptype <- vec_ptype_common(!!!y)
-#             if(is.null(ptype)) {
-#                 abort("Could not find common type for elements of `x`.")
-#             }
-#         }
-#         ret <- new_list_of(x, tag = tag, ptype = ptype, class = cls)
-#         return(ret)
-#     }
-#     new_vctr(x, tag = tag, class = cls)
-# }
-
-#' @export
-new_nbt <- function(x, tag, list_tag) {
-    vec_assert(tag, ptype = integer(), size = 1L)
-    if(tag == 0L) {
-        ret <- new_nbt_empty(list(), tag)
-    } else if(tag %in% c(1L,2L,3L)) {
-        ret <- new_nbt_integer(x, tag)
-    } else if(tag == 4L) {
-        ret <- new_nbt_integer64(x, tag)
-    } else if(tag %in% c(5L,6L)) {
-        ret <- new_nbt_double(x, tag)
-    } else if(tag == 7L) {
-        ret <- new_nbt_integer(x, tag)
-    } else if(tag == 8L) {
-        ret <- new_nbt_character(x,tag)
-    } else if(tag == 9L) {
-        ret <- new_nbt_list(x,tag,list_tag)
-    } else if(tag == 10L) {
-        ret <- new_nbt_compound(x,tag)
-    } else if(tag == 11L) {
-        ret <- new_nbt_integer(x,tag)
-    } else if(tag == 12L) {
-        ret <- new_nbt_integer64(x,tag)
-    } else {
-        msg <- paste0("invalid tag `", tag, "`")
-        abort(msg)
-    }
-    ret
+new_nbt <- function(x, tag) {
+    switch(tag,
+        new_nbt_byte(x),
+        new_nbt_short(x),
+        new_nbt_int(x),
+        new_nbt_long(x),
+        new_nbt_float(x),
+        new_nbt_double(x),
+        new_nbt_byte_array(x),
+        new_nbt_string(x),
+        new_nbt_list(x),
+        new_nbt_compound(x),
+        new_nbt_int_array(x),
+        new_nbt_long_array(x)
+    )
 }
 
-.get_tag <- function(x, include_list=FALSE) {
-    if(isTRUE(include_list) && is_nbt_list(x)) {
-        return(9L)
-    }
-    attr(x, "tag", exact = TRUE)
-}
-
-#' @export
-new_nbt_empty <- function(x,tag) {
-    vec_assert(x, ptype=list(), size=0L)
-    .tag_assert(tag, 0L)
-    new_vctr(x, tag = tag, class=c("rbedrock_nbt_empty", "rbedrock_nbt"))
-}
-
-#' @export
-new_nbt_integer <- function(x, tag) {
-    # if(is_nbt(x)) {
-    #     .tag_assert(.get_tag(x), tag)
-    #     x <- vec_data(x)
-    # }
-    vec_assert(x, ptype = integer())
-    .tag_assert(tag, c(1:3,7L,11L))
-    new_vctr(x, tag = tag, class=c("rbedrock_nbt_integer", "rbedrock_nbt"))
-}
-
-#' @export
-new_nbt_double <- function(x, tag) {
-    if(is_nbt(x)) {
-        .tag_assert(.get_tag(x), tag)
-        x <- vec_data(x)
-    }
-    vec_assert(x, ptype = double())
-    .tag_assert(tag, 5:6)
-    new_vctr(x, tag = tag, class=c("rbedrock_nbt_double", "rbedrock_nbt"))
-}
-
-#' @export
-new_nbt_character <- function(x, tag) {
-    if(is_nbt(x)) {
-        .tag_assert(.get_tag(x), tag)
-        x <- vec_data(x)
-    }
-    vec_assert(x, ptype = character())
-    .tag_assert(tag, 8L)
-    new_vctr(x, tag = tag, class=c("rbedrock_nbt_character", "rbedrock_nbt"))
-}
-
-#' @export
-new_nbt_integer64 <- function(x, tag) {
-    if(is_nbt(x)) {
-        .tag_assert(.get_tag(x), tag)
-        x <- vec_data(x)
-    }
-    vec_assert(x, ptype = integer64())
-    .tag_assert(tag, c(4L,12L))
-    new_vctr(x, tag = tag, class=c("rbedrock_nbt_integer64", "rbedrock_nbt"))
-}
-
-#' @export
-new_nbt_compound <- function(x,tag) {
-    if(is_nbt(x)) {
-        .tag_assert(.get_tag(x), tag)
-        x <- vec_data(x)
-    }
-    vec_assert(x, ptype=list())
-    .tag_assert(tag, 10L)
-    if(!all(sapply(x, is_nbt))) {
-        abort("an nbt_compound can only hold nbt data")
-    }
-    structure(x, tag=tag, class=c("rbedrock_nbt_compound",
-        "rbedrock_nbt", "rbedrock_nbt_container"))
-}
-
-new_nbt_list_impl <- function(x) {
-    # x is a list of payloads of all the same type
-    vec_assert(x, list())
-    tags <- purrr::map_int(x, .get_tag, include_list=TRUE)
-    tag <- tags[1]
-    if(any(tags != tag)) {
-        abort("an nbt_list can only hold multiple payloads if they all have the same tag")
-    }
-    # simplify as needed
-    if(tag %in% c(1:6,8)) {
-        if(tag %in% 1:3) {
-            x <- purrr::as_vector(x, integer(1))
-            x <- new_nbt_integer(x, tag)
-        } else if(tag == 4L) {
-            x <- structure(purrr::as_vector(x, double(1)), class="integer64")
-            x <- new_nbt_integer64(x, tag)
-        } else if(tag %in% 5:6) {
-            x <- purrr::as_vector(x, double(1))
-            x <- new_nbt_double(x, tag)
-        } else {
-            x <- purrr::as_vector(x, character(1))
-            x <- new_nbt_character(x, tag)
-        }
-        cls <- class(x)
-    } else {
-        cls <- "rbedrock_nbt"
-    }
-    structure(x, tag = tag, class = c("rbedrock_nbt_list", cls))
-}
-
-
-#' @export
-new_nbt_list <- function(x, tag) {
-
-}
-
-coerce_rawnbt_container <- function(x) {
-    # extract names
-    n <- purrr::map_chr(x, "name")
-    # extract values
-    v <- purrr::map(x, function(y) {
-        coerce_rawnbt_payload(y[["payload"]], y[["tag"]])
-    })
-    set_names(v, n)
-}
-
-coerce_rawnbt_payload <- function(x, tag) {
-    if(tag == 9L) {
-        v <- purrr::map(x, function(y) {
-            coerce_rawnbt_payload(y[["payload"]], y[["tag"]])
-        })
-        new_nbt_list_impl(v)
-    } else if(tag == 10L) {
-        ret <- coerce_rawnbt_container(x)
-        new_nbt_compound(ret, tag)
-    } else {
-        new_nbt(x, tag)
-    }
-}
-
-new_rbedrock_nbt_scalar <- function(x, ptype, class) {
-    vec_assert(x, ptype = ptype)
+new_rbedrock_nbt_scalar <- function(x, class, ptype = NULL, size = NULL) {
+    vec_assert(x, ptype = ptype, size = size)
     new_vctr(x, class=c(paste0("rbedrock_nbt_", class), "rbedrock_nbt"))
-}
-
-new_rbedrock_nbt_list <- function(x, ptype, class) {
-    vec_assert(x, ptype = list())
-    y <- purrr::map(x, new_rbedrock_nbt_scalar, ptype = ptype, class=class)
-    new_vctr(x, class=c(paste0("rbedrock_nbt_", class, "_list"), "rbedrock_nbt"))
 }
 
 .fixup_long <- function(x) {
@@ -680,88 +488,92 @@ new_rbedrock_nbt_list <- function(x, ptype, class) {
 }
 
 new_nbt_byte <- function(x) {
-    new_rbedrock_nbt_scalar(x, integer(1), "byte")
+    new_rbedrock_nbt_scalar(x, "byte", integer(), 1)
 }
 
 new_nbt_short <- function(x) {
-    new_rbedrock_nbt_scalar(x, integer(1), "short")
+    new_rbedrock_nbt_scalar(x, "short", integer(), 1)
 }
 
 new_nbt_int <- function(x) {
-    new_rbedrock_nbt_scalar(x, integer(1), "int")
+    new_rbedrock_nbt_scalar(x, "int", integer(), 1)
 }
 
 new_nbt_long <- function(x) {
-    x <- new_rbedrock_nbt_scalar(x, integer64(1), "long")
+    x <- new_rbedrock_nbt_scalar(x, "long", integer64(), 1)
     .fixup_long(x)
 }
 
 new_nbt_float <- function(x) {
-    new_rbedrock_nbt_scalar(x, double(1), "float")
+    new_rbedrock_nbt_scalar(x, "float", double(), 1)
 }
 
 new_nbt_double <- function(x) {
-    new_rbedrock_nbt_scalar(x, double(1), "double")
+    new_rbedrock_nbt_scalar(x, "double", double(), 1)
 }
 
 new_nbt_byte_array <- function(x) {
-    new_rbedrock_nbt_scalar(x, integer(), "byte_array")
+    new_rbedrock_nbt_scalar(x, "byte_array", integer())
 }
 
 new_nbt_string <- function(x) {
-    new_rbedrock_nbt_scalar(x, character(1), "character")
+    new_rbedrock_nbt_scalar(x, "character", character(), 1)
 }
 
 new_nbt_int_array <- function(x) {
-    new_rbedrock_nbt_scalar(x, integer(), "int_array")
+    new_rbedrock_nbt_scalar(x, "int_array", integer())
 }
 
 new_nbt_long_array <- function(x) {
-    x <- new_rbedrock_nbt_scalar(x, integer64(), "long_array")
+    x <- new_rbedrock_nbt_scalar(x, "long_array", integer64())
     .fixup_long(x)   
 }
 
+new_nbt_compound <- function(x) {
+    vec_assert(x, ptype=list())
+    if(!all(purrr::map_lgl(x, is_nbt))) {
+        abort("an nbt_compound can only hold nbt data")
+    }
+    structure(x, class=c("rbedrock_nbt_compound",
+        "rbedrock_nbt", "rbedrock_nbt_container"))
+}
+
+new_nbt_list <- function(x) {
+    y <- list_of(!!!x)
+    cls <- class(y)
+    structure(y, class=c("rbedrock_nbt_list", cls))
+}
+
 new_nbt_byte_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, integer(), "byte_list")
+    new_rbedrock_nbt_scalar(x, "byte_list", integer())
 }
 
 new_nbt_short_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, integer(), "short_list")
+    new_rbedrock_nbt_scalar(x, "short_list", integer())
 }
 
 new_nbt_int_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, integer(), "int_list")
+    new_rbedrock_nbt_scalar(x, "int_list", integer())
 }
 
 new_nbt_long_list <- function(x) {
-    x <- new_rbedrock_nbt_scalar(x, integer64(), "long_list")
+    x <- new_rbedrock_nbt_scalar(x, "long_list", integer64())
     .fixup_long(x) 
 }
 
 new_nbt_float_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, integer(), "float_list")
+    new_rbedrock_nbt_scalar(x, "float_list", integer())
 }
 
 new_nbt_double_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, integer(), "double_list")
-}
-
-new_nbt_byte_array_list <- function(x) {
-    new_rbedrock_nbt_list(x, integer(), "byte_array")
+    new_rbedrock_nbt_scalar(x, "double_list", integer())
 }
 
 new_nbt_string_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, character(), "string_list")
+    new_rbedrock_nbt_scalar(x, "string_list", character())
 }
 
-new_nbt_int_array_list <- function(x) {
-    new_rbedrock_nbt_list(x, integer(), "int_array")
-}
-
-new_nbt_long_array_list <- function(x) {
-    y <- new_rbedrock_nbt_list(x, integer64(), "long_array")
-    purrr::map(x, .fixup_long)
-}
+######
 
 nbt_byte <- function(x) {
     new_nbt_byte(vec_cast(x, integer()))
@@ -802,3 +614,72 @@ nbt_int_array <- function(x) {
 nbt_long_array <- function(x) {
     new_nbt_long_array(vec_cast(x, integer()))
 }
+
+nbt_compound <- function(...) {
+    new_nbt_compound(list2(...))
+}
+
+nbt_list <- function(...) {
+    new_nbt_list(list2(...))
+}
+
+######
+
+coerce_rawnbt_container <- function(x) {
+    # extract names
+    n <- purrr::map_chr(x, "name")
+    # extract values
+    v <- purrr::map(x, function(y) {
+        coerce_rawnbt_payload(y[["payload"]], y[["tag"]])
+    })
+    set_names(v, n)
+}
+
+coerce_rawnbt_payload <- function(x, tag) {
+    if(tag == 9L) {
+        v <- purrr::map(x, function(y) {
+            coerce_rawnbt_payload(y[["payload"]], y[["tag"]])
+        })
+        new_nbt_list(v)
+    } else if(tag == 10L) {
+        ret <- coerce_rawnbt_container(x)
+        new_nbt_compound(ret)
+    } else {
+        new_nbt(x, tag)
+    }
+}
+
+######
+
+#' @export
+get_nbt_tag <- function(x) {
+    UseMethod("get_nbt_tag", x)
+}
+
+get_nbt_tag.rbedrock_nbt_byte       <- function(x) 1L
+get_nbt_tag.rbedrock_nbt_short      <- function(x) 2L
+get_nbt_tag.rbedrock_nbt_int        <- function(x) 3L
+get_nbt_tag.rbedrock_nbt_long       <- function(x) 4L
+get_nbt_tag.rbedrock_nbt_float      <- function(x) 5L
+get_nbt_tag.rbedrock_nbt_double     <- function(x) 6L
+get_nbt_tag.rbedrock_nbt_byte_array <- function(x) 7L
+get_nbt_tag.rbedrock_nbt_string     <- function(x) 8L
+get_nbt_tag.rbedrock_nbt_list       <- function(x) 9L
+get_nbt_tag.rbedrock_nbt_compound   <- function(x) 10L
+get_nbt_tag.rbedrock_nbt_int_array  <- function(x) 11L
+get_nbt_tag.rbedrock_nbt_long_array <- function(x) 12L
+
+
+######
+#' @export
+vec_ptype_full.rbedrock_nbt_list <- function(x, ...) {
+    "rbedrock_nbt_list"
+}
+
+#' @export
+vec_cast.rbedrock_nbt_list.vctrs_list_of <- function(x, to, ...) {
+    cls <- setdiff(class(x), "rbedrock_nbt_list")
+    x <- structure(x, class = c("rbedrock_nbt_list", cls))
+    x
+}
+
