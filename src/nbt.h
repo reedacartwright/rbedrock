@@ -24,7 +24,11 @@
 #include <Rinternals.h>
 #include <stdbool.h>
 
-SEXP read_nbt(SEXP r_rawval, SEXP r_max_elements);
-SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end, int max_elements, bool stop_on_end);
+SEXP read_nbt(SEXP r_rawval);
+SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end);
+SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end);
 SEXP write_nbt(SEXP r_value);
 
+#define return_nbt_error() { Rf_error("Malformed NBT data: at %s, line %d.",  __FILE__, __LINE__ ); return R_NilValue; }
+#define return_nbt_error0() { Rf_error("Malformed NBT data: at %s, line %d.",  __FILE__, __LINE__ ); return 0; }
+#define return_nbt_error_tag(x) { Rf_error("Malformed NBT data with tag `%d`: at %s, line %d.", (x), __FILE__, __LINE__ ); return R_NilValue; }

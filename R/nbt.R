@@ -365,55 +365,6 @@
 #     put_data(db, dat, writeoptions = writeoptions)
 # }
 
-# #' @description
-# #' `read_nbt` reads NBT data from a `raw` vector.
-# #'
-# #' @param rawdata A `raw` vector
-# #' @rdname get_nbt_data
-# #' @export
-# read_nbt <- function(rawdata, max_elements = NULL, simplify = TRUE) {
-#     if(!is.null(max_elements)) {
-#         stopifnot(length(max_elements) == 1L && !is.na(max_elements))
-#     }
-#     res <- .Call(Cread_nbt, rawdata, max_elements)
-#     if(isTRUE(simplify) && length(res) == 1L && is.null(attributes(res))) {
-#         res <- res[[1]]
-#     }
-#     res
-# }
-
-# #' @description
-# #' `write_nbt` encodes NBT data into a `raw` vector.
-# #'
-# #' @param object An nbt object or a list of nbt objects
-# #' @rdname get_nbt_data
-# #' @export
-# write_nbt <- function(object) {
-#     if(is_nbt(object)) {
-#         object <- list(object)
-#     }
-#     .Call(Cwrite_nbt, object)
-# }
-
-# #' @description
-# #' `read_nbt_data` calls `read_nbt` on each element of a list.
-# #'
-# #' @rdname get_nbt_data
-# #' @export
-# read_nbt_data <- function(data, max_elements = NULL, simplify=TRUE) {
-#     purrr::map(data, read_nbt, max_elements = max_elements, simplify = simplify)
-# }
-
-# #' @description
-# #' `write_nbt_data` calls `write_nbt` on each element of a list.
-# #'
-
-# #' @rdname get_nbt_data
-# #' @export
-# write_nbt_data <- function(data) {
-#     purrr::map(data, write_nbt)
-# }
-
 #' @rdname nbt
 #' @export
 is_nbt <- function(x) {
@@ -669,7 +620,6 @@ get_nbt_tag.rbedrock_nbt_compound   <- function(x) 10L
 get_nbt_tag.rbedrock_nbt_int_array  <- function(x) 11L
 get_nbt_tag.rbedrock_nbt_long_array <- function(x) 12L
 
-
 ######
 #' @export
 vec_ptype_full.rbedrock_nbt_list <- function(x, ...) {
@@ -677,9 +627,69 @@ vec_ptype_full.rbedrock_nbt_list <- function(x, ...) {
 }
 
 #' @export
-vec_cast.rbedrock_nbt_list.vctrs_list_of <- function(x, to, ...) {
-    cls <- setdiff(class(x), "rbedrock_nbt_list")
-    x <- structure(x, class = c("rbedrock_nbt_list", cls))
-    x
+vec_cast.rbedrock_nbt_list.rbedrock_nbt_list <- function(x, to, ...) {
+    x <- as_list_of(x, .ptype = attr(to, "ptype"))
+    structure(x, class = class(to))
 }
 
+#' @export
+vec_cast.rbedrock_nbt_list.vctrs_list_of <- function(x, to, ...) {
+    x <- as_list_of(x, .ptype = attr(to, "ptype"))
+    structure(x, class = class(to))
+}
+
+
+#' @description
+#' `read_nbt` reads NBT data from a `raw` vector.
+#'
+#' @param rawdata A `raw` vector
+#' @rdname get_nbt_data
+#' @export
+read_nbt <- function(rawdata, simplify = TRUE) {
+    res <- read_rawnbt(rawdata)
+    # if(isTRUE(simplify) && length(res) == 1L && is.null(attributes(res))) {
+    #     res <- res[[1]]
+    # }
+    res
+}
+
+#' @rdname get_nbt_data
+#' @export
+read_rnbt <- function(rawdata) {
+    .Call(Cread_nbt, rawdata)
+}
+
+
+#' @description
+#' `read_nbt_data` calls `read_nbt` on each element of a list.
+#'
+#' @rdname get_nbt_data
+#' @export
+read_nbt_data <- function(data, simplify = TRUE) {
+    purrr::map(data, read_nbt, simplify = simplify)
+}
+
+
+# #' @description
+# #' `write_nbt` encodes NBT data into a `raw` vector.
+# #'
+# #' @param object An nbt object or a list of nbt objects
+# #' @rdname get_nbt_data
+# #' @export
+# write_nbt <- function(object) {
+#     if(is_nbt(object)) {
+#         object <- list(object)
+#     }
+#     .Call(Cwrite_nbt, object)
+# }
+
+
+# #' @description
+# #' `write_nbt_data` calls `write_nbt` on each element of a list.
+# #'
+
+# #' @rdname get_nbt_data
+# #' @export
+# write_nbt_data <- function(data) {
+#     purrr::map(data, write_nbt)
+# }

@@ -102,10 +102,21 @@ SEXP read_subchunk(SEXP r_value) {
             }
             palette_size = 1;
         }
-        SEXP r_palette = PROTECT(read_nbt_values(&p, end, palette_size, false));
-        if(XLENGTH(r_palette) != palette_size) {
-            return_block_error();
-        }
+        SEXP r_palette = PROTECT(Rf_allocVector(VECSXP, palette_size));
+        SEXP r_val;
+
+        for(int i = 0; i < palette_size; ++i) {
+            if(p >= end) {
+                return_block_error();
+            }
+            r_val = PROTECT(read_nbt_value(&p, end));
+            if(Rf_isNull(r_val)) {
+                // We should not encounter a 0 tag in this context
+                return_nbt_error_tag(0);
+            }
+            SET_VECTOR_ELT(r_palette, i, r_val);
+            UNPROTECT(1);
+        }      
         // construct a list to hold this layer
         const char *names[] = {"values", "palette",""};
         SEXP r_layer = PROTECT(Rf_mkNamed(VECSXP, names));
