@@ -121,6 +121,18 @@ static SEXP read_nbt_payload_real(const unsigned char** ptr, const unsigned char
     return res;
 }
 
+static SEXP read_nbt_payload_integer64(const unsigned char** ptr, const unsigned char* end, int size, int n) {
+    SEXP r_payload = PROTECT(read_nbt_payload_real(ptr, end, size, n));
+    if(Rf_isNull(r_payload)) {
+        UNPROTECT(1);
+        return r_payload;
+    }
+    SEXP r_class = PROTECT(Rf_ScalarString(Rf_mkChar("integer64")));
+    Rf_setAttrib(r_payload, R_ClassSymbol, r_class);
+    UNPROTECT(2);
+    return r_payload;
+}
+
 static SEXP read_nbt_list_payload(const unsigned char** ptr, const unsigned char* end) {
     if(end - *ptr < 5) {
         return R_NilValue;
@@ -163,6 +175,7 @@ static SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned 
         }
         r_val = PROTECT(read_nbt_value(ptr, end));
         if(Rf_isNull(r_val)) {
+            UNPROTECT(1);
             break; // NULL value signals end of compound
         }
         grow_stretchy_list(r_ret, r_val);
@@ -207,9 +220,10 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
      case TAG_FLOAT:
         return read_nbt_payload_real(ptr, end, 4, array_len);
      case TAG_DOUBLE:
+        return read_nbt_payload_real(ptr, end, 8, array_len);
      case TAG_LONG:
      case TAG_LONG_ARRAY:
-        return read_nbt_payload_real(ptr, end, 8, array_len);
+        return read_nbt_payload_integer64(ptr, end, 8, array_len);
      case TAG_STRING:
         return Rf_ScalarString(read_nbt_payload_character(ptr, end));
      case TAG_LIST:
