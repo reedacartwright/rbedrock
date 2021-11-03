@@ -136,41 +136,16 @@ test_that("read_nbt does not simplify multiple values", {
     expect_equal(read_nbt(dat, simplify = FALSE), list(com, c))
 })
 
-test_that("read_nbt reads a maximum number of values", {
-    dat <- as_raw(
-            tags$byte, rawstr("A"), 0,
-            tags$byte, rawstr("B"), 1,
-            tags$byte, rawstr("C"), 2
-            )
-    a <- nbt_byte(0)
-    b <- nbt_byte(1)
-    c <- nbt_byte(2)
-
-    expect_equal(read_nbt(dat, max_elements = 0),
-        structure(list(), bytes_read = 0L))
-    expect_equal(read_nbt(dat, max_elements = 1),
-        structure(list(A = a), bytes_read = 5L))
-    expect_equal(read_nbt(dat, max_elements = 2),
-        structure(list(A = a, B = b), bytes_read = 10L))
-    expect_equal(read_nbt(dat, max_elements = 3),
-        structure(list(A = a, B = b, C = c), bytes_read = 15L))
-    expect_equal(read_nbt(dat, max_elements = 4),
-        structure(list(A = a, B = b, C = c), bytes_read = 15L))
-    
-    expect_equal(read_nbt(dat, max_elements = 1, simplify = TRUE),
-        structure(list(A = a), bytes_read = 5L))
-})
-
-test_that("read_nbt throws errors on malformed values", {
+test_that("read_rnbt throws errors on malformed values", {
     dat <- as_raw(tags$compound, rawstr(""),
             tags$byte, rawstr("A"), 0,
             tags$byte_array, rawstr("BCD"), 3, 0, 0, 0, 1, 2, 3,
             tags$byte, rawstr(""), 2,
             tags$end
             )
-    expect_silent(read_nbt(dat))
+    expect_silent(read_rnbt(dat))
     for(i in seq.int(length(dat)-1)) {
-        expect_error(read_nbt(dat[1:!!i]))
+        expect_error(read_rnbt(dat[1:!!i]))
     }
 })
 

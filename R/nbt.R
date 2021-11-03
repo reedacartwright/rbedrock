@@ -33,70 +33,12 @@
 #     new_nbt(x, tag = tag)
 # }
 
-
-
-# #' @rdname nbt
-# #' @export
-# nbt_end <- function() new_nbt(list(), tag = 0L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_byte <- function(x = 0L) new_nbt(vec_cast(x, integer()), tag = 1L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_short <- function(x = 0L) new_nbt(vec_cast(x, integer()), tag = 2L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_int <- function(x = 0L) new_nbt(vec_cast(x, integer()), tag = 3L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_long <- function(x = 0L) new_nbt(vec_cast(x, bit64::integer64()), tag = 4L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_float <- function(x = 0) new_nbt(vec_cast(x, double()), tag = 5L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_double <- function(x = 0) new_nbt(vec_cast(x, double()), tag = 6L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_string <- function(x = "") new_nbt(vec_cast(x, character()), tag = 8L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_byte_array <- function(x = integer()) new_nbt(vec_cast(x, integer()), tag = 7L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_int_array <- function(x = integer()) new_nbt(vec_cast(x, integer()), tag = 11L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_long_array <- function(x = bit64::integer64()) new_nbt(vec_cast(x, bit64::integer64()), tag = 12L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_compound <- function(...) new_nbt(list2(...), tag = 10L)
-
-# #' @rdname nbt
-# #' @export
-# nbt_list <- function(...) new_nbt(list2(...), tag = 9L)
-
-# tag <- function(x) attr(x, "tag")
-
-# list_tag <- function(x) tag(attr(x, "ptype"))
-
-# tag_str <- function(x) {
-#     chr <- c("END", "BYTE", "SHORT", "INT", "LONG", "FLOAT",
-#         "DOUBLE", "BYTE_ARRAY", "STRING", "LIST", "COMPOUND",
-#         "INT_ARRAY", "LONG_ARRAY")
-#     chr[1L+tag(x)]
-# }
+tag_str <- function(x) {
+    chr <- c("END", "BYTE", "SHORT", "INT", "LONG", "FLOAT",
+        "DOUBLE", "BYTE_ARRAY", "STRING", "LIST", "COMPOUND",
+        "INT_ARRAY", "LONG_ARRAY")
+    chr[1L+tag(x)]
+}
 
 # #' @export
 # print.rbedrock_nbt <- function(x, ...) {
@@ -303,9 +245,6 @@
 # #' @export
 # is.na.rbedrock_nbt <- function(x, ...) vec_data(NextMethod())
 
-# #' @export
-# `==.rbedrock_nbt` <- function(e1, e2) vec_data(NextMethod())
-
 # #' Read and Write NBT Data
 # #'
 # #' The Named Binary Tag (NBT) format is used by Minecraft for various data types.
@@ -492,6 +431,10 @@ new_nbt_compound <- function(x) {
 }
 
 new_nbt_list <- function(x) {
+    if(length(x) == 0) {
+        # use a ptype of an empty list for an empty nbt_list
+        x <- list(list())
+    }
     y <- list_of(!!!x)
     cls <- class(y)
     structure(y, class=c("rbedrock_nbt_list", "rbedrock_nbt", cls))
@@ -565,7 +508,7 @@ nbt_int_array <- function(x) {
 }
 
 nbt_long_array <- function(x) {
-    new_nbt_long_array(vec_cast(x, integer()))
+    new_nbt_long_array(vec_cast(x, bit64::integer64()))
 }
 
 nbt_compound <- function(...) {
@@ -645,6 +588,19 @@ vec_cast.rbedrock_nbt_list.vctrs_list_of <- function(x, to, ...) {
     x <- as_list_of(x, .ptype = attr(to, "ptype"))
     structure(x, class = class(to))
 }
+
+# work around integer64 methods not stripping all class variables
+#' @export
+is.na.rbedrock_nbt_long <- function(x, ...) vec_data(NextMethod())
+
+#' @export
+is.na.rbedrock_nbt_long_array <- function(x, ...) vec_data(NextMethod())
+
+#' @export
+`==.rbedrock_nbt_long` <- function(e1, e2) vec_data(NextMethod())
+
+#' @export
+`==.rbedrock_nbt_long_array` <- function(e1, e2) vec_data(NextMethod())
 
 
 #' @description
