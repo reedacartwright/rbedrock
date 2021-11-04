@@ -341,8 +341,8 @@ read_subchunk_blocks_value <- function(rawdata, missing_offset=NA, names_only = 
     subchunk <- read_subchunk_layers_value(rawdata)
     offset <- attr(subchunk,"offset") %|% missing_offset
     blocks <- purrr::map(subchunk, function(x) {
-        pal <- purrr::map_chr(x$palette, .block_string, names_only = names_only)
-        array(pal[x$values], dim = dim(x$values))
+        pal <- purrr::map_chr(x[["palette"]], .block_string, names_only = names_only)
+        array(pal[ x[["values"]] ], dim = dim(x[["values"]]))
     })
     if(isTRUE(extra_block) && length(blocks) >= 2) {
         ret <- str_c(blocks[[1]], blocks[[2]], sep=";") %>%
@@ -461,7 +461,12 @@ read_subchunk_layers_value <- function(rawdata) {
         return(NULL)
     }
     vec_assert(rawdata, raw())
-    .Call(Cread_subchunk, rawdata)
+    x <- .Call(Cread_subchunk, rawdata)
+    x <- purrr::modify(x, function(y) {
+        y$palette <- from_rnbt(y$palette)
+        y
+    })
+    x
 }
 
 #' @description
@@ -491,17 +496,17 @@ write_subchunk_layers_value <- function(object, version=9L, missing_offset=NA_in
         }
     }
     values <- purrr::map(object, function(x) {
-        if(!has_name(x, "values") || length(x$values) != 16*16*16) {
+        if(length(x[["values"]]) != 16*16*16) {
             abort("an element of `object` is malformed")
         }
-        as.integer(x$values)
+        as.integer(x[["values"]])
     })
     palette <- purrr::map(object, function(x) {
         if(!has_name(x, "palette") || 
-            any(purrr::map_lgl(x$palette,is_nbt)==FALSE)) {
+            any(purrr::map_lgl(x[["palette"]],is_nbt) == FALSE)) {
             abort("an element of `object` is malformed")
         }
-        x$palette
+        to_rnbt(x[["palette"]])
     })
 
     .Call(Cwrite_subchunk, values, palette, version, offset)
@@ -515,7 +520,7 @@ write_subchunk_layers_value <- function(object, version=9L, missing_offset=NA_in
         return(block_name)
     }
     states <- purrr::imap(states, function(x,y) {
-        xtag <- tag(x)
+        xtag <- get_nbt_tag(x)
         p <- payload(x)
         if(xtag == 1) {
             tolower(as.character(as.logical(p)))

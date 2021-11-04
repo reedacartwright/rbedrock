@@ -118,7 +118,7 @@ SEXP read_subchunk(SEXP r_value) {
             UNPROTECT(1);
         }      
         // construct a list to hold this layer
-        const char *names[] = {"values", "palette",""};
+        const char *names[] = {"values", "palette", ""};
         SEXP r_layer = PROTECT(Rf_mkNamed(VECSXP, names));
         SET_VECTOR_ELT(r_layer, 0, r_blocks);
         SET_VECTOR_ELT(r_layer, 1, r_palette);
