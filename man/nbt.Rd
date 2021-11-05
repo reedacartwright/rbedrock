@@ -15,7 +15,6 @@
 \alias{nbt_list}
 \alias{is_nbt}
 \alias{payload}
-\alias{payload<-}
 \alias{unnbt}
 \title{Create an NBT value}
 \usage{
@@ -46,8 +45,6 @@ nbt_list(...)
 is_nbt(x)
 
 payload(x)
-
-payload(x) <- value
 
 unnbt(x)
 }

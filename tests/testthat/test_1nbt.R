@@ -232,3 +232,19 @@ test_that("write_nbt() correctly encodes nbt data", {
     expect_equal(write_nbt(nbt_list(nbt_byte(1), nbt_byte(2))),
         as_raw(tags$list, rawstr(""), tags$byte, 2, 0, 0, 0, 1, 2))
 })
+
+
+test_that("vec_ptype_full returns the right prototype string", {
+    expect_equal(vctrs::vec_ptype_full(nbt_byte(1)), "rbedrock_nbt_byte")
+    expect_equal(vctrs::vec_ptype_full(nbt_short(1)), "rbedrock_nbt_short")
+    expect_equal(vctrs::vec_ptype_full(nbt_int(1)), "rbedrock_nbt_int")
+    expect_equal(vctrs::vec_ptype_full(nbt_long(1)), "rbedrock_nbt_long")
+    expect_equal(vctrs::vec_ptype_full(nbt_float(1)), "rbedrock_nbt_float")
+    expect_equal(vctrs::vec_ptype_full(nbt_double(1)), "rbedrock_nbt_double")
+    expect_equal(vctrs::vec_ptype_full(nbt_byte_array(1)), "rbedrock_nbt_byte_array")
+    expect_equal(vctrs::vec_ptype_full(nbt_string("a")), "rbedrock_nbt_string")
+    expect_equal(vctrs::vec_ptype_full(nbt_list()), "rbedrock_nbt_list")
+    expect_equal(vctrs::vec_ptype_full(nbt_compound()), "rbedrock_nbt_compound")
+    expect_equal(vctrs::vec_ptype_full(nbt_int_array(1)), "rbedrock_nbt_int_array")
+    expect_equal(vctrs::vec_ptype_full(nbt_long_array(1)), "rbedrock_nbt_long_array")
+})

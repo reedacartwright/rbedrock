@@ -13,29 +13,11 @@
 \alias{write_nbt_data}
 \title{Read and Write NBT Data}
 \usage{
-get_nbt_data(
-  db,
-  keys,
-  readoptions = NULL,
-  max_elements = NULL,
-  simplify = TRUE
-)
+get_nbt_data(db, keys, readoptions = NULL, simplify = TRUE)
 
-get_nbt_value(
-  db,
-  key,
-  readoptions = NULL,
-  max_elements = NULL,
-  simplify = TRUE
-)
+get_nbt_value(db, key, readoptions = NULL, simplify = TRUE)
 
-get_nbt_values(
-  db,
-  keys,
-  readoptions = NULL,
-  max_elements = NULL,
-  simplify = TRUE
-)
+get_nbt_values(db, keys, readoptions = NULL, simplify = TRUE)
 
 put_nbt_values(db, keys, values, writeoptions = NULL)
 
@@ -57,8 +39,6 @@ write_nbt_data(data)
 \item{keys}{A character vector of keys.}
 
 \item{readoptions}{A \code{bedrock_leveldb_readoptions} object}
-
-\item{max_elements}{Maximum number of elements to parse.}
 
 \item{simplify}{If TRUE, simplifies a list containing a single unnamed \code{nbtnode}.}
 

@@ -104,20 +104,15 @@ payload <- function(x) {
     UseMethod("payload")
 }
 
-#' @rdname nbt
-#' @export
-`payload<-` <- function(x, value) {
-    UseMethod("payload<-")
-}
+# #' @rdname nbt
+# #' @export
+# `payload<-` <- function(x, value) {
+#     UseMethod("payload<-")
+# }
 
 #' @export
 payload.default <- function(x) {
     vec_data(x)
-}
-
-#' @export
-`payload<-.default` <- function(x, value) {
-    vec_restore(value,x)
 }
 
 #' @export
@@ -308,34 +303,34 @@ new_nbt_list <- function(x) {
     structure(y, class=c("rbedrock_nbt_list", "rbedrock_nbt", cls))
 }
 
-new_nbt_byte_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, "byte_list", integer())
-}
+# new_nbt_byte_list <- function(x) {
+#     new_rbedrock_nbt_scalar(x, "byte_list", integer())
+# }
 
-new_nbt_short_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, "short_list", integer())
-}
+# new_nbt_short_list <- function(x) {
+#     new_rbedrock_nbt_scalar(x, "short_list", integer())
+# }
 
-new_nbt_int_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, "int_list", integer())
-}
+# new_nbt_int_list <- function(x) {
+#     new_rbedrock_nbt_scalar(x, "int_list", integer())
+# }
 
-new_nbt_long_list <- function(x) {
-    x <- new_rbedrock_nbt_scalar(x, "long_list", bit64::integer64())
-    .fixup_long(x) 
-}
+# new_nbt_long_list <- function(x) {
+#     x <- new_rbedrock_nbt_scalar(x, "long_list", bit64::integer64())
+#     .fixup_long(x) 
+# }
 
-new_nbt_float_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, "float_list", integer())
-}
+# new_nbt_float_list <- function(x) {
+#     new_rbedrock_nbt_scalar(x, "float_list", integer())
+# }
 
-new_nbt_double_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, "double_list", integer())
-}
+# new_nbt_double_list <- function(x) {
+#     new_rbedrock_nbt_scalar(x, "double_list", integer())
+# }
 
-new_nbt_string_list <- function(x) {
-    new_rbedrock_nbt_scalar(x, "string_list", character())
-}
+# new_nbt_string_list <- function(x) {
+#     new_rbedrock_nbt_scalar(x, "string_list", character())
+# }
 
 ######
 
@@ -565,53 +560,8 @@ to_rnbt_payload <- function(x) {
 }
 
 #' @export
-to_rnbt_payload.rbedrock_nbt_byte <- function(x) {
-    list(tag = 1L, payload = vec_data(x))
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt_short <- function(x) {
-    list(tag = 2L, payload = vec_data(x))
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt_int <- function(x) {
-    list(tag = 3L, payload = vec_data(x))
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt_long <- function(x) {
-    list(tag = 4L, payload = structure(vec_data(x), class="integer64"))
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt_float <- function(x) {
-    list(tag = 5L, payload = vec_data(x))
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt_double <- function(x) {
-    list(tag = 6L, payload = vec_data(x))
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt_byte_array <- function(x) {
-    list(tag = 7L, payload = vec_data(x))
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt_string <- function(x) {
-    list(tag = 8L, payload = vec_data(x))
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt_int_array <- function(x) {
-    list(tag = 11L, payload = vec_data(x))
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt_long_array <- function(x) {
-    list(tag = 12L, payload = structure(vec_data(x), class="integer64"))
+to_rnbt_payload.rbedrock_nbt <- function(x) {
+    list(tag = get_nbt_tag(x), payload = payload(x))
 }
 
 #' @export
@@ -638,47 +588,58 @@ write_rnbt <- function(object) {
     .Call(Cwrite_nbt, object)
 }
 
+# printing ---------------------------------------------------------------------
 
-tag_str <- function(x) {
-    chr <- c("END", "BYTE", "SHORT", "INT", "LONG", "FLOAT",
-        "DOUBLE", "BYTE_ARRAY", "STRING", "LIST", "COMPOUND",
-        "INT_ARRAY", "LONG_ARRAY")
-    chr[1L+tag(x)]
+#' @export
+print.rbedrock_nbt <- function(x, ...) {
+  obj_print(x, ...)
+  invisible(x)
+}
+#' @export
+str.rbedrock_nbt <- function(object, ...) {
+  obj_str(object, ...)
+}
+#' @export
+format.rbedrock_nbt <- function(x, ...) {
+    tag <- get_nbt_tag(x)
+    suffix <- c("B", "S", "", "L", "F", "", "B", "", "", "", "", "L")
+    suffix <- suffix[tag]
+    paste0(format(payload(x), nsmall=1), suffix)
+}
+#' @export
+format.rbedrock_nbt_string <- function(x, ...) {
+    paste0("\"", format(payload(x)), "\"")
+}
+#' @export
+format.rbedrock_nbt_list <- function(x, ...) {
+    lapply(payload(x),format)
+}
+#' @export
+format.rbedrock_nbt_compound <- function(x, ...) {
+    lapply(payload(x),format)
 }
 
-# #' @export
-# print.rbedrock_nbt <- function(x, ...) {
-#   obj_print(x, ...)
-#   invisible(x)
-# }
+# ptypes -----------------------------------------------------------------------
 
-# #' @export
-# str.rbedrock_nbt <- function(object, ...) {
-#   obj_str(object, ...)
-# }
+#' @export
+vec_ptype_full.rbedrock_nbt_list <- function(x, ...) {
+    # override vec_ptype_full.vctrs_list_of
+    "rbedrock_nbt_list"
+}
+#' @export
+vec_ptype_full.rbedrock_nbt_long <- function(x, ...) {
+    "rbedrock_nbt_long"
+}
+#' @export
+vec_ptype_full.rbedrock_nbt_long_array <- function(x, ...) {
+    "rbedrock_nbt_long_array"
+}
+#' @export
+vec_ptype_abbr.rbedrock_nbt <- function(x, ...) {
+    "nbt"
+}
 
-# #' @export
-# format.rbedrock_nbt <- function(x, ...) {
-#     tag <- tag(x)
-
-#     suffix <- c("B","S","", "L", "F", "", "B", "", "", "", "", "L")
-
-#     if(tag == 0L) {
-#         NA_character_
-#     } else if(1L <= tag && tag <= 6L) {
-#         paste0(format(payload(x), nsmall=1), suffix[tag])
-#     } else if(tag == 7L || tag == 11L || tag == 12L) {
-#         paste0(format(payload(x), nsmall=1), suffix[tag])
-#     } else if(tag == 8L) {
-#         paste0("\"", payload(x), "\"")
-#     } else if(tag == 9L) {
-#         lapply(payload(x), format)
-#     } else if(tag == 10L) {
-#         lapply(payload(x), format)
-#     } else {
-#         NA_character_
-#     }
-# }
+# coercion and casting ---------------------------------------------------------
 
 #' @export
 vec_ptype2.rbedrock_nbt_byte.rbedrock_nbt_byte <- function(x, y, ...) x
@@ -725,7 +686,7 @@ vec_ptype2.rbedrock_nbt_byte.integer <- function(x, y, ...) integer()
 vec_ptype2.integer.rbedrock_nbt_byte <- function(x, y, ...) integer()
 #' @export
 vec_cast.rbedrock_nbt_byte.integer <- function(x, to, ...) {
-    rbedrock_nbt_byte(x)
+    nbt_byte(x)
 }
 #' @export
 vec_cast.integer.rbedrock_nbt_byte <- function(x, to, ...) {
@@ -741,48 +702,240 @@ vec_cast.rbedrock_nbt_byte.logical <- function(x, to, ...) {
 }
 #' @export
 vec_cast.logical.rbedrock_nbt_byte <- function(x, to, ...) {
-    as.logical(vec_data(x))
+    vec_cast(vec_data(x), to)
 }
 
 #' @export
 vec_ptype2.rbedrock_nbt_short.integer <- function(x, y, ...) integer()
 #' @export
 vec_ptype2.integer.rbedrock_nbt_short <- function(x, y, ...) integer()
+#' @export
+vec_cast.rbedrock_nbt_short.logical<- function(x, to, ...) {
+    nbt_short(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_short.integer <- function(x, to, ...) {
+    nbt_short(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_short.double <- function(x, to, ...) {
+    nbt_short(x)
+}
+#' @export
+vec_cast.logical.rbedrock_nbt_short <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.integer.rbedrock_nbt_short <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.double.rbedrock_nbt_short <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
 
 #' @export
 vec_ptype2.rbedrock_nbt_int.integer <- function(x, y, ...) integer()
 #' @export
 vec_ptype2.integer.rbedrock_nbt_int <- function(x, y, ...) integer()
+#' @export
+vec_cast.rbedrock_nbt_int.logical<- function(x, to, ...) {
+    nbt_int(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_int.integer <- function(x, to, ...) {
+    nbt_int(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_int.double <- function(x, to, ...) {
+    nbt_int(x)
+}
+#' @export
+vec_cast.logical.rbedrock_nbt_int <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.integer.rbedrock_nbt_int <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.double.rbedrock_nbt_int <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
 
 #' @export
 vec_ptype2.rbedrock_nbt_long.integer64 <- function(x, y, ...) bit64::integer64()
 #' @export
 vec_ptype2.integer64.rbedrock_nbt_long <- function(x, y, ...) bit64::integer64()
+#' @export
+vec_cast.rbedrock_nbt_long.logical<- function(x, to, ...) {
+    nbt_long(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_long.integer <- function(x, to, ...) {
+    nbt_long(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_long.double <- function(x, to, ...) {
+    nbt_long(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_long.integer64 <- function(x, to, ...) {
+    nbt_long(x)
+}
+#' @export
+vec_cast.logical.rbedrock_nbt_long <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.integer.rbedrock_nbt_long <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.double.rbedrock_nbt_long <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.integer64.rbedrock_nbt_long <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
 
 #' @export
 vec_ptype2.rbedrock_nbt_float.double <- function(x, y, ...) double()
 #' @export
 vec_ptype2.double.rbedrock_nbt_float <- function(x, y, ...) double()
+#' @export
+vec_cast.rbedrock_nbt_float.integer <- function(x, to, ...) {
+    nbt_float(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_float.double <- function(x, to, ...) {
+    nbt_float(x)
+}
+#' @export
+vec_cast.integer.rbedrock_nbt_float <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.double.rbedrock_nbt_float <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
 
 #' @export
 vec_ptype2.rbedrock_nbt_double.double <- function(x, y, ...) double()
 #' @export
 vec_ptype2.double.rbedrock_nbt_double <- function(x, y, ...) double()
+#' @export
+vec_cast.rbedrock_nbt_double.integer <- function(x, to, ...) {
+    nbt_double(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_double.double <- function(x, to, ...) {
+    nbt_double(x)
+}
+#' @export
+vec_cast.integer.rbedrock_nbt_double <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.double.rbedrock_nbt_double <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
 
 #' @export
 vec_ptype2.rbedrock_nbt_byte_array.integer <- function(x, y, ...) integer()
 #' @export
 vec_ptype2.integer.rbedrock_nbt_byte_array <- function(x, y, ...) integer()
+#' @export
+vec_cast.rbedrock_nbt_byte_array.logical<- function(x, to, ...) {
+    nbt_byte_array(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_byte_array.integer <- function(x, to, ...) {
+    nbt_byte_array(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_byte_array.double <- function(x, to, ...) {
+    nbt_byte_array(x)
+}
+#' @export
+vec_cast.logical.rbedrock_nbt_byte_array <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.integer.rbedrock_nbt_byte_array <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.double.rbedrock_nbt_byte_array <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
 
 #' @export
 vec_ptype2.rbedrock_nbt_int_array.integer <- function(x, y, ...) integer()
 #' @export
 vec_ptype2.integer.rbedrock_nbt_int_array <- function(x, y, ...) integer()
+#' @export
+vec_cast.rbedrock_nbt_int_array.logical<- function(x, to, ...) {
+    nbt_int_array(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_int_array.integer <- function(x, to, ...) {
+    nbt_int_array(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_int_array.double <- function(x, to, ...) {
+    nbt_int_array(x)
+}
+#' @export
+vec_cast.logical.rbedrock_nbt_int_array <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.integer.rbedrock_nbt_int_array <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.double.rbedrock_nbt_int_array <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
 
 #' @export
 vec_ptype2.rbedrock_nbt_long_array.integer <- function(x, y, ...) bit64::integer64()
 #' @export
 vec_ptype2.integer.rbedrock_nbt_long_array <- function(x, y, ...) bit64::integer64()
+#' @export
+vec_cast.rbedrock_nbt_long_array.logical<- function(x, to, ...) {
+    nbt_long_array(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_long_array.integer <- function(x, to, ...) {
+    nbt_long_array(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_long_array.double <- function(x, to, ...) {
+    nbt_long_array(x)
+}
+#' @export
+vec_cast.rbedrock_nbt_long_array.integer64 <- function(x, to, ...) {
+    nbt_long_array(x)
+}
+#' @export
+vec_cast.logical.rbedrock_nbt_long_array <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.integer.rbedrock_nbt_long_array <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.double.rbedrock_nbt_long_array <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+#' @export
+vec_cast.integer64.rbedrock_nbt_long_array <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
 
 #' @export
 vec_ptype2.rbedrock_nbt_string.character <- function(x, y, ...) character()
@@ -794,18 +947,7 @@ vec_cast.rbedrock_nbt_string.character <- function(x, to, ...) {
 }
 #' @export
 vec_cast.character.rbedrock_nbt_string <- function(x, to, ...) {
-    vec_data(x)
-}
-
-#' @export
-vec_ptype_full.rbedrock_nbt_list <- function(x, ...) {
-    # override vec_ptype_full.vctrs_list_of
-    "rbedrock_nbt_list"
-}
-
-#' @export
-vec_ptype_abbr.rbedrock_nbt <- function(x, ...) {
-    "nbt"
+    vec_cast(vec_data(x), to)
 }
 
 #' @export
@@ -813,108 +955,34 @@ vec_cast.rbedrock_nbt_list.rbedrock_nbt_list <- function(x, to, ...) {
     x <- as_list_of(x, .ptype = attr(to, "ptype"))
     structure(x, class = class(to))
 }
-
 #' @export
 vec_cast.rbedrock_nbt_list.vctrs_list_of <- function(x, to, ...) {
     x <- as_list_of(x, .ptype = attr(to, "ptype"))
     structure(x, class = class(to))
 }
+#' @export
+vec_cast.rbedrock_nbt_list.double <- function(x, to, ...) {
+    x <- as_list_of(as.list(x), .ptype = attr(to, "ptype"))
+    structure(x, class = class(to))    
+}
+#' @export
+vec_cast.rbedrock_nbt_list.integer <- function(x, to, ...) {
+    x <- as_list_of(as.list(x), .ptype = attr(to, "ptype"))
+    structure(x, class = class(to))    
+}
+#' @export
+vec_cast.rbedrock_nbt_list.character <- function(x, to, ...) {
+    x <- as_list_of(as.list(x), .ptype = attr(to, "ptype"))
+    structure(x, class = class(to))    
+}
+#' @export
+vec_cast.rbedrock_nbt_list.logical <- function(x, to, ...) {
+    x <- as_list_of(as.list(x), .ptype = attr(to, "ptype"))
+    structure(x, class = class(to))    
+}
+#' @export
+vec_cast.rbedrock_nbt_list.integer64 <- function(x, to, ...) {
+    x <- as_list_of(as.list(x), .ptype = attr(to, "ptype"))
+    structure(x, class = class(to))    
+}
 
-
-# #' @export
-# vec_cast.rbedrock_nbt.rbedrock_nbt <- function(x, to, ...) {
-#     if (tag(x) != tag(to) || (tag(x) == 9L && list_tag(x) != list_tag(to))) {
-#         # try to convert payloads if different nbt types
-#         nbt(payload(x), tag(to))
-#     } else {
-#         # return x unchanged if it matches to. This allows casts with
-#         # matching zero-length vectors to bypass asserts in nbt().
-#         x
-#     }
-# }
-
-# #' @export
-# vec_cast.rbedrock_nbt.logical <- function(x, to, ...) nbt(x, tag(to))
-
-# #' @export
-# vec_cast.rbedrock_nbt.character <- function(x, to, ...) nbt(x, tag(to))
-
-# #' @export
-# vec_cast.rbedrock_nbt.integer64 <- function(x, to, ...) nbt(x, tag(to))
-
-# #' @export
-# vec_cast.rbedrock_nbt.integer <- function(x, to, ...) nbt(x, tag(to))
-
-# #' @export
-# vec_cast.rbedrock_nbt.double <- function(x, to, ...) nbt(x, tag(to))
-
-# #' @export
-# vec_cast.rbedrock_nbt.list <- function(x, to, ...) nbt(x, tag(to))
-
-# #' @export
-# vec_cast.logical.rbedrock_nbt <- function(x, to, ...) {
-#     vec_cast(payload(x), logical())
-# }
-
-# #' @export
-# vec_cast.character.rbedrock_nbt <- function(x, to, ...) {
-#     vec_cast(payload(x), character())
-# }
-
-# #' @export
-# vec_cast.integer.rbedrock_nbt <- function(x, to, ...) {
-#     vec_cast(payload(x), integer())
-# }
-
-# #' @export
-# vec_cast.double.rbedrock_nbt <- function(x, to, ...) {
-#     vec_cast(payload(x), double())
-# }
-
-# #' @export
-# vec_cast.integer64.rbedrock_nbt <- function(x, to, ...) {
-#     vec_cast(payload(x), bit64::integer64())
-# }
-
-# #' @export
-# vec_cast.list.rbedrock_nbt <- function(x, to, ...) {
-#     vec_cast(payload(x), list())
-# }
-
-# #' @export
-# vec_ptype2.rbedrock_nbt.rbedrock_nbt <- function(x, y, ..., x_arg = "", y_arg = "") {
-#     if (tag(x) != tag(y) || (tag(x) == 9L && list_tag(x) != list_tag(y))) {
-#         stop_incompatible_type(x, y, x_arg = x_arg, y_arg = y_arg)
-#     }
-#     x
-# }
-
-# #' @export
-# vec_ptype2.rbedrock_nbt.character <- function(x, y, ...) character()
-
-# #' @export
-# vec_ptype2.character.rbedrock_nbt <- function(x, y, ...) character()
-
-# #' @export
-# vec_ptype2.rbedrock_nbt.logical <- function(x, y, ...) logical()
-
-# #' @export
-# vec_ptype2.logical.rbedrock_nbt <- function(x, y, ...) logical()
-
-# #' @export
-# vec_ptype2.rbedrock_nbt.integer <- function(x, y, ...) integer()
-
-# #' @export
-# vec_ptype2.integer.rbedrock_nbt <- function(x, y, ...) integer()
-
-# #' @export
-# vec_ptype2.rbedrock_nbt.double <- function(x, y, ...) double()
-
-# #' @export
-# vec_ptype2.double.rbedrock_nbt <- function(x, y, ...) double()
-
-# #' @export
-# vec_ptype2.integer64.rbedrock_nbt <- function(x, y, ...) bit64::integer64()
-
-# #' @export
-# vec_ptype2.rbedrock_nbt.integer64 <- function(x, y, ...) bit64::integer64()
