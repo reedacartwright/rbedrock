@@ -16,6 +16,7 @@
 \alias{is_nbt}
 \alias{payload}
 \alias{unnbt}
+\alias{get_nbt_tag}
 \title{Create an NBT value}
 \usage{
 nbt_byte(x)
@@ -47,14 +48,14 @@ is_nbt(x)
 payload(x)
 
 unnbt(x)
+
+get_nbt_tag(x)
 }
 \arguments{
 \item{x}{An nbt value}
 
 \item{...}{Arguments to collect into an NBT compound or NBT list value.
 Supports dynamic dots via \code{rlang::list2()}.}
-
-\item{value}{A new payload}
 }
 \description{
 The Named Binary Tag (NBT) format is used by Minecraft for various data
@@ -64,5 +65,7 @@ of data held.
 \verb{nbt_*()} family of functions create nbt data types.
 \code{unnbt()} recursively strips NBT metadata from an NBT value.
 
-\code{payload()} and \verb{payload<-()} read and write an nbt value's payload.
+\code{payload()} reads an nbt value's payload.
+
+\code{get_nbt_tag()} returns the NBT tag corresponding to and NBT value.
 }

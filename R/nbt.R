@@ -93,22 +93,15 @@ is_nbt <- function(x) {
 }
 
 #' @description
-#' `payload()` and `payload<-()` read and write an nbt value's payload.
+#' `payload()` reads an nbt value's payload.
 #'
 #' @param x An nbt value
-#' @param value A new payload
 #'
 #' @rdname nbt
 #' @export
 payload <- function(x) {
     UseMethod("payload")
 }
-
-# #' @rdname nbt
-# #' @export
-# `payload<-` <- function(x, value) {
-#     UseMethod("payload<-")
-# }
 
 #' @export
 payload.default <- function(x) {
@@ -323,6 +316,10 @@ new_nbt_list <- function(x) {
 
 ######
 
+#' @description
+#' `get_nbt_tag()` returns the NBT tag corresponding to and NBT value.
+#'
+#' @rdname nbt
 #' @export
 get_nbt_tag <- function(x) {
     UseMethod("get_nbt_tag")
@@ -531,6 +528,8 @@ from_rnbt_payload <- function(x, tag) {
     }
 }
 
+#' @rdname rnbt
+#' @keywords internal
 #' @export
 to_rnbt_payload <- function(x) {
     UseMethod("to_rnbt_payload")

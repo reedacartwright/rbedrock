@@ -4,6 +4,7 @@
 \alias{from_rnbt}
 \alias{to_rnbt}
 \alias{from_rnbt_payload}
+\alias{to_rnbt_payload}
 \alias{read_rnbt}
 \alias{write_rnbt}
 \title{Raw Named Binary Tag Format}
@@ -13,6 +14,8 @@ from_rnbt(x)
 to_rnbt(x)
 
 from_rnbt_payload(x, tag)
+
+to_rnbt_payload(x)
 
 read_rnbt(rawdata)
 
