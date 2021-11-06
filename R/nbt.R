@@ -211,21 +211,18 @@ new_rbedrock_nbt_scalar <- function(x, class, ptype = NULL, size = NULL) {
 new_nbt_byte <- function(x) {
     new_rbedrock_nbt_scalar(x, "byte", integer(), 1)
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
 new_nbt_short <- function(x) {
     new_rbedrock_nbt_scalar(x, "short", integer(), 1)
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
 new_nbt_int <- function(x) {
     new_rbedrock_nbt_scalar(x, "int", integer(), 1)
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
@@ -233,42 +230,36 @@ new_nbt_long <- function(x) {
     x <- new_rbedrock_nbt_scalar(x, "long", bit64::integer64(), 1)
     .fixup_long(x)
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
 new_nbt_float <- function(x) {
     new_rbedrock_nbt_scalar(x, "float", double(), 1)
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
 new_nbt_double <- function(x) {
     new_rbedrock_nbt_scalar(x, "double", double(), 1)
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
 new_nbt_byte_array <- function(x) {
     new_rbedrock_nbt_scalar(x, "byte_array", integer())
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
 new_nbt_string <- function(x) {
     new_rbedrock_nbt_scalar(x, "string", character(), 1)
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
 new_nbt_int_array <- function(x) {
     new_rbedrock_nbt_scalar(x, "int_array", integer())
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
@@ -276,7 +267,6 @@ new_nbt_long_array <- function(x) {
     x <- new_rbedrock_nbt_scalar(x, "long_array", bit64::integer64())
     .fixup_long(x)   
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
@@ -288,7 +278,6 @@ new_nbt_compound <- function(x) {
     new_vctr(x, class=c("rbedrock_nbt_compound",
         "rbedrock_nbt", "rbedrock_nbt_container"))
 }
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
@@ -341,50 +330,36 @@ get_nbt_tag <- function(x) {
 
 #' @export
 get_nbt_tag.rbedrock_nbt_byte       <- function(x) 1L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_short      <- function(x) 2L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_int        <- function(x) 3L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_long       <- function(x) 4L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_float      <- function(x) 5L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_double     <- function(x) 6L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_byte_array <- function(x) 7L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_string     <- function(x) 8L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_list       <- function(x) 9L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_compound   <- function(x) 10L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_int_array  <- function(x) 11L
-
 #' @export
 get_nbt_tag.rbedrock_nbt_long_array <- function(x) 12L
 
 # work around integer64 methods not stripping all class variables
 #' @export
 is.na.rbedrock_nbt_long <- function(x, ...) vec_data(NextMethod())
-
 #' @export
 is.na.rbedrock_nbt_long_array <- function(x, ...) vec_data(NextMethod())
-
 #' @export
 `==.rbedrock_nbt_long` <- function(e1, e2) vec_data(NextMethod())
-
 #' @export
 `==.rbedrock_nbt_long_array` <- function(e1, e2) vec_data(NextMethod())
 
@@ -492,6 +467,8 @@ write_nbt <- function(object) {
 write_nbt_data <- function(data) {
     purrr::map(data, write_nbt)
 }
+
+# raw nbt ----------------------------------------------------------------------
 
 #' Raw Named Binary Tag Format
 #'
