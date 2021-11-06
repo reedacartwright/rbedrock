@@ -8,34 +8,16 @@
 \alias{put_nbt_value}
 \alias{put_nbt_data}
 \alias{read_nbt}
-\alias{write_nbt}
 \alias{read_nbt_data}
+\alias{write_nbt}
 \alias{write_nbt_data}
 \title{Read and Write NBT Data}
 \usage{
-get_nbt_data(
-  db,
-  keys,
-  readoptions = NULL,
-  max_elements = NULL,
-  simplify = TRUE
-)
+get_nbt_data(db, keys, readoptions = NULL, simplify = TRUE)
 
-get_nbt_value(
-  db,
-  key,
-  readoptions = NULL,
-  max_elements = NULL,
-  simplify = TRUE
-)
+get_nbt_value(db, key, readoptions = NULL, simplify = TRUE)
 
-get_nbt_values(
-  db,
-  keys,
-  readoptions = NULL,
-  max_elements = NULL,
-  simplify = TRUE
-)
+get_nbt_values(db, keys, readoptions = NULL, simplify = TRUE)
 
 put_nbt_values(db, keys, values, writeoptions = NULL)
 
@@ -43,11 +25,11 @@ put_nbt_value(db, key, value, writeoptions = NULL)
 
 put_nbt_data(db, data, writeoptions = NULL)
 
-read_nbt(rawdata, max_elements = NULL, simplify = TRUE)
+read_nbt(rawdata, simplify = TRUE)
+
+read_nbt_data(data, simplify = TRUE)
 
 write_nbt(object)
-
-read_nbt_data(data, max_elements = NULL, simplify = TRUE)
 
 write_nbt_data(data)
 }
@@ -57,8 +39,6 @@ write_nbt_data(data)
 \item{keys}{A character vector of keys.}
 
 \item{readoptions}{A \code{bedrock_leveldb_readoptions} object}
-
-\item{max_elements}{Maximum number of elements to parse.}
 
 \item{simplify}{If TRUE, simplifies a list containing a single unnamed \code{nbtnode}.}
 
@@ -84,9 +64,9 @@ write_nbt_data(data)
 
 \code{read_nbt} reads NBT data from a \code{raw} vector.
 
-\code{write_nbt} encodes NBT data into a \code{raw} vector.
-
 \code{read_nbt_data} calls \code{read_nbt} on each element of a list.
+
+\code{write_nbt} encodes NBT data into a \code{raw} vector.
 
 \code{write_nbt_data} calls \code{write_nbt} on each element of a list.
 }

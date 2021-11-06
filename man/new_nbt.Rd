@@ -2,9 +2,45 @@
 % Please edit documentation in R/nbt.R
 \name{new_nbt}
 \alias{new_nbt}
+\alias{new_nbt_byte}
+\alias{new_nbt_short}
+\alias{new_nbt_int}
+\alias{new_nbt_long}
+\alias{new_nbt_float}
+\alias{new_nbt_double}
+\alias{new_nbt_byte_array}
+\alias{new_nbt_string}
+\alias{new_nbt_int_array}
+\alias{new_nbt_long_array}
+\alias{new_nbt_compound}
+\alias{new_nbt_list}
 \title{Create an NBT value}
 \usage{
-new_nbt(x = list(), tag = 0L)
+new_nbt(x, tag)
+
+new_nbt_byte(x)
+
+new_nbt_short(x)
+
+new_nbt_int(x)
+
+new_nbt_long(x)
+
+new_nbt_float(x)
+
+new_nbt_double(x)
+
+new_nbt_byte_array(x)
+
+new_nbt_string(x)
+
+new_nbt_int_array(x)
+
+new_nbt_long_array(x)
+
+new_nbt_compound(x)
+
+new_nbt_list(x)
 }
 \arguments{
 \item{x}{An nbt payload.}

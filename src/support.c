@@ -230,3 +230,19 @@ void grow_stretchy_list_with_name(SEXP l, SEXP s, SEXP tag) {
     grow_stretchy_list(l, s);
     SET_TAG(CAR(l), tag);
 }
+
+/* Extract and element from a list by name */
+SEXP get_list_element(SEXP r_value, const char *name) {
+    if(!Rf_isNewList(r_value)) {
+        error_return("invalid argument type");
+    }
+    SEXP r_names = Rf_getAttrib(r_value, R_NamesSymbol);
+    SEXP r_ret = R_NilValue;
+    for(R_xlen_t i = 0; i < XLENGTH(r_value); ++i) {
+        if(strcmp(CHAR(STRING_ELT(r_names, i)), name) == 0) {
+            r_ret = VECTOR_ELT(r_value, i);
+            break;
+        }
+    }
+    return r_ret;
+}
