@@ -111,6 +111,7 @@ chunk_origins <- function(keys) {
 
 # List of Tags that identify the contents of a chunk key.
 .CHUNK_TAGS <- c(
+    "3DMaps" = 43L,
     "ChunkVersion" = 44L,
     "2DMaps" = 45L,
     "2DMapsLegacy" = 46L,
@@ -140,7 +141,6 @@ chunk_origins <- function(keys) {
     "40" = 40L,
     "41" = 41L,
     "42" = 42L,
-    "43" = 43L,
     "60" = 60L,
     "60" = 60L,
     "61" = 61L,
