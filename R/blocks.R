@@ -461,7 +461,7 @@ read_subchunk_layers_value <- function(rawdata) {
         return(NULL)
     }
     vec_assert(rawdata, raw())
-    x <- .Call(Cread_subchunk, rawdata)
+    x <- .Call(Cread_subchunk_blocks, rawdata)
     x <- purrr::modify(x, function(y) {
         y$palette <- from_rnbt(y$palette)
         y
@@ -509,7 +509,7 @@ write_subchunk_layers_value <- function(object, version=9L, missing_offset=NA_in
         to_rnbt(x[["palette"]])
     })
 
-    .Call(Cwrite_subchunk, values, palette, version, offset)
+    .Call(Cwrite_subchunk_blocks, values, palette, version, offset)
 }
 
 .block_string <- function(x, names_only = FALSE) {

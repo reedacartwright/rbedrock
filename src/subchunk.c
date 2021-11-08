@@ -1,6 +1,7 @@
 #define R_NO_REMAP
 
 #include "nbt.h"
+#include "support.h"
 
 static SEXP g_palette_symbol = NULL;
 static SEXP g_offset_symbol = NULL;
@@ -74,7 +75,7 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
     return r_blocks;
 }
 
-SEXP read_subchunk(SEXP r_value) {
+SEXP read_subchunk_blocks(SEXP r_value) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
     }
@@ -145,6 +146,47 @@ SEXP read_subchunk(SEXP r_value) {
     return r_ret;
 }
 
+SEXP read_chunk_biomes(SEXP r_value) {
+    if(Rf_isNull(r_value)) {
+        return R_NilValue;
+    }
+    if(TYPEOF(r_value) != RAWSXP) {
+        error_return("Argument is not a raw type or NULL.");
+    }
+    SEXP r_ret = PROTECT(create_stretchy_list());
+
+    size_t len = XLENGTH(r_value);
+    const unsigned char *buffer = RAW(r_value);
+    const unsigned char *p = buffer;
+    const unsigned char *end = buffer+len;
+    while(p < end) {
+        bool is_persistent;
+        int palette_size;
+        SEXP r_values = PROTECT(read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
+        if(is_persistent == true) {
+            // Biomes are stored as runtime IDs. Toss error if they aren't.
+            error_return("Subchunk has Persistent IDs.");
+        }
+        if(end - p < palette_size*sizeof(int)) {
+            return_block_error();
+        }
+        SEXP r_palette = PROTECT(Rf_allocVector(INTSXP, palette_size));
+        memcpy(INTEGER(r_palette), p, palette_size*sizeof(int));
+        p += palette_size*sizeof(int);
+
+        // construct a list to hold this subchunk
+        const char *names[] = {"values", "palette", ""};
+        SEXP r_val = PROTECT(Rf_mkNamed(VECSXP, names));
+        SET_VECTOR_ELT(r_val, 0, r_values);
+        SET_VECTOR_ELT(r_val, 1, r_palette);
+        // add to stretchy list
+        grow_stretchy_list(r_ret, r_val);
+        UNPROTECT(3);
+    }
+    UNPROTECT(1);
+    return Rf_PairToVectorList(CDR(r_ret));
+}
+
 static int calc_bits_per_block(int sz) {
     int p[8] = {1,2,3,4,5,6,8,16};
     int z[8] = {2,4,8,16,32,64,256,65536};
@@ -156,7 +198,7 @@ static int calc_bits_per_block(int sz) {
     return p[i];
 }
 
-SEXP write_subchunk(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
+SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
     R_xlen_t num_layers = XLENGTH(r_values);
     if(XLENGTH(r_palettes) != num_layers) {
         return_block_error();
@@ -235,3 +277,4 @@ SEXP write_subchunk(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offse
     UNPROTECT(2);
     return r_ret;
 }
+

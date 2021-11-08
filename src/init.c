@@ -32,7 +32,7 @@
 #include "bedrock_leveldb.h"
 #include "key_conv.h"
 #include "nbt.h"
-#include "blocks.h"
+#include "subchunk.h"
 #include "random.h"
 
 // for testing:
@@ -116,8 +116,9 @@ static const R_CallMethodDef call_methods[] = {
     {"Cread_nbt", (DL_FUNC)&read_nbt, 1},
     {"Cwrite_nbt", (DL_FUNC)&write_nbt, 1},
 
-    {"Cread_subchunk", (DL_FUNC)&read_subchunk, 1},
-    {"Cwrite_subchunk", (DL_FUNC)&write_subchunk, 4},
+    {"Cread_subchunk_blocks", (DL_FUNC)&read_subchunk_blocks, 1},
+    {"Cwrite_subchunk_blocks", (DL_FUNC)&write_subchunk_blocks, 4},
+    {"Cread_chunk_biomes", (DL_FUNC)&read_chunk_biomes, 1},
 
     {"Cmcpe_random_seed", (DL_FUNC)&mcpe_random_seed, 1},
     {"Cmcpe_random_state", (DL_FUNC)&mcpe_random_state, 1},
