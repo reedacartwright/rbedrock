@@ -3,6 +3,7 @@
 \name{Maps2D}
 \alias{Maps2D}
 \alias{get_2dmaps_data}
+\alias{get_2dmaps_values}
 \alias{get_2dmaps_value}
 \alias{read_2dmaps_value}
 \alias{put_2dmaps_data}
@@ -12,6 +13,8 @@
 \title{Read and write 2DMaps data}
 \usage{
 get_2dmaps_data(db, x, z, dimension)
+
+get_2dmaps_values(db, x, z, dimension)
 
 get_2dmaps_value(db, x, z, dimension)
 
@@ -48,7 +51,7 @@ should be a list a \code{list()} with both "height_map" and "biome_map" elements
 \code{get_2dmaps_data()} returns a list of the of the values returned by
 \code{get_2dmaps_value()}.
 
-\code{get_2dmaps_values()} returns a list with components "height_map"
+\code{get_2dmaps_value()} returns a list with components "height_map"
 and "biome_map".
 }
 \description{

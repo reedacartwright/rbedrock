@@ -37,11 +37,16 @@ get_2dmaps_data <- function(db, x, z, dimension) {
     purrr::map(dat, read_2dmaps_value)
 }
 
+#' @rdname Maps2D
+#' @export
+get_2dmaps_values <- get_2dmaps_data
+
+
 #' @description
 #' `get_2dmaps_value()` loads 2DMaps data from a `bedrockdb`.
 #' It only supports loading a single value.
 #'
-#' @return `get_2dmaps_values()` returns a list with components "height_map"
+#' @return `get_2dmaps_value()` returns a list with components "height_map"
 #' and "biome_map".
 #' @rdname Maps2D
 #' @export
