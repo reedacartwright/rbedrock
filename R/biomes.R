@@ -197,7 +197,15 @@ put_biomes_value <- function(db, x, z, dimension, value,
     soulsand_valley = 178L,
     crimson_forest = 179L,
     warped_forest = 180L,
-    basalt_deltas = 181L
+    basalt_deltas = 181L,
+    lofty_peaks = 182L,
+    snow_capped_peaks = 183L,
+    snowy_slopes = 184L,
+    mountain_grove = 185L,
+    mountain_meadow = 186L,
+    lush_caves = 187L,
+    dripstone_caves = 188L,
+    stony_peaks = 189L
 )
 
 # Some biomes don't have a color in BDS, and their color was copied from Java/Amidst.
@@ -279,7 +287,15 @@ put_biomes_value <- function(db, x, z, dimension, value,
     soulsand_valley = '#5b4538',
     crimson_forest = '#941818',
     warped_forest = '#167e86',
-    basalt_deltas = '#685f70'
+    basalt_deltas = '#685f70',
+    lofty_peaks = '#909090',
+    snow_capped_peaks = '#ffccd2',
+    snowy_slopes = '#ffffff',
+    mountain_grove = '#0c0c0c',
+    mountain_meadow = '#60b38d',
+    lush_caves = '#097b53',
+    dripstone_caves = '#1545d9',
+    stony_peaks = '#606060'    
 )
 
 # invert the list
