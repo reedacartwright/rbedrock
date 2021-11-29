@@ -5,6 +5,9 @@
 \alias{get_3dmaps_data}
 \alias{get_3dmaps_values}
 \alias{get_3dmaps_value}
+\alias{get_cnc_biomes_data}
+\alias{get_cnc_biomes_values}
+\alias{get_cnc_biomes_value}
 \alias{read_3dmaps_value}
 \title{Read and write 3DMaps data}
 \usage{
@@ -14,6 +17,12 @@ get_3dmaps_values(db, x, z, dimension)
 
 get_3dmaps_value(db, x, z, dimension)
 
+get_cnc_biomes_data(db, x, z, dimension, return_names = TRUE)
+
+get_cnc_biomes_values(db, x, z, dimension, return_names = TRUE)
+
+get_cnc_biomes_value(db, x, z, dimension, return_names = TRUE)
+
 read_3dmaps_value(rawdata)
 }
 \arguments{
@@ -21,6 +30,8 @@ read_3dmaps_value(rawdata)
 
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
+
+\item{return_names}{return biome names instead of biome ids.}
 
 \item{rawdata}{A raw vector.}
 }
@@ -30,15 +41,26 @@ read_3dmaps_value(rawdata)
 
 \code{get_3dmaps_value()} returns a list with components "height_map"
 and "biome_map".
+
+\code{get_cnc_biomes_data()} returns a list of the of the values returned by
+\code{get_cnc_biomes__value()}.
+
+\code{get_cnc_biomes_value()} returns an array.
 }
 \description{
 3DMaps data (tag 43) stores information about surface heights and biomes in a
 chunk.
 
 \code{get_3dmaps_data()} loads 3DMaps data from a \code{bedrockdb}.
-It will silently drop and keys not representing 3DMaps data.
+It will silently drop keys not representing 3DMaps data.
 
 \code{get_3dmaps_value()} loads 3DMaps data from a \code{bedrockdb}.
+It only supports loading a single value.
+
+\code{get_cnc_biomes_data()} loads 3D Biomes data from a \code{bedrodckdb}.
+It will silently drop keys not holding 3D biome data.
+
+\code{get_cnc_biomes_value()} loads 3D biome data from a \code{bedrockdb}.
 It only supports loading a single value.
 
 \code{read_3dmaps_value()} decodes binary 3DMaps data.

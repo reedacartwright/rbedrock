@@ -9,7 +9,7 @@ NULL
 
 #' @description
 #' `get_3dmaps_data()` loads 3DMaps data from a `bedrockdb`.
-#'  It will silently drop and keys not representing 3DMaps data.
+#'  It will silently drop keys not representing 3DMaps data.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
@@ -39,10 +39,41 @@ get_3dmaps_values <- get_3dmaps_data
 #' @rdname Maps3D
 #' @export
 get_3dmaps_value <- function(db, x, z, dimension) {
-    key <- .process_key_args(x, z, dimension, tag=45L)
+    key <- .process_key_args(x, z, dimension, tag=43L)
     vec_assert(key, character(), 1L)
     dat <- get_value(db, key)
     read_3dmaps_value(dat)
+}
+
+#' @description
+#' `get_cnc_biomes_data()` loads 3D Biomes data from a `bedrodckdb`.
+#' It will silently drop keys not holding 3D biome data.
+#'
+#' @return `get_cnc_biomes_data()` returns a list of the of the values returned by 
+#'         `get_cnc_biomes__value()`.
+#' @rdname Maps3D
+#' @inheritParams get_biomes_data
+#' @export
+get_cnc_biomes_data <- function(db, x, z, dimension, return_names = TRUE) {
+    dat <- get_3dmaps_data(db, x, z, dimension)
+    purrr::map(dat, .get_biomes_impl, return_names = return_names)
+}
+
+#' @rdname Maps3D
+#' @export
+get_cnc_biomes_values <- get_cnc_biomes_data
+
+#' @description
+#' `get_cnc_biomes_value()` loads 3D biome data from a `bedrockdb`.
+#' It only supports loading a single value.
+#'
+#' @return `get_cnc_biomes_value()` returns an array.
+#'
+#' @rdname Maps3D
+#' @export
+get_cnc_biomes_value <- function(db, x, z, dimension, return_names = TRUE) {
+    dat <- get_3dmaps_value(db, x, z, dimension)
+    .get_biomes_impl(dat, return_names = return_names)
 }
 
 #' @description
@@ -69,4 +100,15 @@ read_3dmaps_value <- function(rawdata) {
         b[,16*(i-1)+(1:16),] <- a[[i]]
     }
     list(height_map = h, biome_map = b)
+}
+
+.get_biomes_impl <- function(x, return_names) {
+    if(is.null(x)) {
+        return(NULL)
+    }
+    y <- x$biome_map
+    if(isTRUE(return_names)) {
+        y[] <- .BIOME_LIST_INV[y+1]
+    }
+    y
 }
