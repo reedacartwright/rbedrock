@@ -33,24 +33,24 @@
 #define CHUNK_KEY_DIM_MAX 2
 #define CHUNK_KEY_SUBCHUNK_MAX 31
 
-static char encode_hex(unsigned int x) {
+static char encode_hex(unsigned char x) {
     x = x & 15;
     if(x < 10) {
-        return '0'+x;
+        return (char)('0'+x);
     } else {
-        return 'A'+x-10;
+        return (char)('A'+x-10);
     }
 }
 
-static int decode_hex_digit(unsigned char ch) {
+static unsigned char decode_hex_digit(char ch) {
     if('0' <= ch && ch <= '9') {
-        return ch - '0';
+        return (unsigned char)(ch - '0');
     } else if('A' <= ch && ch <= 'F') {
-        return ch - 'A' + 10;
+        return (unsigned char)(ch - 'A' + 10);
     } else if('a' <= ch && ch <= 'f') {
-        return ch - 'a' + 10;
+        return (unsigned char)(ch - 'a' + 10);
     }
-    return -1;
+    return 0xFF;
 }
 
 static size_t str_to_uint(const char *str, size_t len, unsigned int *out) {
@@ -166,9 +166,9 @@ static size_t percent_decode(const char *key, size_t key_len, unsigned char *buf
     for(; i != key_len; ++i) {
         unsigned char ch = key[i];
         if(ch == '%' && i+2 < key_len) {
-            int a = decode_hex_digit(key[i+1]);
-            int b = decode_hex_digit(key[i+2]);
-            if(a != -1 && b != -1) {
+            unsigned char a = decode_hex_digit(key[i+1]);
+            unsigned char b = decode_hex_digit(key[i+2]);
+            if( 0 <= a && a < 16  && 0 <= b && b < 16) {
                 ch = (unsigned char)(a*16+b);
                 i += 2;
             }
@@ -223,7 +223,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
     if(sz == 0) {
         return 0;
     }
-    tag = u;
+    tag = (signed char)u;
     i += sz;
     if(i < key_len) {
         // decode subtag
@@ -236,7 +236,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
         if(sz == 0 || i != key_len) {
             return 0;
         }
-        subtag = d;
+        subtag = (signed char)d;
         has_subtag = true;
     }
     // Validate values
@@ -361,7 +361,7 @@ SEXP rawkeys_to_chrkeys(SEXP r_keys) {
             Rf_error("Conversion of element %td of argument 'key' exceeded buffer space.", i+1);
             return R_NilValue;
         }
-        SET_STRING_ELT(r_ret, i, Rf_mkCharLenCE(buffer, key_len, CE_UTF8));
+        SET_STRING_ELT(r_ret, i, Rf_mkCharLenCE(buffer, (int)key_len, CE_UTF8));
     }
     UNPROTECT(1);
     return r_ret;
