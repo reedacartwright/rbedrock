@@ -24,6 +24,13 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
     }
     int flags = p[0];
     ++p;
+
+    // Check for special flag that signals an empty subchunk
+    if(flags == 255) {
+        *palette_size = 0;
+        *buffer = p;
+        return R_NilValue;
+    }
     *is_persistent = ((flags & 1) == 0);
 
     SEXP r_blocks = PROTECT(Rf_alloc3DArray(INTSXP, 16,16,16));
@@ -226,26 +233,31 @@ SEXP read_chunk_biomes(SEXP r_value) {
     while(p < end) {
         bool is_persistent;
         int palette_size;
-        SEXP r_values = PROTECT(read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
-        if(is_persistent == true) {
-            // Biomes are stored as runtime IDs. Toss error if they aren't.
-            error_return("Subchunk has Persistent IDs.");
-        }
-        if(end - p < palette_size*sizeof(int)) {
-            return_block_error();
-        }
-        SEXP r_palette = PROTECT(Rf_allocVector(INTSXP, palette_size));
-        memcpy(INTEGER(r_palette), p, palette_size*sizeof(int));
-        p += palette_size*sizeof(int);
-
         // construct a list to hold this subchunk
         const char *names[] = {"values", "palette", ""};
         SEXP r_val = PROTECT(Rf_mkNamed(VECSXP, names));
+        SEXP r_values = PROTECT(read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
         SET_VECTOR_ELT(r_val, 0, r_values);
-        SET_VECTOR_ELT(r_val, 1, r_palette);
+        UNPROTECT(1);
+        if(palette_size > 0) {
+            if(is_persistent == true) {
+                // Biomes are stored as runtime IDs. Toss error if they aren't.
+                error_return("Subchunk has Persistent IDs.");
+            }
+            if(end - p < palette_size*sizeof(int)) {
+                return_block_error();
+            }
+            SEXP r_palette = PROTECT(Rf_allocVector(INTSXP, palette_size));
+            memcpy(INTEGER(r_palette), p, palette_size*sizeof(int));
+            p += palette_size*sizeof(int);
+            SET_VECTOR_ELT(r_val, 1, r_palette);
+            UNPROTECT(1);
+        } else {
+            SET_VECTOR_ELT(r_val, 1, R_NilValue);
+        }
         // add to stretchy list
         grow_stretchy_list(r_ret, r_val);
-        UNPROTECT(3);
+        UNPROTECT(1);
     }
     UNPROTECT(1);
     return Rf_PairToVectorList(CDR(r_ret));

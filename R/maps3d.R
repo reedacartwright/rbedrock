@@ -91,9 +91,20 @@ read_3dmaps_value <- function(rawdata) {
     h <- readBin(rawdata[1:512], integer(), n=256L, size=2L, endian="little", signed = TRUE)
     dim(h) <- c(16L,16L)
     b <- .Call(Cread_chunk_biomes, rawdata[-(1:512)])
+    # trim trailing null values
+    pos <- purrr::detect_index(b, ~!is_null(.$values), .dir = "backward")
+    if(pos == 0) {
+        return(NULL)
+    }
+    b <- b[seq.int(pos)]
+
     a <- purrr::map(b, function(x) {
         # apply palette
-        array(x$palette[x$values], dim(x$values))
+        if(is_null(x$values)) {
+            array(NA_integer_, c(16,16,16))
+        } else {
+            array(x$palette[x$values], dim(x$values))
+        }
     })
     b <- array(0L, c(16,length(a)*16,16))
     for(i in seq_along(a)) {
