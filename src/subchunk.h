@@ -24,8 +24,9 @@
 #include <Rinternals.h>
 
 SEXP read_subchunk_blocks(SEXP r_value);
-SEXP write_subchunk_blocks(SEXP r_value);
 SEXP read_chunk_biomes(SEXP r_value);
+
+SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset);
 
 SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char *end,
     bool *nbt_palette, int *palette_size);

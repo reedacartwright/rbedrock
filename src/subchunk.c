@@ -17,14 +17,14 @@ void rbedrock_init_blocks() {
 // [version:byte][num_storages:byte][block storage1]...[blockStorageN]
 
 SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char *end,
-    bool *nbt_palette, int *palette_size) {
+    bool *is_persistent, int *palette_size) {
     const unsigned char *p = *buffer;
     if(end-p < 1) {
         return_block_error();
     }
     int flags = p[0];
     ++p;
-    *nbt_palette = ((flags & 1) == 0);
+    *is_persistent = ((flags & 1) == 0);
 
     SEXP r_blocks = PROTECT(Rf_alloc3DArray(INTSXP, 16,16,16));
     // calculate storage structure.
@@ -73,6 +73,70 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
     UNPROTECT(1);
     *buffer = p;
     return r_blocks;
+}
+
+static int calc_bits_per_block(int sz) {
+    int p[8] = {1,2,3,4,5,6,8,16};
+    int z[8] = {2,4,8,16,32,64,256,65536};
+
+    int i;
+    for(i = 0; i < 7 && z[i] < sz; ++i) {
+        /*noop*/;
+    }
+    return p[i];
+}
+
+SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t palette_size) {
+    if(!Rf_isInteger(r_values) || XLENGTH(r_values) != 4096) {
+        return_block_error();
+    }
+    SEXP r_ret;
+    // Handle special case of palette_size == 1
+    if(palette_size == 1) {
+        r_ret = PROTECT(Rf_allocVector(RAWSXP, 1));
+        unsigned char *buffer = RAW(r_ret);
+        *buffer = (is_persistent ? 0 : 1);
+        UNPROTECT(1);
+        return r_ret;
+    }
+
+    // Calculate which palette type we need to use
+    int bits_per_block = calc_bits_per_block(palette_size);
+    int blocks_per_word = 32 / bits_per_block; // floor using integer math
+    int word_count = (4095 / blocks_per_word)+1; // ceiling using integer math
+    int mask = (1 << bits_per_block)-1;
+
+    // Allocate space
+    r_ret = PROTECT(Rf_allocVector(RAWSXP, 5+word_count*4));
+    unsigned char *buffer = RAW(r_ret);
+    *buffer = (bits_per_block << 1) | (is_persistent ? 0 : 1);
+    buffer += 1;
+
+    // write palette ids
+    unsigned int u = 0;
+    int *v = INTEGER(r_values);
+
+    for(int j = 0; j < word_count; ++j) {
+        // read current word and parse
+        unsigned int temp = 0;
+        for(int k = 0; k < blocks_per_word && u < 4096; ++k) {
+            // calculate position as if we did aperm(v, c(3,1,2))
+            unsigned int x = (u >> 8) & 0xf;
+            unsigned int y = u & 0xf;
+            unsigned int z = (u >> 4) & 0xf;
+            unsigned int pos = x + 16*y + 256*z;
+            // store block id
+            unsigned int id = v[pos]-1;
+            temp |= (id & mask) << k*bits_per_block;
+            u += 1;
+        }
+        memcpy(buffer, &temp, 4);
+        buffer += 4;
+    }
+    // copy palette size
+    memcpy(buffer, &palette_size, 4);
+    UNPROTECT(1);
+    return r_ret;
 }
 
 SEXP read_subchunk_blocks(SEXP r_value) {
@@ -187,17 +251,6 @@ SEXP read_chunk_biomes(SEXP r_value) {
     return Rf_PairToVectorList(CDR(r_ret));
 }
 
-static int calc_bits_per_block(int sz) {
-    int p[8] = {1,2,3,4,5,6,8,16};
-    int z[8] = {2,4,8,16,32,64,256,65536};
-
-    int i;
-    for(i = 0; i < 7 && z[i] < sz; ++i) {
-        /*noop*/;        
-    }
-    return p[i];
-}
-
 SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
     R_xlen_t num_layers = XLENGTH(r_values);
     if(XLENGTH(r_palettes) != num_layers) {
@@ -210,42 +263,8 @@ SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP 
         if(!Rf_isInteger(r_layer) || XLENGTH(r_layer) != 4096 || Rf_isNull(r_pal)) {
             return_block_error();
         }
-        // Calculate which palette type we need to use
-        R_xlen_t palette_size = XLENGTH(r_pal);
-        int bits_per_block = calc_bits_per_block(palette_size);
-        int blocks_per_word = 32 / bits_per_block; // floor using integer math
-        int word_count = (4095 / blocks_per_word)+1; // ceiling using integer math
-        int mask = (1 << bits_per_block)-1;
-
-        // Allocate space
-        SET_VECTOR_ELT(r_retv, 2*i, Rf_allocVector(RAWSXP, 5+word_count*4));
-        unsigned char *buffer = RAW(VECTOR_ELT(r_retv, 2*i));
-        *buffer = bits_per_block << 1;
-        buffer += 1;
-
-        // write palette ids
-        unsigned int u = 0;
-        int *v = INTEGER(r_layer);
-
-        for(int j = 0; j < word_count; ++j) {
-            // read current word and parse
-            unsigned int temp = 0;
-            for(int k = 0; k < blocks_per_word && u < 4096; ++k) {
-                // calculate position as if we did aperm(v, c(3,1,2))
-                unsigned int x = (u >> 8) & 0xf;
-                unsigned int y = u & 0xf;
-                unsigned int z = (u >> 4) & 0xf;
-                unsigned int pos = x + 16*y + 256*z;
-                // store block id
-                unsigned int id = v[pos]-1;
-                temp |= (id & mask) << k*bits_per_block;
-                u += 1;
-            }
-            memcpy(buffer, &temp, 4);
-            buffer += 4;
-        }
-        // copy palette size
-        memcpy(buffer, &palette_size, 4);
+        // Write the palette ids using persistent storage
+        SET_VECTOR_ELT(r_retv, 2*i, write_subchunk_palette_ids(r_layer, true, XLENGTH(r_pal)));
         // write palette
         SET_VECTOR_ELT(r_retv, 2*i+1, write_nbt(r_pal));
     }
