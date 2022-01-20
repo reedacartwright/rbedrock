@@ -83,7 +83,7 @@ bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, p
 #' @param ... arguments passed to or from other methods.
 #'
 #' @rdname bedrockdb
-close.bedrockdb <- function(con, compact = TRUE, ...) {
+close.bedrockdb <- function(con, compact = FALSE, ...) {
     if(isTRUE(compact)) {
         inform("Compacting database...")
         con$compact_range()
