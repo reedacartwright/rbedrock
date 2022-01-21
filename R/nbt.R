@@ -137,12 +137,28 @@ is_nbt_compound <- function(x) {
 }
 
 #' @export
-`$.rbedrock_nbt_container` <- function(x,i) {
+`$.rbedrock_nbt_container` <- function(x, i, ...) {
     NextMethod()
 }
 
 #' @export
-`$<-.rbedrock_nbt_container` <- function(x,i,value) {
+`[[.rbedrock_nbt_container` <- function(x, i, ...) {
+    NextMethod()
+}
+
+#' @export
+`$<-.rbedrock_nbt_container` <- function(x, i, value) {
+    if(!is_nbt(value)) {
+        value <- vec_cast(value, vec_ptype(x[[i]]), x_arg="value")
+        if(!is_nbt(value)) {
+            abort("conversion of value to nbt failed.")
+        }
+    }
+    NextMethod()
+}
+
+#' @export
+`[[<-.rbedrock_nbt_container` <- function(x, i, value) {
     if(!is_nbt(value)) {
         value <- vec_cast(value, vec_ptype(x[[i]]), x_arg="value")
         if(!is_nbt(value)) {

@@ -18,7 +18,7 @@ bedrockdb(
   compression_level = -1L
 )
 
-\method{close}{bedrockdb}(con, compact = TRUE, ...)
+\method{close}{bedrockdb}(con, compact = FALSE, ...)
 }
 \arguments{
 \item{path}{The path to a world folder. If the path does not exist, it is
