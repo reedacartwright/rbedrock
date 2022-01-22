@@ -3,6 +3,7 @@
 \name{get_subchunk_layers_data}
 \alias{get_subchunk_layers_data}
 \alias{get_subchunk_layers_value}
+\alias{get_subchunk_layers_from_chunk}
 \alias{put_subchunk_layers_data}
 \alias{put_subchunk_layers_values}
 \alias{put_subchunk_layers_value}
@@ -13,6 +14,8 @@
 get_subchunk_layers_data(db, x, z, dimension, subchunk)
 
 get_subchunk_layers_value(db, x, z, dimension, subchunk)
+
+get_subchunk_layers_from_chunk(db, x, z, dimension)
 
 put_subchunk_layers_data(db, data, ...)
 
@@ -48,6 +51,9 @@ returned by \code{read_subchunk_layers_value()}.
 return a list of block layers. Each block layer is a 16x16x16 array of
 integers associated with a block palette. The block palette is stored in the
 "palette" attribute of the array.
+
+\code{get_subchunk_layers_value()} returns a list of the of the values
+returned by \code{read_subchunk_layers_value()}.
 }
 \description{
 \code{get_subchunk_layers_data()} loads SubchunkBlocks data from a \code{bedrockdb}.
@@ -55,6 +61,9 @@ It will silently drop and keys not representing SubchunkBlocks data.
 
 \code{get_subchunk_layers_value()} loads SubchunkBlocks data from a \code{bedrockdb}.
 It only supports loading a single value.
+
+\code{get_subchunk_layers_value()} loads SubchunkBlocks data from a \code{bedrockdb}.
+It supports efficiently loading subchunk block data from a single chunk.
 
 \code{put_subchunk_layers_data()}, \code{put_subchunk_layers_values()}, and
 \code{put_subchunk_layers_value()} store SubchunkBlocks data into a \code{bedrockdb}.

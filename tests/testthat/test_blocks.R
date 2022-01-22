@@ -306,6 +306,18 @@ test_that("get_subchunk_blocks_from_chunk returns block data for all subchunks i
     }
 })
 
+test_that("get_subchunk_layers_from_chunk returns block data for all subchunks in a chunk", {
+    keys <- get_keys(db)
+    dat <- get_subchunk_layers_from_chunk(db, 37, 6, 0)
+    expect_equal(names(dat), grep("^@37:6:0:47",keys,value=TRUE))
+    for(elt in dat) {
+        expect_type(elt, "list")
+        for(layer in elt) {
+            expect_named(layer, c("values", "palette"))
+        }
+    }
+})
+
 # clean up
 close(db)
 fs::dir_delete(dbpath)

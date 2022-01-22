@@ -444,6 +444,24 @@ get_subchunk_layers_value <- function(db, x, z, dimension, subchunk) {
 }
 
 #' @description
+#' `get_subchunk_layers_value()` loads SubchunkBlocks data from a `bedrockdb`.
+#' It supports efficiently loading subchunk block data from a single chunk.
+#'
+#' @return `get_subchunk_layers_value()` returns a list of the of the values
+#' returned by `read_subchunk_layers_value()`.
+
+#' @rdname get_subchunk_layers_data
+#' @export
+get_subchunk_layers_from_chunk <- function(db, x, z, dimension) {
+    starts_with <- .process_key_args_prefix(x, z, dimension)
+    vec_assert(starts_with, character(), 1L)
+    starts_with <- str_c(starts_with, ":47")
+
+    dat <- get_values(db, starts_with=starts_with)
+    purrr::map(dat, read_subchunk_layers_value)
+}
+
+#' @description
 #' `put_subchunk_layers_data()`, `put_subchunk_layers_values()`, and
 #' `put_subchunk_layers_value()` store SubchunkBlocks data into a `bedrockdb`.
 #'
