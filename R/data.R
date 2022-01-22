@@ -27,12 +27,19 @@ get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
 #'
 #' @param db A `bedrockdb` object
 #' @param keys A character vector of keys.
+#' @param starts_with A string specifying chunk prefix or string prefix.
 #' @param key  A single key.
 #' @param readoptions A `bedrock_leveldb_readoptions` object
 #' 
 #' @return `get_values()` returns a named-list of raw vectors.
 #' @export
-get_values <- function(db, keys, readoptions = NULL) {
+get_values <- function(db, keys, starts_with, readoptions = NULL) {
+    if(missing(keys)) {
+        starts_with <- .create_rawkey_prefix(starts_with)
+        dat <- db$mget_prefix(starts_with, readoptions)
+        dat <- rlang::set_names(dat$values, rawkeys_to_chrkeys(dat$keys))
+        return(dat)
+    }
     rawkeys <- chrkeys_to_rawkeys(keys)
     dat <- db$mget(rawkeys, readoptions)
     rlang::set_names(dat, keys)

@@ -44,6 +44,16 @@ test_that("get_values returns a list of raw values", {
     )), "NotFound" = NULL))
 })
 
+test_that("get_values returns all keys with a prefix", {
+    keys <- get_keys(db)
+    pre_str <- get_values(db, starts_with="VILLAGE")
+    expect_equal(names(pre_str), grep("^VILLAGE",keys,value=TRUE))
+    pre_chunk <- get_values(db, starts_with="@37:6:0")
+    expect_equal(names(pre_chunk), grep("^@37:6:0",keys,value=TRUE))
+    pre_chunk <- get_values(db, starts_with="@37:6:0:47")
+    expect_equal(names(pre_chunk), grep("^@37:6:0:47",keys,value=TRUE))
+})
+
 test_that("has_values returns a logical vector", {
     expect_equal(has_values(db, c("@31:6:0:44","Overworld","NotFound")),
         c("@31:6:0:44" = TRUE, "Overworld" = TRUE, "NotFound" = FALSE))

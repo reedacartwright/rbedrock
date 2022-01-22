@@ -128,6 +128,9 @@ bedrock_leveldb_get <- function(db, key, readoptions = NULL) {
 bedrock_leveldb_mget <- function(db, key, readoptions = NULL) {
     .Call(Cbedrock_leveldb_mget, db, key, readoptions)
 }
+bedrock_leveldb_mget_prefix <- function(db, starts_with, readoptions = NULL) {
+    .Call(Cbedrock_leveldb_mget_prefix, db, starts_with, readoptions)
+}
 bedrock_leveldb_put <- function(db, key, value, writeoptions = NULL) {
     .Call(Cbedrock_leveldb_put, db, key, value, writeoptions)
 }

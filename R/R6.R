@@ -121,6 +121,9 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, l
     mget = function(keys, readoptions = NULL) {
         bedrock_leveldb_mget(self$db, keys, readoptions)
     },
+    mget_prefix = function(starts_with, readoptions = NULL) {
+        bedrock_leveldb_mget_prefix(self$db, starts_with, readoptions)
+    },    
     put = function(key, value, writeoptions = NULL) {
         bedrock_leveldb_put(self$db, key, value, writeoptions)
         invisible(self)

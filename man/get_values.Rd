@@ -7,9 +7,9 @@
 \alias{has_values}
 \title{Read values stored in a bedrockdb.}
 \usage{
-get_values(db, keys, readoptions = NULL)
+get_values(db, keys, starts_with, readoptions = NULL)
 
-get_data(db, keys, readoptions = NULL)
+get_data(db, keys, starts_with, readoptions = NULL)
 
 get_value(db, key, readoptions = NULL)
 
@@ -19,6 +19,8 @@ has_values(db, keys, readoptions = NULL)
 \item{db}{A \code{bedrockdb} object}
 
 \item{keys}{A character vector of keys.}
+
+\item{starts_with}{A string specifying chunk prefix or string prefix.}
 
 \item{readoptions}{A \code{bedrock_leveldb_readoptions} object}
 

@@ -21,17 +21,17 @@
 #' @export
 get_chunk_blocks_data <- function(db, x, z, dimension,
         names_only = FALSE, extra_block = FALSE) {
-    keys <- .process_key_args_prefix(x, z, dimension)
-    keys <- vec_unique(keys)
-    keys <- str_c(keys, ":47")
+    starts_with <- .process_key_args_prefix(x, z, dimension)
+    starts_with <- vec_unique(starts_with)
+    starts_with <- str_c(starts_with, ":47")
 
-    dat <- purrr::map(keys, ~.get_chunk_blocks_value_impl(db,
-        prefix = .,
+    dat <- purrr::map(starts_with, ~.get_chunk_blocks_value_impl(db,
+        starts_with = .,
         names_only = names_only,
         extra_block = extra_block
     ))
 
-    set_names(dat, keys)
+    set_names(dat, starts_with)
 }
 
 #' @description
@@ -53,11 +53,12 @@ get_chunk_blocks_values <- get_chunk_blocks_data
 #' @export
 get_chunk_blocks_value <- function(db, x, z, dimension,
         names_only = FALSE, extra_block = FALSE) {
-    keys <- .process_key_args_prefix(x, z, dimension)
-    keys <- vec_unique(keys)
-    vec_assert(keys, character(), 1L)
+    starts_with <- .process_key_args_prefix(x, z, dimension)
+    starts_with <- vec_unique(starts_with)
+    vec_assert(starts_with, character(), 1L)
+    starts_with <- str_c(starts_with, ":47")
 
-    .get_chunk_blocks_value_impl(db, keys,
+    .get_chunk_blocks_value_impl(db, starts_with,
         names_only = names_only,
         extra_block = extra_block
     )
@@ -96,13 +97,12 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, version=9L) {
     .put_chunk_blocks_value_impl(db, key, value, version=version)
 }
 
-
-.get_chunk_blocks_value_impl <- function(db, prefix, ...) {
-    keys <- get_keys(db, starts_with = prefix)
-    if(length(keys) == 0L) {
+.get_chunk_blocks_value_impl <- function(db, starts_with, ...) {
+    dat <- .get_subchunk_blocks_data_impl(db, starts_with=starts_with, ...)
+    if(length(dat) == 0L) {
         return(NULL)
     }
-    dat <- get_subchunk_blocks_data(db, keys, ...)
+
     pos <- purrr::map_int(dat, attr, "offset")
     # calculate the lowest subchunk and adjust as necessary
     # ideally calculation should be based on dimension
@@ -118,7 +118,7 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, version=9L) {
     for(i in seq_along(pos)) {
         mat[,((pos[i]-bottom)*16)+1:16,] <- dat[[i]]
     }
-    o <- as.integer(.split_chunk_stems(prefix)[2:3])
+    o <- as.integer(.split_chunk_stems(starts_with)[2:3])
     attr(mat,"origin") <- c(o[1], bottom, o[2])*16L
     mat
 }
@@ -256,8 +256,15 @@ NULL
 get_subchunk_blocks_data <- function(db, x, z, dimension, subchunk,
         names_only = FALSE, extra_block = FALSE) {
     keys <- .process_key_args(x,z,dimension, tag=47L, subtag = subchunk)
-    dat <- get_values(db, keys)
-    offsets <- .get_subtag_from_chunk_key(keys)
+
+    .get_subchunk_blocks_data_impl(db, keys,
+        names_only = names_only, extra_block = extra_block)
+}
+
+.get_subchunk_blocks_data_impl <- function(db, keys, starts_with, readoptions = NULL,
+        names_only = FALSE, extra_block = FALSE) {
+    dat <- get_values(db, keys, starts_with, readoptions)
+    offsets <- .get_subtag_from_chunk_key(names(dat))
     ret <- purrr::map2(dat, offsets, read_subchunk_blocks_value, names_only = names_only,
         extra_block = extra_block)
     ret
@@ -283,6 +290,26 @@ get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
     
     read_subchunk_blocks_value(dat, offset, names_only = names_only,
         extra_block = extra_block)
+}
+
+#' @description
+#' `get_subchunk_blocks_from_chunk()` loads SubchunkBlocks data from a `bedrockdb`.
+#' It supports efficiently loading subchunk block data from a single chunk.
+#'
+#' @return `get_subchunk_blocks_from_chunk()` returns a list of the of the values
+#' returned by `read_subchunk_blocks_value()`.
+
+#' @rdname SubchunkBlocks
+#' @export
+get_subchunk_blocks_from_chunk <- function(db, x, z, dimension,
+    names_only = FALSE, extra_block = FALSE) {
+
+    starts_with <- .process_key_args_prefix(x, z, dimension)
+    vec_assert(starts_with, character(), 1L)
+    starts_with <- str_c(starts_with, ":47")
+
+    .get_subchunk_blocks_data_impl(db, starts_with=starts_with,
+        names_only = names_only, extra_block = extra_block)
 }
 
 #' @description

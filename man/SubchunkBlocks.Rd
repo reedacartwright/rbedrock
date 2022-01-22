@@ -4,6 +4,7 @@
 \alias{SubchunkBlocks}
 \alias{get_subchunk_blocks_data}
 \alias{get_subchunk_blocks_value}
+\alias{get_subchunk_blocks_from_chunk}
 \alias{put_subchunk_blocks_data}
 \alias{put_subchunk_blocks_values}
 \alias{put_subchunk_blocks_value}
@@ -29,6 +30,15 @@ get_subchunk_blocks_value(
   z,
   dimension,
   subchunk,
+  names_only = FALSE,
+  extra_block = FALSE
+)
+
+get_subchunk_blocks_from_chunk(
+  db,
+  x,
+  z,
+  dimension,
   names_only = FALSE,
   extra_block = FALSE
 )
@@ -96,6 +106,9 @@ returned by \code{read_subchunk_blocks_value()}.
 return a 16x16x16 character array. The axes represent the \code{x}, \code{y}, and \code{z}
 dimensions in that order.
 
+\code{get_subchunk_blocks_from_chunk()} returns a list of the of the values
+returned by \code{read_subchunk_blocks_value()}.
+
 \code{read_subchunk_blocks_value()} returns a 16x16x16 character array.
 The axes represent the \code{x}, \code{y}, and \code{z} dimensions in that order.
 
@@ -119,6 +132,9 @@ It will silently drop and keys not representing SubchunkBlocks data.
 
 \code{get_subchunk_blocks_value()} loads SubchunkBlocks data from a \code{bedrockdb}.
 It only supports loading a single value.
+
+\code{get_subchunk_blocks_from_chunk()} loads SubchunkBlocks data from a \code{bedrockdb}.
+It supports efficiently loading subchunk block data from a single chunk.
 
 \code{put_subchunk_blocks_data()}, \code{put_subchunk_blocks_values()}, and
 \code{put_subchunk_blocks_value()} store SubchunkBlocks data into a \code{bedrockdb}.

@@ -52,6 +52,7 @@ static const R_CallMethodDef call_methods[] = {
 
     {"Cbedrock_leveldb_get", (DL_FUNC)&bedrock_leveldb_get, 3},
     {"Cbedrock_leveldb_mget", (DL_FUNC)&bedrock_leveldb_mget, 3},
+    {"Cbedrock_leveldb_mget_prefix", (DL_FUNC)&bedrock_leveldb_mget_prefix, 3},
     {"Cbedrock_leveldb_put", (DL_FUNC)&bedrock_leveldb_put, 4},
     {"Cbedrock_leveldb_mput", (DL_FUNC)&bedrock_leveldb_mput, 4},
     {"Cbedrock_leveldb_delete", (DL_FUNC)&bedrock_leveldb_delete, 5},
