@@ -120,6 +120,7 @@ static const R_CallMethodDef call_methods[] = {
     {"Cread_subchunk_blocks", (DL_FUNC)&read_subchunk_blocks, 1},
     {"Cwrite_subchunk_blocks", (DL_FUNC)&write_subchunk_blocks, 4},
     {"Cread_chunk_biomes", (DL_FUNC)&read_chunk_biomes, 1},
+    {"Cwrite_chunk_biomes", (DL_FUNC)&write_chunk_biomes, 2},
 
     {"Cmcpe_random_seed", (DL_FUNC)&mcpe_random_seed, 1},
     {"Cmcpe_random_state", (DL_FUNC)&mcpe_random_state, 1},

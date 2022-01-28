@@ -5,10 +5,14 @@
 \alias{get_3dmaps_data}
 \alias{get_3dmaps_values}
 \alias{get_3dmaps_value}
+\alias{put_3dmaps_data}
+\alias{put_3dmaps_values}
+\alias{put_3dmaps_value}
 \alias{get_cnc_biomes_data}
 \alias{get_cnc_biomes_values}
 \alias{get_cnc_biomes_value}
 \alias{read_3dmaps_value}
+\alias{write_3dmaps_value}
 \title{Read and write 3DMaps data}
 \usage{
 get_3dmaps_data(db, x, z, dimension)
@@ -17,6 +21,12 @@ get_3dmaps_values(db, x, z, dimension)
 
 get_3dmaps_value(db, x, z, dimension)
 
+put_3dmaps_data(db, data)
+
+put_3dmaps_values(db, x, z, dimension, height_maps, biome_maps)
+
+put_3dmaps_value(db, x, z, dimension, height_map, biome_map)
+
 get_cnc_biomes_data(db, x, z, dimension, return_names = TRUE)
 
 get_cnc_biomes_values(db, x, z, dimension, return_names = TRUE)
@@ -24,12 +34,27 @@ get_cnc_biomes_values(db, x, z, dimension, return_names = TRUE)
 get_cnc_biomes_value(db, x, z, dimension, return_names = TRUE)
 
 read_3dmaps_value(rawdata)
+
+write_3dmaps_value(height_map, biome_map)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
 
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
+
+\item{data}{A named-vector of key-value pairs for 3DMaps data.}
+
+\item{height_maps, biome_maps}{Lists of height and biome data.
+Values will be recycled if necessary to match the number of keys
+to be written to. If \code{biome_maps} is missing, \code{height_maps} should
+be in the same format as returned by \code{get_3dmaps_data()}.}
+
+\item{height_map}{16x16 array containing height data.
+Values will be recycled if necessary. If \code{biome_map} is missing, \code{height-map}
+should be a list a \code{list()} with both "height_map" and "biome_map" elements.}
+
+\item{biome_map}{16xNx16 array containing biome data.}
 
 \item{return_names}{return biome names instead of biome ids.}
 
@@ -43,7 +68,7 @@ read_3dmaps_value(rawdata)
 and "biome_map".
 
 \code{get_cnc_biomes_data()} returns a list of the of the values returned by
-\code{get_cnc_biomes__value()}.
+\code{get_cnc_biomes_value()}.
 
 \code{get_cnc_biomes_value()} returns an array.
 }
@@ -57,6 +82,9 @@ It will silently drop keys not representing 3DMaps data.
 \code{get_3dmaps_value()} loads 3DMaps data from a \code{bedrockdb}.
 It only supports loading a single value.
 
+\code{put_3dmaps_data()}, \code{put_3dmaps_values()}, and
+\code{put_3dmaps_value()} store 3DMaps data into a \code{bedrockdb}.
+
 \code{get_cnc_biomes_data()} loads 3D Biomes data from a \code{bedrodckdb}.
 It will silently drop keys not holding 3D biome data.
 
@@ -64,4 +92,6 @@ It will silently drop keys not holding 3D biome data.
 It only supports loading a single value.
 
 \code{read_3dmaps_value()} decodes binary 3DMaps data.
+
+\code{write_3dmaps_value} encodes 3DMaps data into a raw vector.
 }
