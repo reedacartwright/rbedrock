@@ -11,6 +11,9 @@
 \alias{get_cnc_biomes_data}
 \alias{get_cnc_biomes_values}
 \alias{get_cnc_biomes_value}
+\alias{put_cnc_biomes_data}
+\alias{put_cnc_biomes_values}
+\alias{put_cnc_biomes_value}
 \alias{read_3dmaps_value}
 \alias{write_3dmaps_value}
 \title{Read and write 3DMaps data}
@@ -33,6 +36,12 @@ get_cnc_biomes_values(db, x, z, dimension, return_names = TRUE)
 
 get_cnc_biomes_value(db, x, z, dimension, return_names = TRUE)
 
+put_cnc_biomes_data(db, data, missing_height = -64L)
+
+put_cnc_biomes_values(db, x, z, dimension, values, missing_height = -64L)
+
+put_cnc_biomes_value(db, x, z, dimension, value, missing_height = -64L)
+
 read_3dmaps_value(rawdata)
 
 write_3dmaps_value(height_map, biome_map)
@@ -43,7 +52,8 @@ write_3dmaps_value(height_map, biome_map)
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{data}{A named-vector of key-value pairs for 3DMaps data.}
+\item{data}{A list of character or integer vectors. Each element of
+the list must contain 256 values or an error will be raised.}
 
 \item{height_maps, biome_maps}{Lists of height and biome data.
 Values will be recycled if necessary to match the number of keys
@@ -57,6 +67,13 @@ should be a list a \code{list()} with both "height_map" and "biome_map" elements
 \item{biome_map}{16xNx16 array containing biome data.}
 
 \item{return_names}{return biome names instead of biome ids.}
+
+\item{missing_height}{if there is no existing height data, use this value
+for the chunk.}
+
+\item{values}{a list of arrays containing biome names or ids.}
+
+\item{value}{an array containing biome names or ids.}
 
 \item{rawdata}{A raw vector.}
 }
@@ -87,6 +104,12 @@ It only supports loading a single value.
 
 \code{get_cnc_biomes_data()} loads 3D Biomes data from a \code{bedrodckdb}.
 It will silently drop keys not holding 3D biome data.
+
+\code{get_cnc_biomes_value()} loads 3D biome data from a \code{bedrockdb}.
+It only supports loading a single value.
+
+\code{put_cnc_biomes_data()} \code{put_cnc_biomes_values()}, and \code{put_cnc_biomes_value()} update
+the biome information of chunks. They preserve any existing height data.
 
 \code{get_cnc_biomes_value()} loads 3D biome data from a \code{bedrockdb}.
 It only supports loading a single value.

@@ -123,6 +123,72 @@ get_cnc_biomes_value <- function(db, x, z, dimension, return_names = TRUE) {
 }
 
 #' @description
+#' `put_cnc_biomes_data()` `put_cnc_biomes_values()`, and `put_cnc_biomes_value()` update
+#' the biome information of chunks. They preserve any existing height data.
+#'
+#' @param data A list of character or integer vectors. Each element of
+#'    the list must contain 256 values or an error will be raised.
+#' @param missing_height if there is no existing height data, use this value
+#'    for the chunk.
+#'
+#' @rdname Maps3D
+#' @export
+put_cnc_biomes_data <- function(db, data, missing_height = -64L) {
+    put_cnc_biomes_values(db, names(data), values=data, missing_height = missing_height)
+}
+
+#' @param values a list of arrays containing biome names or ids.
+#'
+#' @rdname Maps3D
+#' @export
+put_cnc_biomes_values <- function(db, x, z, dimension, values,
+    missing_height = -64L) {
+    keys <- .process_key_args(x, z, dimension, tag=43L, stop_if_filtered = TRUE)
+    values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
+
+    dat <- get_3dmaps_data(db, keys)
+
+    dat2 <- purrr::map2(dat, values, function(d, value) {
+        h <- d$height_map %||% missing_height
+
+        if(is.character(value)) {
+            value <- biome_id(value)
+            if(any(is.na(value))) {
+                abort("`values` contains unknown biome")                 
+            }
+        }
+        list(height_map = h, biome_map = value)
+    })
+
+    put_3dmaps_data(db, dat2)
+}
+
+#' @description
+#' `get_cnc_biomes_value()` loads 3D biome data from a `bedrockdb`.
+#' It only supports loading a single value.
+#'
+#' @param value an array containing biome names or ids.
+#'
+#' @rdname Maps3D
+#' @export
+put_cnc_biomes_value <- function(db, x, z, dimension, value,
+    missing_height = -64L) {
+    key <- .process_key_args(x, z, dimension, tag=43L)
+    vec_assert(key, character(), 1L)
+
+    d <- get_3dmaps_value(db, key)
+    h <- d$height_map %||% missing_height
+
+    if(is.character(value)) {
+        value <- biome_id(value)
+        if(any(is.na(value))) {
+            abort("`value` contains unknown biome")
+        }
+    }
+    put_3dmaps_value(db, key, height_map = h, biome_map = value)
+}
+
+#' @description
 #' `read_3dmaps_value()` decodes binary 3DMaps data.
 #'
 #' @param rawdata A raw vector.
@@ -184,12 +250,18 @@ write_3dmaps_value <- function(height_map, biome_map) {
     height_map <- vec_recycle(height_map, 256, x_arg="height_map")
 
     biome_map <- vec_cast(c(biome_map), integer(), x_arg="biome_map")
-
-    #biome_map <- vec_recycle(biome_map, 256, x_arg="biome_map")
-    if(length(biome_map) %% 4096 != 0) {
+    
+    # reshape biome_map
+    if(length(biome_map) == 1L) {
+        biome_map <- array(biome_map, c(16L,16L*24L,16L))
+    } else if(length(biome_map) == 256L) {
+        biome_map <- aperm(array(biome_map, c(16L,16L,16L*24L)), c(1L,3L,2L))
+    } else if(length(biome_map) %% 4096 != 0) {
         abort("Invalid biome_map dimensions.")
+    } else {
+        biome_map <- array(biome_map, c(16L, length(biome_map)/256L, 16L))
     }
-    dim(biome_map) <- c(16L, length(biome_map)/256L, 16L)
+
     values_list <- rep(list(integer(0L)), 25)
     palette_list <- rep(list(integer(0L)), 25)
     for(i in seq.int(length(biome_map) %/% 4096)) {
