@@ -55,7 +55,7 @@ If you do not have CMake installed, you can install it via installr.
 installr::install.CMake()
 ```
 
-Now restart R/Rstudio so the new .Renviron can take effect.
+Now restart R/RStudio so the new .Renviron can take effect.
 
 ``` r
 # install development version of rbedrock

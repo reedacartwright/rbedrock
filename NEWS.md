@@ -1,6 +1,6 @@
 ## RBedrock 0.2.0
  * Support subchunk version 9 introduced for Caves and Cliffs.
- * Support Caves and Cliffs's 3DMaps.
+ * Support Caves and Cliffs' 3DMaps.
  * Change tag format to `@x:z:d:t:s`. This change was made because subtags can now be negative.
  * Add `locate_blocks()` function.
  * Introduce intermediate `rnbt` (raw nbt) format.
