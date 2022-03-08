@@ -13,6 +13,7 @@ If you are not already using R, you will need to install the latest [R](https://
 
 ```r
 # The easiest way to install rbedrock is from CRAN.
+# If this doesn't work, you will need to install the development version (see below).
 install.packages("rbedrock")
 
 # Install tidyverse (not needed, but useful)
