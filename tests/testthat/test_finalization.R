@@ -5,9 +5,9 @@ as_raw <- function(...) {
     as.raw(c(...))
 }
 
-test_that("Finalization is chunk tag 54", {
-    expect_equal(chunk_tag_int("Finalization"), 54L)
-    expect_equal(chunk_tag_str(54L), "Finalization")
+test_that("FinalizedState is chunk tag 54", {
+    expect_equal(chunk_tag_int("FinalizedState"), 54L)
+    expect_equal(chunk_tag_str(54L), "FinalizedState")
 })
 
 test_that("get_finalization_data returns all Finalization data", {

@@ -5,9 +5,9 @@ as_raw <- function(...) {
     as.raw(c(...))
 }
 
-test_that("2DMaps is chunk tag 45", {
-    expect_equal(chunk_tag_int("2DMaps"), 45L)
-    expect_equal(chunk_tag_str(45L), "2DMaps")
+test_that("Data2D is chunk tag 45", {
+    expect_equal(chunk_tag_int("Data2D"), 45L)
+    expect_equal(chunk_tag_str(45L), "Data2D")
 })
 
 test_that("write_2dmaps_value() accepts 1 parameter.", {

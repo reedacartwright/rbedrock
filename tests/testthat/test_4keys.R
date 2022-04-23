@@ -120,5 +120,5 @@ test_that("rawkeys_to_chrkeys signals errors", {
 
 test_that("parse_chunk_keys parses correctly",{
     expect_equal(parse_chunk_keys("@0:0:0:47:1"),
-        tibble::tibble(key="@0:0:0:47:1",x=0L,z=0L,dimension=0L,tag="SubchunkBlocks",subtag=1L))
+        tibble::tibble(key="@0:0:0:47:1",x=0L,z=0L,dimension=0L,tag="SubChunkBlocks",subtag=1L))
 })

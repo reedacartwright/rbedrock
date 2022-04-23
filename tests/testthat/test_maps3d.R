@@ -5,9 +5,9 @@ as_raw <- function(...) {
     as.raw(c(...))
 }
 
-test_that("3DMaps is chunk tag 43", {
-    expect_equal(chunk_tag_int("3DMaps"), 43L)
-    expect_equal(chunk_tag_str(43L), "3DMaps")
+test_that("Data3D is chunk tag 43", {
+    expect_equal(chunk_tag_int("Data3D"), 43L)
+    expect_equal(chunk_tag_str(43L), "Data3D")
 })
 
 test_that("Reading and Writing 3DMaps data works", {

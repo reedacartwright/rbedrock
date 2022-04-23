@@ -1,9 +1,9 @@
 dbpath <- rbedrock_example_world("example1.mcworld")
 db <- bedrockdb(dbpath)
 
-test_that("BlockEntities is chunk tag 49", {
-    expect_equal(chunk_tag_int("BlockEntities"), 49L)
-    expect_equal(chunk_tag_str(49L), "BlockEntities")
+test_that("BlockEntity is chunk tag 49", {
+    expect_equal(chunk_tag_int("BlockEntity"), 49L)
+    expect_equal(chunk_tag_str(49L), "BlockEntity")
 })
 
 test_that("get_block_entities_data returns all BlockEnties data", {

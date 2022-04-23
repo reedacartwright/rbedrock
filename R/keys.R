@@ -110,29 +110,32 @@ chunk_origins <- function(keys) {
 }
 
 # List of Tags that identify the contents of a chunk key.
+# Most names are consistent with Creator Documentation
+# https://docs.microsoft.com/en-us/minecraft/creator/documents/actorstorage#non-actor-data-chunk-key-ids
 .CHUNK_TAGS <- c(
-    "3DMaps" = 43L, # introduced in 1.18
-    "ChunkVersion" = 44L,
-    "2DMaps" = 45L,
-    "Legacy2DMaps" = 46L,
-    "SubchunkBlocks" = 47L,
+    "Data3D" = 43L, # introduced in 1.18
+    "Version" = 44L,
+    "Data2D" = 45L,
+    "Data2DLegacy" = 46L,
+    "SubChunkBlocks" = 47L,
     "LegacyTerrain" = 48L, # removed
-    "BlockEntities" = 49L,
-    "Entities"= 50L,
-    "PendingBlockTicks" = 51L,
+    "BlockEntity" = 49L,
+    "Entity"= 50L,
+    "PendingTicks" = 51L,
     "LegacyBlockExtraData" = 52L, # removed
-    "BiomeStates" = 53L,
-    "Finalization" = 54L,
+    "BiomeState" = 53L,
+    "FinalizedState" = 54L,
     "ConversionData" = 55L, # removed
     "BorderBlocks" = 56L, # Education edition
-    "HardcodedSpawnAreas" = 57L,
-    "RandomBlockTicks" = 58L,
+    "HardcodedSpawners" = 57L,
+    "RandomTicks" = 58L,
     "Checksums" = 59L, # introduced in 1.16
     "GenerationSeed" = 60L, # introduced in 1.18
     "GeneratedPreCnCBlending" = 61L, # introduced in 1.18
                        # "Chunk Originally generated before Caves and Cliffs"
                        # "isGeneratedPreCavesandCliffsBlending"
-    "LegacyChunkVersion" = 118L, # replaced by 44
+    "BlendingBiomeHeight" = 62L,
+    "LegacyVersion" = 118L, # replaced by 44
 
     # future proofing
     "33" = 33L,

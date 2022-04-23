@@ -3,9 +3,9 @@ db <- bedrockdb(dbpath)
 
 # @31:2:0:47-0
 
-test_that("SubchunkBlocks is chunk tag 47.", {
-    expect_equal(chunk_tag_int("SubchunkBlocks"), 47L)
-    expect_equal(chunk_tag_str(47L), "SubchunkBlocks")
+test_that("SubChunkBlocks is chunk tag 47.", {
+    expect_equal(chunk_tag_int("SubChunkBlocks"), 47L)
+    expect_equal(chunk_tag_str(47L), "SubChunkBlocks")
 })
 
 test_that("write_subchunk_layers_value() encodes subchunk data.", {
