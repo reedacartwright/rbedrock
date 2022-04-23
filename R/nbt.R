@@ -64,6 +64,12 @@ nbt_string <- function(x) {
 
 #' @rdname nbt
 #' @export
+nbt_raw_string <- function(x) {
+    new_nbt_raw_string(vec_cast(x, raw()))
+}
+
+#' @rdname nbt
+#' @export
 nbt_int_array <- function(x) {
     new_nbt_int_array(vec_cast(x, integer()))
 }
@@ -266,6 +272,13 @@ new_nbt_string <- function(x) {
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
+new_nbt_raw_string <- function(x) {
+    new_rbedrock_nbt_scalar(x, "raw_string", raw())
+}
+
+#' @keywords internal
+#' @rdname new_nbt
+#' @export
 new_nbt_int_array <- function(x) {
     new_rbedrock_nbt_scalar(x, "int_array", integer())
 }
@@ -357,6 +370,8 @@ get_nbt_tag.rbedrock_nbt_double     <- function(x) 6L
 get_nbt_tag.rbedrock_nbt_byte_array <- function(x) 7L
 #' @export
 get_nbt_tag.rbedrock_nbt_string     <- function(x) 8L
+#' @export
+get_nbt_tag.rbedrock_nbt_raw_string <- function(x) 8L
 #' @export
 get_nbt_tag.rbedrock_nbt_list       <- function(x) 9L
 #' @export
@@ -503,7 +518,7 @@ write_nbt_data <- function(data) {
 #' @export
 from_rnbt <- function(x) {
     # extract names
-    n <- purrr::map_chr(x, "name", .default="")
+    n <- purrr::map_chr(x, .extract_rnbt_name)
     # extract values
     v <- purrr::map(x, function(y) {
         from_rnbt_payload(y[["payload"]], y[["tag"]])
@@ -514,6 +529,23 @@ from_rnbt <- function(x) {
     } else {
         set_names(v, n)
     }
+}
+
+.extract_rnbt_name <- function(x) {
+    if(!is_list(x)) {
+        abort("Malformed rnbt data.")
+    }
+    n <- x$name %||% ""
+    if(is_raw(n)) {
+        # truncate at the first null
+        idx <- n == 0L
+        if(any(idx)) {
+            idx <- which(idx)-1
+            n <- n[seq_len(idx)]
+        }
+        n <- rawToChar(n)
+    }
+    n
 }
 
 #' @rdname rnbt
@@ -539,6 +571,8 @@ from_rnbt_payload <- function(x, tag) {
     } else if(tag == 10L) {
         ret <- from_rnbt(x)
         new_nbt_compound(ret)
+    } else if(tag == 8L && is.raw(x)) {
+        new_nbt_raw_string(x)
     } else {
         new_nbt(x, tag)
     }
@@ -603,6 +637,10 @@ format.rbedrock_nbt_string <- function(x, ...) {
     paste0("\"", format(payload(x)), "\"")
 }
 #' @export
+format.rbedrock_nbt_raw_string <- function(x, ...) {
+    format(payload(x))
+}
+#' @export
 format.rbedrock_nbt_list <- function(x, ...) {
     lapply(payload(x),format)
 }
@@ -656,6 +694,9 @@ vec_ptype2.rbedrock_nbt_byte_array.rbedrock_nbt_byte_array <- function(x, y, ...
 
 #' @export
 vec_ptype2.rbedrock_nbt_string.rbedrock_nbt_string <- function(x, y, ...) x
+
+#' @export
+vec_ptype2.rbedrock_nbt_raw_string.rbedrock_nbt_raw_string <- function(x, y, ...) x
 
 #' @export
 vec_ptype2.rbedrock_nbt_compound.rbedrock_nbt_compound <- function(x, y, ...) x
@@ -941,6 +982,20 @@ vec_cast.rbedrock_nbt_string.character <- function(x, to, ...) {
 vec_cast.character.rbedrock_nbt_string <- function(x, to, ...) {
     vec_cast(vec_data(x), to)
 }
+
+#' @export
+vec_ptype2.rbedrock_nbt_raw_string.raw <- function(x, y, ...) raw()
+#' @export
+vec_ptype2.raw.rbedrock_nbt_raw_string <- function(x, y, ...) raw()
+#' @export
+vec_cast.rbedrock_nbt_raw_string.character <- function(x, to, ...) {
+    nbt_raw_string(x)
+}
+#' @export
+vec_cast.character.rbedrock_nbt_raw_string <- function(x, to, ...) {
+    vec_cast(vec_data(x), to)
+}
+
 
 #' @export
 vec_cast.rbedrock_nbt_list.rbedrock_nbt_list <- function(x, to, ...) {

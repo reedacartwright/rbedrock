@@ -1,3 +1,6 @@
+## RBedrock Development
+ * Add nbt_raw_string to support reading and writing nbt_string data that contains embedded nulls.
+
 ## RBedrock 0.2.0
  * Support subchunk version 9 introduced for Caves and Cliffs.
  * Support Caves and Cliffs' 3DMaps.

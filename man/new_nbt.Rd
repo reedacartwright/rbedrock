@@ -10,6 +10,7 @@
 \alias{new_nbt_double}
 \alias{new_nbt_byte_array}
 \alias{new_nbt_string}
+\alias{new_nbt_raw_string}
 \alias{new_nbt_int_array}
 \alias{new_nbt_long_array}
 \alias{new_nbt_compound}
@@ -33,6 +34,8 @@ new_nbt_double(x)
 new_nbt_byte_array(x)
 
 new_nbt_string(x)
+
+new_nbt_raw_string(x)
 
 new_nbt_int_array(x)
 

@@ -90,6 +90,19 @@ test_that("read_nbt can read strings",{
     greek_dat <- as_raw(tags$string, rawstr("test"), rawstr("\u03B1\u03B2\u03B3"))
     expect_equal(read_rnbt(greek_dat), list(list(name = "test", tag = 8L, payload="\u03B1\u03B2\u03B3")))
     expect_equal(read_nbt(greek_dat), list(test = nbt_string("\u03B1\u03B2\u03B3")))
+
+    # Issue #3: nbt strings with null values
+    null_dat <- as_raw(tags$string, rawstr("test"), rawstr("hello world"))
+    null_dat[6] <- as.raw(0L)
+    null_dat[15] <- as.raw(0L)
+
+    expect_equal(read_rnbt(null_dat), list(list(
+        name = as_raw(charToRaw("te"), 0L, charToRaw("t")),
+        tag = 8L,
+        payload=as_raw(charToRaw("hello"), 0L, charToRaw("world")))))
+
+    expect_equal(read_nbt(null_dat), list(te = 
+        nbt_raw_string(as_raw(charToRaw("hello"), 0L, charToRaw("world")))))
 })
 
 test_that("read_nbt can read int arrays", {
@@ -206,6 +219,7 @@ test_that("write_nbt() correctly encodes nbt data", {
     expect_equal(write_nbt(nbt_float(10)), as_raw(tags$float, rawstr(""), 0, 0, 32, 65))
     expect_equal(write_nbt(nbt_double(10)), as_raw(tags$double, rawstr(""), 0, 0, 0, 0, 0, 0, 36, 64))
     expect_equal(write_nbt(nbt_string("10")), as_raw(tags$string, rawstr(""), rawstr("10")))
+    expect_equal(write_nbt(nbt_raw_string(charToRaw("10"))), as_raw(tags$string, rawstr(""), rawstr("10")))
 
     expect_equal(write_nbt(nbt_byte_array(c(10,20))),
         as_raw(tags$byte_array, rawstr(""), 2, 0, 0, 0, 10, 20))
@@ -243,6 +257,7 @@ test_that("vec_ptype_full returns the right prototype string", {
     expect_equal(vctrs::vec_ptype_full(nbt_double(1)), "rbedrock_nbt_double")
     expect_equal(vctrs::vec_ptype_full(nbt_byte_array(1)), "rbedrock_nbt_byte_array")
     expect_equal(vctrs::vec_ptype_full(nbt_string("a")), "rbedrock_nbt_string")
+    expect_equal(vctrs::vec_ptype_full(nbt_raw_string(as.raw(0L))), "rbedrock_nbt_raw_string")
     expect_equal(vctrs::vec_ptype_full(nbt_list()), "rbedrock_nbt_list")
     expect_equal(vctrs::vec_ptype_full(nbt_compound()), "rbedrock_nbt_compound")
     expect_equal(vctrs::vec_ptype_full(nbt_int_array(1)), "rbedrock_nbt_int_array")

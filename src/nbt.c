@@ -67,10 +67,24 @@ static SEXP read_nbt_payload_character(const unsigned char** ptr, const unsigned
     memcpy(&len, p, sizeof(len));
     p += sizeof(len);
     if(end-p < len) {
-        return R_NilValue;        
+        return R_NilValue;
     }
     *ptr = p+len;
-    return Rf_mkCharLenCE((const char*)p, len, CE_UTF8);
+    // Check for embedded nulls
+    bool has_null = false;
+    for(int i=0; i < len; ++i) {
+        if(p[i] == '\0') {
+            has_null = true;
+            break;
+        }
+    }
+    // If a string has embedded nulls, we will a raw vector here.
+    if(has_null) {
+        SEXP r_ret = Rf_allocVector(RAWSXP, len);
+        memcpy(RAW(r_ret), p, len);
+        return r_ret;
+    }
+    return Rf_ScalarString(Rf_mkCharLenCE((const char*)p, len, CE_UTF8));
 }
 
 static SEXP read_nbt_payload_integer(const unsigned char** ptr, const unsigned char* end, int size, int n) {
@@ -225,7 +239,7 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
      case TAG_LONG_ARRAY:
         return read_nbt_payload_integer64(ptr, end, 8, array_len);
      case TAG_STRING:
-        return Rf_ScalarString(read_nbt_payload_character(ptr, end));
+        return read_nbt_payload_character(ptr, end);
      case TAG_LIST:
         return read_nbt_list_payload(ptr, end);
      case TAG_COMPOUND:
@@ -250,7 +264,7 @@ SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end) {
     if( (unsigned int)tag >= TAG_CHECK ) {
         return_nbt_error_tag(tag);
     }
-    r_name = PROTECT(Rf_ScalarString(read_nbt_payload_character(ptr, end)));
+    r_name = PROTECT(read_nbt_payload_character(ptr, end));
     if(Rf_isNull(r_name)) {
         return_nbt_error();
     }
@@ -405,6 +419,9 @@ static R_xlen_t write_nbt_character_payload(SEXP r_value, unsigned char** ptr, u
     } else if(IS_SCALAR(r_value, STRSXP)) {
         str = Rf_translateCharUTF8(STRING_ELT(r_value, 0));
         len = (unsigned short)strlen(str);
+    } else if(TYPEOF(r_value) == RAWSXP) {
+        str = (const char*)RAW(r_value);
+        len = (unsigned short)XLENGTH(r_value);
     } else if(!Rf_isNull(r_value)) {
         return_nbt_error0();
     }
