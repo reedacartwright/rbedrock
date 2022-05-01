@@ -99,7 +99,7 @@ test_that("rawkeys_to_chrkeys supports chunk keys", {
             "chunk:-1:1:0:47:-1","chunk:-1:1:0:47:-4"))
 })
 
-test_that("rawkeys_to_chrkeys treats invalid chunk keys as strings", {
+test_that("rawkeys_to_chrkeys treats invalid chunk keys as plain keys", {
     expect_equal(rawkeys_to_chrkeys(as.raw(c(0,0,0,0,0,0,0,0,0,0,0,0,0,0))),
         "plain:%00%00%00%00%00%00%00%00%00%00%00%00%00%00")
     expect_equal(rawkeys_to_chrkeys(as.raw(c(0,0,0,0,0,0,0,0,3,0,0,0,44,0))),
@@ -108,6 +108,38 @@ test_that("rawkeys_to_chrkeys treats invalid chunk keys as strings", {
         "plain:%00%00%00%00%00%00%00%00%01%00%00%00%00%00")
     expect_equal(rawkeys_to_chrkeys(as.raw(c(0,0,0,0,0,0,0,0,1,0,0,0,44,32))),
         "plain:%00%00%00%00%00%00%00%00%01%00%00%00,%20")
+})
+
+test_that("rawkeys_to_chrkeys supports actor keys", {
+    prefix <- charToRaw("actorprefix")
+    expect_equal(rawkeys_to_chrkeys(c(prefix, as.raw(c(0,0,0,0,0,0,0,0)))),
+        "actor:0000000000000000")
+    expect_equal(rawkeys_to_chrkeys(c(prefix, as.raw(c(110,0,0,0,0,107,0,0)))),
+        "actor:6E000000006B0000")
+})
+
+test_that("rawkeys_to_chrkeys treats invalid actor keys as plain keys", {
+    prefix <- charToRaw("actorprefix")
+    expect_equal(rawkeys_to_chrkeys(c(prefix, as.raw(c(0,0,0,0,0,0,0)))),
+        "plain:actorprefix%00%00%00%00%00%00%00")
+    expect_equal(rawkeys_to_chrkeys(c(prefix, as.raw(c(110,0,0,0,0,107,0,0,0)))),
+        "plain:actorprefixn%00%00%00%00k%00%00%00")
+})
+
+test_that("rawkeys_to_chrkeys supports actor digest keys", {
+    prefix <- charToRaw("digp")
+    expect_equal(rawkeys_to_chrkeys(c(prefix, as.raw(c(0,0,0,0,0,0,0,0)))),
+        "acdat:0:0:0")
+    expect_equal(rawkeys_to_chrkeys(c(prefix, as.raw(c(110,0,0,0,250,255,255,255,1,0,0,0)))),
+        "acdat:110:-6:1")
+})
+
+test_that("rawkeys_to_chrkeys treats invalid actor digest keys as plain keys", {
+    prefix <- charToRaw("digp")
+    expect_equal(rawkeys_to_chrkeys(c(prefix, as.raw(c(0,0,0,0,0,0,0)))),
+        "plain:digp%00%00%00%00%00%00%00")
+    expect_equal(rawkeys_to_chrkeys(c(prefix, as.raw(c(110,0,0,0,250,255,255,255,1,0,0,0,0)))),
+        "plain:digpn%00%00%00%FA%FF%FF%FF%01%00%00%00%00")
 })
 
 test_that("rawkeys_to_chrkeys signals errors", {

@@ -325,21 +325,18 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
         tag = key[12];
         key_type = CHUNK;
         break;
-     default: {
-        if(strncmp((char *)key, RAWKEY_PREFIX_ACTOR, strlen(RAWKEY_PREFIX_ACTOR))==0) {
-            key_type = ACTOR;
-            key += strlen(RAWKEY_PREFIX_ACTOR);
-            key_len -= strlen(RAWKEY_PREFIX_ACTOR);
-        } else if(strncmp((char *)key, RAWKEY_PREFIX_ACTOR_DIGEST_KEYS,
-            strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS))==0) {
-            key_type = ACTOR_DIGEST_KEYS;
-            key += strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS);
-            key_len -= strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS);
-        } else {
-            key_type = PLAIN;
+     default:
+        {
+            if(strncmp((char *)key, RAWKEY_PREFIX_ACTOR, strlen(RAWKEY_PREFIX_ACTOR))==0) {
+                key_type = ACTOR;
+            } else if(strncmp((char *)key, RAWKEY_PREFIX_ACTOR_DIGEST_KEYS,
+                strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS))==0) {
+                key_type = ACTOR_DIGEST_KEYS;
+            } else {
+                key_type = PLAIN;
+            }
+            break;
         }
-        break;
-     }
     }
     // validate data
     if(key_type == CHUNK) {
@@ -351,21 +348,29 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
             key_type = PLAIN;
         }
     } else if(key_type == ACTOR_DIGEST_KEYS) {
-        if(key_len != 8 && key_len != 12) {
+        size_t len = strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS);
+        if(key_len != len+8 && key_len != len+12) {
             key_type = PLAIN;
         }
     } else if(key_type == ACTOR) {
-        if(key_len != 8) {
+        size_t len = strlen(RAWKEY_PREFIX_ACTOR);
+        if(key_len != len+8) {
             key_type = PLAIN;
         }
     }
 
     // extract chunk_prefix coordinates
     if(key_type == CHUNK || key_type == ACTOR_DIGEST_KEYS) {
-        memcpy(&x, key + 0, 4);
-        memcpy(&z, key + 4, 4);
-        if(key_len >= 12) {
-            memcpy(&dimension, key + 8, 4);
+        const unsigned char * p = key;
+        size_t len = key_len;
+        if(key_type == ACTOR_DIGEST_KEYS) {
+            p += strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS);
+            len -= strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS);
+        }
+        memcpy(&x, p + 0, 4);
+        memcpy(&z, p + 4, 4);
+        if(len >= 12) {
+            memcpy(&dimension, p + 8, 4);
             // validate dimension
             if(dimension > CHUNK_KEY_DIM_MAX) {
                 key_type = PLAIN;
@@ -383,9 +388,10 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
         return snprintf(buffer, buffer_len,
                 CHRKEY_PREFIX_ACTOR_DIGEST_KEYS "%d:%d:%u", x, z, dimension);
     } else if(key_type == ACTOR) {
+        key = key + strlen(RAWKEY_PREFIX_ACTOR);
         size_t prefix_len = strlen(CHRKEY_PREFIX_ACTOR);
-        if(buffer_len < prefix_len+2*8+1) {
-            memcpy(buffer, CHRKEY_PREFIX_ACTOR, prefix_len);
+        if(prefix_len+2*8+1 < buffer_len) {
+            memcpy(buffer, (char*)CHRKEY_PREFIX_ACTOR, prefix_len);
             buffer += prefix_len;
             for(int i=0; i < 8; ++i) {
                 unsigned char ch = key[i];
@@ -395,7 +401,7 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
             }
             buffer[0] = '\0';
         }
-        return prefix_len+2*8+1;
+        return prefix_len+2*8;
     }
     // Plain keys
     size_t prefix_len = strlen(CHRKEY_PREFIX_PLAIN);
