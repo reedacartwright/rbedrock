@@ -1,31 +1,32 @@
 test_that("chrkeys_to_rawkeys supports strings", {
-    expect_equal(chrkeys_to_rawkeys("test_string"),
+    expect_equal(chrkeys_to_rawkeys("plain:test_string"),
         list(charToRaw("test_string")))
-    expect_equal(chrkeys_to_rawkeys("test\u01_string"),
+    expect_equal(chrkeys_to_rawkeys("plain:test\u01_string"),
         list(charToRaw("test\u01_string")))
-    expect_equal(chrkeys_to_rawkeys(c("test_string1","test_string2")),
+    expect_equal(chrkeys_to_rawkeys(c("plain:test_string1","plain:test_string2")),
         list(charToRaw("test_string1"),charToRaw("test_string2")))
 })
 
 test_that("chrkeys_to_rawkeys supports NA and NULL", {
-    expect_equal(chrkeys_to_rawkeys(c(NA_character_,"test")), list(NULL,charToRaw("test")))
+    expect_equal(chrkeys_to_rawkeys(c(NA_character_,"plain:test")), list(NULL,charToRaw("test")))
     expect_equal(chrkeys_to_rawkeys(character(0L)),list())
-    expect_equal(chrkeys_to_rawkeys(""),list(raw(0L)))
+    expect_equal(chrkeys_to_rawkeys("plain:"),list(raw(0L)))
     expect_null(chrkeys_to_rawkeys(NULL))
 })
 
 test_that("chrkeys_to_rawkeys supports percent encoding", {
-    expect_equal(chrkeys_to_rawkeys("test%64string"), list(charToRaw("test\x64string")))
-    expect_equal(chrkeys_to_rawkeys("%00test"), list(c(as.raw(0),charToRaw("test"))))
-    expect_equal(chrkeys_to_rawkeys("%FF%ff%00%00%00%00%00%00%30"),
+    expect_equal(chrkeys_to_rawkeys("plain:test%64string"), list(charToRaw("test\x64string")))
+    expect_equal(chrkeys_to_rawkeys("plain:%00test"), list(c(as.raw(0),charToRaw("test"))))
+    expect_equal(chrkeys_to_rawkeys("plain:%FF%ff%00%00%00%00%00%00%30"),
         list(as.raw(c(0xff,0xff,0,0,0,0,0,0,48))))
-    expect_equal(chrkeys_to_rawkeys("%ta%0T%af"),
+    expect_equal(chrkeys_to_rawkeys("plain:%ta%0T%af"),
         list(charToRaw("%ta%0T\xaf")))
 })
 
 test_that("chrkeys_to_rawkeys supports chunk keys", {
-    expect_equal(chrkeys_to_rawkeys(c("@-1:1:0:50","@-1:1:1:47:3","@-1:1:2:50","@-1:1:0:47:3",
-        "@-1:1:0:47:-1","@-1:1:0:47:-4")),
+    expect_equal(chrkeys_to_rawkeys(c("chunk:-1:1:0:50","chunk:-1:1:1:47:3",
+        "chunk:-1:1:2:50","chunk:-1:1:0:47:3",
+        "chunk:-1:1:0:47:-1","chunk:-1:1:0:47:-4")),
         list(as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,50)),
              as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,1,0,0,0,47,3)),
              as.raw(c(0xff,0xff,0xff,0xff,1,0,0,0,2,0,0,0,50)),
@@ -36,26 +37,41 @@ test_that("chrkeys_to_rawkeys supports chunk keys", {
 })
 
 test_that("chrkeys_to_rawkeys treats invalid chunk keys as strings", {
-    expect_equal(chrkeys_to_rawkeys("@0:0:0:0a"), list(charToRaw("@0:0:0:0a")))
-    expect_equal(chrkeys_to_rawkeys("@0:0:0:0-"), list(charToRaw("@0:0:0:0-")))
-    expect_equal(chrkeys_to_rawkeys("@0:0:0:0"), list(charToRaw("@0:0:0:0")))
-    expect_equal(chrkeys_to_rawkeys("@0:0:0:"), list(charToRaw("@0:0:0:")))
-    expect_equal(chrkeys_to_rawkeys("@0:0:0"), list(charToRaw("@0:0:0")))
-    expect_equal(chrkeys_to_rawkeys("@0:0:"), list(charToRaw("@0:0:")))
-    expect_equal(chrkeys_to_rawkeys("@0:0"), list(charToRaw("@0:0")))
-    expect_equal(chrkeys_to_rawkeys("@0:"), list(charToRaw("@0:")))
-    expect_equal(chrkeys_to_rawkeys("@0"), list(charToRaw("@0")))
-    expect_equal(chrkeys_to_rawkeys("@"), list(charToRaw("@")))
-    expect_equal(chrkeys_to_rawkeys("@0:a:0:0"), list(charToRaw("@0:a:0:0")))
-    expect_equal(chrkeys_to_rawkeys("@0:0:0a:0"), list(charToRaw("@0:0:0a:0")))
-    expect_equal(chrkeys_to_rawkeys("@0:0:0:100"), list(charToRaw("@0:0:0:100")))
-    expect_equal(chrkeys_to_rawkeys("@0:0:-1:44"), list(charToRaw("@0:0:-1:44")))
-    expect_equal(chrkeys_to_rawkeys("@0:0:3:44"), list(charToRaw("@0:0:3:44")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:0a"))
+    expect_equal(val, list(charToRaw("chunk:0:0:0:0a")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:0-"))
+    expect_equal(val, list(charToRaw("chunk:0:0:0:0-")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:0"))
+    expect_equal(val, list(charToRaw("chunk:0:0:0:0")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:"))
+    expect_equal(val, list(charToRaw("chunk:0:0:0:")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0"))
+    expect_equal(val, list(charToRaw("chunk:0:0:0")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:"))
+    expect_equal(val, list(charToRaw("chunk:0:0:")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0"))
+    expect_equal(val, list(charToRaw("chunk:0:0")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:"))
+    expect_equal(val, list(charToRaw("chunk:0:")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0"))
+    expect_equal(val, list(charToRaw("chunk:0")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:"))
+    expect_equal(val, list(charToRaw("chunk:")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:a:0:0"))
+    expect_equal(val, list(charToRaw("chunk:0:a:0:0")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0a:0"))
+    expect_equal(val, list(charToRaw("chunk:0:0:0a:0")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:100"))
+    expect_equal(val, list(charToRaw("chunk:0:0:0:100")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:-1:44"))
+    expect_equal(val, list(charToRaw("chunk:0:0:-1:44")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:3:44"))
+    expect_equal(val, list(charToRaw("chunk:0:0:3:44")))
 })
 
 test_that("chrkeys_to_rawkeys signals errors", {
-    long_string1 <- paste0(rep("%61",10000),collapse='')
-    long_string2 <- paste0(rep("a",10000),collapse='')
+    long_string1 <- paste0("plain:", paste0(rep("%61",10000),collapse=''))
+    long_string2 <- paste0("plain:", paste0(rep("a",10000),collapse=''))
     expect_error(chrkeys_to_rawkeys(long_string1), "exceeded buffer space")
     expect_error(chrkeys_to_rawkeys(long_string2), "exceeded buffer space")
     expect_error(.Call(Cchrkeys_to_rawkeys, list("a","b")), "not a vector of strings")

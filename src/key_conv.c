@@ -107,6 +107,14 @@ static size_t str_to_int(const char *str, size_t len, int *out) {
     return ret;
 }
 
+static bool has_prefix(const char *key, size_t key_len, char *prefix) {
+    size_t prefix_len = strlen(prefix);
+    if(key_len < prefix_len) {
+        return false;
+    }
+    return(strncmp(key, prefix, prefix_len) == 0);
+}
+
 // Percent encode keys.
 // Writes up to buffer_len-1 characters into buffer.
 // Appends '\0' to written string.
@@ -197,6 +205,37 @@ static size_t percent_decode(const char *key, size_t key_len, unsigned char *buf
     return ret_len;
 }
 
+size_t decode_chunk_prefix(const char *key, size_t key_len, int *x, int *z, unsigned int *dimension) {
+    size_t sz = 0;
+    size_t i = 0;
+
+    // decode x
+    sz = str_to_int(key+i, key_len-i, x);
+    i += sz;
+    if(sz == 0 || i == key_len || key[i] != ':') {
+        return 0;
+    }
+    i += 1;
+    // decode z
+    sz = str_to_int(key+i, key_len-i, z);
+    i += sz;
+    if(sz == 0 || i == key_len || key[i] != ':') {
+        return 0;
+    }
+    i += 1;
+    // decode dimension
+    sz = str_to_uint(key+i, key_len-i, dimension);
+    i += sz;
+    if(sz == 0) {
+        return 0;
+    }
+    // validate dimension
+    if(*dimension > CHUNK_KEY_DIM_MAX) {
+        return 0;
+    }
+    return i;
+}
+
 size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, size_t buffer_len) {
     unsigned int u = 0;
     int d = 0;
@@ -209,26 +248,8 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
     size_t sz = 0;
     size_t i = 0;
 
-    if(key[i] != '@') {
-        return 0;
-    }
-    i += 1;
-    // decode x
-    sz = str_to_int(key+i, key_len-i, &x);
-    i += sz;
-    if(sz == 0 || i == key_len || key[i] != ':') {
-        return 0;
-    }
-    i += 1;
-    // decode z
-    sz = str_to_int(key+i, key_len-i, &z);
-    i += sz;
-    if(sz == 0 || i == key_len || key[i] != ':') {
-        return 0;
-    }
-    i += 1;
-    // decode dimension
-    sz = str_to_uint(key+i, key_len-i, &dimension);
+    // decode prefix
+    sz = decode_chunk_prefix(key, key_len, &x, &z, &dimension);
     i += sz;
     if(sz == 0 || i == key_len || key[i] != ':') {
         return 0;
@@ -260,7 +281,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
         return 0;
     } else if(tag > CHUNK_KEY_TAG_MAX && tag != CHUNK_KEY_LEGACY_VERSION_TAG) {
         return 0;
-    } else if(dimension > CHUNK_KEY_DIM_MAX) {
+    } else if(subtag < CHUNK_KEY_SUBCHUNK_MIN || subtag > CHUNK_KEY_SUBCHUNK_MAX) {
         return 0;
     }
 
@@ -284,7 +305,15 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
         buffer[i+1] = subtag;
     }
     return decode_len;
+}
 
+size_t digkey_decode(const char *key, size_t key_len, unsigned char *buffer, size_t buffer_len) {
+    return 0;
+}
+
+
+size_t actorkey_decode(const char *key, size_t key_len, unsigned char *buffer, size_t buffer_len) {
+    return 0;
 }
 
 // convert an internal rawkey to a human-readable format
@@ -327,10 +356,9 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
         break;
      default:
         {
-            if(strncmp((char *)key, RAWKEY_PREFIX_ACTOR, strlen(RAWKEY_PREFIX_ACTOR))==0) {
+            if(has_prefix((char *)key, key_len, RAWKEY_PREFIX_ACTOR)) {
                 key_type = ACTOR;
-            } else if(strncmp((char *)key, RAWKEY_PREFIX_ACTOR_DIGEST_KEYS,
-                strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS))==0) {
+            } else if(has_prefix((char *)key, key_len, RAWKEY_PREFIX_ACTOR_DIGEST_KEYS)) {
                 key_type = ACTOR_DIGEST_KEYS;
             } else {
                 key_type = PLAIN;
@@ -454,8 +482,6 @@ SEXP rawkeys_to_chrkeys(SEXP r_keys) {
 }
 
 // convert a human-readable key to a raw key
-// keys for chunk data are converted from @x:z:d:t-s
-// everything else is percent decoded.
 // Writes up to buffer_len characters into buffer.
 // Returns the total length of the encoding, even if all
 // characters were not written.
@@ -463,11 +489,41 @@ size_t chrkey_to_rawkey(const char *key, size_t key_len, unsigned char *buffer, 
     if(key_len == 0) {
         return 0;
     }
-    // check to see if it can be decoded as a key for chunk data
-    size_t ret = chunkkey_decode(key, key_len, buffer, buffer_len);
+    size_t ret = 0;
+    enum KEY_TYPE key_type = PLAIN;
+    if(has_prefix(key, key_len, CHRKEY_PREFIX_PLAIN)) {
+        key += strlen(CHRKEY_PREFIX_PLAIN);
+        key_len -= strlen(CHRKEY_PREFIX_PLAIN);
+    } else if(has_prefix(key, key_len, CHRKEY_PREFIX_CHUNK)) {
+        size_t len = strlen(CHRKEY_PREFIX_CHUNK);
+        key_type = CHUNK;
+        ret = chunkkey_decode(key+len, key_len-len, buffer, buffer_len);
+    } else if(has_prefix(key, key_len, CHRKEY_PREFIX_ACTOR)) {
+        size_t len = strlen(CHRKEY_PREFIX_ACTOR);
+        key_type = ACTOR;
+        ret = actorkey_decode(key+len, key_len-len, buffer, buffer_len);
+    } else if(has_prefix(key, key_len, CHRKEY_PREFIX_ACTOR_DIGEST_KEYS)) {
+        size_t len = strlen(CHRKEY_PREFIX_ACTOR_DIGEST_KEYS);
+        key_type = ACTOR_DIGEST_KEYS;
+        ret = digkey_decode(key+len, key_len-len, buffer, buffer_len);
+    } else {
+        Rf_warning("Unknown or missing prefix in key; assuming key is a plain key.");
+    }
+
+    // check to see if key has been decoded, otherwise assume plain key
     if(ret > 0) {
         return ret;
     }
+    if(key_type == PLAIN) {
+        /*noop*/;
+    } else if(key_type == CHUNK) {
+        Rf_warning("Invalid chunk key format; assuming key is a plain key.");
+    } else if(key_type == ACTOR) {
+        Rf_warning("Invalid actor key format; assuming key is a plain key.");
+    } else if(key_type == ACTOR_DIGEST_KEYS) {
+        Rf_warning("Invalid actor digest keys key format; assuming key is a plain key.");
+    }
+
     return percent_decode(key, key_len, buffer, buffer_len);    
 }
 
