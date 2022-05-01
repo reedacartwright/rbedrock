@@ -31,7 +31,7 @@ rawkeys_to_chrkeys <- function(keys) {
 #' @description
 #' Chunk keys are keys to chunk data. A chunk key has a format which indicates
 #' the chunk it holds data for and the type of data it holds. This format is
-#' either `@@x:z:d:t` or `@@x:z:d:t:s`, where `x` and `z` indicates the 
+#' either `chunk:x:z:d:t` or `chunk:x:z:d:t:s`, where `x` and `z` indicates the 
 #' coordinates of the chunk in chunk space, `d` indicates the dimension of
 #' the chunk, and `t` and `s` indicate the tag and subtag of the chunk.
 #'
@@ -47,18 +47,24 @@ NULL
 #'
 #' @rdname chunk_keys
 #' @examples
-#' parse_chunk_keys("@@0:0:0:47-1")
+#' parse_chunk_keys("chunk:0:0:0:44")
+#' parse_chunk_keys("chunk:0:0:0:47:1")
 #' @export
 parse_chunk_keys <- function(keys) {
     vec_assert(keys, character())
-    m <- keys %>% .subset_chunk_keys() %>% .split_chunk_keys()
+    keys <- .subset_chunk_keys(keys) 
+    m <- str_split(keys, fixed(":"), simplify=TRUE)
+    m <- m[,-1, drop=FALSE]
+    if(ncol(m) == 4) {
+        m <- cbind(m, NA_character_)
+    }
 
-    tibble::tibble(key = m[, 1],
-        x = as.integer(m[, 2]),
-        z = as.integer(m[, 3]),
-        dimension = as.integer(m[, 4]),
-        tag = chunk_tag_str(as.integer(m[, 5])),
-        subtag = as.integer(m[, 6])
+    tibble::tibble(key = keys,
+        x = as.integer(m[, 1]),
+        z = as.integer(m[, 2]),
+        dimension = as.integer(m[, 3]),
+        tag = chunk_tag_str(as.integer(m[, 4])),
+        subtag = as.integer(m[, 5])
     )
 }
 
@@ -85,8 +91,8 @@ create_chunk_keys <- function(x, z, dimension, tag, subtag) {
     }
     args <- vec_recycle_common(x,z,dimension,tag,subtag)
     tag <- str_c(args[[4]], args[[5]], sep=":") %|% as.character(args[[4]])
-    ret <- str_glue("@{args[[1]]}:{args[[2]]}:{args[[3]]}:{tag}")
-    as.character(ret)
+
+    str_c("chunk", args[[1]], args[[2]], args[[3]], tag, sep=":")
 }
 
 #' @description
@@ -135,6 +141,7 @@ chunk_origins <- function(keys) {
                        # "Chunk Originally generated before Caves and Cliffs"
                        # "isGeneratedPreCavesandCliffsBlending"
     "BlendingBiomeHeight" = 62L,
+    "MetaDataHash" = 63L,
     "LegacyVersion" = 118L, # replaced by 44
 
     # future proofing
@@ -148,8 +155,6 @@ chunk_origins <- function(keys) {
     "40" = 40L,
     "41" = 41L,
     "42" = 42L,
-    "62" = 62L,
-    "63" = 63L,
     "64" = 64L
 )
 .CHUNK_TAGS_INV <- rep(NA_character_, 128)
@@ -174,7 +179,6 @@ chunk_tag_int <- function(tags) {
     unname(.CHUNK_TAGS[tags])
 }
 
-.CHUNK_KEY_RE = "^@[^:]+:[^:]+:[^:]+:[^:]+(?::[^:]+)?$"
 .CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:]+)(?::([^:]+))?$"
 .CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?::([^:]+))?$"
 .CHUNK_STEM_MATCH = "^@([^:]+):([^:]+):([^:]+)$"
@@ -186,7 +190,7 @@ chunk_tag_int <- function(tags) {
 }
 
 .subset_chunk_keys <- function(keys, negate = FALSE) {
-   str_subset(keys, .CHUNK_KEY_RE, negate = negate)
+   str_subset(keys, "^chunk:", negate = negate)
 }
 
 .split_chunk_keys <- function(keys) {

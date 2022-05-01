@@ -27,11 +27,27 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define CHRKEY_PREFIX_CHUNK "chunk:"
+#define CHRKEY_PREFIX_PLAIN "plain:"
+#define CHRKEY_PREFIX_ACTOR "actor:"
+#define CHRKEY_PREFIX_ACTOR_DIGEST_KEYS "acdat:" //Not sure about this one
+
+#define RAWKEY_PREFIX_ACTOR "actorprefix"
+#define RAWKEY_PREFIX_ACTOR_DIGEST_KEYS "digp"
+
 #define CHUNK_KEY_TAG_MIN 33
 #define CHUNK_KEY_TAG_MAX 64
 #define CHUNK_KEY_LEGACY_VERSION_TAG 118
 #define CHUNK_KEY_DIM_MAX 2
+#define CHUNK_KEY_SUBCHUNK_MIN -32
 #define CHUNK_KEY_SUBCHUNK_MAX 31
+
+enum KEY_TYPE {
+    PLAIN = 0,
+    CHUNK,
+    ACTOR,
+    ACTOR_DIGEST_KEYS
+};
 
 static char encode_hex(unsigned char x) {
     x = x & 15;
@@ -103,7 +119,7 @@ static size_t percent_encode(const unsigned char *key, size_t key_len, char *buf
     int i = 0;
     for(; i != key_len; ++i) {
         unsigned char ch = key[i];
-        if(ch <= 0x20 || ch >= 0x7F || ch == '%' || ch == '@') {
+        if(ch <= 0x20 || ch >= 0x7F || ch == '%') {
             break;
         }
     }
@@ -120,7 +136,7 @@ static size_t percent_encode(const unsigned char *key, size_t key_len, char *buf
     for(; i != key_len; ++i) {
         unsigned char ch = key[i];
 
-        if(ch <= 0x20 || ch >= 0x7F || ch == '%' || ch == '@') {
+        if(ch <= 0x20 || ch >= 0x7F || ch == '%') {
             if(buffer_len > ret_len+3 ) {
                 buffer[ret_len] = '%';
                 buffer[ret_len+1] = encode_hex(ch >> 4);
@@ -272,7 +288,11 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
 }
 
 // convert an internal rawkey to a human-readable format
-// keys for chunk data are converted to @x:z:d:t:s
+//  - chunk:x:z:d:t:s
+//  - plain:~local_player
+//  - actor:0000000000000100
+//  - acdat:x:z:d
+
 // everything else is percent encoded.
 // Writes up to buffer_len-1 characters into buffer.
 // Appends '\0' to written string.
@@ -284,49 +304,109 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
     int z = 0;
     signed char tag = 0;
     signed char subtag = 0;
-    bool is_chunk_key = true;
     bool has_subtag = false;
+    size_t ret_val = 0;
 
+    enum KEY_TYPE key_type;
+
+    // Detect key type
     switch(key_len) {
-    case 10:
+     case 10:
         subtag = key[9];
         has_subtag = true;
-    case 9:
+     case  9:
         tag = key[8];
-        memcpy(&x, key + 0, 4);
-        memcpy(&z, key + 4, 4);
+        key_type = CHUNK;
         break;
-    case 14:
+     case 14:
         subtag = key[13];
         has_subtag = true;
-    case 13:
+     case 13:
         tag = key[12];
-        memcpy(&x, key + 0, 4);
-        memcpy(&z, key + 4, 4);
-        memcpy(&dimension, key + 8, 4);
+        key_type = CHUNK;
         break;
-    default:
-        is_chunk_key = false;
+     default: {
+        if(strncmp((char *)key, RAWKEY_PREFIX_ACTOR, strlen(RAWKEY_PREFIX_ACTOR))==0) {
+            key_type = ACTOR;
+            key += strlen(RAWKEY_PREFIX_ACTOR);
+            key_len -= strlen(RAWKEY_PREFIX_ACTOR);
+        } else if(strncmp((char *)key, RAWKEY_PREFIX_ACTOR_DIGEST_KEYS,
+            strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS))==0) {
+            key_type = ACTOR_DIGEST_KEYS;
+            key += strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS);
+            key_len -= strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS);
+        } else {
+            key_type = PLAIN;
+        }
+        break;
+     }
     }
-    if(is_chunk_key) {
+    // validate data
+    if(key_type == CHUNK) {
         if(tag < CHUNK_KEY_TAG_MIN) {
-            is_chunk_key = false;
+            key_type = PLAIN;
         } else if(tag > CHUNK_KEY_TAG_MAX && tag != CHUNK_KEY_LEGACY_VERSION_TAG) {
-            is_chunk_key = false;
-        } else if(dimension > CHUNK_KEY_DIM_MAX) {
-            is_chunk_key = false;
-        } else if(subtag != -1 && subtag > CHUNK_KEY_SUBCHUNK_MAX) {
-            is_chunk_key = false;
+            key_type = PLAIN;
+        } else if(subtag < CHUNK_KEY_SUBCHUNK_MIN || subtag > CHUNK_KEY_SUBCHUNK_MAX) {
+            key_type = PLAIN;
+        }
+    } else if(key_type == ACTOR_DIGEST_KEYS) {
+        if(key_len != 8 && key_len != 12) {
+            key_type = PLAIN;
+        }
+    } else if(key_type == ACTOR) {
+        if(key_len != 8) {
+            key_type = PLAIN;
         }
     }
-    if(!is_chunk_key) {
-        return percent_encode(key, key_len, buffer, buffer_len);
-    } else if(has_subtag) {
-        return snprintf(buffer, buffer_len, "@%d:%d:%u:%u:%d", x, z, dimension,
-                                (unsigned int)tag, (int)subtag);
+
+    // extract chunk_prefix coordinates
+    if(key_type == CHUNK || key_type == ACTOR_DIGEST_KEYS) {
+        memcpy(&x, key + 0, 4);
+        memcpy(&z, key + 4, 4);
+        if(key_len >= 12) {
+            memcpy(&dimension, key + 8, 4);
+            // validate dimension
+            if(dimension > CHUNK_KEY_DIM_MAX) {
+                key_type = PLAIN;
+            }
+        }
     }
-    return snprintf(buffer, buffer_len, "@%d:%d:%u:%u", x, z, dimension,
-                                (unsigned int)tag);
+
+    if(key_type == CHUNK && has_subtag) {
+        return snprintf(buffer, buffer_len, CHRKEY_PREFIX_CHUNK "%d:%d:%u:%u:%d", x, z, dimension,
+            (unsigned int)tag, (int)subtag);
+    } else if(key_type == CHUNK) {
+        return snprintf(buffer, buffer_len, CHRKEY_PREFIX_CHUNK "%d:%d:%u:%u", x, z, dimension,
+            (unsigned int)tag);
+    } else if(key_type == ACTOR_DIGEST_KEYS) {
+        return snprintf(buffer, buffer_len,
+                CHRKEY_PREFIX_ACTOR_DIGEST_KEYS "%d:%d:%u", x, z, dimension);
+    } else if(key_type == ACTOR) {
+        size_t prefix_len = strlen(CHRKEY_PREFIX_ACTOR);
+        if(buffer_len < prefix_len+2*8+1) {
+            memcpy(buffer, CHRKEY_PREFIX_ACTOR, prefix_len);
+            buffer += prefix_len;
+            for(int i=0; i < 8; ++i) {
+                unsigned char ch = key[i];
+                buffer[0] = encode_hex(ch >> 4);
+                buffer[1] = encode_hex(ch & 0xF);
+                buffer += 2;
+            }
+            buffer[0] = '\0';
+        }
+        return prefix_len+2*8+1;
+    }
+    // Plain keys
+    size_t prefix_len = strlen(CHRKEY_PREFIX_PLAIN);
+    if(prefix_len < buffer_len) {
+        memcpy(buffer, CHRKEY_PREFIX_PLAIN, prefix_len);
+        buffer += prefix_len;
+        buffer_len -= prefix_len;
+    } else {
+        buffer_len = 0;
+    }
+    return prefix_len + percent_encode(key, key_len, buffer, buffer_len);
 }
 
 // Take a VECSXP of raw, internal keys and covert them to human-readable keys.
