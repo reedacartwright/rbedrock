@@ -30,7 +30,7 @@
 #define CHRKEY_PREFIX_CHUNK "chunk:"
 #define CHRKEY_PREFIX_PLAIN "plain:"
 #define CHRKEY_PREFIX_ACTOR "actor:"
-#define CHRKEY_PREFIX_ACTOR_DIGEST_KEYS "acdat:" //Not sure about this one
+#define CHRKEY_PREFIX_ACTOR_DIGEST_KEYS "acdig:" //Not sure about this one
 
 #define RAWKEY_PREFIX_ACTOR "actorprefix"
 #define RAWKEY_PREFIX_ACTOR_DIGEST_KEYS "digp"
@@ -43,10 +43,10 @@
 #define CHUNK_KEY_SUBCHUNK_MAX 31
 
 enum KEY_TYPE {
-    PLAIN = 0,
-    CHUNK,
-    ACTOR,
-    ACTOR_DIGEST_KEYS
+    PLAIN = 0,        // plain:~local_player
+    CHUNK,            // chunk:x:z:d:t:s
+    ACTOR,            // actor:0000000000000100
+    ACTOR_DIGEST_KEYS // acdat:x:z:d
 };
 
 static char encode_hex(unsigned char x) {
@@ -205,6 +205,8 @@ static size_t percent_decode(const char *key, size_t key_len, unsigned char *buf
     return ret_len;
 }
 
+// decode a prefix in the format of x:z:d
+//  returns how many bytes from key were read.
 size_t decode_chunk_prefix(const char *key, size_t key_len, int *x, int *z, unsigned int *dimension) {
     size_t sz = 0;
     size_t i = 0;
@@ -236,6 +238,9 @@ size_t decode_chunk_prefix(const char *key, size_t key_len, int *x, int *z, unsi
     return i;
 }
 
+// decode x:z:dimension:tag and x:z:dimension:tag:subtag
+// writes decoding into buffer and returns the number of byte written
+// if buffer is too small, it returns the number of bytes that would be written
 size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, size_t buffer_len) {
     unsigned int u = 0;
     int d = 0;
@@ -307,20 +312,74 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
     return decode_len;
 }
 
+// decode x:z:dimension
+// writes decoding into buffer and returns the number of byte written
+// if buffer is too small, it returns the number of bytes that would be written
 size_t digkey_decode(const char *key, size_t key_len, unsigned char *buffer, size_t buffer_len) {
-    return 0;
+    int x = 0, z = 0;
+    unsigned int dimension = 0;
+
+    // decode prefix
+    size_t sz = decode_chunk_prefix(key, key_len, &x, &z, &dimension);
+    if(sz == 0 || key_len > sz) {
+        return 0;
+    }
+
+    const size_t prefix_len = strlen(RAWKEY_PREFIX_ACTOR_DIGEST_KEYS);
+    size_t decode_len = prefix_len+8+4*(dimension != 0);
+    if(buffer_len < decode_len) {
+        return decode_len; // # nocov
+    }
+    size_t i=0;
+    // prefix
+    memcpy(buffer, RAWKEY_PREFIX_ACTOR_DIGEST_KEYS, prefix_len);
+    i += prefix_len;
+    // x
+    memcpy(buffer+i,&x,4);
+    i += 4;
+    // z
+    memcpy(buffer+i,&z,4);
+    i += 4;
+    // dimension
+    if(dimension > 0) {
+        memcpy(buffer+i,&dimension,4);
+        i += 4;
+    }
+
+    return decode_len;
 }
 
 
+// decode aabbccddeeffgghh
+// writes decoding into buffer and returns the number of byte written
+// if buffer is too small, it returns the number of bytes that would be written
 size_t actorkey_decode(const char *key, size_t key_len, unsigned char *buffer, size_t buffer_len) {
-    return 0;
-}
 
-// convert an internal rawkey to a human-readable format
-//  - chunk:x:z:d:t:s
-//  - plain:~local_player
-//  - actor:0000000000000100
-//  - acdat:x:z:d
+    // validate key
+    if(key_len != 16) {
+        return 0;
+    }
+    for(int i=0;i<16;++i) {
+        unsigned char a = decode_hex_digit(key[i]);
+        if(!(0 <= a && a < 16)) {
+            return 0;
+        }
+    }
+    const size_t prefix_len = strlen(RAWKEY_PREFIX_ACTOR);
+    size_t decode_len = prefix_len+8;
+    if(buffer_len < decode_len) {
+        return decode_len; // # nocov
+    }
+    memcpy(buffer, RAWKEY_PREFIX_ACTOR, prefix_len);
+    for(int i=0;i<16;i+=2) {
+        unsigned char a = decode_hex_digit(key[i]);
+        unsigned char b = decode_hex_digit(key[i+1]);
+        unsigned char ch = (unsigned char)(a*16+b);
+        buffer[prefix_len+i/2] = ch;
+    }
+
+    return decode_len;
+}
 
 // everything else is percent encoded.
 // Writes up to buffer_len-1 characters into buffer.
@@ -438,7 +497,7 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
         buffer += prefix_len;
         buffer_len -= prefix_len;
     } else {
-        buffer_len = 0;
+        buffer_len = 0; // # nocov
     }
     return prefix_len + percent_encode(key, key_len, buffer, buffer_len);
 }
