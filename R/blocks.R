@@ -706,8 +706,7 @@ write_subchunk_layers_value <- function(object, version=9L, missing_offset=NA_in
 #' @export
 #' @rdname SubchunkBlocks
 subchunk_origins <- function(keys) {
-    pos <- .split_chunk_keys(keys)[,c(2,6,3), drop = FALSE]
-    mode(pos) <- "integer"
+    pos <- .extract_chunk_key_components(keys, which=c(1,5,2))
     pos*16L
 }
 

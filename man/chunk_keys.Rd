@@ -40,7 +40,7 @@ chunk_tag_int(tags)
 \description{
 Chunk keys are keys to chunk data. A chunk key has a format which indicates
 the chunk it holds data for and the type of data it holds. This format is
-either \verb{@x:z:d:t} or \verb{@x:z:d:t:s}, where \code{x} and \code{z} indicates the
+either \code{chunk:x:z:d:t} or \code{chunk:x:z:d:t:s}, where \code{x} and \code{z} indicates the
 coordinates of the chunk in chunk space, \code{d} indicates the dimension of
 the chunk, and \code{t} and \code{s} indicate the tag and subtag of the chunk.
 
@@ -60,7 +60,8 @@ corner of keys.
 representations of chunk tags.
 }
 \examples{
-parse_chunk_keys("@0:0:0:47-1")
+parse_chunk_keys("chunk:0:0:0:44")
+parse_chunk_keys("chunk:0:0:0:47:1")
 create_chunk_keys(0, 0, 0, 47, 1)
 
 }

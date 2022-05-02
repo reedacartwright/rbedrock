@@ -100,9 +100,7 @@ create_chunk_keys <- function(x, z, dimension, tag, subtag) {
 #' @export
 #' @rdname chunk_keys
 chunk_positions <- function(keys) {
-    pos <- .split_chunk_keys(keys)[,2:3, drop = FALSE]
-    mode(pos) <- "integer"
-    pos
+    .extract_chunk_key_components(keys, which=1:2)
 }
 
 #' @description
