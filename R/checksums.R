@@ -52,7 +52,7 @@ get_checksums_value <- function(db, x, z, dimension) {
 #' @rdname Checksums
 #' @export
 update_checksums_data <- function(db, x, z, dimension) {
-    keys <- .process_key_args(x,z,dimension, tag=59L, stop_if_filtered = TRUE)
+    keys <- .process_key_args(x, z, dimension, tag=59L, stop_if_filtered = TRUE)
     purrr::map(keys, .update_checksums_value_impl, db=db)
     invisible(db)
 }
@@ -98,14 +98,20 @@ read_checksums_value <- function(rawdata) {
 #' @rdname Checksums
 #' @export
 write_checksums_value <- function(object) {
-    parsed_names <- stringr::str_match(names(object), .CHUNK_KEY_TAG_MATCH)
-    stopifnot(!any(is.na(parsed_names[,1])))
-    tag <- as.integer(parsed_names[,2])
-    subtag <- as.integer(parsed_names[,3])
-    # check for NAs introduced by coercion
-    stopifnot(all(is.na(tag) == is.na(parsed_names[,2]) & is.na(subtag) == is.na(parsed_names[,3])))
-
-    subtag[is.na(subtag)] <- 0L
+    n <- names(object)
+    if(any(.is_chunk_key(n))) {
+        m <- .extract_chunk_key_components(n, 4:5)
+    } else if(length(n)) {
+        m <- str_split(n, fixed(":"), simplify=TRUE)
+        mode(m) <- "integer"
+    } else {
+        m <- array(integer(), c(0,2))
+    }
+    tag <- m[,1]
+    subtag <- m[,2] %|% 0L
+    if(any(is.na(tag))) {
+        abort("Invalid chunk key passed to write_chunksums_value.")
+    }
 
     hash <- purrr::map(object, function(x) {
         h <- strsplit(x, character(0L))[[1]]
@@ -119,26 +125,16 @@ write_checksums_value <- function(object) {
             as.raw(subtag[i]), hash[[i]])
     })
     c(ret, purrr::flatten_raw(retp))
-
-
-    # for(i in seq_along(object)) {
-    #     ret <- c(ret,
-    #         writeBin(tag[i], raw(), size=2L, endian="little"),
-    #         as.raw(subtag[i]),
-    #         hash[[i]])
-    # }
-    #ret
 }
 
 .update_checksums_value_impl <- function(db, key) {
     # 45, 47, 49, 50 all need to be updated if they exist
     stem <- stringr::str_replace(key, ":59$", "")
-    chunk_keys <- get_keys(db, stem)
+    chunk_keys <- get_keys(db, starts_with=stem)
     chunk_keys <- stringr::str_subset(chunk_keys, ":(?:47:[^:]+|45|49|50)$")
 
     dat <- get_values(db, chunk_keys)
     obj <- purrr::map(dat, .checksum_impl)
-    names(obj) <- .trim_stem_from_chunk_key(names(obj))
 
     val <- write_checksums_value(obj)
     put_value(db, key, val)

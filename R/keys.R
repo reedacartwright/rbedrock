@@ -179,22 +179,26 @@ chunk_tag_int <- function(tags) {
     unname(.CHUNK_TAGS[tags])
 }
 
-.CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:]+)(?::([^:]+))?$"
-.CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?::([^:]+))?$"
-.CHUNK_STEM_MATCH = "^@([^:]+):([^:]+):([^:]+)$"
-.CHUNK_STEM_MATCH2 = "^@([^:]+):([^:]+):([^:]+)(?::([^:]+)(?::([^:]+))?)?$"
+# .CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:]+)(?::([^:]+))?$"
+# .CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?::([^:]+))?$"
+# .CHUNK_STEM_MATCH = "^@([^:]+):([^:]+):([^:]+)$"
+# .CHUNK_STEM_MATCH2 = "^@([^:]+):([^:]+):([^:]+)(?::([^:]+)(?::([^:]+))?)?$"
 
-.is_chunk_key <- function(keys, tag = "[^:]+", subtag = "(?::[^:]+)?") {
-    re <- str_c("^@[^:]+:[^:]+:[^:]+:", tag, subtag)
-    str_detect(keys, re)
+.is_chunk_key <- function(keys) {
+    str_starts(keys, pattern=fixed("chunk:"))
 }
 
 .subset_chunk_keys <- function(keys, negate = FALSE) {
    str_subset(keys, "^chunk:", negate = negate)
 }
 
-.split_chunk_keys <- function(keys) {
-    str_match(keys, .CHUNK_KEY_MATCH)
+.extract_chunk_key_components <- function(keys, which=1:5) {
+    m <- str_split(keys, fixed(":"), simplify=TRUE)
+    is_chunk <- m[,1] == "chunk"
+    ret <- m[, which+1, drop=FALSE]
+    ret[!is_chunk,] <- NA_character_
+    mode(ret) <- "integer"
+    ret
 }
 
 .split_chunk_stems <- function(keys) {
@@ -202,8 +206,7 @@ chunk_tag_int <- function(tags) {
 }
 
 .get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
-    m <- .split_chunk_keys(keys)
-    res <- as.integer(m[,5])
+    res <- c(.extract_chunk_key_components(keys, 4))
     if(as_string) {
         res <- chunk_tag_str(res)
     }
@@ -211,13 +214,11 @@ chunk_tag_int <- function(tags) {
 }
 
 .get_subtag_from_chunk_key <- function(keys) {
-    m <- .split_chunk_keys(keys)
-    as.integer(m[,6])
+    c(.extract_chunk_key_components(keys, 5))
 }
 
 .get_dimension_from_chunk_key <- function(keys) {
-    m <- .split_chunk_keys(keys)
-    as.integer(m[,4])
+    c(.extract_chunk_key_components(keys, 3))
 }
 
 .trim_stem_from_chunk_key <- function(keys) {
@@ -229,15 +230,22 @@ chunk_tag_int <- function(tags) {
 }
 
 .check_chunk_key_tag <- function(keys, tag, subtag, silent = FALSE) {
-    if(missing(subtag)) {
-        subtag <- if(tag == 47L) "(?::[^:]+)?" else ""
+    vec_assert(tag, size = 1)
+    if(!missing(subtag)) {
+        vec_assert(subtag, size = 1)
+        m <- .extract_chunk_key_components(keys, 4:5)
+        b <- (m[,1] == tag) & (m[,2] == subtag)
+    } else {
+        m <- .extract_chunk_key_components(keys, 4)
+        b <- (m[,1] == tag)
     }
-    b <- .is_chunk_key(keys, tag=tag, subtag=subtag)
-    isgood <- all(b)
+    # keys that aren't chunk keys or are malformed will may have NA here
+    b <- b & !is.na(b)
+    isgood <- isTRUE(all(b))
     if(isFALSE(silent) && !isgood) {
         abort(str_glue("Invalid key: tag is not {tag}."))
     }
-    isgood
+    b
 }
 
 .process_key_args <- function(x, z, d, tag, subtag,
@@ -246,17 +254,7 @@ chunk_tag_int <- function(tags) {
     if(missing(z) && is.character(x)) {
         # if tag exists, we are going to filter on data type
         if(!missing(tag)) {
-            vec_assert(tag, size = 1)
-            if(missing(subtag)) {
-                subtag <- if(tag == 47L) "(?::[^:]+)?" else ""
-            }
-            vec_assert(subtag, size = 1)
-
-            b <- .is_chunk_key(x, tag=tag, subtag=subtag)
-            isgood <- all(b)
-            if(stop_if_filtered && !isgood) {
-                abort(str_c("Some keys passed to .process_keys_args are not of type ", tag))
-            }
+            b <- .check_chunk_key_tag(x, tag, subtag, silent=!stop_if_filtered)
             x <- x[b]
         }
         return(x)
@@ -286,13 +284,13 @@ chunk_tag_int <- function(tags) {
     }
     vec_assert(starts_with, character(), 1L)
 
-    if(str_starts(starts_with, pattern=fixed("@"))) {
+    if(.is_chunk_key(starts_with)) {
         # Chunk-key prefixes must refer to a chunk
         v <- str_count(starts_with, fixed(":"))
-        if(v < 2) {
+        if(v < 3) {
             abort("Argument 'starts_with' does not identify a chunk")
         }
-        if(v == 2) {
+        if(v == 3) {
             #append a dummy tag
             starts_with <- paste0(starts_with, ":44")
             res <- chrkeys_to_rawkeys(starts_with)[[1]]
