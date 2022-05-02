@@ -11,7 +11,7 @@ test_that("Data3D is chunk tag 43", {
 })
 
 test_that("Reading and Writing 3DMaps data works", {
-    dat <- get_value(db, "@0:0:0:43")
+    dat <- get_value(db, "chunk:0:0:0:43")
 
     val <- read_3dmaps_value(dat)
     expect_named(val, c("height_map", "biome_map"))

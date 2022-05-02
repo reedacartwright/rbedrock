@@ -194,6 +194,9 @@ chunk_tag_int <- function(tags) {
 
 .extract_chunk_key_components <- function(keys, which=1:5) {
     m <- str_split(keys, fixed(":"), simplify=TRUE)
+    if(length(m) == 0) {
+        dim(m) <- c(0L,6L)
+    }
     is_chunk <- m[,1] == "chunk"
     ret <- m[, which+1, drop=FALSE]
     ret[!is_chunk,] <- NA_character_
@@ -202,7 +205,7 @@ chunk_tag_int <- function(tags) {
 }
 
 .split_chunk_stems <- function(keys) {
-    str_match(keys, .CHUNK_STEM_MATCH2)
+    .extract_chunk_key_components(keys, 1:3)
 }
 
 .get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
@@ -222,11 +225,11 @@ chunk_tag_int <- function(tags) {
 }
 
 .trim_stem_from_chunk_key <- function(keys) {
-    str_replace(keys, "^@[^:]+:[^:]+:[^:]+:", "")
+    str_replace(keys, "^chunk:[^:]+:[^:]+:[^:]+:", "")
 }
 
 .get_stem_from_chunk_key <- function(keys) {
-    str_extract(keys, "^@[^:]+:[^:]+:[^:]+")
+    str_extract(keys, "^chunk:[^:]+:[^:]+:[^:]+")
 }
 
 .check_chunk_key_tag <- function(keys, tag, subtag, silent = FALSE) {
@@ -273,8 +276,8 @@ chunk_tag_int <- function(tags) {
         return(x[b])
     }
     args <- vec_recycle_common(x, z, d)
-    ret <- str_glue("@{args[[1]]}:{args[[2]]}:{args[[3]]}")
-    as.character(ret)
+
+    str_c("chunk", args[[1]], args[[2]], args[[3]], sep=":")
 }
 
 #' @importFrom utils head

@@ -118,7 +118,7 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, version=9L) {
     for(i in seq_along(pos)) {
         mat[,((pos[i]-bottom)*16)+1:16,] <- dat[[i]]
     }
-    o <- as.integer(.split_chunk_stems(starts_with)[2:3])
+    o <- as.integer(.split_chunk_stems(starts_with)[1:2])
     attr(mat,"origin") <- c(o[1], bottom, o[2])*16L
     mat
 }
