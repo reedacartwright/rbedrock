@@ -21,7 +21,7 @@ test_that("get_checksums_data returns all Checksums data", {
 })
 
 test_that("get_checksums_data returns specific Checksums data", {
-    keys <- c("@36:16:0:59", "fake_data", "@37:15:0:59")
+    keys <- c("chunk:36:16:0:59", "fake_data", "chunk:37:15:0:59")
     dat <- get_checksums_data(db, keys)
     expect_vector(dat, list(), 2L)
     expect_named(dat, keys[-2])
@@ -31,15 +31,15 @@ test_that("get_checksums_data returns specific Checksums data", {
 })
 
 test_that("get_checksums_value returns a single record", {
-    dat <- get_checksums_value(db, "@36:16:0:59")
+    dat <- get_checksums_value(db, "chunk:36:16:0:59")
     expect_vector(dat, character(), 7L)
     expect_named(dat)
 
-    expect_error(get_checksums_value(db, c("@36:16:0:59","@37:15:0:59")))
+    expect_error(get_checksums_value(db, c("chunk:36:16:0:59","chunk:37:15:0:59")))
 })
 
 test_that("update_checksums_data works", {
-    keys <- c("@36:16:0:59", "@37:15:0:59")
+    keys <- c("chunk:36:16:0:59", "chunk:37:15:0:59")
     original_dat <- get_checksums_data(db, keys)
     delete_values(db, keys)
     expect_equal(has_values(db,keys), setNames(c(FALSE,FALSE),keys))
@@ -61,7 +61,7 @@ test_that("update_checksums_data() and get_checksums_value() handle missing data
 })
 
 test_that("update_checksums_data throws an error if filtering", {
-    expect_error(update_checksums_data(db,c("@36:16:0:47:0", "@37:15:0:59")))
+    expect_error(update_checksums_data(db,c("chunk:36:16:0:47:0", "chunk:37:15:0:59")))
 })
 
 helper_checksum_impl <- function(x) {

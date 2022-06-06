@@ -32,12 +32,12 @@ test_that("put_biomes_value accepts integers", {
 })
 
 test_that("put_biomes_values accepts strings", {
-    keys <- c("@37:5:0:45","@37:6:0:45")
+    keys <- c("chunk:37:5:0:45","chunk:37:6:0:45")
     put_biomes_values(db, keys, values="plains")
 
     new_dat <- list(
-        `@37:5:0:45` = matrix("plains", 16, 16),
-        `@37:6:0:45` = matrix("plains", 16, 16)
+        `chunk:37:5:0:45` = matrix("plains", 16, 16),
+        `chunk:37:6:0:45` = matrix("plains", 16, 16)
     )
 
     dat <- get_biomes_data(db, keys)
@@ -45,12 +45,12 @@ test_that("put_biomes_values accepts strings", {
 })
 
 test_that("put_biomes_values accepts integers", {
-    keys <- c("@37:5:0:45","@37:6:0:45")
+    keys <- c("chunk:37:5:0:45","chunk:37:6:0:45")
     put_biomes_values(db, keys, values=2L)
 
     new_dat <- list(
-        `@37:5:0:45` = matrix(2L, 16, 16),
-        `@37:6:0:45` = matrix(2L, 16, 16)
+        `chunk:37:5:0:45` = matrix(2L, 16, 16),
+        `chunk:37:6:0:45` = matrix(2L, 16, 16)
     )
 
     dat <- get_biomes_data(db, keys, return_names = FALSE)

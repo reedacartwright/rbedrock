@@ -118,7 +118,7 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, version=9L) {
     for(i in seq_along(pos)) {
         mat[,((pos[i]-bottom)*16)+1:16,] <- dat[[i]]
     }
-    o <- as.integer(.split_chunk_stems(starts_with)[2:3])
+    o <- as.integer(.split_chunk_stems(starts_with)[1:2])
     attr(mat,"origin") <- c(o[1], bottom, o[2])*16L
     mat
 }
@@ -706,8 +706,7 @@ write_subchunk_layers_value <- function(object, version=9L, missing_offset=NA_in
 #' @export
 #' @rdname SubchunkBlocks
 subchunk_origins <- function(keys) {
-    pos <- .split_chunk_keys(keys)[,c(2,6,3), drop = FALSE]
-    mode(pos) <- "integer"
+    pos <- .extract_chunk_key_components(keys, which=c(1,5,2))
     pos*16L
 }
 

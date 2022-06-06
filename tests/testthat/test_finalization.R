@@ -18,19 +18,19 @@ test_that("get_finalization_data returns all Finalization data", {
 })
 
 test_that("get_finalization_data returns specific Finalization data", {
-    keys <- c("@36:16:0:54", "fake_data", "@37:15:0:54")
+    keys <- c("chunk:36:16:0:54", "fake_data", "chunk:37:15:0:54")
     dat <- get_finalization_data(db, keys)
     expect_equal(dat, !!setNames(c(2L,2L), keys[-2]))
 })
 
 test_that("get_finalization_value returns a single value", {
-    dat <- get_finalization_value(db, "@36:16:0:54")
+    dat <- get_finalization_value(db, "chunk:36:16:0:54")
     expect_equal(dat, 2L)
-    expect_error(get_finalization_value(db, c("@36:16:0:54","@37:15:0:54")))
+    expect_error(get_finalization_value(db, c("chunk:36:16:0:54","chunk:37:15:0:54")))
 })
 
 test_that("put_finalization_data updates database", {
-    keys <- c("@0:0:0:54", "@100:100:1:54")
+    keys <- c("chunk:0:0:0:54", "chunk:100:100:1:54")
     dat <- setNames(c(1L,2L), keys)
 
     put_finalization_data(db, dat)
@@ -40,13 +40,13 @@ test_that("put_finalization_data updates database", {
 })
 
 test_that("put_finalization_data stops on bad keys",{
-    keys <- c("@0:0:0:50", "fake_name")
+    keys <- c("chunk:0:0:0:50", "plain:fake_name")
     dat <- setNames(c(1L,2L), keys)
     expect_error(put_finalization_data(db, dat))
 })
 
 test_that("put_finalization_values updates database", {
-    keys <- c("@0:1:0:54", "@10:2:1:54")
+    keys <- c("chunk:0:1:0:54", "chunk:10:2:1:54")
     dat <- c(1L,2L)
 
     put_finalization_values(db, keys, values=dat)
@@ -57,9 +57,9 @@ test_that("put_finalization_values updates database", {
     put_finalization_values(db, x=1:2, z=1:2, dimension=1, values=c(2L,1L))
 
     res <- get_finalization_data(db, 1:2, 1:2, 1)
-    expect_equal(res, !!setNames(c(2L,1L), c("@1:1:1:54", "@2:2:1:54")))
+    expect_equal(res, !!setNames(c(2L,1L), c("chunk:1:1:1:54", "chunk:2:2:1:54")))
 
-    keys <- c("@0:2:0:54", "@10:3:1:54")
+    keys <- c("chunk:0:2:0:54", "chunk:10:3:1:54")
     put_finalization_values(db, keys, values=2L)
 
     res <- get_finalization_data(db, keys)
@@ -67,8 +67,8 @@ test_that("put_finalization_values updates database", {
 })
 
 test_that("put_finalization_values stops on bad input", {
-    expect_error(put_finalization_values(db, c("@0:0:0:55","fake_data"), values=2L))
-    expect_error(put_finalization_values(db, c("@0:0:0:54","@0:0:1:54"), values=c(2L,2L,2L)))
+    expect_error(put_finalization_values(db, c("chunk:0:0:0:55","plain:fake_data"), values=2L))
+    expect_error(put_finalization_values(db, c("chunk:0:0:0:54","chunk:0:0:1:54"), values=c(2L,2L,2L)))
 })
 
 test_that("put_finalization_value updates database", {
@@ -76,7 +76,7 @@ test_that("put_finalization_value updates database", {
     res <- get_finalization_value(db, x=100, z=20, dimension=2)
     expect_equal(res, 2L)
 
-    expect_error(put_finalization_value(db, c("@0:0:0:54","@0:0:1:54"), value=2L))
+    expect_error(put_finalization_value(db, c("chunk:0:0:0:54","chunk:0:0:1:54"), value=2L))
 })
 
 test_that("write_finalizaton_value requires integerish values", {

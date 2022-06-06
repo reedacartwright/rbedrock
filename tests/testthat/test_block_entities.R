@@ -17,7 +17,7 @@ test_that("get_block_entities_data returns all BlockEnties data", {
 })
 
 test_that("get_block_entities_data returns specific BlockEnties data", {
-    keys <- c("@37:13:0:49", "fake_data", "@37:15:0:49")
+    keys <- c("chunk:37:13:0:49", "fake_data", "chunk:37:15:0:49")
     dat <- get_block_entities_data(db, keys)
     expect_vector(dat, list(), 2L)
     expect_named(dat)
@@ -41,18 +41,18 @@ test_that("MobSpawners can be identified and placed in a table", {
 })
 
 test_that("put_block_entities_data writes BlockEnties data", {
-    dat <- get_block_entities_data(db, "@37:13:0:49")
+    dat <- get_block_entities_data(db, "chunk:37:13:0:49")
     dat2 <- dat
-    names(dat2) <- "@10:0:0:49"
+    names(dat2) <- "chunk:10:0:0:49"
     put_block_entities_data(db, dat2)
-    dat <- get_block_entities_data(db, "@10:0:0:49")
+    dat <- get_block_entities_data(db, "chunk:10:0:0:49")
     expect_equal(dat, dat2)
 })
 
 test_that("put_block_entities_data throws error if asked to write non BlockEnties data", {
-    dat <- get_block_entities_data(db, "@37:13:0:49")
+    dat <- get_block_entities_data(db, "chunk:37:13:0:49")
     dat2 <- dat
-    names(dat2) <- "@10:0:0:44"
+    names(dat2) <- "chunk:10:0:0:44"
     expect_error(put_block_entities_data(db, dat2))
 })
 
