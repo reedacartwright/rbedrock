@@ -2,6 +2,7 @@
 % Please edit documentation in R/blocks.R
 \name{get_subchunk_layers_data}
 \alias{get_subchunk_layers_data}
+\alias{get_subchunk_layers_values}
 \alias{get_subchunk_layers_value}
 \alias{get_subchunk_layers_from_chunk}
 \alias{put_subchunk_layers_data}
@@ -12,6 +13,8 @@
 \title{Load and store SubchunkBlocks layers}
 \usage{
 get_subchunk_layers_data(db, x, z, dimension, subchunk)
+
+get_subchunk_layers_values(db, x, z, dimension, subchunk)
 
 get_subchunk_layers_value(db, x, z, dimension, subchunk)
 
@@ -58,6 +61,7 @@ returned by \code{read_subchunk_layers_value()}.
 \description{
 \code{get_subchunk_layers_data()} loads SubchunkBlocks data from a \code{bedrockdb}.
 It will silently drop and keys not representing SubchunkBlocks data.
+\code{get_subchunk_layers_values()} is a synonym for \code{get_subchunk_layers_data()}.
 
 \code{get_subchunk_layers_value()} loads SubchunkBlocks data from a \code{bedrockdb}.
 It only supports loading a single value.

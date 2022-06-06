@@ -12,7 +12,7 @@
 #' dbpath <- rbedrock_example_world("example1.mcworld")
 #' db <- bedrockdb(dbpath)
 #' # view all HSA in a world
-#' hsa <- get_hsa_data(db)
+#' hsa <- get_hsa_data(db, get_keys(db))
 #' hsa
 #' # add an HSA to a world
 #' dat <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15,
@@ -24,6 +24,7 @@ NULL
 #' @description
 #' `get_hsa_data()` loads HardcodedSpawnArea data from a `bedrockdb`.
 #'  It will silently drop and keys not representing HSA data.
+#' `get_hsa_values()` is a synonym for `get_hsa_data()`.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
@@ -33,7 +34,7 @@ NULL
 #'         as `get_hsa_value()`.
 #' @rdname HSA
 #' @export
-get_hsa_data <- function(db, x=get_keys(db), z, dimension) {
+get_hsa_data <- function(db, x, z, dimension) {
     keys <- .process_key_args(x,z,dimension, tag=57L)
     dat <- get_values(db, keys)
     hsa <- purrr::map_dfr(dat, read_hsa_value, .id="key")
@@ -42,6 +43,10 @@ get_hsa_data <- function(db, x=get_keys(db), z, dimension) {
     hsa <- dplyr::relocate(hsa, "key", .after = dplyr::last_col())
     hsa
 }
+
+#' @rdname HSA
+#' @export
+get_hsa_values <- get_hsa_data 
 
 #' @description
 #' `get_hsa_value()` loads HSA data from a `bedrockdb`.

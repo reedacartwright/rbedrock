@@ -1,14 +1,17 @@
-#' Read and write biome data.
+#' Read and write biomes data.
 #'
-#' Biome data is stored as the second map in the 2DMaps data (tag 45). Each
-#' chunk stores its biome data as 256 uint8s. 
+#' Biomes data is stored as the second map in Data3D data (tag 43).
+#' Legacy Biomes data is stored as the second map in the Data2D data (tag 45).
 #'
 #' @name Biomes
 NULL
 
 #' @description
-#' `get_biomes_data()` loads biomes data from a `bedrockdb`.
-#'  It will silently drop and keys not representing 2DMaps data.
+#' `get_biomes_data()` and `get_biomes_value()` load Biomes
+#' data from `db`. `get_biomes_data()` will silently drop keys not
+#' representing Data3D data. `get_biomes_value()` supports loading
+#' only a single value. `get_biomes_values()` is a synonym for 
+#' `get_biomes_data()`.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
@@ -16,73 +19,52 @@ NULL
 #'
 #' @param return_names return biome names instead of biome ids.
 #'
-#' @return `get_biomes_data()` returns a list of the of the values returned by 
-#'         `get_biome_value()`.
+#' @return `get_biomes_value()` returns an array with 3 dimensions.
+#' `get_biomes_data()` returns a list of the of the values returned by 
+#' `get_biomes_value()`.
 #'
 #' @rdname Biomes
 #' @export
 get_biomes_data <- function(db, x, z, dimension, return_names = TRUE) {
-    dat <- get_2dmaps_data(db, x, z, dimension)
-    
-    biomes <- purrr::map(dat, function(x) {
-        if(is.null(x)) {
-            return(NULL)
-        }
-        # y[x+1,z+1] is biome of x,z
-        y <- x$biome_map
-        if(isTRUE(return_names)) {
-            y[] <- .BIOME_LIST_INV[y+1]
-        }
-        y
-    })
-
-    biomes
+    dat <- get_data3d_data(db, x, z, dimension)
+    purrr::map(dat, .get_biomes_impl, return_names = return_names)
 }
 
-#' @description
-#' `get_biomes_value()` loads biome data from a `bedrockdb`.
-#' It only supports loading a single value.
-#'
-#' @return An array containing biome information, with dimension "x" and "z".
-#'     The indexes of the array are a horizontal position relative to the
-#'     chunk origin.
+#' @rdname Biomes
+#' @export
+get_biomes_values <- get_biomes_data
+
 #' @rdname Biomes
 #' @export
 get_biomes_value <- function(db, x, z, dimension, return_names = TRUE) {
-    dat <- get_2dmaps_value(db, x, z, dimension)
-    if(is.null(dat)) {
-        return(NULL)
-    }
-    y <- dat$biome_map
-    if(isTRUE(return_names)) {
-        y[] <- .BIOME_LIST_INV[y+1]
-    }
-    y
+    dat <- get_data3d_value(db, x, z, dimension)
+    .get_biomes_impl(dat, return_names = return_names)
 }
 
 #' @description
 #' `put_biomes_data()` `put_biomes_values()`, and `put_biomes_value()` update
 #' the biome information of chunks. They preserve any existing height data.
 #'
-#' @param data A list of character or integer vectors. Each element of
-#'    the list must contain 256 values or an error will be raised.
+#' @param data A list of character or integer vectors.
+#' @param values a list of arrays containing biome names or ids.
+#' @param value an array containing biome names or ids.
 #' @param missing_height if there is no existing height data, use this value
 #'    for the chunk.
+#'
 #' @rdname Biomes
 #' @export
-put_biomes_data <- function(db, data, missing_height = 0L) {
+put_biomes_data <- function(db, data, missing_height = -64L) {
     put_biomes_values(db, names(data), values=data, missing_height = missing_height)
 }
 
-#' @param values a list of arrays containing biome names or ids.
 #' @rdname Biomes
 #' @export
 put_biomes_values <- function(db, x, z, dimension, values,
-    missing_height = 0L) {
-    keys <- .process_key_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
+    missing_height = -64L) {
+    keys <- .process_key_args(x, z, dimension, tag=43L, stop_if_filtered = TRUE)
     values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
 
-    dat <- get_2dmaps_data(db, keys)
+    dat <- get_data3d_data(db, keys)
 
     dat2 <- purrr::map2(dat, values, function(d, value) {
         h <- d$height_map %||% missing_height
@@ -96,18 +78,17 @@ put_biomes_values <- function(db, x, z, dimension, values,
         list(height_map = h, biome_map = value)
     })
 
-    put_2dmaps_data(db, dat2)
+    put_data3d_data(db, dat2)
 }
 
-#' @param value an array containing biome names or ids.
 #' @rdname Biomes
 #' @export
 put_biomes_value <- function(db, x, z, dimension, value,
-    missing_height = 0L) {
-    key <- .process_key_args(x, z, dimension, tag=45L)
+    missing_height = -64L) {
+    key <- .process_key_args(x, z, dimension, tag=43L)
     vec_assert(key, character(), 1L)
 
-    d <- get_2dmaps_value(db, key)
+    d <- get_data3d_value(db, key)
     h <- d$height_map %||% missing_height
 
     if(is.character(value)) {
@@ -116,9 +97,79 @@ put_biomes_value <- function(db, x, z, dimension, value,
             abort("`value` contains unknown biome")
         }
     }
-    put_2dmaps_value(db, key, height_map = h, biome_map = value)
+    put_data3d_value(db, key, height_map = h, biome_map = value)
 }
 
+#' @description
+#' `get_legacy_biomes_*()` and `put_legacy_biomes_*()` behave similar to
+#' the equivalent non-legacy functions. They get or put 2d biome data.
+#'
+#' @rdname Biomes
+#' @export
+get_legacy_biomes_data <- function(db, x, z, dimension, return_names = TRUE) {
+    dat <- get_data2d_data(db, x, z, dimension)
+    purrr::map(dat, .get_biomes_impl, return_names = return_names)
+}
+
+#' @rdname Biomes
+#' @export
+get_legacy_biomes_values <- get_legacy_biomes_data
+
+#' @rdname Biomes
+#' @export
+get_legacy_biomes_value <- function(db, x, z, dimension, return_names = TRUE) {
+    dat <- get_data2d_value(db, x, z, dimension)
+    .get_biomes_impl(dat, return_names = return_names)
+}
+
+#' @rdname Biomes
+#' @export
+put_legacy_biomes_data <- function(db, data, missing_height = 0L) {
+    put_legacy_biomes_values(db, names(data), values=data, missing_height = missing_height)
+}
+
+#' @rdname Biomes
+#' @export
+put_legacy_biomes_values <- function(db, x, z, dimension, values,
+    missing_height = 0L) {
+    keys <- .process_key_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
+    values <- vctrs::vec_recycle(values, length(keys), x_arg="values")
+
+    dat <- get_data2d_data(db, keys)
+
+    dat2 <- purrr::map2(dat, values, function(d, value) {
+        h <- d$height_map %||% missing_height
+
+        if(is.character(value)) {
+            value <- biome_id(value)
+            if(any(is.na(value))) {
+                abort("`values` contains unknown biome")                 
+            }
+        }
+        list(height_map = h, biome_map = value)
+    })
+
+    put_data2d_data(db, dat2)
+}
+
+#' @rdname Biomes
+#' @export
+put_legacy_biomes_value <- function(db, x, z, dimension, value,
+    missing_height = 0L) {
+    key <- .process_key_args(x, z, dimension, tag=45L)
+    vec_assert(key, character(), 1L)
+
+    d <- get_data2d_value(db, key)
+    h <- d$height_map %||% missing_height
+
+    if(is.character(value)) {
+        value <- biome_id(value)
+        if(any(is.na(value))) {
+            abort("`value` contains unknown biome")
+        }
+    }
+    put_data2d_value(db, key, height_map = h, biome_map = value)
+}
 
 # these lists was generated from a running instance of
 # bedrock dedicated server 1.16.100.04
@@ -316,4 +367,15 @@ list_biomes <- function() {
 #' @export
 biome_id <- function(x) {
     .BIOME_LIST[x]
+}
+
+.get_biomes_impl <- function(x, return_names) {
+    if(is.null(x$biome_map)) {
+        return(NULL)
+    }
+    y <- x$biome_map
+    if(isTRUE(return_names)) {
+        y[] <- .BIOME_LIST_INV[y+1]
+    }
+    y
 }

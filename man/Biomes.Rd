@@ -3,21 +3,42 @@
 \name{Biomes}
 \alias{Biomes}
 \alias{get_biomes_data}
+\alias{get_biomes_values}
 \alias{get_biomes_value}
 \alias{put_biomes_data}
 \alias{put_biomes_values}
 \alias{put_biomes_value}
-\title{Read and write biome data.}
+\alias{get_legacy_biomes_data}
+\alias{get_legacy_biomes_values}
+\alias{get_legacy_biomes_value}
+\alias{put_legacy_biomes_data}
+\alias{put_legacy_biomes_values}
+\alias{put_legacy_biomes_value}
+\title{Read and write biomes data.}
 \usage{
 get_biomes_data(db, x, z, dimension, return_names = TRUE)
 
+get_biomes_values(db, x, z, dimension, return_names = TRUE)
+
 get_biomes_value(db, x, z, dimension, return_names = TRUE)
 
-put_biomes_data(db, data, missing_height = 0L)
+put_biomes_data(db, data, missing_height = -64L)
 
-put_biomes_values(db, x, z, dimension, values, missing_height = 0L)
+put_biomes_values(db, x, z, dimension, values, missing_height = -64L)
 
-put_biomes_value(db, x, z, dimension, value, missing_height = 0L)
+put_biomes_value(db, x, z, dimension, value, missing_height = -64L)
+
+get_legacy_biomes_data(db, x, z, dimension, return_names = TRUE)
+
+get_legacy_biomes_values(db, x, z, dimension, return_names = TRUE)
+
+get_legacy_biomes_value(db, x, z, dimension, return_names = TRUE)
+
+put_legacy_biomes_data(db, data, missing_height = 0L)
+
+put_legacy_biomes_values(db, x, z, dimension, values, missing_height = 0L)
+
+put_legacy_biomes_value(db, x, z, dimension, value, missing_height = 0L)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -27,8 +48,7 @@ put_biomes_value(db, x, z, dimension, value, missing_height = 0L)
 
 \item{return_names}{return biome names instead of biome ids.}
 
-\item{data}{A list of character or integer vectors. Each element of
-the list must contain 256 values or an error will be raised.}
+\item{data}{A list of character or integer vectors.}
 
 \item{missing_height}{if there is no existing height data, use this value
 for the chunk.}
@@ -38,23 +58,23 @@ for the chunk.}
 \item{value}{an array containing biome names or ids.}
 }
 \value{
+\code{get_biomes_value()} returns an array with 3 dimensions.
 \code{get_biomes_data()} returns a list of the of the values returned by
-\code{get_biome_value()}.
-
-An array containing biome information, with dimension "x" and "z".
-The indexes of the array are a horizontal position relative to the
-chunk origin.
+\code{get_biomes_value()}.
 }
 \description{
-Biome data is stored as the second map in the 2DMaps data (tag 45). Each
-chunk stores its biome data as 256 uint8s.
+Biomes data is stored as the second map in Data3D data (tag 43).
+Legacy Biomes data is stored as the second map in the Data2D data (tag 45).
 
-\code{get_biomes_data()} loads biomes data from a \code{bedrockdb}.
-It will silently drop and keys not representing 2DMaps data.
-
-\code{get_biomes_value()} loads biome data from a \code{bedrockdb}.
-It only supports loading a single value.
+\code{get_biomes_data()} and \code{get_biomes_value()} load Biomes
+data from \code{db}. \code{get_biomes_data()} will silently drop keys not
+representing Data3D data. \code{get_biomes_value()} supports loading
+only a single value. \code{get_biomes_values()} is a synonym for
+\code{get_biomes_data()}.
 
 \code{put_biomes_data()} \code{put_biomes_values()}, and \code{put_biomes_value()} update
 the biome information of chunks. They preserve any existing height data.
+
+\verb{get_legacy_biomes_*()} and \verb{put_legacy_biomes_*()} behave similar to
+the equivalent non-legacy functions. They get or put 2d biome data.
 }

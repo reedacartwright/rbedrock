@@ -3,6 +3,7 @@
 \name{ChunkVersion}
 \alias{ChunkVersion}
 \alias{get_chunk_version_data}
+\alias{get_chunk_version_values}
 \alias{get_chunk_version_value}
 \alias{put_chunk_version_data}
 \alias{put_chunk_version_values}
@@ -12,6 +13,8 @@
 \title{Read and write chunk version data}
 \usage{
 get_chunk_version_data(db, x, z, dimension)
+
+get_chunk_version_values(db, x, z, dimension)
 
 get_chunk_version_value(db, x, z, dimension)
 
@@ -31,7 +34,7 @@ write_chunk_version_value(num)
 \item{x, z, dimension}{Chunk coordinates to extract version data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{data}{A named-vector of key-value pairs for ChunkVersion data.}
+\item{data}{A named-vector of key-value pairs for Version data.}
 
 \item{values}{An integer vector}
 
@@ -42,17 +45,20 @@ write_chunk_version_value(num)
 \item{num}{A scalar integer.}
 }
 \description{
-ChunkVersion data (tag 44) and ChunkVersionLegacy data (tag 118)
+Version data (tag 44) and LegacyVersion data (tag 118)
 store the version number of a chunk. In Minecraft version 1.16.100,
 chunk version data was moved from tag 118 to tag 44.
 
-\code{get_chunk_version_data()} retrieves chunk versions from a \code{bedrockdb}.
-It will silently drop and keys not representing ChunkVersion data.
+\code{get_chunk_version_data()} and \code{get_chunk_version_value()} load Version
+data from \code{db}. \code{get_chunk_version_data()} will silently drop and keys not
+representing Version data. \code{get_chunk_version_value()} supports loading
+only a single value. \code{get_chunk_version_values()} is a synonym for
+\code{get_chunk_version_data()}.
 
 \code{put_chunk_version_data()}, \code{put_chunk_version_values()}, and
-\code{put_chunk_version_value()} store ChunkVersion data into a \code{bedrockdb}.
+\code{put_chunk_version_value()} store Version data into a \code{bedrockdb}.
 
-\code{read_chunk_version_value()} decodes ChunkVersion data.
+\code{read_chunk_version_value()} decodes Version data.
 
-\code{write_chunk_version_value()} encodes ChunkVersion data.
+\code{write_chunk_version_value()} encodes Version data.
 }

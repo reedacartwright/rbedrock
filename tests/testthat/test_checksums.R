@@ -10,16 +10,6 @@ test_that("Checksums is chunk tag 59", {
     expect_equal(chunk_tag_str(59L), "Checksums")
 })
 
-test_that("get_checksums_data returns all Checksums data", {
-    dat <- get_checksums_data(db)
-    expect_vector(dat, list(), 105L)
-    expect_named(dat)
-    expect_true(all(grepl(":59$", names(dat))))
-    for(i in seq_along(dat)) {
-        expect_named(dat[[!!i]])
-    }
-})
-
 test_that("get_checksums_data returns specific Checksums data", {
     keys <- c("chunk:36:16:0:59", "fake_data", "chunk:37:15:0:59")
     dat <- get_checksums_data(db, keys)

@@ -3,6 +3,7 @@
 \name{HSA}
 \alias{HSA}
 \alias{get_hsa_data}
+\alias{get_hsa_values}
 \alias{get_hsa_value}
 \alias{read_hsa_value}
 \alias{put_hsa_data}
@@ -11,7 +12,9 @@
 \alias{write_hsa_value}
 \title{Read and write HardcodedSpawnArea (HSA) data}
 \usage{
-get_hsa_data(db, x = get_keys(db), z, dimension)
+get_hsa_data(db, x, z, dimension)
+
+get_hsa_values(db, x, z, dimension)
 
 get_hsa_value(db, x, z, dimension)
 
@@ -62,6 +65,7 @@ specifies the type: 1 = NetherFortress, 2 = SwampHut,
 
 \code{get_hsa_data()} loads HardcodedSpawnArea data from a \code{bedrockdb}.
 It will silently drop and keys not representing HSA data.
+\code{get_hsa_values()} is a synonym for \code{get_hsa_data()}.
 
 \code{get_hsa_value()} loads HSA data from a \code{bedrockdb}.
 It only supports loading a single value.
@@ -80,7 +84,7 @@ into a \code{bedrockdb}.
 dbpath <- rbedrock_example_world("example1.mcworld")
 db <- bedrockdb(dbpath)
 # view all HSA in a world
-hsa <- get_hsa_data(db)
+hsa <- get_hsa_data(db, get_keys(db))
 hsa
 # add an HSA to a world
 dat <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15,

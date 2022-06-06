@@ -1,70 +1,70 @@
-#' Read and write 2DMaps data
+#' Read and write Data2D data
 #'
-#' 2DMaps data (tag 45) stores information about surface heights and biomes in a
-#' chunk. 2DMaps data is 768 bytes long and consists of a 256 int16s (heights)
+#' Data2D data (tag 45) stores information about surface heights and biomes in a
+#' chunk. Data2D data is 768 bytes long and consists of a 256 int16s (heights)
 #' followed by 256 uint8s (biomes).
 #'
-#' @name Maps2D
+#' @name Data2D
 #'
 #' @examples
 #' heights <- matrix(63,16,16)
 #' biomes <- matrix(1,16,16)
 #' # Pass heights and biomes as separate parameters
-#' dat <- write_2dmaps_value(heights, biomes)
+#' dat <- write_data2d_value(heights, biomes)
 #' # Pass them as a list.
 #' obj <- list(height_map = heights, biome_map = biomes)
-#' dat <- write_2dmaps_value(obj)
+#' dat <- write_data2d_value(obj)
 #' # Pass them as scalars
-#' dat <- write_2dmaps_value(63, 1)
+#' dat <- write_data2d_value(63, 1)
 NULL
 
 #' @description
-#' `get_2dmaps_data()` loads 2DMaps data from a `bedrockdb`.
-#'  It will silently drop and keys not representing 2DMaps data.
+#' `get_data2d_data()` loads Data2D data from a `bedrockdb`.
+#'  It will silently drop and keys not representing Data2D data.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
 #'
-#' @return `get_2dmaps_data()` returns a list of the of the values returned by 
-#'         `get_2dmaps_value()`.
+#' @return `get_data2d_data()` returns a list of the of the values returned by 
+#'         `get_data2d_value()`.
 #'
-#' @rdname Maps2D
+#' @rdname Data2D
 #' @export
-get_2dmaps_data <- function(db, x, z, dimension) {
+get_data2d_data <- function(db, x, z, dimension) {
     keys <- .process_key_args(x,z,dimension, tag=45L)
     dat <- get_values(db, keys)
-    purrr::map(dat, read_2dmaps_value)
+    purrr::map(dat, read_data2d_value)
 }
 
-#' @rdname Maps2D
+#' @rdname Data2D
 #' @export
-get_2dmaps_values <- get_2dmaps_data
+get_data2d_values <- get_data2d_data
 
 
 #' @description
-#' `get_2dmaps_value()` loads 2DMaps data from a `bedrockdb`.
+#' `get_data2d_value()` loads Data2D data from a `bedrockdb`.
 #' It only supports loading a single value.
 #'
-#' @return `get_2dmaps_value()` returns a list with components "height_map"
+#' @return `get_data2d_value()` returns a list with components "height_map"
 #' and "biome_map".
-#' @rdname Maps2D
+#' @rdname Data2D
 #' @export
-get_2dmaps_value <- function(db, x, z, dimension) {
+get_data2d_value <- function(db, x, z, dimension) {
     key <- .process_key_args(x, z, dimension, tag=45L)
     vec_assert(key, character(), 1L)
     dat <- get_value(db, key)
-    read_2dmaps_value(dat)
+    read_data2d_value(dat)
 }
 
 #' @description
-#' `read_2dmaps_value` decodes binary 2DMaps data.
+#' `read_data2d_value` decodes binary Data2D data.
 #'
 #' @param rawdata A raw vector.
 #'
-#' @rdname Maps2D
+#' @rdname Data2D
 #' @export
-read_2dmaps_value <- function(rawdata) {
+read_data2d_value <- function(rawdata) {
     if(is.null(rawdata)) {
         return(NULL)
     }
@@ -79,35 +79,35 @@ read_2dmaps_value <- function(rawdata) {
 }
 
 #' @description
-#' `put_2dmaps_data()`, `put_2dmaps_values()`, and
-#' `put_2dmaps_value()` store 2DMaps data into a `bedrockdb`.
+#' `put_data2d_data()`, `put_data2d_values()`, and
+#' `put_data2d_value()` store Data2D data into a `bedrockdb`.
 #'
-#' @param data A named-vector of key-value pairs for 2DMaps data.
+#' @param data A named-vector of key-value pairs for Data2D data.
 #'
-#' @rdname Maps2D
+#' @rdname Data2D
 #' @export
-put_2dmaps_data <- function(db, data) {
+put_data2d_data <- function(db, data) {
     stopifnot(all(.get_tag_from_chunk_key(names(data)) == 45L))
-    dat <- purrr::map(data, write_2dmaps_value)
+    dat <- purrr::map(data, write_data2d_value)
     put_data(db, dat)
 }
 
 #' @param height_maps,biome_maps Lists of height and biome data.
 #' Values will be recycled if necessary to match the number of keys
 #' to be written to. If `biome_maps` is missing, `height_maps` should
-#' be in the same format as returned by `get_2dmaps_data()`.
+#' be in the same format as returned by `get_data2d_data()`.
 #'
-#' @rdname Maps2D
+#' @rdname Data2D
 #' @export
-put_2dmaps_values <- function(db, x, z, dimension, height_maps, biome_maps) {
+put_data2d_values <- function(db, x, z, dimension, height_maps, biome_maps) {
     keys <- .process_key_args(x, z, dimension, tag=45L, stop_if_filtered = TRUE)
     if(missing(biome_maps)) {
         values <- vec_recycle(height_maps, length(keys), x_arg="height_maps")
-        values <- purrr::map(values, write_2dmaps_value)
+        values <- purrr::map(values, write_data2d_value)
     } else {
         h <- vec_recycle(height_maps, length(keys), x_arg="height_maps")
         b <- vec_recycle(biome_maps, length(keys), x_arg="biome_maps")
-        values <- purrr::map2(h, b, write_2dmaps_value)
+        values <- purrr::map2(h, b, write_data2d_value)
     }
     put_values(db, keys, values)
 }
@@ -116,21 +116,21 @@ put_2dmaps_values <- function(db, x, z, dimension, height_maps, biome_maps) {
 #' Values will be recycled if necessary. If `biome_map` is missing, `height-map`
 #' should be a list a `list()` with both "height_map" and "biome_map" elements.
 #'
-#' @rdname Maps2D
+#' @rdname Data2D
 #' @export
-put_2dmaps_value <- function(db, x, z, dimension, height_map, biome_map) {
+put_data2d_value <- function(db, x, z, dimension, height_map, biome_map) {
     key <- .process_key_args(x, z, dimension, tag=45L)
     vec_assert(key, character(), 1L)
-    value <- write_2dmaps_value(height_map, biome_map)
+    value <- write_data2d_value(height_map, biome_map)
     put_value(db, key, value)
 }
 
 #' @description
-#' `write_2dmaps_value` encodes 2DMaps data into a raw vector.
+#' `write_data2d_value` encodes Data2D data into a raw vector.
 #'
-#' @rdname Maps2D
+#' @rdname Data2D
 #' @export
-write_2dmaps_value <- function(height_map, biome_map) {
+write_data2d_value <- function(height_map, biome_map) {
     # support passing a list
     if(missing(biome_map)) {
         if(is.null(height_map)) {
@@ -143,7 +143,7 @@ write_2dmaps_value <- function(height_map, biome_map) {
         return(NULL)
     }
     if(is.null(height_map) || is.null(biome_map)) {
-        abort("Invalid 2DMaps data.")
+        abort("Invalid Data2D data.")
     }
 
     height_map <- vec_cast(c(height_map), integer(), x_arg="height_map")

@@ -236,6 +236,7 @@ NULL
 #' @description
 #' `get_subchunk_blocks_data()` loads SubchunkBlocks data from a `bedrockdb`.
 #'  It will silently drop and keys not representing SubchunkBlocks data.
+#' `get_subchunk_blocks_values()` is a synonym for `get_subchunk_blocks_data()`.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
@@ -260,6 +261,10 @@ get_subchunk_blocks_data <- function(db, x, z, dimension, subchunk,
     .get_subchunk_blocks_data_impl(db, keys,
         names_only = names_only, extra_block = extra_block)
 }
+
+#' @rdname SubchunkBlocks
+#' @export
+get_subchunk_blocks_values <- get_subchunk_blocks_data
 
 .get_subchunk_blocks_data_impl <- function(db, keys, starts_with, readoptions = NULL,
         names_only = FALSE, extra_block = FALSE) {
@@ -407,6 +412,7 @@ write_subchunk_blocks_value <- function(object, version=9L, missing_offset=NA_in
 #' @description
 #' `get_subchunk_layers_data()` loads SubchunkBlocks data from a `bedrockdb`.
 #'  It will silently drop and keys not representing SubchunkBlocks data.
+#' `get_subchunk_layers_values()` is a synonym for `get_subchunk_layers_data()`.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
@@ -423,6 +429,10 @@ get_subchunk_layers_data <- function(db, x, z, dimension, subchunk) {
     dat <- get_values(db, keys)
     purrr::map(dat, read_subchunk_layers_value)
 }
+
+#' @rdname get_subchunk_layers_data
+#' @export
+get_subchunk_layers_values <- get_subchunk_layers_data
 
 #' @description
 #' `get_subchunk_layers_value()` loads SubchunkBlocks data from a `bedrockdb`.

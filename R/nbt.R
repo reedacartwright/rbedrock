@@ -422,7 +422,7 @@ get_nbt_value <- function(db, key, readoptions = NULL, simplify = TRUE) {
 get_nbt_values <- get_nbt_data
 
 #' @description
-#' `put_nbt_values`, `put_nbt_value`, and `put_nbt_data` stores nbt data into `db` in binary form.
+#' `put_nbt_values()`, `put_nbt_value()`, and `put_nbt_data()` store nbt data into `db` in binary form.
 #'
 #' @param values A list of nbt objects
 #' @param writeoptions A `bedrock_leveldb_writeoptions` object

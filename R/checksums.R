@@ -10,6 +10,7 @@ NULL
 #' @description
 #' `get_checksums_data()` loads Checksums data from a `bedrockdb`.
 #'  It will silently drop and keys not representing Checksums data.
+#' `get_checksums_values()` is a synonym for `get_checksums_data()`.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
@@ -19,11 +20,15 @@ NULL
 #'          by `get_checksums_value()`.
 #' @rdname Checksums
 #' @export
-get_checksums_data <- function(db, x=get_keys(db), z, dimension) {
+get_checksums_data <- function(db, x, z, dimension) {
     keys <- .process_key_args(x,z,dimension, tag=59L)
     dat <- get_values(db, keys)
     purrr::map(dat, read_checksums_value)
 }
+
+#' @rdname Checksums
+#' @export
+get_checksums_values <- get_checksums_data
 
 #' @description
 #' `get_checksums_value()` loads Checksums data from a `bedrockdb`.

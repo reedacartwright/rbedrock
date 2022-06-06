@@ -1,8 +1,8 @@
 dbpath <- rbedrock_example_world("example1.mcworld")
 db <- bedrockdb(dbpath)
 
-test_that("get_hsa_data can read HSA data.", {
-    hsa <- get_hsa_data(db)
+test_that("get_hsa_data() can read HSA data.", {
+    hsa <- get_hsa_data(db, x=get_keys(db))
     expected_hsa <- tibble::tibble(
         tag = "PillagerOutpost",
         x1 = c(577, 577, 592, 592), y1 = 65, z1 = c(241, 256, 241, 256), 
@@ -16,7 +16,7 @@ test_that("get_hsa_data can read HSA data.", {
     expect_equal(hsa, expected_hsa)
 })
 
-test_that("get_hsa_data returns an empty table if no HSA is found.", {
+test_that("get_hsa_data() returns an empty table if no HSA is found.", {
     hsa <- get_hsa_data(db, "chunk:0:0:0:57")
     expected_hsa <- tibble::tibble(
         tag = character(0),
@@ -31,7 +31,7 @@ test_that("get_hsa_data returns an empty table if no HSA is found.", {
     expect_equal(hsa, expected_hsa)
 })
 
-test_that("get_hsa_value can read a single HSA data.", {
+test_that("get_hsa_value() can read a single HSA data.", {
     hsa <- get_hsa_value(db, 36, 15, 0)
 
     expected_hsa <- tibble::tibble(
@@ -49,7 +49,7 @@ test_that("get_hsa_value can read a single HSA data.", {
     expect_error(get_hsa_value(db, c("chunk:36:15:0:57", "chunk:36:16:0:57")))
 })
 
-test_that("get_hsa_value returns an empty table if no HSA is found.", {
+test_that("get_hsa_value() returns an empty table if no HSA is found.", {
     hsa <- get_hsa_value(db, "chunk:0:0:0:57")
     expected_hsa <- tibble::tibble(
         tag = character(0),
@@ -64,7 +64,7 @@ test_that("get_hsa_value returns an empty table if no HSA is found.", {
     expect_equal(hsa, expected_hsa)
 })
 
-test_that("put_hsa_data can write HSA data.", {
+test_that("put_hsa_data() can write HSA data.", {
     dat <- data.frame(x1 = 295, x2 = 300, z1 = 100, z2 = 110, y1 = 64, y2=70, tag = 2L, dimension=0L)
     hsa <- put_hsa_data(db, dat, merge = FALSE)
     expected_hsa <- tibble::tibble(
@@ -111,7 +111,7 @@ test_that("put_hsa_data can write HSA data.", {
     expect_equal(new_hsa, expected_hsa)
 })
 
-test_that("put_hsa_data can merge HSA data.", {
+test_that("put_hsa_data() can merge HSA data.", {
     dat <- data.frame(
         x1 = 295, x2 = 300,
         z1 = 100, z2 = 120,
@@ -144,7 +144,7 @@ test_that("put_hsa_data can merge HSA data.", {
     expect_equal(new_hsa, expected_hsa)
 })
 
-test_that("put_hsa_value can write HSA data.", {
+test_that("put_hsa_value() can write HSA data.", {
     dat <- data.frame(
         x1 = 0, x2 = 15,
         z1 = 0, z2 = 15,
@@ -167,7 +167,7 @@ test_that("put_hsa_value can write HSA data.", {
     expect_equal(hsa, expected_hsa)
 })
 
-test_that("put_hsa_values can write HSA data.", {
+test_that("put_hsa_values() can write HSA data.", {
 
     dat1 <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15, y1 = 40, y2 = 60,
         tag = 1)

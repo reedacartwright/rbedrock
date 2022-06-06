@@ -13,8 +13,10 @@ rawkeys_to_chrkeys(keys)
 \item{keys}{a character vector of chrkeys or a list or rawkeys}
 }
 \value{
-\code{chrkeys_to_rawkeys()} returns a list of raw vectors.\preformatted{    `rawkeys_to_chrkeys()` returns a character vector.
-}
+\code{chrkeys_to_rawkeys()} returns a list of raw vectors.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{    `rawkeys_to_chrkeys()` returns a character vector.
+}\if{html}{\out{</div>}}
 }
 \description{
 rbedrock represents database keys two different ways. \code{chrkeys} are a human-readable

@@ -60,7 +60,7 @@ write_nbt_data(data)
 \code{get_nbt_data()} and \code{get_nbt_value()} load nbt-formatted data from \code{db} and parses it.
 \code{get_nbt_values()} is a synonym for \code{get_nbt_data()}.
 
-\code{put_nbt_values}, \code{put_nbt_value}, and \code{put_nbt_data} stores nbt data into \code{db} in binary form.
+\code{put_nbt_values()}, \code{put_nbt_value()}, and \code{put_nbt_data()} store nbt data into \code{db} in binary form.
 
 \code{read_nbt} reads NBT data from a \code{raw} vector.
 

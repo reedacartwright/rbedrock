@@ -3,6 +3,7 @@
 \name{SubchunkBlocks}
 \alias{SubchunkBlocks}
 \alias{get_subchunk_blocks_data}
+\alias{get_subchunk_blocks_values}
 \alias{get_subchunk_blocks_value}
 \alias{get_subchunk_blocks_from_chunk}
 \alias{put_subchunk_blocks_data}
@@ -15,6 +16,16 @@
 \title{Load and store SubchunkBlocks data}
 \usage{
 get_subchunk_blocks_data(
+  db,
+  x,
+  z,
+  dimension,
+  subchunk,
+  names_only = FALSE,
+  extra_block = FALSE
+)
+
+get_subchunk_blocks_values(
   db,
   x,
   z,
@@ -129,6 +140,7 @@ Blocks may have 0 or more states.
 
 \code{get_subchunk_blocks_data()} loads SubchunkBlocks data from a \code{bedrockdb}.
 It will silently drop and keys not representing SubchunkBlocks data.
+\code{get_subchunk_blocks_values()} is a synonym for \code{get_subchunk_blocks_data()}.
 
 \code{get_subchunk_blocks_value()} loads SubchunkBlocks data from a \code{bedrockdb}.
 It only supports loading a single value.
