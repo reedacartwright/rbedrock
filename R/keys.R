@@ -116,7 +116,7 @@ chunk_origins <- function(keys) {
 # List of Tags that identify the contents of a chunk key.
 # Most names are consistent with Creator Documentation
 # https://docs.microsoft.com/en-us/minecraft/creator/documents/actorstorage#non-actor-data-chunk-key-ids
-.CHUNK_TAGS <- c(
+.CHUNK_TAGS_CHR <- c(
     "Data3D" = 43L, # introduced in 1.18
     "Version" = 44L,
     "Data2D" = 45L,
@@ -135,29 +135,16 @@ chunk_origins <- function(keys) {
     "RandomTicks" = 58L,
     "Checksums" = 59L, # introduced in 1.16
     "GenerationSeed" = 60L, # introduced in 1.18
-    "GeneratedPreCnCBlending" = 61L, # introduced in 1.18
-                       # "Chunk Originally generated before Caves and Cliffs"
-                       # "isGeneratedPreCavesandCliffsBlending"
-    "BlendingBiomeHeight" = 62L,
+    "GeneratedPreCavesAndCliffsBlending" = 61L, # introduced in 1.18, not used any more (?)
+    "BlendingBiomeHeight" = 62L, # introduced in 1.18, not used any more (?)
     "MetaDataHash" = 63L,
-    "LegacyVersion" = 118L, # replaced by 44
-
-    # future proofing
-    "33" = 33L,
-    "34" = 34L,
-    "35" = 35L,
-    "36" = 36L,
-    "37" = 37L,
-    "38" = 38L,
-    "39" = 39L,
-    "40" = 40L,
-    "41" = 41L,
-    "42" = 42L,
-    "64" = 64L
+    "BlendingData" = 64L,
+    "ActorDigestVersion" = 65L,
+    "LegacyVersion" = 118L # replaced by 44
 )
-.CHUNK_TAGS_INV <- rep(NA_character_, 128)
-.CHUNK_TAGS_INV[.CHUNK_TAGS] <- names(.CHUNK_TAGS)
-
+.CHUNK_TAGS_INV <- as.character(1:128)
+.CHUNK_TAGS_INV[.CHUNK_TAGS_CHR] <- names(.CHUNK_TAGS_CHR)
+.CHUNK_TAGS <- setNames(1:128, .CHUNK_TAGS_INV)
 
 #' @description
 #' `chunk_tag_str()` and `chunk_tag_int()` convert between integer and character

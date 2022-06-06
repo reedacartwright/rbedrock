@@ -1,4 +1,6 @@
 ## RBedrock Development
+ * [Breaking Change] Chunk tag key descriptions have been changed to better match internal Mojang descriptions.
+ * Maximum chunk key tag has been increased to 96.
  * [Breaking Change] Change key format to require prefixes in front of every key. This allows rbedrock to support multiple key formats.
  * Add nbt_raw_string to support reading and writing nbt_string data that contains embedded nulls.
 
