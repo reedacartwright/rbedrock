@@ -1,4 +1,5 @@
 ## RBedrock Development
+ * [Breaking Change] Change key format to require prefixes in front of every key. This allows rbedrock to support multiple key formats.
  * Add nbt_raw_string to support reading and writing nbt_string data that contains embedded nulls.
 
 ## RBedrock 0.2.0
