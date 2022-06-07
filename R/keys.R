@@ -72,9 +72,9 @@ parse_chunk_keys <- function(keys) {
 #' `create_chunk_keys()` returns a vector of chunk keys formed from its
 #' arguments.
 #'
-#' @param x Chunk x-coordinate
-#' @param z Chunk z-coordinate
-#' @param dimension dimension
+#' @param x Chunk x-coordinate.
+#' @param z Chunk z-coordinate.
+#' @param dimension Dimension.
 #' @param tag The type of chunk data.
 #' @param subtag The subchunk the key refers to (Only used for tag 47).
 #' @examples

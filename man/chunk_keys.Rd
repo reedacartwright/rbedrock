@@ -25,11 +25,11 @@ chunk_tag_int(tags)
 \arguments{
 \item{keys}{A character vector of database keys.}
 
-\item{x}{Chunk x-coordinate}
+\item{x}{Chunk x-coordinate.}
 
-\item{z}{Chunk z-coordinate}
+\item{z}{Chunk z-coordinate.}
 
-\item{dimension}{dimension}
+\item{dimension}{Dimension.}
 
 \item{tag}{The type of chunk data.}
 
