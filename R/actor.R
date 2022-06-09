@@ -9,13 +9,11 @@ NULL
 
 #' @description
 #' `get_acdig_data()` and `get_acdig_value()` load ActorDigest
-#' data from `db`. `get_acdig_data()` will silently drop and keys not
-#' representing ActorDigest data. `get_acdig_value()` supports loading
-#' only a single value. `get_acdig_values()` is a synonym for 
-#' `get_acdig_data()`.
+#' data from `db`. They return `NULL` for any key that is not 
+#' does not represent ActorDigest data. `get_acdig_value()` supports loading
+#' only a single value.
 #'
-#' `put_acdig_values()`, `put_acdig_value()`, and
-#' `put_acdig_data()` store ActorDigest data into `db`.
+#' `put_acdig_data()` and `put_acdig_value()` store ActorDigest data into `db`.
 #'
 #' `read_acdig_value()` and `write_acdig_value()` decode and encode
 #' ActorDigest data respectively.
@@ -26,8 +24,7 @@ NULL
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
 #' @param value A character vector.
-#' @param values A list of character vectors.
-#' @param data A named-list of character vectors.
+#' @param values A list of character vectors. If named, the names represent db keys.
 #' @param rawdata A raw vector.
 #'
 #' @return `get_acdig_values()` returns a vector of actor keys.
@@ -36,44 +33,41 @@ NULL
 #' 
 #' @rdname ActorDigest
 #' @export
-get_acdig_data <- function(db, x, z, dimension) {
+get_acdig_data <- function(x, z, dimension, db) {
     keys <- .process_acdig_key_args(x, z, dimension)
-    dat <- get_data(db, keys)
-    purrr::map(dat, read_acdig_value)
+    good_key <- .is_valid_acdig_key(keys)
+    ret <- rep(list(NULL), length(keys))
+    names(ret) <- keys
+    dat <- get_data(db, keys[good_key])
+    ret[names(dat)] <- purrr::map(dat, read_acdig_value)
+    ret
 }
 
 #' @rdname ActorDigest
 #' @export
-get_acdig_values <- get_acdig_data
-
-#' @rdname ActorDigest
-#' @export
-get_acdig_value <- function(db, x, z, dimension) {
-    key <- .process_acdig_key_args(x, z, dimension)
-    vec_assert(key, character(), 1L)
+get_acdig_value <- function(x, z, dimension, db) {
+    key <- .process_acdig_key_args(x, z, dimension, assert_scalar=TRUE)
+    if(!.is_valid_acdig_key(key)) {
+        return(NULL)
+    }
     dat <- get_value(db, key)
     read_acdig_value(dat)
 }
 
 #' @rdname ActorDigest
 #' @export
-put_acdig_data <- function(db, data) {
-    put_acdig_values(db, x=names(data), values=data) 
-}
-
-#' @rdname ActorDigest
-#' @export
-put_acdig_values <- function(db, x, z, dimension, values) {
-    keys <- .process_acdig_key_args(x, z, dimension, stop_if_filtered = TRUE)
+put_acdig_data <- function(values, x, z, dimension, db) {
+    keys <- .process_acdig_key_args(x, z, dimension, values=values,
+        assert_validity = TRUE)
     values <- purrr::map(values, write_acdig_value)
     put_values(db, keys, values)
 }
 
 #' @rdname ActorDigest
 #' @export
-put_acdig_value <- function(db, x, z, dimension, value) {
-    key <- .process_acdig_key_args(x, z, dimension)
-    vec_assert(key, character(), 1L)
+put_acdig_value <- function(value, x, z, dimension, db) {
+    key <- .process_acdig_key_args(x, z, dimension,
+        assert_scalar=TRUE, assert_validity = TRUE)
     value <- write_acdig_value(value)
     put_value(db, key, value)
 }
@@ -92,7 +86,7 @@ read_acdig_value <- function(rawdata) {
     if(ncol(m) == 0) {
         character()
     } else {
-        str_c("actor:", apply(m, 2, str_c, collapse=""))
+        str_c("actor:", toupper(apply(m, 2, str_c, collapse="")))
     }
 }
 
@@ -136,15 +130,17 @@ create_acdig_keys <- function(x, z, dimension) {
     str_detect(keys, pattern="^actor:[0-9a-fA-F]{16}$")
 }
 
-.process_acdig_key_args <- function(x, z, d, stop_if_filtered = FALSE) {
-    # is z is missing then x should contain keys as strings
-    if(missing(z) && is.character(x)) {
-        # filter 
-        b <- .is_valid_acdig_key(x)
-        if(isTRUE(stop_if_filtered) && !isTRUE(all(b))) {
-            abort("Invalid key. Key is not an acdig key.")            
-        }
-        return(x[b])
+.process_acdig_key_args <- function(x, z, d, values = NULL, assert_scalar = FALSE, assert_validity = FALSE) {
+    if(missing(x) && is_named(values)) {
+        # if x is missing use names from values
+        x <- names(values)
+    } else if(!missing(z)) {
+        # if z is not missing, create keys from x, z, and d
+        x <- create_acdig_keys(x, z, d)
     }
-    create_acdig_keys(x, z, d)
+    vec_assert(x, character(), size = if(isTRUE(assert_scalar)) 1L else NULL)
+    if(isTRUE(assert_validity) && !isTRUE(all(.is_valid_actor_key(x)))) {
+        abort("Invalid actor key.")
+    }
+    x
 }

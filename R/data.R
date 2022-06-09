@@ -53,9 +53,7 @@ get_data <- get_values
 #' @rdname get_values
 #' @export
 get_value <- function(db, key, readoptions = NULL) {
-    if(length(key) != 1 || !is.character(key)) {
-        stop("key must be a scalar character value")
-    }
+    vec_assert(key, character(), 1L)
     rawkey <- chrkeys_to_rawkeys(key)[[1]]
     db$get(rawkey, readoptions)
 }
@@ -80,7 +78,6 @@ has_values <- function(db, keys, readoptions = NULL) {
 #' @export
 put_values <- function(db, keys, values, writeoptions = NULL) {
     values <- vec_recycle(values, length(keys))
-    
     rawkeys <- chrkeys_to_rawkeys(keys)
     db$mput(rawkeys, values, writeoptions)
 }
@@ -90,9 +87,7 @@ put_values <- function(db, keys, values, writeoptions = NULL) {
 #' @rdname put_values
 #' @export
 put_value <- function(db, key, value, writeoptions = NULL) {
-    if(length(key) != 1 || !is.character(key)) {
-        stop("key must be a scalar character value")
-    }
+    vec_assert(key, character(), 1L)
     rawkey <- chrkeys_to_rawkeys(key)[[1]]
     db$put(rawkey, value, writeoptions)
 }

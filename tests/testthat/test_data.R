@@ -27,10 +27,10 @@ test_that("get_value returns a single, raw value",{
 })
 
 test_that("get_value requires a scalar character argument",{
-    expect_error(get_value(db, NULL), "must be a scalar character value")
-    expect_error(get_value(db, 1L), "must be a scalar character value")
-    expect_error(get_value(db, as.raw(1L)), "must be a scalar character value")
-    expect_error(get_value(db, c("hello","world")), "must be a scalar character value")
+    expect_error(get_value(db, NULL), class="vctrs_error_scalar_type")
+    expect_error(get_value(db, 1L), class="vctrs_error_assert_ptype")
+    expect_error(get_value(db, as.raw(1L)), class="vctrs_error_assert_ptype")
+    expect_error(get_value(db, c("hello","world")), class="vctrs_error_assert_size")
 })
 
 test_that("get_values returns a list of raw values", {
@@ -72,10 +72,10 @@ test_that("put_value writes data into the db", {
 })
 
 test_that("put_value throws errors are incorrect arguments",{
-    expect_error(put_value(db, NULL, raw(1L)), "must be a scalar character value")
-    expect_error(put_value(db, 1L, raw(1L)), "must be a scalar character value")
-    expect_error(put_value(db, as.raw(1L), raw(1L)), "must be a scalar character value")
-    expect_error(put_value(db, c("plain:hello","plain:world"), raw(1L)), "must be a scalar character value")
+    expect_error(put_value(db, NULL, raw(1L)), class="vctrs_error_scalar_type")
+    expect_error(put_value(db, 1L, raw(1L)), class="vctrs_error_assert_ptype")
+    expect_error(put_value(db, as.raw(1L), raw(1L)), class="vctrs_error_assert_ptype")
+    expect_error(put_value(db, c("plain:hello","plain:world"), raw(1L)), class="vctrs_error_assert_size")
 
     expect_error(put_value(db, "plain:Test%02", "hello Error"), "expected raw")
 })

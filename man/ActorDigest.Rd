@@ -3,27 +3,21 @@
 \name{ActorDigest}
 \alias{ActorDigest}
 \alias{get_acdig_data}
-\alias{get_acdig_values}
 \alias{get_acdig_value}
 \alias{put_acdig_data}
-\alias{put_acdig_values}
 \alias{put_acdig_value}
 \alias{read_acdig_value}
 \alias{write_acdig_value}
 \alias{create_acdig_keys}
 \title{Read and write Actor Digest Data}
 \usage{
-get_acdig_data(db, x, z, dimension)
+get_acdig_data(x, z, dimension, db)
 
-get_acdig_values(db, x, z, dimension)
+get_acdig_value(x, z, dimension, db)
 
-get_acdig_value(db, x, z, dimension)
+put_acdig_data(values, x, z, dimension, db)
 
-put_acdig_data(db, data)
-
-put_acdig_values(db, x, z, dimension, values)
-
-put_acdig_value(db, x, z, dimension, value)
+put_acdig_value(value, x, z, dimension, db)
 
 read_acdig_value(rawdata)
 
@@ -32,14 +26,12 @@ write_acdig_value(value)
 create_acdig_keys(x, z, dimension)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{data}{A named-list of character vectors.}
+\item{db}{A bedrockdb object.}
 
-\item{values}{A list of character vectors.}
+\item{values}{A list of character vectors. If named, the names represent db keys.}
 
 \item{value}{A character vector.}
 
@@ -56,13 +48,11 @@ they are not chunk data and use their own prefix. The key format
 for actor digest data is acdig:x:z:dimension.
 
 \code{get_acdig_data()} and \code{get_acdig_value()} load ActorDigest
-data from \code{db}. \code{get_acdig_data()} will silently drop and keys not
-representing ActorDigest data. \code{get_acdig_value()} supports loading
-only a single value. \code{get_acdig_values()} is a synonym for
-\code{get_acdig_data()}.
+data from \code{db}. They return \code{NULL} for any key that is not
+does not represent ActorDigest data. \code{get_acdig_value()} supports loading
+only a single value.
 
-\code{put_acdig_values()}, \code{put_acdig_value()}, and
-\code{put_acdig_data()} store ActorDigest data into \code{db}.
+\code{put_acdig_data()} and \code{put_acdig_value()} store ActorDigest data into \code{db}.
 
 \code{read_acdig_value()} and \code{write_acdig_value()} decode and encode
 ActorDigest data respectively.
