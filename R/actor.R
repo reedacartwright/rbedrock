@@ -114,6 +114,33 @@ create_acdig_keys <- function(x, z, dimension) {
     str_c("acdig", args[[1]], args[[2]], args[[3]], sep=":")
 }
 
+
+#' Read and write Actor data
+#'
+#' @param db A bedrockdb object.
+#' @param x,z,dimension Chunk coordinates to extract data from.
+#'    `x` can also be a character vector of db keys.
+##' @param value A character vector.
+##' @param values A list of character vectors. If named, the names represent db keys.
+##' @param rawdata A raw vector.
+#'
+#' @name Actors
+NULL
+
+#' @rdname Actors
+#' @export
+get_actors_data <- function(x, z, dimension, db) {
+    keys <- get_acdig_data(x, z, dimension, db)
+    purrr::map(keys, ~get_nbt_data(keys=., db=db))
+}
+
+#' @rdname Actors
+#' @export
+get_actors_value <- function(x, z, dimension, db) {
+    keys <- get_acdig_value(x, z, dimension, db)
+    get_nbt_data(keys, db=db)
+}
+
 .is_acdig_key <- function(keys) {
     str_starts(keys, pattern=fixed("acdig:"))
 }
@@ -139,7 +166,7 @@ create_acdig_keys <- function(x, z, dimension) {
         x <- create_acdig_keys(x, z, d)
     }
     vec_assert(x, character(), size = if(isTRUE(assert_scalar)) 1L else NULL)
-    if(isTRUE(assert_validity) && !isTRUE(all(.is_valid_actor_key(x)))) {
+    if(isTRUE(assert_validity) && !isTRUE(all(.is_valid_acdig_key(x)))) {
         abort("Invalid actor key.")
     }
     x
