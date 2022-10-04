@@ -8,23 +8,23 @@
 \alias{put_pending_ticks_value}
 \title{Load and store PendingTicks NBT data}
 \usage{
-get_pending_ticks_data(db, x, z, dimension)
+get_pending_ticks_data(x, z, dimension, db)
 
-get_pending_ticks_value(db, x, z, dimension)
+get_pending_ticks_value(x, z, dimension, db)
 
-put_pending_ticks_data(db, data)
+put_pending_ticks_data(values, db)
 
-put_pending_ticks_value(db, x, z, dimension, value)
+put_pending_ticks_value(x, z, dimension, value, db)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{value}{An nbt object.}
+\item{db}{A bedrockdb object.}
 
 \item{values}{A list of nbt objects. If \code{x} is missing, the names of \code{values} will be taken as the keys.}
+
+\item{value}{An nbt object.}
 }
 \value{
 \code{get_pending_ticks_data()} returns a named-list of nbt data.

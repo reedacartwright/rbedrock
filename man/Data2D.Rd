@@ -3,74 +3,59 @@
 \name{Data2D}
 \alias{Data2D}
 \alias{get_data2d_data}
-\alias{get_data2d_values}
 \alias{get_data2d_value}
-\alias{read_data2d_value}
 \alias{put_data2d_data}
-\alias{put_data2d_values}
 \alias{put_data2d_value}
+\alias{read_data2d_value}
 \alias{write_data2d_value}
 \title{Read and write Data2D data}
 \usage{
-get_data2d_data(db, x, z, dimension)
-
-get_data2d_values(db, x, z, dimension)
+get_data2d_data(x, z, dimension, db)
 
 get_data2d_value(db, x, z, dimension)
 
+put_data2d_data(height_maps, biome_maps, x, z, dimension, db)
+
+put_data2d_value(height_map, biome_map, x, z, dimension, db)
+
 read_data2d_value(rawdata)
-
-put_data2d_data(db, data)
-
-put_data2d_values(db, x, z, dimension, height_maps, biome_maps)
-
-put_data2d_value(db, x, z, dimension, height_map, biome_map)
 
 write_data2d_value(height_map, biome_map)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{rawdata}{A raw vector.}
-
-\item{data}{A named-vector of key-value pairs for Data2D data.}
+\item{db}{A bedrockdb object.}
 
 \item{height_maps, biome_maps}{Lists of height and biome data.
 Values will be recycled if necessary to match the number of keys
 to be written to. If \code{biome_maps} is missing, \code{height_maps} should
-be in the same format as returned by \code{get_data2d_data()}.}
+be in the same format as returned by \code{get_data2d_data()}.
+If \code{x} is missing, the names of \code{height_maps} will be taken as the keys.}
 
 \item{height_map, biome_map}{16x16 arrays containing height and biome data.
 Values will be recycled if necessary. If \code{biome_map} is missing, \code{height-map}
 should be a list a \code{list()} with both "height_map" and "biome_map" elements.}
+
+\item{rawdata}{A raw vector.}
 }
 \value{
-\code{get_data2d_data()} returns a list of the of the values returned by
-\code{get_data2d_value()}.
-
-\code{get_data2d_value()} returns a list with components "height_map"
-and "biome_map".
+\code{get_data2d_value()} returns a list with components "height_map" and "biome_map".
+\code{get_data2d_data()} returns a list of the of the values returned by  \code{get_data2d_value()}.
 }
 \description{
 Data2D data (tag 45) stores information about surface heights and biomes in a
 chunk. Data2D data is 768 bytes long and consists of a 256 int16s (heights)
 followed by 256 uint8s (biomes).
+}
+\details{
+\code{get_data2d_data()} and \verb{get_data2d_value() load Data2D data from }db\code{. }get_data2d_value()` only supports loading a single value.
 
-\code{get_data2d_data()} loads Data2D data from a \code{bedrockdb}.
-It will silently drop and keys not representing Data2D data.
+\code{put_data2d_data()} and \code{put_data2d_value()} store Data2D data into \code{db}.
 
-\code{get_data2d_value()} loads Data2D data from a \code{bedrockdb}.
-It only supports loading a single value.
-
-\code{read_data2d_value} decodes binary Data2D data.
-
-\code{put_data2d_data()}, \code{put_data2d_values()}, and
-\code{put_data2d_value()} store Data2D data into a \code{bedrockdb}.
-
-\code{write_data2d_value} encodes Data2D data into a raw vector.
+\code{read_data2d_value()} decodes binary Data2D data.
+\code{write_data2d_value()} encodes Data2D data into a raw vector.
 }
 \examples{
 heights <- matrix(63,16,16)
@@ -82,4 +67,5 @@ obj <- list(height_map = heights, biome_map = biomes)
 dat <- write_data2d_value(obj)
 # Pass them as scalars
 dat <- write_data2d_value(63, 1)
+
 }

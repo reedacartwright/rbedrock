@@ -8,19 +8,19 @@
 \alias{put_random_ticks_data}
 \title{Load and store RandomTicks NBT data}
 \usage{
-get_random_ticks_data(db, x, z, dimension)
+get_random_ticks_data(x, z, dimension, db)
 
-get_random_ticks_value(db, x, z, dimension)
+get_random_ticks_value(x, z, dimension, db)
 
-put_random_ticks_value(db, x, z, dimension, value)
+put_random_ticks_value(x, z, dimension, value, db)
 
-put_random_ticks_data(db, data)
+put_random_ticks_data(values, db)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
+
+\item{db}{A bedrockdb object.}
 
 \item{value}{An nbt object.}
 
