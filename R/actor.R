@@ -157,13 +157,13 @@ get_actors_value <- function(x, z, dimension, db) {
     str_detect(keys, pattern="^actor:[0-9a-fA-F]{16}$")
 }
 
-.process_acdig_key_args <- function(x, z, d, values = NULL, assert_scalar = FALSE, assert_validity = FALSE) {
+.process_acdig_key_args <- function(x, z, dimension, values = NULL, assert_scalar = FALSE, assert_validity = FALSE) {
     if(missing(x) && is_named(values)) {
         # if x is missing use names from values
         x <- names(values)
     } else if(!missing(z)) {
-        # if z is not missing, create keys from x, z, and d
-        x <- create_acdig_keys(x, z, d)
+        # if z is not missing, create keys from x, z, and dimension
+        x <- create_acdig_keys(x, z, dimension)
     }
     vec_assert(x, character(), size = if(isTRUE(assert_scalar)) 1L else NULL)
     if(isTRUE(assert_validity) && !isTRUE(all(.is_valid_acdig_key(x)))) {

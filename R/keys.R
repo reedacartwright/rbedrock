@@ -113,6 +113,13 @@ chunk_origins <- function(keys) {
     pos*16L
 }
 
+#' @export
+#' @rdname chunk_keys
+filter_chunk_keys <- function(keys, tag) {
+    b <- .check_chunk_key_tag(keys, tag = tag, silent = TRUE)
+    keys[b]
+}
+
 # List of Tags that identify the contents of a chunk key.
 # Most names are consistent with Creator Documentation
 # https://docs.microsoft.com/en-us/minecraft/creator/documents/actorstorage#non-actor-data-chunk-key-ids
@@ -163,11 +170,6 @@ chunk_tag_int <- function(tags) {
     tags <- vec_cast(tags, character())
     unname(.CHUNK_TAGS[tags])
 }
-
-# .CHUNK_KEY_MATCH = "^@([^:]+):([^:]+):([^:]+):([^:]+)(?::([^:]+))?$"
-# .CHUNK_KEY_TAG_MATCH = "^([^:-]+)(?::([^:]+))?$"
-# .CHUNK_STEM_MATCH = "^@([^:]+):([^:]+):([^:]+)$"
-# .CHUNK_STEM_MATCH2 = "^@([^:]+):([^:]+):([^:]+)(?::([^:]+)(?::([^:]+))?)?$"
 
 .is_chunk_key <- function(keys) {
     str_starts(keys, pattern=fixed("chunk:"))
@@ -231,12 +233,37 @@ chunk_tag_int <- function(tags) {
     b <- b & !is.na(b)
     isgood <- isTRUE(all(b))
     if(isFALSE(silent) && !isgood) {
-        abort(str_glue("Invalid key: tag is not {tag}."))
+        abort(str_glue("One or more keys have a tag that is not {tag}."))
     }
     b
 }
 
-.process_key_args <- function(x, z, d, tag, subtag,
+.is_valid_chunk_key <- function(keys) {
+    str_detect(keys, pattern="^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+:-?[0-9]+(:-?[0-9]+)?$")
+}
+
+.process_chunk_key_args <- function(x, z, dimension, tag, values = NULL, assert_scalar = FALSE,
+    assert_validity = FALSE) {
+    if(missing(x) && is_named(values)) {
+        # if x is missing use names from values
+        x <- names(values)
+    } else if(!missing(z)) {
+        # if z is not missing, create keys from x, z, and dimension
+        x <- create_chunk_keys(x, z, dimension, tag)
+    }
+    vec_assert(x, character(), size = if(isTRUE(assert_scalar)) 1L else NULL)
+    if(isTRUE(assert_validity)) {
+        if(!missing(tag)) {
+            .check_chunk_key_tag(x, tag, silent = FALSE)
+        }
+        if(!isTRUE(all(.is_valid_chunk_key(x)))) {
+            abort("One or more chunk keys is invalid.")
+        }
+    }
+    x
+}
+
+.process_key_args <- function(x, z, dimension, tag, subtag,
     stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
     if(missing(z) && is.character(x)) {
@@ -247,10 +274,10 @@ chunk_tag_int <- function(tags) {
         }
         return(x)
     }
-    create_chunk_keys(x, z, d, tag, subtag)
+    create_chunk_keys(x, z, dimension, tag, subtag)
 }
 
-.process_key_args_prefix <- function(x, z, d, stop_if_filtered = FALSE) {
+.process_key_args_prefix <- function(x, z, dimension, stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
     if(missing(z) && is.character(x)) {
         x <- .get_stem_from_chunk_key(x)
@@ -260,7 +287,7 @@ chunk_tag_int <- function(tags) {
         }
         return(x[b])
     }
-    args <- vec_recycle_common(x, z, d)
+    args <- vec_recycle_common(x, z, dimension)
 
     str_c("chunk", args[[1]], args[[2]], args[[3]], sep=":")
 }

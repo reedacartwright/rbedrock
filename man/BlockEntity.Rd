@@ -3,36 +3,28 @@
 \name{BlockEntity}
 \alias{BlockEntity}
 \alias{get_block_entity_data}
-\alias{get_block_entity_values}
 \alias{get_block_entity_value}
-\alias{put_block_entity_values}
-\alias{put_block_entity_value}
 \alias{put_block_entity_data}
+\alias{put_block_entity_value}
 \title{Load and store BlockEntity NBT data}
 \usage{
-get_block_entity_data(db, x, z, dimension)
+get_block_entity_data(x, z, dimension, db = db)
 
-get_block_entity_values(db, x, z, dimension)
+get_block_entity_value(x, z, dimension, db = db)
 
-get_block_entity_value(db, x, z, dimension)
+put_block_entity_data(values, x, z, dimension, db)
 
-put_block_entity_values(db, x, z, dimension, values)
-
-put_block_entity_value(db, x, z, dimension, value)
-
-put_block_entity_data(db, data)
+put_block_entity_value(value, x, z, dimension, db)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{values}{A list of nbt objects}
+\item{db}{A bedrockdb object.}
+
+\item{values}{A list of nbt objects. If \code{x} is missing, the names of \code{values} will be taken as the keys.}
 
 \item{value}{An nbt object.}
-
-\item{data}{A named-list specifying key-value pairs.}
 }
 \value{
 \code{get_block_entity_data()} returns a named-list of nbt data.
@@ -41,13 +33,12 @@ put_block_entity_data(db, data)
 \description{
 BlockEntity data (tag 49) holds a list of NBT values for
 entity data associated with specific blocks.
-
+}
+\details{
 \code{get_block_entity_data()} and \code{get_block_entity_value()} load BlockEntity
-data from \code{db}. \code{get_block_entity_data()} will silently drop and keys not
-representing BlockEntity data. \code{get_block_entity_value()} supports loading
-only a single value. \code{get_block_entity_values()} is a synonym for
-\code{get_block_entity_data()}.
+data from \code{db}. \code{get_block_entity_value()} supports loading
+only a single value.
 
-\code{put_block_entity_values()}, \code{put_block_entity_value()}, and
-\code{put_block_entity_data()} store BlockEntity data into \code{db}.
+\code{put_block_entity_value()}, and \code{put_block_entity_data()} store BlockEntity
+data into \code{db}.
 }

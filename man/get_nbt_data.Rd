@@ -3,8 +3,6 @@
 \name{get_nbt_data}
 \alias{get_nbt_data}
 \alias{get_nbt_value}
-\alias{get_nbt_values}
-\alias{put_nbt_values}
 \alias{put_nbt_value}
 \alias{put_nbt_data}
 \alias{read_nbt}
@@ -13,17 +11,13 @@
 \alias{write_nbt_data}
 \title{Read and Write NBT Data}
 \usage{
-get_nbt_data(db, keys, readoptions = NULL, simplify = TRUE)
+get_nbt_data(keys, db, readoptions = NULL, simplify = TRUE)
 
-get_nbt_value(db, key, readoptions = NULL, simplify = TRUE)
+get_nbt_value(key, db, readoptions = NULL, simplify = TRUE)
 
-get_nbt_values(db, keys, readoptions = NULL, simplify = TRUE)
+put_nbt_value(value, key, db, writeoptions = NULL)
 
-put_nbt_values(db, keys, values, writeoptions = NULL)
-
-put_nbt_value(db, key, value, writeoptions = NULL)
-
-put_nbt_data(db, data, writeoptions = NULL)
+put_nbt_data(values, keys, db, writeoptions = NULL)
 
 read_nbt(rawdata, simplify = TRUE)
 
@@ -34,9 +28,9 @@ write_nbt(object)
 write_nbt_data(data)
 }
 \arguments{
-\item{db}{A \code{bedrockdb} object}
-
 \item{keys}{A character vector of keys.}
+
+\item{db}{A \code{bedrockdb} object}
 
 \item{readoptions}{A \code{bedrock_leveldb_readoptions} object}
 
@@ -44,13 +38,11 @@ write_nbt_data(data)
 
 \item{key}{A single key.}
 
-\item{values}{A list of nbt objects}
+\item{value}{An nbt object.}
 
 \item{writeoptions}{A \code{bedrock_leveldb_writeoptions} object}
 
-\item{value}{An nbt object.}
-
-\item{data}{A named-list specifying key-value pairs.}
+\item{values}{A list of nbt objects}
 
 \item{rawdata}{A \code{raw} vector}
 
@@ -58,9 +50,8 @@ write_nbt_data(data)
 }
 \description{
 \code{get_nbt_data()} and \code{get_nbt_value()} load nbt-formatted data from \code{db} and parses it.
-\code{get_nbt_values()} is a synonym for \code{get_nbt_data()}.
 
-\code{put_nbt_values()}, \code{put_nbt_value()}, and \code{put_nbt_data()} store nbt data into \code{db} in binary form.
+\code{put_nbt_value()} and \code{put_nbt_data()} store nbt data into \code{db} in binary form.
 
 \code{read_nbt} reads NBT data from a \code{raw} vector.
 

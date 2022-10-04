@@ -397,56 +397,43 @@ is.na.rbedrock_nbt_long_array <- function(x, ...) vec_data(NextMethod())
 #'
 #' @description
 #' `get_nbt_data()` and `get_nbt_value()` load nbt-formatted data from `db` and parses it.
-#' `get_nbt_values()` is a synonym for `get_nbt_data()`.
 #'
 #' @param db A `bedrockdb` object
 #' @param keys A character vector of keys.
 #' @param readoptions A `bedrock_leveldb_readoptions` object
 #' @param simplify If TRUE, simplifies a list containing a single unnamed `nbtnode`.
 #' @export
-get_nbt_data <- function(db, keys, readoptions = NULL, simplify = TRUE) {
-    dat <- get_values(db, keys, readoptions = readoptions)
+get_nbt_data <- function(keys, db, readoptions = NULL, simplify = TRUE) {
+    dat <- get_data(keys = keys, db = db, readoptions = readoptions)
     read_nbt_data(dat, simplify = simplify)
 }
 
 #' @param key  A single key.
 #' @rdname get_nbt_data
 #' @export
-get_nbt_value <- function(db, key, readoptions = NULL, simplify = TRUE) {
-    dat <- get_value(db, key, readoptions = readoptions)
+get_nbt_value <- function(key, db, readoptions = NULL, simplify = TRUE) {
+    dat <- get_value(key = key, db = db, readoptions = readoptions)
     read_nbt(dat, simplify = simplify)
 }
 
-#' @rdname get_nbt_data
-#' @export
-get_nbt_values <- get_nbt_data
-
 #' @description
-#' `put_nbt_values()`, `put_nbt_value()`, and `put_nbt_data()` store nbt data into `db` in binary form.
+#' `put_nbt_value()` and `put_nbt_data()` store nbt data into `db` in binary form.
 #'
+#' @param value An nbt object.
 #' @param values A list of nbt objects
 #' @param writeoptions A `bedrock_leveldb_writeoptions` object
 #' @rdname get_nbt_data
 #' @export
-put_nbt_values <- function(db, keys, values, writeoptions = NULL) {
-    dat <- write_nbt_data(values)
-    put_values(db, keys, dat, writeoptions = writeoptions)
-}
-
-#' @param value An nbt object.
-#' @rdname get_nbt_data
-#' @export
-put_nbt_value <- function(db, key, value, writeoptions = NULL) {
-    dat <- write_nbt(value)
-    put_value(db, key, dat, writeoptions = writeoptions)
+put_nbt_value <- function(value, key, db, writeoptions = NULL) {
+    value <- write_nbt(value)
+    put_value(value = value, key = key, db = db, writeoptions = writeoptions)
 }
 
 #' @rdname get_nbt_data
-#' @param data A named-list specifying key-value pairs.
 #' @export
-put_nbt_data <- function(db, data, writeoptions = NULL) {
-    dat <- write_nbt_data(data)
-    put_data(db, dat, writeoptions = writeoptions)
+put_nbt_data <- function(values, keys, db, writeoptions = NULL) {
+    values <- write_nbt_data(values)
+    put_data(values = values, keys = keys, db = db, writeoptions = writeoptions)
 }
 
 #' @description

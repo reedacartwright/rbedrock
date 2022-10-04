@@ -6,6 +6,7 @@
 \alias{create_chunk_keys}
 \alias{chunk_positions}
 \alias{chunk_origins}
+\alias{filter_chunk_keys}
 \alias{chunk_tag_str}
 \alias{chunk_tag_int}
 \title{Read and manipulate chunk keys}
@@ -17,6 +18,8 @@ create_chunk_keys(x, z, dimension, tag, subtag)
 chunk_positions(keys)
 
 chunk_origins(keys)
+
+filter_chunk_keys(keys, tag)
 
 chunk_tag_str(tags)
 
