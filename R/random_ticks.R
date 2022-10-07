@@ -16,7 +16,7 @@
 #' @param value An nbt object.
 #'
 #' @return `get_random_ticks_data()` returns a named-list of nbt data.
-#' `get_random_ticks_values()` returns a single nbt value.
+#' `get_random_ticks_value()` returns a single nbt value.
 #' 
 #' @name RandomTicks
 NULL
@@ -24,28 +24,24 @@ NULL
 #' @rdname RandomTicks
 #' @export
 get_random_ticks_data <- function(x, z, dimension, db) {
-    keys <- .process_chunk_key_args(x, z, dimension, tag = 59L, assert_validity = TRUE)
-    get_nbt_data(keys, db, simplify = FALSE)
-
+    .get_chunk_nbt_data(x, z, dimension, db, tag = 59L)
 }
 
 #' @rdname RandomTicks
 #' @export
 get_random_ticks_value <- function(x, z, dimension, db) {
-    key <- .process_chunk_key_args(x, z, dimension, tag = 59L, assert_validity = TRUE, assert_scalar = TRUE)
-    get_nbt_value(key, db, simplify = FALSE)
+    .get_chunk_nbt_value(x, z, dimension, db, tag = 59L)
 }
 
 #' @rdname RandomTicks
 #' @export
-put_random_ticks_value <- function(x, z, dimension, value, db) {
-    key <- .process_chunk_key_args(x, z, dimension, tag = 59L, assert_validity = TRUE, assert_scalar = TRUE)
-    put_nbt_value(value=value, key = key, db = db)
+put_random_ticks_data <- function(values, x, z, dimension, db) {
+    .put_chunk_nbt_data(values, x, z, dimension, db, tag = 59L)
 }
 
 #' @rdname RandomTicks
 #' @export
-put_random_ticks_data <- function(values, db) {
-    keys <- .process_chunk_key_args(x, z, dimension, tag = 59L, values = values, assert_validity = TRUE)
-    put_nbt_data(values = values, keys=keys, db = db)
+put_random_ticks_value <- function(value, x, z, dimension, db) {
+    .put_chunk_nbt_value(value, x, z, dimension, db, tag = 59L)
 }
+

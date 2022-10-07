@@ -12,9 +12,9 @@ get_pending_ticks_data(x, z, dimension, db)
 
 get_pending_ticks_value(x, z, dimension, db)
 
-put_pending_ticks_data(values, db)
+put_pending_ticks_data(values, x, z, dimension, db)
 
-put_pending_ticks_value(x, z, dimension, value, db)
+put_pending_ticks_value(value, x, z, dimension, db)
 }
 \arguments{
 \item{x, z, dimension}{Chunk coordinates to extract data from.
@@ -28,7 +28,7 @@ put_pending_ticks_value(x, z, dimension, value, db)
 }
 \value{
 \code{get_pending_ticks_data()} returns a named-list of nbt data.
-\code{get_pending_ticks_values()} returns a single nbt value.
+\code{get_pending_ticks_value()} returns a single nbt value.
 }
 \description{
 PendingTicks data (tag 51) holds a list of NBT values for

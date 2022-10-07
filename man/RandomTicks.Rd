@@ -4,17 +4,17 @@
 \alias{RandomTicks}
 \alias{get_random_ticks_data}
 \alias{get_random_ticks_value}
-\alias{put_random_ticks_value}
 \alias{put_random_ticks_data}
+\alias{put_random_ticks_value}
 \title{Load and store RandomTicks NBT data}
 \usage{
 get_random_ticks_data(x, z, dimension, db)
 
 get_random_ticks_value(x, z, dimension, db)
 
-put_random_ticks_value(x, z, dimension, value, db)
+put_random_ticks_data(values, x, z, dimension, db)
 
-put_random_ticks_data(values, db)
+put_random_ticks_value(value, x, z, dimension, db)
 }
 \arguments{
 \item{x, z, dimension}{Chunk coordinates to extract data from.
@@ -22,13 +22,13 @@ put_random_ticks_data(values, db)
 
 \item{db}{A bedrockdb object.}
 
-\item{value}{An nbt object.}
-
 \item{values}{A list of nbt objects. If \code{x} is missing, the names of \code{values} will be taken as the keys.}
+
+\item{value}{An nbt object.}
 }
 \value{
 \code{get_random_ticks_data()} returns a named-list of nbt data.
-\code{get_random_ticks_values()} returns a single nbt value.
+\code{get_random_ticks_value()} returns a single nbt value.
 }
 \description{
 RandomTicks data (tag 59) holds a list of NBT values for

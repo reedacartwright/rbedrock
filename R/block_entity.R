@@ -17,35 +17,31 @@
 #' @param value An nbt object.
 
 #' @return `get_block_entity_data()` returns a named-list of nbt data.
-#' `get_block_entity_values()` returns a single nbt value.
+#' `get_block_entity_value()` returns a single nbt value.
 #'
 #' @name BlockEntity
 NULL
 
 #' @rdname BlockEntity
 #' @export
-get_block_entity_data <- function(x, z, dimension, db = db) {
-    keys <- .process_chunk_key_args(x, z, dimension, tag = 49L, assert_validity = TRUE)
-    get_nbt_data(keys, db, simplify = FALSE)
+get_block_entity_data <- function(x, z, dimension, db) {
+    .get_chunk_nbt_data(x, z, dimension, db, tag = 49L)
 }
 
 #' @rdname BlockEntity
 #' @export
-get_block_entity_value <- function(x, z, dimension, db = db) {
-    key <- .process_chunk_key_args(x, z, dimension, tag = 49L, assert_validity = TRUE, assert_scalar = TRUE)
-    get_nbt_value(key, db, simplify = FALSE)
+get_block_entity_value <- function(x, z, dimension, db) {
+    .get_chunk_nbt_value(x, z, dimension, db, tag = 49L)
 }
 
 #' @rdname BlockEntity
 #' @export
 put_block_entity_data <- function(values, x, z, dimension, db) {
-    keys <- .process_chunk_key_args(x, z, dimension, tag = 49L, values = values, assert_validity = TRUE)
-    put_nbt_data(values = values, keys=keys, db = db)
+    .put_chunk_nbt_data(values, x, z, dimension, db, tag = 49L)
 }
 
 #' @rdname BlockEntity
 #' @export
 put_block_entity_value <- function(value, x, z, dimension, db) {
-    key <- .process_chunk_key_args(x, z, dimension, tag = 49L, assert_validity = TRUE, assert_scalar = TRUE)
-    put_nbt_value(value=value, key = key, db = db)
+    .put_chunk_nbt_value(value, x, z, dimension, db, tag = 49L)
 }

@@ -8,9 +8,9 @@
 \alias{put_block_entity_value}
 \title{Load and store BlockEntity NBT data}
 \usage{
-get_block_entity_data(x, z, dimension, db = db)
+get_block_entity_data(x, z, dimension, db)
 
-get_block_entity_value(x, z, dimension, db = db)
+get_block_entity_value(x, z, dimension, db)
 
 put_block_entity_data(values, x, z, dimension, db)
 
@@ -28,7 +28,7 @@ put_block_entity_value(value, x, z, dimension, db)
 }
 \value{
 \code{get_block_entity_data()} returns a named-list of nbt data.
-\code{get_block_entity_values()} returns a single nbt value.
+\code{get_block_entity_value()} returns a single nbt value.
 }
 \description{
 BlockEntity data (tag 49) holds a list of NBT values for
