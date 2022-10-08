@@ -67,6 +67,18 @@ create_chunk_keys <- function(x, z, dimension, tag, subtag) {
     str_c("chunk", args[[1]], args[[2]], args[[3]], tag, sep=":")
 }
 
+#' @rdname chunk_keys
+#' @export
+create_chunk_key_prefixes <- function(x, z, dimension, tag) {
+    if(!missing(tag)) {
+        args <- vec_recycle_common(x, z, dimension, tag)
+        str_c("chunk", args[[1]], args[[2]], args[[3]], args[[4]], sep=":")
+    } else {
+        args <- vec_recycle_common(x, z, dimension)
+        str_c("chunk", args[[1]], args[[2]], args[[3]], sep=":")
+    }
+}
+
 #' @description
 #' `chunk_positions()` returns a matrix containing the chunk coordinates of keys.
 #' @export
@@ -214,21 +226,55 @@ chunk_tag_int <- function(tags) {
     str_detect(keys, pattern="^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+:-?[0-9]+(:-?[0-9]+)?$")
 }
 
-.process_chunk_key_args <- function(x, z, dimension, tag, values = NULL, assert_scalar = FALSE,
+.is_valid_chunk_key_prefix <- function(keys) {
+    str_detect(keys, pattern="^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+$")
+}
+
+.is_valid_chunk_key_prefix_with_tag <- function(keys) {
+    str_detect(keys, pattern="^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+:-?[0-9]+$")
+}
+
+.process_chunk_key_args <- function(x, z, dimension, tag, subtag, values = NULL, assert_scalar = FALSE,
     assert_validity = FALSE) {
     if(missing(x) && is_named(values)) {
         # if x is missing use names from values
         x <- names(values)
     } else if(!missing(z)) {
         # if z is not missing, create keys from x, z, and dimension
-        x <- create_chunk_keys(x, z, dimension, tag)
+        x <- create_chunk_keys(x, z, dimension, tag, subtag)
     }
-    vec_assert(x, character(), size = if(isTRUE(assert_scalar)) 1L else NULL)
+    if(.is_key_prefix(x)) {
+        vec_assert(x, size = if(isTRUE(assert_scalar)) 1L else NULL)        
+    } else {
+        vec_assert(x, character(), size = if(isTRUE(assert_scalar)) 1L else NULL)
+    }
     if(isTRUE(assert_validity)) {
         if(!missing(tag)) {
             .check_chunk_key_tag(x, tag, silent = FALSE)
         }
         if(!isTRUE(all(.is_valid_chunk_key(x)))) {
+            abort("One or more chunk keys is invalid.")
+        }
+    }
+    x
+}
+
+.process_chunk_key_args_prefix <- function(x, z, dimension, tag, values = NULL, assert_scalar = FALSE,
+    assert_validity = FALSE) {
+    if(missing(x) && is_named(values)) {
+        # if x is missing, use names from values
+        x <- names(values)        
+    } else if(!(missing(z))) {
+        x <- create_chunk_key_prefixes(x, z, dimension, tag = tag) 
+    }
+    vec_assert(x, character(), size = if(isTRUE(assert_scalar)) 1L else NULL)
+    if(isTRUE(assert_validity)) {
+        if(!missing(tag)) {
+            .check_chunk_key_tag(x, tag, silent = FALSE)
+            if(!isTRUE(all(.is_valid_chunk_key_prefix_with_tag(x)))) {
+                abort("One or more chunk keys is invalid.")
+            }
+        } else if(!isTRUE(all(.is_valid_chunk_key_prefix(x)))) {
             abort("One or more chunk keys is invalid.")
         }
     }
@@ -264,44 +310,52 @@ chunk_tag_int <- function(tags) {
     str_c("chunk", args[[1]], args[[2]], args[[3]], sep=":")
 }
 
-.get_chunk_data <- function(x, z, dimension, db, tag) {
-    keys <- .process_chunk_key_args(x, z, dimension, tag = tag, assert_validity = TRUE)
+.get_chunk_data <- function(x, z, dimension, db, tag, subtag) {
+    keys <- .process_chunk_key_args(x, z, dimension, tag = tag, subtag = subtag,
+        assert_validity = TRUE)
     get_data(keys, db)
 
 }
 
-.get_chunk_value <- function(x, z, dimension, db, tag) {
-    key <- .process_chunk_key_args(x, z, dimension, tag = tag, assert_validity = TRUE, assert_scalar = TRUE)
+.get_chunk_value <- function(x, z, dimension, db, tag, subtag) {
+    key <- .process_chunk_key_args(x, z, dimension, tag = tag, subtag = subtag,
+        assert_validity = TRUE, assert_scalar = TRUE)
     get_value(key, db)
 }
 
-.put_chunk_data <- function(values, x, z, dimension, db, tag) {
-    keys <- .process_chunk_key_args(x, z, dimension, tag = tag, values = values, assert_validity = TRUE)
+.put_chunk_data <- function(values, x, z, dimension, db, tag, subtag) {
+    keys <- .process_chunk_key_args(x, z, dimension, tag = tag, subtag = subtag,
+        values = values, assert_validity = TRUE)
     put_data(values = values, keys=keys, db = db)
 }
 
-.put_chunk_value <- function(value, x, z, dimension, db, tag) {
-    key <- .process_chunk_key_args(x, z, dimension, tag = tag, assert_validity = TRUE, assert_scalar = TRUE)
+.put_chunk_value <- function(value, x, z, dimension, db, tag, subtag) {
+    key <- .process_chunk_key_args(x, z, dimension, tag = tag, subtag = subtag,
+        assert_validity = TRUE, assert_scalar = TRUE)
     put_value(value=value, key = key, db = db)
 }
 
 .get_chunk_nbt_data <- function(x, z, dimension, db, tag) {
-    keys <- .process_chunk_key_args(x, z, dimension, tag = tag, assert_validity = TRUE)
+    keys <- .process_chunk_key_args(x, z, dimension, tag = tag,
+        assert_validity = TRUE)
     get_nbt_data(keys, db, simplify = FALSE)
 
 }
 
 .get_chunk_nbt_value <- function(x, z, dimension, db, tag) {
-    key <- .process_chunk_key_args(x, z, dimension, tag = tag, assert_validity = TRUE, assert_scalar = TRUE)
+    key <- .process_chunk_key_args(x, z, dimension, tag = tag,
+        assert_validity = TRUE, assert_scalar = TRUE)
     get_nbt_value(key, db, simplify = FALSE)
 }
 
 .put_chunk_nbt_data <- function(values, x, z, dimension, db, tag) {
-    keys <- .process_chunk_key_args(x, z, dimension, tag = tag, values = values, assert_validity = TRUE)
+    keys <- .process_chunk_key_args(x, z, dimension, tag = tag, values = values,
+        assert_validity = TRUE)
     put_nbt_data(values = values, keys=keys, db = db)
 }
 
 .put_chunk_nbt_value <- function(value, x, z, dimension, db, tag) {
-    key <- .process_chunk_key_args(x, z, dimension, tag = tag, assert_validity = TRUE, assert_scalar = TRUE)
+    key <- .process_chunk_key_args(x, z, dimension, tag = tag,
+        assert_validity = TRUE, assert_scalar = TRUE)
     put_nbt_value(value=value, key = key, db = db)
 }

@@ -2,7 +2,8 @@ dbpath <- rbedrock_example_world("example1.mcworld")
 db <- bedrockdb(dbpath)
 
 test_that("get_hsa_data() can read HSA data.", {
-    hsa <- get_hsa_data(db, x=get_keys(db))
+    keys <- str_subset(get_keys(db), ":57$")
+    hsa <- get_hsa_data(keys, db = db)
     expected_hsa <- tibble::tibble(
         tag = "PillagerOutpost",
         x1 = c(577, 577, 592, 592), y1 = 65, z1 = c(241, 256, 241, 256), 
@@ -17,7 +18,7 @@ test_that("get_hsa_data() can read HSA data.", {
 })
 
 test_that("get_hsa_data() returns an empty table if no HSA is found.", {
-    hsa <- get_hsa_data(db, "chunk:0:0:0:57")
+    hsa <- get_hsa_data(0, 0, 0, db = db)
     expected_hsa <- tibble::tibble(
         tag = character(0),
         x1 = integer(0), y1 = integer(0), z1 = integer(0), 
@@ -32,7 +33,7 @@ test_that("get_hsa_data() returns an empty table if no HSA is found.", {
 })
 
 test_that("get_hsa_value() can read a single HSA data.", {
-    hsa <- get_hsa_value(db, 36, 15, 0)
+    hsa <- get_hsa_value(36, 15, 0, db = db)
 
     expected_hsa <- tibble::tibble(
         tag = "PillagerOutpost",
@@ -40,39 +41,35 @@ test_that("get_hsa_value() can read a single HSA data.", {
         x2 = 591, y2 = 86, z2 = 255,
         xspot = 584,
         yspot = 82,
-        zspot = 248,
-        dimension = 0,
-        key = "chunk:36:15:0:57"
+        zspot = 248
     )
     expect_equal(hsa, expected_hsa)
 
-    expect_error(get_hsa_value(db, c("chunk:36:15:0:57", "chunk:36:16:0:57")))
+    expect_error(get_hsa_value(c("chunk:36:15:0:57", "chunk:36:16:0:57"), db = db))
 })
 
 test_that("get_hsa_value() returns an empty table if no HSA is found.", {
-    hsa <- get_hsa_value(db, "chunk:0:0:0:57")
+    hsa <- get_hsa_value("chunk:0:0:0:57", db = db)
     expected_hsa <- tibble::tibble(
         tag = character(0),
         x1 = integer(0), y1 = integer(0), z1 = integer(0), 
         x2 = integer(0), y2 = integer(0), z2 = integer(0),
         xspot = integer(0),
         yspot = integer(0),
-        zspot = integer(0),
-        dimension = integer(0),
-        key = character(0)
+        zspot = integer(0)
     )
     expect_equal(hsa, expected_hsa)
 })
 
 test_that("put_hsa_data() can write HSA data.", {
     dat <- data.frame(x1 = 295, x2 = 300, z1 = 100, z2 = 110, y1 = 64, y2=70, tag = 2L, dimension=0L)
-    hsa <- put_hsa_data(db, dat, merge = FALSE)
-    expected_hsa <- tibble::tibble(
-        tag = "SwampHut",
+    hsa <- put_hsa_data(dat, db = db, merge = FALSE)
+    expected_hsa <- data.frame(
+        tag = 2L,
         x1 = 295L, y1 = 64L, z1 = 100L, 
-        x2 = 300L, y2 = 70L, z2 = 110L,
-        key = "chunk:18:6:0:57"
+        x2 = 300L, y2 = 70L, z2 = 110L
     )
+    expected_hsa <- list("chunk:18:6:0:57" = expected_hsa)
     expect_equal(hsa, expected_hsa)
 
     expected_hsa <- tibble::tibble(
@@ -86,7 +83,7 @@ test_that("put_hsa_data() can write HSA data.", {
         key = "chunk:18:6:0:57"
     )
 
-    new_hsa <- get_hsa_data(db, "chunk:18:6:0:57")
+    new_hsa <- get_hsa_data("chunk:18:6:0:57", db = db)
     expect_equal(new_hsa, expected_hsa)
 
     dat1 <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15, y1 = 64, y2 = 70,
@@ -94,7 +91,7 @@ test_that("put_hsa_data() can write HSA data.", {
     dat2 <- data.frame(x1 = 0, x2 = 16, z1 = 0, z2 = 15, y1 = 64, y2 = 70,
         tag = "SwampHut")
     dat <- dplyr::bind_rows(dat1, dat2)
-    hsa <- put_hsa_data(db, dat, merge = FALSE)
+    hsa <- put_hsa_data(dat, db = db, merge = FALSE)
 
     expected_hsa <- tibble::tibble(
         tag = c("NetherFortress", "SwampHut", "SwampHut"),
@@ -107,8 +104,30 @@ test_that("put_hsa_data() can write HSA data.", {
         key = c("chunk:0:0:1:57", "chunk:0:0:0:57", "chunk:1:0:0:57")
     )
 
-    new_hsa <- get_hsa_data(db, c("chunk:0:0:1:57", "chunk:0:0:0:57", "chunk:1:0:0:57"))
+    new_hsa <- get_hsa_data(c("chunk:0:0:1:57", "chunk:0:0:0:57", "chunk:1:0:0:57"), db = db)
     expect_equal(new_hsa, expected_hsa)
+
+    dat1 <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15, y1 = 40, y2 = 60,
+        tag = 1)
+    dat2 <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15, y1 = 40, y2 = 60,
+        tag = 2)
+
+    dat <- list(dat1, dat2)
+
+    put_hsa_data(dat, c("chunk:0:0:1:57", "chunk:0:0:0:57"), db = db, merge = FALSE)
+    hsa <- get_hsa_data(c("chunk:0:0:1:57", "chunk:0:0:0:57"), db = db)
+
+    expected_hsa <- tibble::tibble(
+        tag = c("NetherFortress", "SwampHut"),
+        x1 = 0, y1 = 40, z1 = 0, 
+        x2 = 15, y2 = 60, z2 = 15,
+        xspot = 8,
+        yspot = c(59,56),
+        zspot = 8,
+        dimension = c(1L,0L),
+        key = c("chunk:0:0:1:57", "chunk:0:0:0:57")
+    )
+    expect_equal(hsa, expected_hsa)    
 })
 
 test_that("put_hsa_data() can merge HSA data.", {
@@ -117,18 +136,27 @@ test_that("put_hsa_data() can merge HSA data.", {
         z1 = 100, z2 = 120,
         y1 = 64, y2=70,
         tag = 3L, dimension = 0L)
-    hsa <- put_hsa_data(db, dat)
 
-    expected_hsa <- tibble::tibble(
-        tag = c("OceanMonument","OceanMonument"),
-        x1 = c(295, 295), y1 = c(64, 64), z1 = c(100, 112), 
-        x2 = c(300, 300), y2 = c(70, 70), z2 = c(111, 120),
-        key = c("chunk:18:6:0:57", "chunk:18:7:0:57")
+    hsa <- put_hsa_data(dat, db = db, merge = TRUE)
+
+    expected_hsa <- list(
+        "chunk:18:6:0:57" = data.frame(
+            tag = 3L,
+            x1 = 295L, y1 = 64L, z1 = 100L,
+            x2 = 300L, y2 = 70L, z2 = 111L,
+            row.names = 1L
+        ),
+        "chunk:18:7:0:57" = data.frame(
+            tag = 3L,
+            x1 = 295L, y1 = 64L, z1 = 112L,
+            x2 = 300L, y2 = 70L, z2 = 120L,
+            row.names = 2L
+        )
     )
 
     expect_equal(hsa, expected_hsa)
 
-    new_hsa <- get_hsa_data(db, c("chunk:18:6:0:57","chunk:18:7:0:57"))
+    new_hsa <- get_hsa_data(c("chunk:18:6:0:57","chunk:18:7:0:57"), db = db)
 
     expected_hsa <- tibble::tibble(
         tag = c("SwampHut", "OceanMonument", "OceanMonument"),
@@ -150,9 +178,9 @@ test_that("put_hsa_value() can write HSA data.", {
         z1 = 0, z2 = 15,
         y1 = 100, y2 = 110,
         tag = "SwampHut", dimension = 2)
-    put_hsa_value(db, 0, 0, 2, dat)
+    put_hsa_value(dat, 0, 0, 2, db = db)
 
-    hsa <- get_hsa_value(db, "chunk:0:0:2:57")
+    hsa <- get_hsa_value("chunk:0:0:2:57", db = db)
 
     expected_hsa <- tibble::tibble(
         tag = "SwampHut",
@@ -160,35 +188,7 @@ test_that("put_hsa_value() can write HSA data.", {
         x2 = 15, y2 = 110, z2 = 15,
         xspot = 8,
         yspot = 106,
-        zspot = 8,
-        dimension = 2,
-        key = "chunk:0:0:2:57"
-    )
-    expect_equal(hsa, expected_hsa)
-})
-
-test_that("put_hsa_values() can write HSA data.", {
-
-    dat1 <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15, y1 = 40, y2 = 60,
-        tag = 1)
-    dat2 <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15, y1 = 40, y2 = 60,
-        tag = 2)
-
-    dat <- list(dat1, dat2)
-
-    put_hsa_values(db, c("chunk:0:0:1:57", "chunk:0:0:0:57"), values=dat)
-
-    hsa <- get_hsa_data(db, c("chunk:0:0:1:57", "chunk:0:0:0:57"))
-
-    expected_hsa <- tibble::tibble(
-        tag = c("NetherFortress", "SwampHut"),
-        x1 = 0, y1 = 40, z1 = 0, 
-        x2 = 15, y2 = 60, z2 = 15,
-        xspot = 8,
-        yspot = c(59,56),
-        zspot = 8,
-        dimension = c(1,0),
-        key = c("chunk:0:0:1:57", "chunk:0:0:0:57")
+        zspot = 8
     )
     expect_equal(hsa, expected_hsa)
 })

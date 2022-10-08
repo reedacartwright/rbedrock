@@ -3,11 +3,8 @@
 \name{SubchunkBlocks}
 \alias{SubchunkBlocks}
 \alias{get_subchunk_blocks_data}
-\alias{get_subchunk_blocks_values}
 \alias{get_subchunk_blocks_value}
-\alias{get_subchunk_blocks_from_chunk}
 \alias{put_subchunk_blocks_data}
-\alias{put_subchunk_blocks_values}
 \alias{put_subchunk_blocks_value}
 \alias{read_subchunk_blocks_value}
 \alias{write_subchunk_blocks_value}
@@ -16,49 +13,28 @@
 \title{Load and store SubchunkBlocks data}
 \usage{
 get_subchunk_blocks_data(
-  db,
   x,
   z,
   dimension,
   subchunk,
-  names_only = FALSE,
-  extra_block = FALSE
-)
-
-get_subchunk_blocks_values(
   db,
-  x,
-  z,
-  dimension,
-  subchunk,
   names_only = FALSE,
   extra_block = FALSE
 )
 
 get_subchunk_blocks_value(
-  db,
   x,
   z,
   dimension,
   subchunk,
-  names_only = FALSE,
-  extra_block = FALSE
-)
-
-get_subchunk_blocks_from_chunk(
   db,
-  x,
-  z,
-  dimension,
   names_only = FALSE,
   extra_block = FALSE
 )
 
-put_subchunk_blocks_data(db, data, version = 9L)
+put_subchunk_blocks_data(values, x, z, dimension, subchunk, db, version = 9L)
 
-put_subchunk_blocks_values(db, x, z, dimension, subchunk, values, version = 9L)
-
-put_subchunk_blocks_value(db, x, z, dimension, subchunk, value, version = 9L)
+put_subchunk_blocks_value(value, x, z, dimension, subchunk, db, version = 9L)
 
 read_subchunk_blocks_value(
   rawdata,
@@ -74,27 +50,25 @@ subchunk_origins(keys)
 subchunk_coords(ind, origins = subchunk_origins(names(ind)))
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
 \item{subchunk}{Subchunk indexes to extract data from.}
 
-\item{names_only}{A logical scalar. Return only the names of the blocks,
-ignoring block states.}
+\item{db}{A bedrockdb object.}
+
+\item{names_only}{A logical scalar. Return only the names of the blocks.}
 
 \item{extra_block}{A logical scalar. Append the extra block layer to the
 output (separated by ";"). This is mostly useful if you have waterlogged
 blocks. If the extra block is air, it will not be appended.}
 
-\item{data}{A named list of 16x16x16 character() arrays}
+\item{values}{A list of 16x16x16 character() arrays. If \code{x} is missing, the names of \code{values} will be taken as the keys.
+ignoring block states.}
 
 \item{version}{Which format of subchunk data to use}
 
-\item{values}{A list of 16x16x16 character() arrays}
-
-\item{value}{A 16x16x16 character array}
+\item{value}{A 16x16x16 character array.}
 
 \item{rawdata}{a raw vector holding binary SubchunkBlock data}
 
@@ -110,18 +84,16 @@ indexes for blocks in a subchunk.}
 \item{origins}{A matrix of subchunk origins.}
 }
 \value{
-\code{get_subchunk_blocks_data()} returns a list of the of the values
-returned by \code{read_subchunk_blocks_value()}.
-
 \code{get_subchunk_blocks_value()} and \code{read_subchunk_blocks_value()}
 return a 16x16x16 character array. The axes represent the \code{x}, \code{y}, and \code{z}
 dimensions in that order.
-
-\code{get_subchunk_blocks_from_chunk()} returns a list of the of the values
-returned by \code{read_subchunk_blocks_value()}.
-
+\code{get_subchunk_blocks_data()}
+return a list of the of the values returned by \code{read_subchunk_blocks_value()}.
 \code{read_subchunk_blocks_value()} returns a 16x16x16 character array.
 The axes represent the \code{x}, \code{y}, and \code{z} dimensions in that order.
+
+If a subchunk contains only air it will not be stored in the database, and
+missing subchunks are considered air.
 
 \code{subchunk_coords()} returns a 3-column matrix of block coordinates.
 }
@@ -133,26 +105,6 @@ Blocks are stored in a palette-based format. Subchunks can have two layers
 of blocks, and the extra layer is most-often used to store water for
 water-logged blocks.
 
-These functions return block data as strings containing the
-block name and block states. The strings' format is
-\code{blockname@state1=value1@state2=value2} etc.
-Blocks may have 0 or more states.
-
-\code{get_subchunk_blocks_data()} loads SubchunkBlocks data from a \code{bedrockdb}.
-It will silently drop and keys not representing SubchunkBlocks data.
-\code{get_subchunk_blocks_values()} is a synonym for \code{get_subchunk_blocks_data()}.
-
-\code{get_subchunk_blocks_value()} loads SubchunkBlocks data from a \code{bedrockdb}.
-It only supports loading a single value.
-
-\code{get_subchunk_blocks_from_chunk()} loads SubchunkBlocks data from a \code{bedrockdb}.
-It supports efficiently loading subchunk block data from a single chunk.
-
-\code{put_subchunk_blocks_data()}, \code{put_subchunk_blocks_values()}, and
-\code{put_subchunk_blocks_value()} store SubchunkBlocks data into a \code{bedrockdb}.
-
-\code{read_subchunk_blocks_value()} decodes binary SubchunkBlock data.
-
 \code{subchunk_origins()} returns a matrix containing the block coordinate of the
 lower NW corner of subchunk keys
 
@@ -160,6 +112,16 @@ lower NW corner of subchunk keys
 array indexes and their subchunk origins.
 }
 \details{
-If a subchunk contains only air it will not be stored in the database, and
-missing subchunks are considered air.
+These functions return block data as strings containing the
+block name and block states. The strings' format is
+\code{blockname@state1=value1@state2=value2} etc.
+Blocks may have 0 or more states.
+
+\code{get_subchunk_blocks_data()} and \code{get_subchunk_blocks_value()} load SubchunkBlocks data from \code{db}.
+\code{get_subchunk_blocks_value()} only supports loading a single value.
+
+\code{put_subchunk_blocks_data()}, \code{put_subchunk_blocks_values()}, and
+\code{put_subchunk_blocks_value()} store SubchunkBlocks data into \code{db}.
+
+\code{read_subchunk_blocks_value()} decodes binary SubchunkBlock data.
 }

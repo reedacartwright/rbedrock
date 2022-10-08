@@ -3,57 +3,51 @@
 \name{Checksums}
 \alias{Checksums}
 \alias{get_checksums_data}
-\alias{get_checksums_values}
 \alias{get_checksums_value}
 \alias{update_checksums_data}
 \alias{read_checksums_value}
 \alias{write_checksums_value}
 \title{Load and store Checksums data}
 \usage{
-get_checksums_data(db, x, z, dimension)
+get_checksums_data(x, z, dimension, db)
 
-get_checksums_values(db, x, z, dimension)
+get_checksums_value(x, z, dimension, db)
 
-get_checksums_value(db, x, z, dimension)
-
-update_checksums_data(db, x, z, dimension)
+update_checksums_data(x, z, dimension, db)
 
 read_checksums_value(rawdata)
 
 write_checksums_value(object)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{rawdata}{a raw vector holding binary Checksums data}
+\item{db}{A bedrockdb object.}
+
+\item{rawdata}{a raw vector holding binary Checksums data.}
 
 \item{object}{a named character vector in the same format as returned by \code{read_checksums_value()}.}
 }
 \value{
-\code{get_checksums_data()} returns a named-list of the values returned
-by \code{get_checksums_value()}.
+\code{write_checksums_value()} returns a raw vector.
 
 \code{get_checksums_value()} and \code{read_checksums_value()}
 return a character vector.
 The names of the character vector indicate which
 chunk record (tag and subtag) the checksum is for.
-
-\code{write_checksums_value()} returns a raw vector.
+\code{get_checksums_data()} returns a named-list of the values returned
+by \code{get_checksums_value()}.
 }
 \description{
 Checksums data (tag 59) holds checksums for several chunk records.
 These records are 2DMaps (tag 45), SubchunkBlocks (tag 47),
 BlockEntities (tag 49), and Entities (tag 50).
-
-\code{get_checksums_data()} loads Checksums data from a \code{bedrockdb}.
-It will silently drop and keys not representing Checksums data.
-\code{get_checksums_values()} is a synonym for \code{get_checksums_data()}.
-
-\code{get_checksums_value()} loads Checksums data from a \code{bedrockdb}.
-It only supports loading a single value.
+}
+\details{
+\code{get_checksums_data()} and \code{get_checksums_value()} load Checksums
+data from \code{db}. \code{get_checksums_value()} supports loading
+only a single value.
 
 \code{update_checksums_data()} recalculates Checksums data.
 It calculates checksums for the specified chunks'
@@ -62,7 +56,6 @@ records in \code{db} and updates the Checksums record to match.
 
 \code{read_checksums_value()} parses a binary Checksums record
 into a list of checksums.
-
 \code{write_checksums_value()} converts Checksums from a named list into
 binary format.
 }

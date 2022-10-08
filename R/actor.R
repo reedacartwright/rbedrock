@@ -38,7 +38,7 @@ get_acdig_data <- function(x, z, dimension, db) {
     good_key <- .is_valid_acdig_key(keys)
     ret <- rep(list(NULL), length(keys))
     names(ret) <- keys
-    dat <- get_data(db, keys[good_key])
+    dat <- get_data(keys[good_key], db = db)
     ret[names(dat)] <- purrr::map(dat, read_acdig_value)
     ret
 }
@@ -50,7 +50,7 @@ get_acdig_value <- function(x, z, dimension, db) {
     if(!.is_valid_acdig_key(key)) {
         return(NULL)
     }
-    dat <- get_value(db, key)
+    dat <- get_value(key, db = db)
     read_acdig_value(dat)
 }
 
@@ -60,7 +60,7 @@ put_acdig_data <- function(values, x, z, dimension, db) {
     keys <- .process_acdig_key_args(x, z, dimension, values=values,
         assert_validity = TRUE)
     values <- purrr::map(values, write_acdig_value)
-    put_values(db, keys, values)
+    put_data(values, keys, db = db)
 }
 
 #' @rdname ActorDigest
@@ -69,7 +69,7 @@ put_acdig_value <- function(value, x, z, dimension, db) {
     key <- .process_acdig_key_args(x, z, dimension,
         assert_scalar=TRUE, assert_validity = TRUE)
     value <- write_acdig_value(value)
-    put_value(db, key, value)
+    put_value(value, key, db = db)
 }
 
 #' @rdname ActorDigest

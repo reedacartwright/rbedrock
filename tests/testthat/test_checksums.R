@@ -11,17 +11,19 @@ test_that("Checksums is chunk tag 59", {
 })
 
 test_that("get_checksums_data returns specific Checksums data", {
-    keys <- c("chunk:36:16:0:59", "fake_data", "chunk:37:15:0:59")
-    dat <- get_checksums_data(db, keys)
+    keys <- c("chunk:36:16:0:59", "chunk:37:15:0:59")
+    dat <- get_checksums_data(keys, db = db)
     expect_vector(dat, list(), 2L)
-    expect_named(dat, keys[-2])
+    expect_named(dat, keys)
     for(i in seq_along(dat)) {
         expect_named(dat[[!!i]])
     }
+
+    expect_error(get_checksums_value(c("chunk:36:16:0:59", "plain:fake", "chunk:37:15:0:59"), db=db))
 })
 
 test_that("get_checksums_value returns a single record", {
-    dat <- get_checksums_value(db, "chunk:36:16:0:59")
+    dat <- get_checksums_value("chunk:36:16:0:59", db = db)
     expect_vector(dat, character(), 7L)
     expect_named(dat)
 
@@ -30,12 +32,12 @@ test_that("get_checksums_value returns a single record", {
 
 test_that("update_checksums_data works", {
     keys <- c("chunk:36:16:0:59", "chunk:37:15:0:59")
-    original_dat <- get_checksums_data(db, keys)
-    delete_values(db, keys)
-    expect_equal(has_values(db,keys), setNames(c(FALSE,FALSE),keys))
+    original_dat <- get_checksums_data(keys, db = db)
+    delete_values(keys, db = db)
+    expect_equal(has_values(keys, db = db), setNames(c(FALSE,FALSE),keys))
 
-    update_checksums_data(db,keys)
-    dat <- get_checksums_data(db, keys)
+    update_checksums_data(keys, db = db)
+    dat <- get_checksums_data(keys, db = db)
     expect_named(dat, keys)
     for(k in keys) {
         expect_mapequal(dat[[!!k]], original_dat[[!!k]])
@@ -43,10 +45,10 @@ test_that("update_checksums_data works", {
 })
 
 test_that("update_checksums_data() and get_checksums_value() handle missing data", {
-    dat <- get_checksums_value(db, -10, -10, 0)
+    dat <- get_checksums_value(-10, -10, 0, db = db)
     expect_equal(dat, NULL)
-    update_checksums_data(db, -10, -10, 0)
-    dat <- get_checksums_value(db, -10, -10, 0)
+    update_checksums_data(-10, -10, 0, db = db)
+    dat <- get_checksums_value(-10, -10, 0, db = db)
     expect_equal(dat, character())
 })
 

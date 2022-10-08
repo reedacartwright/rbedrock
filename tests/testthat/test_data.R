@@ -33,8 +33,8 @@ test_that("get_value requires a scalar character argument",{
     expect_error(get_value(c("hello","world"), db=db), class="vctrs_error_assert_size")
 })
 
-test_that("get_values returns a list of raw values", {
-    expect_equal(get_values(c("chunk:31:6:0:44","plain:Overworld","plain:NotFound"), db=db),
+test_that("get_data returns a list of raw values", {
+    expect_equal(get_data(c("chunk:31:6:0:44","plain:Overworld","plain:NotFound"), db=db),
         list("chunk:31:6:0:44" = as.raw(0x15), "plain:Overworld" = as.raw(c(
         0x0a, 0x00, 0x00, 0x0a, 0x04, 0x00, 0x64, 0x61,
         0x74, 0x61, 0x09, 0x0d, 0x00, 0x4c, 0x69, 0x6d,
@@ -44,13 +44,13 @@ test_that("get_values returns a list of raw values", {
     )), "plain:NotFound" = NULL))
 })
 
-test_that("get_values returns all keys with a prefix", {
+test_that("get_data returns all keys with a prefix", {
     keys <- get_keys(db)
-    pre_str <- get_values(key_prefix("plain:VILLAGE"), db=db)
+    pre_str <- get_data(key_prefix("plain:VILLAGE"), db=db)
     expect_equal(names(pre_str), grep("^plain:VILLAGE", keys, value=TRUE))
-    pre_chunk <- get_values(key_prefix("chunk:37:6:0"), db=db)
+    pre_chunk <- get_data(key_prefix("chunk:37:6:0"), db=db)
     expect_equal(names(pre_chunk), grep("^chunk:37:6:0", keys, value=TRUE))
-    pre_chunk <- get_values(key_prefix("chunk:37:6:0:47"), db=db)
+    pre_chunk <- get_data(key_prefix("chunk:37:6:0:47"), db=db)
     expect_equal(names(pre_chunk), grep("^chunk:37:6:0:47", keys, value=TRUE))
 })
 
@@ -83,11 +83,11 @@ test_that("put_value throws errors are incorrect arguments",{
 
 test_that("put_data writes data into the db", {
     put_data(list("plain:Test%01" = as.raw(0x1), "plain:Test%02" = as.raw(0x2)), db = db)
-    put_result <- get_values(c("plain:Test%01", "plain:Test%02"), db = db)
+    put_result <- get_data(c("plain:Test%01", "plain:Test%02"), db = db)
     expect_equal(put_result, list("plain:Test%01" = as.raw(0x1), "plain:Test%02" = as.raw(0x2)))
 
     put_data(list(as.raw(0x10), as.raw(0x20)), c("plain:Test%01", "plain:Test%02"), db = db)
-    put_result <- get_values(c("plain:Test%01", "plain:Test%02"), db = db)
+    put_result <- get_data(c("plain:Test%01", "plain:Test%02"), db = db)
     expect_equal(put_result, list("plain:Test%01" = as.raw(0x10), "plain:Test%02" = as.raw(0x20)))
 })
 
@@ -95,7 +95,7 @@ test_that("delete_values removes data from the db", {
     put_data(list("plain:Test%01" = as.raw(0x1), "plain:Test%02" = as.raw(0x2)), db = db)
     delete_ret <- delete_values(c("plain:Test%01", "plain:Test%02"), db = db)
     expect_null(delete_ret)
-    delete_result <- get_values(c("plain:Test%01", "plain:Test%02"), db = db)
+    delete_result <- get_data(c("plain:Test%01", "plain:Test%02"), db = db)
     expect_equal(delete_result, list("plain:Test%01" = NULL, "plain:Test%02" = NULL))
     put_data(list("plain:Test%01" = as.raw(0x1), "plain:Test%02" = as.raw(0x2)), db = db)
     delete_ret <- delete_values(c("plain:Test%01", "plain:Test%03","plain:Test%02"), db = db, report=TRUE)

@@ -4,6 +4,7 @@
 \alias{chunk_keys}
 \alias{parse_chunk_keys}
 \alias{create_chunk_keys}
+\alias{create_chunk_key_prefixes}
 \alias{chunk_positions}
 \alias{chunk_origins}
 \alias{filter_chunk_keys}
@@ -14,6 +15,8 @@
 parse_chunk_keys(keys)
 
 create_chunk_keys(x, z, dimension, tag, subtag)
+
+create_chunk_key_prefixes(x, z, dimension, tag)
 
 chunk_positions(keys)
 

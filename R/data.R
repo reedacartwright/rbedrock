@@ -38,7 +38,7 @@ get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
 #' @return `get_data()` returns a named-list of raw vectors. `get_value()` returns a raw vector.
 #' @export
 get_data <- function(keys, db, readoptions = NULL) {
-    if("rbedrock_key_prefix" %in% class(keys)) {
+    if(.is_key_prefix(keys)) {
         starts_with <- .create_rawkey_prefix(as.character(keys))
         dat <- db$mget_prefix(starts_with, readoptions)
         dat <- set_names(dat$values, rawkeys_to_chrkeys(dat$keys))
@@ -56,6 +56,10 @@ key_prefix <- function(prefix) {
         prefix <- as.character(prefix)
     }
     structure(prefix, class = c("rbedrock_key_prefix", "character"))
+}
+
+.is_key_prefix <- function(x) {
+    inherits(x, "rbedrock_key_prefix")
 }
 
 #' @rdname get_data

@@ -4,70 +4,61 @@
 #' These records are 2DMaps (tag 45), SubchunkBlocks (tag 47),
 #' BlockEntities (tag 49), and Entities (tag 50).
 #' 
-#' @name Checksums
-NULL
-
-#' @description
-#' `get_checksums_data()` loads Checksums data from a `bedrockdb`.
-#'  It will silently drop and keys not representing Checksums data.
-#' `get_checksums_values()` is a synonym for `get_checksums_data()`.
+#' `get_checksums_data()` and `get_checksums_value()` load Checksums
+#' data from `db`. `get_checksums_value()` supports loading
+#' only a single value.
 #'
-#' @param db A bedrockdb object.
-#' @param x,z,dimension Chunk coordinates to extract data from.
-#'    `x` can also be a character vector of db keys.
-#'
-#' @return `get_checksums_data()` returns a named-list of the values returned
-#'          by `get_checksums_value()`.
-#' @rdname Checksums
-#' @export
-get_checksums_data <- function(db, x, z, dimension) {
-    keys <- .process_key_args(x,z,dimension, tag=59L)
-    dat <- get_values(db, keys)
-    purrr::map(dat, read_checksums_value)
-}
-
-#' @rdname Checksums
-#' @export
-get_checksums_values <- get_checksums_data
-
-#' @description
-#' `get_checksums_value()` loads Checksums data from a `bedrockdb`.
-#' It only supports loading a single value.
-#'
-#' @return `get_checksums_value()` and `read_checksums_value()`
-#'         return a character vector.
-#'         The names of the character vector indicate which
-#'         chunk record (tag and subtag) the checksum is for.
-#' @rdname Checksums
-#' @export
-get_checksums_value <- function(db, x, z, dimension) {
-    key <- .process_key_args(x,z,dimension, tag=59L)
-    vec_assert(key, character(), 1)
-
-    dat <- get_value(db, key)
-    read_checksums_value(dat)
-}
-
-#' @description
 #' `update_checksums_data()` recalculates Checksums data.
 #' It calculates checksums for the specified chunks'
 #' SubchunkBlocks, 2DMaps, BlockEntities, and Entities
 #' records in `db` and updates the Checksums record to match.
 #'
-#' @rdname Checksums
-#' @export
-update_checksums_data <- function(db, x, z, dimension) {
-    keys <- .process_key_args(x, z, dimension, tag=59L, stop_if_filtered = TRUE)
-    purrr::map(keys, .update_checksums_value_impl, db=db)
-    invisible(db)
-}
-
-#' @description
 #' `read_checksums_value()` parses a binary Checksums record
 #' into a list of checksums.
+#' `write_checksums_value()` converts Checksums from a named list into 
+#' binary format.
 #'
-#' @param rawdata a raw vector holding binary Checksums data
+#' @param db A bedrockdb object.
+#' @param x,z,dimension Chunk coordinates to extract data from.
+#'    `x` can also be a character vector of db keys.
+#' @param rawdata a raw vector holding binary Checksums data.
 #'
+#'
+#' @param object a named character vector in the same format as returned by `read_checksums_value()`.
+#'
+#' @return `write_checksums_value()` returns a raw vector.
+#' @return `get_checksums_value()` and `read_checksums_value()`
+#'         return a character vector.
+#'         The names of the character vector indicate which
+#'         chunk record (tag and subtag) the checksum is for.
+#'         `get_checksums_data()` returns a named-list of the values returned
+#'          by `get_checksums_value()`.
+#'
+#' @name Checksums
+NULL
+
+#' @rdname Checksums
+#' @export
+get_checksums_data <- function(x, z, dimension, db) {
+    dat <- .get_chunk_data(x, z, dimension, db, tag=59L)
+    purrr::map(dat, read_checksums_value)
+}
+
+#' @rdname Checksums
+#' @export
+get_checksums_value <- function(x, z, dimension, db) {
+    dat <- .get_chunk_value(x, z, dimension, db, tag=59L)
+    read_checksums_value(dat)
+}
+
+#' @rdname Checksums
+#' @export
+update_checksums_data <- function(x, z, dimension, db) {
+    keys <- .process_chunk_key_args(x, z, dimension, tag = 59L, assert_validity = TRUE)
+    purrr::map(keys, .update_checksums_value_impl, db = db)
+    invisible()
+}
+
 #' @rdname Checksums
 #' @export
 read_checksums_value <- function(rawdata) {
@@ -93,13 +84,6 @@ read_checksums_value <- function(rawdata) {
     rlang::set_names(purrr::as_vector(ret[[1]]), ret[[2]])
 }
 
-#' @description
-#' `write_checksums_value()` converts Checksums from a named list into 
-#' binary format.
-#'
-#' @param object a named character vector in the same format as returned by `read_checksums_value()`.
-#'
-#' @return `write_checksums_value()` returns a raw vector.
 #' @rdname Checksums
 #' @export
 write_checksums_value <- function(object) {
@@ -132,17 +116,17 @@ write_checksums_value <- function(object) {
     c(ret, purrr::flatten_raw(retp))
 }
 
-.update_checksums_value_impl <- function(db, key) {
+.update_checksums_value_impl <- function(key, db) {
     # 45, 47, 49, 50 all need to be updated if they exist
     stem <- stringr::str_replace(key, ":59$", "")
-    chunk_keys <- get_keys(db, starts_with=stem)
+    chunk_keys <- get_keys(key_prefix(stem), db = db)
     chunk_keys <- stringr::str_subset(chunk_keys, ":(?:47:[^:]+|45|49|50)$")
 
-    dat <- get_values(db, chunk_keys)
+    dat <- get_data(chunk_keys, db = db)
     obj <- purrr::map(dat, .checksum_impl)
 
     val <- write_checksums_value(obj)
-    put_value(db, key, val)
+    put_value(val, key, db = db)
     invisible()
 }
 
