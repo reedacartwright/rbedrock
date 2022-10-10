@@ -9,7 +9,7 @@
 \alias{read_acdig_value}
 \alias{write_acdig_value}
 \alias{create_acdig_keys}
-\title{Read and write Actor Digest Data}
+\title{Read and write ActorDigest data}
 \usage{
 get_acdig_data(x, z, dimension, db)
 
@@ -46,7 +46,8 @@ returned by \code{get_acdig_value()}.
 Actor digests store a list of all entities in a chunk; however
 they are not chunk data and use their own prefix. The key format
 for actor digest data is acdig:x:z:dimension.
-
+}
+\details{
 \code{get_acdig_data()} and \code{get_acdig_value()} load ActorDigest
 data from \code{db}. They return \code{NULL} for any key that is not
 does not represent ActorDigest data. \code{get_acdig_value()} supports loading

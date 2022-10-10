@@ -1,21 +1,33 @@
-#' Read and Write NBT Data
+#' Read and write NBT data
 #'
 #' The Named Binary Tag (NBT) format is used by Minecraft for various data types.
 #'
-#' @description
 #' `get_nbt_data()` and `get_nbt_value()` load nbt-formatted data from `db` and parses it.
+#'
+#' `put_nbt_value()` and `put_nbt_data()` store nbt data into `db` in binary form.
+#'
+#' `read_nbt()` reads NBT data from a `raw` vector.
+#' `read_nbt_data()` calls `read_nbt()` on each element of a list.
+#' `write_nbt()` encodes NBT data into a `raw` vector.
+#' `write_nbt_data` calls `write_nbt` on each element of a list.
 #'
 #' @param db A `bedrockdb` object
 #' @param keys A character vector of keys.
-#' @param readoptions A `bedrock_leveldb_readoptions` object
+#' @param key  A single key.
+#' @param readoptions A `bedrock_leveldb_readoptions` object.
 #' @param simplify If TRUE, simplifies a list containing a single unnamed `nbtnode`.
+#' @param value An nbt object.
+#' @param values A list of nbt objects.
+#' @param writeoptions A `bedrock_leveldb_writeoptions` object.
+#' @param rawvalue  A `raw` vector.
+#' @param rawvalues A list of `raw` vectors.
+#'
 #' @export
 get_nbt_data <- function(keys, db, readoptions = NULL, simplify = TRUE) {
     dat <- get_data(keys = keys, db = db, readoptions = readoptions)
     read_nbt_data(dat, simplify = simplify)
 }
 
-#' @param key  A single key.
 #' @rdname get_nbt_data
 #' @export
 get_nbt_value <- function(key, db, readoptions = NULL, simplify = TRUE) {
@@ -23,12 +35,6 @@ get_nbt_value <- function(key, db, readoptions = NULL, simplify = TRUE) {
     read_nbt(dat, simplify = simplify)
 }
 
-#' @description
-#' `put_nbt_value()` and `put_nbt_data()` store nbt data into `db` in binary form.
-#'
-#' @param value An nbt object.
-#' @param values A list of nbt objects
-#' @param writeoptions A `bedrock_leveldb_writeoptions` object
 #' @rdname get_nbt_data
 #' @export
 put_nbt_value <- function(value, key, db, writeoptions = NULL) {
@@ -43,14 +49,10 @@ put_nbt_data <- function(values, keys, db, writeoptions = NULL) {
     put_data(values = values, keys = keys, db = db, writeoptions = writeoptions)
 }
 
-#' @description
-#' `read_nbt` reads NBT data from a `raw` vector.
-#'
-#' @param rawdata A `raw` vector
 #' @rdname get_nbt_data
 #' @export
-read_nbt <- function(rawdata, simplify = TRUE) {
-    res <- read_rnbt(rawdata)
+read_nbt <- function(rawvalue, simplify = TRUE) {
+    res <- read_rnbt(rawvalue)
     res <- from_rnbt(res)
     if(isTRUE(simplify) && length(res) == 1L && is.null(attributes(res))) {
         res <- res[[1]]
@@ -58,34 +60,24 @@ read_nbt <- function(rawdata, simplify = TRUE) {
     res
 }
 
-#' @description
-#' `read_nbt_data` calls `read_nbt` on each element of a list.
-#'
 #' @rdname get_nbt_data
 #' @export
-read_nbt_data <- function(data, simplify = TRUE) {
-    purrr::map(data, read_nbt, simplify = simplify)
+read_nbt_data <- function(rawvalues, simplify = TRUE) {
+    purrr::map(rawvalues, read_nbt, simplify = simplify)
 }
 
-#' @description
-#' `write_nbt` encodes NBT data into a `raw` vector.
-#'
-#' @param object An nbt object or a list of nbt objects
 #' @rdname get_nbt_data
 #' @export
-write_nbt <- function(object) {
-    if(is_nbt(object)) {
-        object <- list(object)
+write_nbt <- function(value) {
+    if(is_nbt(value)) {
+        value <- list(value)
     }
-    object <- to_rnbt(object)
-    .Call(Cwrite_nbt, object)
+    value <- to_rnbt(value)
+    .Call(Cwrite_nbt, value)
 }
 
-#' @description
-#' `write_nbt_data` calls `write_nbt` on each element of a list.
-#'
 #' @rdname get_nbt_data
 #' @export
-write_nbt_data <- function(data) {
-    purrr::map(data, write_nbt)
+write_nbt_data <- function(values) {
+    purrr::map(values, write_nbt)
 }

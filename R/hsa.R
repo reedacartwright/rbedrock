@@ -22,7 +22,8 @@
 #' @param rawdata A scalar raw.
 #' @param value A table containing HSA coordinates
 #' @param merge Merge the new HSAs with existing HSAs.
-#' @param simplify Simplify a list of tables into one table.
+#' @param simplify If `TRUE`, simplify a list of tables into one table.
+#' @param pretty If `TRUE`, return as a tibble with extra information.
 #'
 #' @return `get_hsa_data()` returns a table in the same format
 #'         as `get_hsa_value()`.
@@ -37,17 +38,18 @@
 #' dbpath <- rbedrock_example_world("example1.mcworld")
 #' db <- bedrockdb(dbpath)
 #' # view all HSA in a world
-#' hsa <- get_hsa_data(db, get_keys(db))
+#' keys <- grep(":57$", get_keys(db), value=TRUE)
+#' hsa <- get_hsa_data(keys, db = db)
 #' hsa
 #' # add an HSA to a world
 #' dat <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15,
 #'                   y1 = 40, y2 = 60, tag = "SwampHut")
-#' put_hsa_data(db, dat, merge = TRUE)
+#' put_hsa_data(dat, db = db, merge = TRUE)
 #' close(db)
-#' @name HSA
+#' @name HardcodedSpawnArea
 NULL
 
-#' @rdname HSA
+#' @rdname HardcodedSpawnArea
 #' @export
 get_hsa_data <- function(x, z, dimension, db, simplify = TRUE) {
     dat <- .get_chunk_data(x, z, dimension, db, tag = 57L)
@@ -60,7 +62,7 @@ get_hsa_data <- function(x, z, dimension, db, simplify = TRUE) {
     hsa
 }
 
-#' @rdname HSA
+#' @rdname HardcodedSpawnArea
 #' @export
 get_hsa_value <- function(x, z, dimension, db) {
     dat <- .get_chunk_value(x, z, dimension, db, tag = 57L)
@@ -76,7 +78,7 @@ get_hsa_value <- function(x, z, dimension, db) {
    "6" # removed cat HSA
 )
 
-#' @rdname HSA
+#' @rdname HardcodedSpawnArea
 #' @export
 read_hsa_value <- function(rawdata, pretty = TRUE) {
     if(is.null(rawdata)) {
@@ -111,7 +113,7 @@ read_hsa_value <- function(rawdata, pretty = TRUE) {
     hsa
 }
 
-#' @rdname HSA
+#' @rdname HardcodedSpawnArea
 #' @export
 put_hsa_data <- function(values, x, z, dimension, db, merge = TRUE) {
     # if values is a data.frame, split HSAs across chunks as necessary
@@ -178,7 +180,7 @@ put_hsa_data <- function(values, x, z, dimension, db, merge = TRUE) {
     invisible(ret)
 }
 
-#' @rdname HSA
+#' @rdname HardcodedSpawnArea
 #' @export
 put_hsa_value <- function(value, x, z, dimension, db) {
     value <- write_hsa_value(value)
@@ -186,7 +188,7 @@ put_hsa_value <- function(value, x, z, dimension, db) {
 }
 
 #' @export
-#' @rdname HSA
+#' @rdname HardcodedSpawnArea
 write_hsa_value <- function(value) {
     len <- nrow(value)
     ret <- raw(4L + 25L*len)

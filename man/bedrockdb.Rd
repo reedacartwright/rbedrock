@@ -2,7 +2,8 @@
 % Please edit documentation in R/R6.R
 \name{bedrockdb}
 \alias{bedrockdb}
-\alias{close.bedrockdb}
+\alias{close.rbedrock_db}
+\alias{is_bedrockdb}
 \title{Open a Bedrock Edition world for reading and writing.}
 \usage{
 bedrockdb(
@@ -18,7 +19,9 @@ bedrockdb(
   compression_level = -1L
 )
 
-\method{close}{bedrockdb}(con, compact = FALSE, ...)
+\method{close}{rbedrock_db}(con, compact = FALSE, ...)
+
+is_bedrockdb(x)
 }
 \arguments{
 \item{path}{The path to a world folder. If the path does not exist, it is
@@ -48,6 +51,8 @@ directory.}
 \item{compact}{Compact database before closing.}
 
 \item{...}{arguments passed to or from other methods.}
+
+\item{x}{An object.}
 }
 \value{
 On success, \code{bedrockdb} returns an R6 class of type 'bedrockdb'.

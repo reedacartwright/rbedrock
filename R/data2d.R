@@ -53,7 +53,7 @@ get_data2d_data <- function(x, z, dimension, db) {
 
 #' @rdname Data2D
 #' @export
-get_data2d_value <- function(db, x, z, dimension) {
+get_data2d_value <- function(x, z, dimension, db) {
     key <- .process_chunk_key_args(x, z, dimension, tag = 45L,
         assert_validity = TRUE, assert_scalar = TRUE)
     dat <- get_value(key, db)

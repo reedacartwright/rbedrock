@@ -1,28 +1,44 @@
 #' Get a list of keys stored in a bedrockdb.
 #'
+#' Returns a vector containing keys found in the bedrockdb
+#' with a specific `prefix`. If `prefix` is `NULL`, it will
+#' return all the keys. If `db` is missing, `get_keys()`,
+#' will check if `db` was passed as the first argument.
+#'
 #' @param db A `bedrockdb` object
-#' @param starts_with A string specifying chunk prefix or string prefix.
+#' @param prefix A string specifying chunk prefix or string prefix.
 #' @param readoptions A `bedrock_leveldb_readoptions` object
 #'
-#' @return
-#' A vector containing all the keys found in the bedrockdb.
+#' @return A character vector.
 #'
-#' If `starts_with` is specified, this vector will be filtered for
-#' based on the specified prefix.
+#' @examples
+#' dbpath <- rbedrock_example_world("example1.mcworld")
+#' db <- bedrockdb(dbpath)
+#' # get all keys in the world
+#' keys <- get_keys(db = db)
+#' # this also works
+#' keys <- get_keys(db)
+#' # get all the keys in the world with a prefix
+#' keys <- get_keys("^VILLAGE", db)
+#' close(db)
 #' @export
-get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
-    if(!is_null(starts_with)) {
-        starts_with <- as.character(starts_with)
-        starts_with_raw <- .create_rawkey_prefix(starts_with)
+get_keys <- function(prefix = NULL, db, readoptions = NULL) {
+    if(missing(db) && is_bedrockdb(prefix)) {
+        db <- prefix
+        prefix <- NULL
+    }
+    if(!is_null(prefix)) {
+        prefix <- as.character(prefix)
+        prefix_raw <- .create_rawkey_prefix(prefix)
     }
     else {
-        starts_with_raw <- starts_with
+        prefix_raw <- NULL
     }
-    rawkeys <- db$keys(starts_with_raw, readoptions)
+    rawkeys <- db$keys(prefix_raw, readoptions)
     res <- rawkeys_to_chrkeys(rawkeys)
-    if(!is.null(starts_with)) {
+    if(!is.null(prefix)) {
         # filter out keys from the wrong dimension
-        res <- str_subset(res, fixed(starts_with))
+        res <- str_subset(res, fixed(prefix))
     }
     res
 }

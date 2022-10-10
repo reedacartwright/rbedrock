@@ -16,7 +16,7 @@ test_that("put_legacy_biomes_value() accepts strings", {
     dat <- get_legacy_biomes_value(32, 3, 0, db = db)
     expect_equal(dat, matrix(new_dat, 16L, 16L))
 
-    expect_error(put_legacy_biomes_value("plain:fake_biome", 32, 3, 0, db))
+    expect_error(put_legacy_biomes_value("plain:fake_biome", 32, 3, 0, db = db))
 })
 
 test_that("put_legacy_biomes_value() accepts integers", {

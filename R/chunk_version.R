@@ -65,7 +65,7 @@ put_chunk_version_data <- function(values, x, z, dimension, db) {
 
 #' @rdname ChunkVersion
 #' @export
-put_chunk_version_value <- function(db, x, z, dimension, value) {
+put_chunk_version_value <- function(value, x, z, dimension, db) {
     key <- .process_chunk_key_args(x, z, dimension, tag = 44L,
         assert_validity = TRUE, assert_scalar = TRUE)
     value <- write_chunk_version_value(value)

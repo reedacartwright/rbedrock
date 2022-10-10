@@ -71,7 +71,7 @@ put_biomes_data <- function(values, x, z, dimension, db,
 
 #' @rdname Biomes
 #' @export
-put_biomes_value <- function(db, x, z, dimension, value,
+put_biomes_value <- function(value, x, z, dimension, db,
     missing_height = -64L) {
     key <- .process_chunk_key_args(x, z, dimension, tag = 43L,
         assert_validity = TRUE, assert_scalar = TRUE)
@@ -134,7 +134,7 @@ put_legacy_biomes_value <- function(value, x, z, dimension, db,
     key <- .process_chunk_key_args(x, z, dimension, tag = 45L,
         assert_validity = TRUE, assert_scalar = TRUE)
 
-    d <- get_data2d_value(db, key)
+    d <- get_data2d_value(key, db = db)
     h <- d$height_map %||% missing_height
 
     if(is.character(value)) {

@@ -12,7 +12,7 @@
 \usage{
 get_data2d_data(x, z, dimension, db)
 
-get_data2d_value(db, x, z, dimension)
+get_data2d_value(x, z, dimension, db)
 
 put_data2d_data(height_maps, biome_maps, x, z, dimension, db)
 

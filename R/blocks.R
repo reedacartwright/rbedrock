@@ -171,7 +171,7 @@ chunk_origin <- function(x) {
 #' @examples
 #' dbpath <- rbedrock_example_world("example1.mcworld")
 #' db <- bedrockdb(dbpath)
-#' blocks <- get_chunk_blocks_value(db, x=37, z=10, dimension=0)
+#' blocks <- get_chunk_blocks_value(x=37, z=10, dimension=0, db = db)
 #' locate_blocks(blocks, "ore")
 #' close(db)
 #'
@@ -394,7 +394,7 @@ put_subchunk_layers_data <- function(values, x, z, dimension, subchunk, db, ...)
 
 #' @rdname get_subchunk_layers_data
 #' @export
-put_subchunk_layers_value <- function(db, x, z, dimension, subchunk, value, ...) {
+put_subchunk_layers_value <- function(value, x, z, dimension, subchunk, db, ...) {
     key <- .process_chunk_key_args(x, z, dimension, tag = 47L,
         assert_validity = TRUE, assert_scalar = TRUE)
     value <- write_subchunk_layers_value(value, ...)

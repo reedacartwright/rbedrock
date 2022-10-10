@@ -15,7 +15,7 @@ get_subchunk_layers_value(x, z, dimension, subchunk, db)
 
 put_subchunk_layers_data(values, x, z, dimension, subchunk, db, ...)
 
-put_subchunk_layers_value(db, x, z, dimension, subchunk, value, ...)
+put_subchunk_layers_value(value, x, z, dimension, subchunk, db, ...)
 
 read_subchunk_layers_value(rawdata)
 

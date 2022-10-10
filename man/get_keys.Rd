@@ -4,21 +4,32 @@
 \alias{get_keys}
 \title{Get a list of keys stored in a bedrockdb.}
 \usage{
-get_keys(db, starts_with = NULL, readoptions = NULL)
+get_keys(prefix = NULL, db, readoptions = NULL)
 }
 \arguments{
-\item{db}{A \code{bedrockdb} object}
+\item{prefix}{A string specifying chunk prefix or string prefix.}
 
-\item{starts_with}{A string specifying chunk prefix or string prefix.}
+\item{db}{A \code{bedrockdb} object}
 
 \item{readoptions}{A \code{bedrock_leveldb_readoptions} object}
 }
 \value{
-A vector containing all the keys found in the bedrockdb.
-
-If \code{starts_with} is specified, this vector will be filtered for
-based on the specified prefix.
+A character vector.
 }
 \description{
-Get a list of keys stored in a bedrockdb.
+Returns a vector containing keys found in the bedrockdb
+with a specific \code{prefix}. If \code{prefix} is \code{NULL}, it will
+return all the keys. If \code{db} is missing, \code{get_keys()},
+will check if \code{db} was passed as the first argument.
+}
+\examples{
+dbpath <- rbedrock_example_world("example1.mcworld")
+db <- bedrockdb(dbpath)
+# get all keys in the world
+keys <- get_keys(db = db)
+# this also works
+keys <- get_keys(db)
+# get all the keys in the world with a prefix
+keys <- get_keys("^VILLAGE", db)
+close(db)
 }

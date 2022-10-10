@@ -1,13 +1,9 @@
-#' Read and write Actor Digest Data
+#' Read and write ActorDigest data
 #'
 #' Actor digests store a list of all entities in a chunk; however
 #' they are not chunk data and use their own prefix. The key format
 #' for actor digest data is acdig:x:z:dimension.
 #'
-#' @name ActorDigest
-NULL
-
-#' @description
 #' `get_acdig_data()` and `get_acdig_value()` load ActorDigest
 #' data from `db`. They return `NULL` for any key that is not 
 #' does not represent ActorDigest data. `get_acdig_value()` supports loading
@@ -30,7 +26,9 @@ NULL
 #' @return `get_acdig_values()` returns a vector of actor keys.
 #' `get_acdig_data()` returns a named list of the of the values
 #' returned by `get_acdig_value()`.
-#' 
+#' @name ActorDigest
+NULL
+
 #' @rdname ActorDigest
 #' @export
 get_acdig_data <- function(x, z, dimension, db) {
@@ -120,9 +118,9 @@ create_acdig_keys <- function(x, z, dimension) {
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
-##' @param value A character vector.
-##' @param values A list of character vectors. If named, the names represent db keys.
-##' @param rawdata A raw vector.
+#' #@param value A character vector.
+#' #@param values A list of character vectors. If named, the names represent db keys.
+#' #@param rawdata A raw vector.
 #'
 #' @name Actors
 NULL

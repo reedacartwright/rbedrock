@@ -16,7 +16,7 @@ get_chunk_version_value(x, z, dimension, db)
 
 put_chunk_version_data(values, x, z, dimension, db)
 
-put_chunk_version_value(db, x, z, dimension, value)
+put_chunk_version_value(value, x, z, dimension, db)
 
 read_chunk_version_value(rawdata)
 

@@ -36,7 +36,7 @@ test_that("get_block_entity_value() accepts returns one BlockEntity data", {
 })
 
 test_that("MobSpawners can be identified and placed in a table", {
-    keys <- filter_chunk_keys(get_keys(db), tag = 49L)
+    keys <- filter_chunk_keys(get_keys(db = db), tag = 49L)
     dat <- get_block_entity_data(keys, db = db)
     dat <- purrr::flatten(dat)
     dat <- purrr::keep(dat, ~.$id == "MobSpawner")

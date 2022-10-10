@@ -18,7 +18,7 @@ get_biomes_value(x, z, dimension, db, return_names = TRUE)
 
 put_biomes_data(values, x, z, dimension, db, missing_height = -64L)
 
-put_biomes_value(db, x, z, dimension, value, missing_height = -64L)
+put_biomes_value(value, x, z, dimension, db, missing_height = -64L)
 
 get_legacy_biomes_data(x, z, dimension, db, return_names = TRUE)
 
