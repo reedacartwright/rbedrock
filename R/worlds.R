@@ -3,7 +3,6 @@
 #' @name minecraft_worlds
 #' @examples
 #' \dontrun{
-#'
 #' create_world(LevelName = "My World", RandomSeed = 10)
 #' }
 NULL
@@ -241,8 +240,7 @@ get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
 }
 
 .nbt_random_seed <- function() {
-    s <- stats::runif(1L,min=-2147483647, max=2147483648)
-    storage.mode(s) <- "integer"
+    s <- bit64::runif64(1)
     nbt_long(s)
 }
 
