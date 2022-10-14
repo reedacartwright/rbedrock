@@ -19,7 +19,7 @@
 #' # this also works
 #' keys <- get_keys(db)
 #' # get all the keys in the world with a prefix
-#' keys <- get_keys("^VILLAGE", db)
+#' keys <- get_keys("plain:VILLAGE", db)
 #' close(db)
 #' @export
 get_keys <- function(prefix = NULL, db, readoptions = NULL) {
