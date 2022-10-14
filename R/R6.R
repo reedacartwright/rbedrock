@@ -46,6 +46,10 @@
 #' @param cache_capacity Internal leveldb option
 #' @param bloom_filter_bits_per_key Internal leveldb option
 #' @param compression_level Internal leveldb option
+#' @param compact Compact database before closing.
+#' @param con An database object created by bedrockdb.
+#' @param ... arguments passed to or from other methods.
+#' @param x An object.
 #'
 #' @return On success, `bedrockdb` returns an R6 class of type 'bedrockdb'.
 #'         
@@ -78,12 +82,8 @@ bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, p
 }
 
 #' @export
-#' @param compact Compact database before closing.
-#' @param con An database object created by bedrockdb.
-#' @param ... arguments passed to or from other methods.
-#'
 #' @rdname bedrockdb
-close.bedrockdb <- function(con, compact = FALSE, ...) {
+close.rbedrock_db <- function(con, compact = FALSE, ...) {
     if(isTRUE(compact)) {
         inform("Compacting database...")
         con$compact_range()
@@ -91,8 +91,14 @@ close.bedrockdb <- function(con, compact = FALSE, ...) {
     con$close()
 }
 
+#' @rdname bedrockdb
+#' @export
+is_bedrockdb <- function(x) {
+    inherits(x, "rbedrock_db")
+}
+
 #' @importFrom R6 R6Class
-R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(db = NULL, path = NULL, levelname = NULL, 
+R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL, path = NULL, levelname = NULL, 
     initialize = function(path, ...) {
         path <- fs::path_real(.fixup_path(path))
         namefile <- fs::path(path, "levelname.txt")

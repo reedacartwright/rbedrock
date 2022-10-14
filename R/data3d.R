@@ -3,69 +3,58 @@
 #' Data3D data (tag 43) stores information about surface heights and biomes in a
 #' chunk.
 #'
-#' @name Data3D
+#' `get_data3d_data()` and `get_data3d_value()` load Data3D data from `db`.
+#' `get_data3d_value()` only supports loading a single value.'
 #'
-NULL
-
-#' @description
-#' `get_data3d_data()` loads Data3D data from `db`.
-#'  It will silently drop keys not representing Data3D data.
+#' `put_data3d_data()` and `put_data3d_value()` store Data3D data into `db`.
+#'
+#' `read_data3d_value()` decodes binary Data3D data. `write_data3d_value()`
+#' encodes Data3D data into a raw vector.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
+#' @param height_maps,biome_maps Lists of height and biome data.
+#' Values will be recycled if necessary to match the number of keys
+#' to be written to. If `biome_maps` is missing, `height_maps` should
+#' be in the same format as returned by `get_data3d_data()`.
+#' If `x` is missing, the names of `height_maps` will be taken as the keys
+#' @param height_map 16x16 array containing height data.
+#' Values will be recycled if necessary. If `biome_map` is missing, `height-map`
+#' should be a list a `list()` with both "height_map" and "biome_map" elements.
+#' @param biome_map 16xNx16 array containing biome data.
+#' @param rawdata A raw vector.
 #'
-#' @return `get_data3d_data()` returns a list of the of the values returned by 
-#'         `get_data3d_value()`.
+#' @return `get_data3d_value()` returns a list with components "height_map"
+#' and "biome_map". `get_data3d_data()` returns a list of the of the values
+#' returned by `get_data3d_value()`.
 #'
+#' @name Data3D
+NULL
+
 #' @rdname Data3D
 #' @export
-get_data3d_data <- function(db, x, z, dimension) {
-    keys <- .process_key_args(x,z,dimension, tag=43L)
-    dat <- get_values(db, keys)
+get_data3d_data <- function(x, z, dimension, db) {
+    keys <- .process_chunk_key_args(x, z, dimension, tag = 43L,
+        assert_validity = TRUE)
+    dat <- get_data(keys, db)
     purrr::map(dat, read_data3d_value)
 }
 
 #' @rdname Data3D
 #' @export
-get_data3d_values <- get_data3d_data
-
-#' @description
-#' `get_data3d_value()` loads Data3D data from `db`.
-#' It only supports loading a single value.
-#'
-#' @return `get_data3d_value()` returns a list with components "height_map"
-#' and "biome_map".
-#' @rdname Data3D
-#' @export
-get_data3d_value <- function(db, x, z, dimension) {
-    key <- .process_key_args(x, z, dimension, tag=43L)
-    vec_assert(key, character(), 1L)
-    dat <- get_value(db, key)
+get_data3d_value <- function(x, z, dimension, db) {
+    key <- .process_chunk_key_args(x, z, dimension, tag = 43L,
+        assert_validity = TRUE, assert_scalar = TRUE)
+    dat <- get_value(key, db)
     read_data3d_value(dat)
 }
 
-#' @description
-#' `put_data3d_data()`, `put_data3d_values()`, and
-#' `put_data3d_value()` store Data3D data into `db`.
-#'
-#' @param data A named-vector of key-value pairs for Data3D data.
-#'
 #' @rdname Data3D
 #' @export
-put_data3d_data <- function(db, data) {
-    put_data3d_values(db, x=names(data), height_maps=data)
-}
-
-#' @param height_maps,biome_maps Lists of height and biome data.
-#' Values will be recycled if necessary to match the number of keys
-#' to be written to. If `biome_maps` is missing, `height_maps` should
-#' be in the same format as returned by `get_data3d_data()`.
-#'
-#' @rdname Data3D
-#' @export
-put_data3d_values <- function(db, x, z, dimension, height_maps, biome_maps) {
-    keys <- .process_key_args(x, z, dimension, tag=43L, stop_if_filtered = TRUE)
+put_data3d_data <- function(height_maps, biome_maps, x, z, dimension, db) {
+    keys <- .process_chunk_key_args(x, z, dimension, tag = 43L,
+        values = height_maps, assert_validity = TRUE)
     if(missing(biome_maps)) {
         values <- vec_recycle(height_maps, length(keys), x_arg="height_maps")
         values <- purrr::map(values, write_data3d_value)
@@ -74,28 +63,18 @@ put_data3d_values <- function(db, x, z, dimension, height_maps, biome_maps) {
         b <- vec_recycle(biome_maps, length(keys), x_arg="biome_maps")
         values <- purrr::map2(h, b, write_data3d_value)
     }
-    put_values(db, keys, values)
+    put_data(values, keys, db)
 }
 
-#' @param height_map 16x16 array containing height data.
-#' Values will be recycled if necessary. If `biome_map` is missing, `height-map`
-#' should be a list a `list()` with both "height_map" and "biome_map" elements.
-#' @param biome_map 16xNx16 array containing biome data.
-#'
 #' @rdname Data3D
 #' @export
-put_data3d_value <- function(db, x, z, dimension, height_map, biome_map) {
-    key <- .process_key_args(x, z, dimension, tag=43L)
-    vec_assert(key, character(), 1L)
+put_data3d_value <- function(height_map, biome_map, x, z, dimension, db) {
+    key <- .process_chunk_key_args(x, z, dimension, tag = 43L,
+        assert_validity = TRUE, assert_scalar = TRUE)
     value <- write_data3d_value(height_map, biome_map)
-    put_value(db, key, value)
+    put_value(value, key, db)
 }
 
-#' @description
-#' `read_data3d_value()` decodes binary Data3D data.
-#'
-#' @param rawdata A raw vector.
-#'
 #' @rdname Data3D
 #' @export
 read_data3d_value <- function(rawdata) {
@@ -128,9 +107,6 @@ read_data3d_value <- function(rawdata) {
     list(height_map = h, biome_map = b)
 }
 
-#' @description
-#' `write_data3d_value` encodes Data3D data into a raw vector.
-#'
 #' @rdname Data3D
 #' @export
 write_data3d_value <- function(height_map, biome_map) {

@@ -3,43 +3,36 @@
 \name{Data3D}
 \alias{Data3D}
 \alias{get_data3d_data}
-\alias{get_data3d_values}
 \alias{get_data3d_value}
 \alias{put_data3d_data}
-\alias{put_data3d_values}
 \alias{put_data3d_value}
 \alias{read_data3d_value}
 \alias{write_data3d_value}
 \title{Read and write Data3D data}
 \usage{
-get_data3d_data(db, x, z, dimension)
+get_data3d_data(x, z, dimension, db)
 
-get_data3d_values(db, x, z, dimension)
+get_data3d_value(x, z, dimension, db)
 
-get_data3d_value(db, x, z, dimension)
+put_data3d_data(height_maps, biome_maps, x, z, dimension, db)
 
-put_data3d_data(db, data)
-
-put_data3d_values(db, x, z, dimension, height_maps, biome_maps)
-
-put_data3d_value(db, x, z, dimension, height_map, biome_map)
+put_data3d_value(height_map, biome_map, x, z, dimension, db)
 
 read_data3d_value(rawdata)
 
 write_data3d_value(height_map, biome_map)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{data}{A named-vector of key-value pairs for Data3D data.}
+\item{db}{A bedrockdb object.}
 
 \item{height_maps, biome_maps}{Lists of height and biome data.
 Values will be recycled if necessary to match the number of keys
 to be written to. If \code{biome_maps} is missing, \code{height_maps} should
-be in the same format as returned by \code{get_data3d_data()}.}
+be in the same format as returned by \code{get_data3d_data()}.
+If \code{x} is missing, the names of \code{height_maps} will be taken as the keys}
 
 \item{height_map}{16x16 array containing height data.
 Values will be recycled if necessary. If \code{biome_map} is missing, \code{height-map}
@@ -50,26 +43,20 @@ should be a list a \code{list()} with both "height_map" and "biome_map" elements
 \item{rawdata}{A raw vector.}
 }
 \value{
-\code{get_data3d_data()} returns a list of the of the values returned by
-\code{get_data3d_value()}.
-
 \code{get_data3d_value()} returns a list with components "height_map"
-and "biome_map".
+and "biome_map". \code{get_data3d_data()} returns a list of the of the values
+returned by \code{get_data3d_value()}.
 }
 \description{
 Data3D data (tag 43) stores information about surface heights and biomes in a
 chunk.
+}
+\details{
+\code{get_data3d_data()} and \code{get_data3d_value()} load Data3D data from \code{db}.
+\code{get_data3d_value()} only supports loading a single value.'
 
-\code{get_data3d_data()} loads Data3D data from \code{db}.
-It will silently drop keys not representing Data3D data.
+\code{put_data3d_data()} and \code{put_data3d_value()} store Data3D data into \code{db}.
 
-\code{get_data3d_value()} loads Data3D data from \code{db}.
-It only supports loading a single value.
-
-\code{put_data3d_data()}, \code{put_data3d_values()}, and
-\code{put_data3d_value()} store Data3D data into \code{db}.
-
-\code{read_data3d_value()} decodes binary Data3D data.
-
-\code{write_data3d_value} encodes Data3D data into a raw vector.
+\code{read_data3d_value()} decodes binary Data3D data. \code{write_data3d_value()}
+encodes Data3D data into a raw vector.
 }

@@ -3,42 +3,34 @@
 \name{ChunkVersion}
 \alias{ChunkVersion}
 \alias{get_chunk_version_data}
-\alias{get_chunk_version_values}
 \alias{get_chunk_version_value}
 \alias{put_chunk_version_data}
-\alias{put_chunk_version_values}
 \alias{put_chunk_version_value}
 \alias{read_chunk_version_value}
 \alias{write_chunk_version_value}
 \title{Read and write chunk version data}
 \usage{
-get_chunk_version_data(db, x, z, dimension)
+get_chunk_version_data(x, z, dimension, db)
 
-get_chunk_version_values(db, x, z, dimension)
+get_chunk_version_value(x, z, dimension, db)
 
-get_chunk_version_value(db, x, z, dimension)
+put_chunk_version_data(values, x, z, dimension, db)
 
-put_chunk_version_data(db, data)
-
-put_chunk_version_values(db, x, z, dimension, values)
-
-put_chunk_version_value(db, x, z, dimension, value)
+put_chunk_version_value(value, x, z, dimension, db)
 
 read_chunk_version_value(rawdata)
 
 write_chunk_version_value(num)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract version data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{data}{A named-vector of key-value pairs for Version data.}
+\item{db}{A bedrockdb object.}
 
-\item{values}{An integer vector}
+\item{values}{An integer vector. If \code{x} is missing, the names of \code{values} will be taken as the keys.}
 
-\item{value}{A scalar integer vector}
+\item{value}{A scalar integer vector.}
 
 \item{rawdata}{A scalar raw.}
 
@@ -48,17 +40,15 @@ write_chunk_version_value(num)
 Version data (tag 44) and LegacyVersion data (tag 118)
 store the version number of a chunk. In Minecraft version 1.16.100,
 chunk version data was moved from tag 118 to tag 44.
-
+}
+\details{
 \code{get_chunk_version_data()} and \code{get_chunk_version_value()} load Version
-data from \code{db}. \code{get_chunk_version_data()} will silently drop and keys not
-representing Version data. \code{get_chunk_version_value()} supports loading
-only a single value. \code{get_chunk_version_values()} is a synonym for
-\code{get_chunk_version_data()}.
+data from \code{db}. \code{get_chunk_version_value()} supports loading
+only a single value.
 
-\code{put_chunk_version_data()}, \code{put_chunk_version_values()}, and
+\code{put_chunk_version_data()} and
 \code{put_chunk_version_value()} store Version data into a \code{bedrockdb}.
 
-\code{read_chunk_version_value()} decodes Version data.
-
+\code{read_chunk_version_value()} decodes Version data and
 \code{write_chunk_version_value()} encodes Version data.
 }

@@ -3,66 +3,44 @@
 \name{FinalizedState}
 \alias{FinalizedState}
 \alias{get_finalized_state_data}
-\alias{get_finalized_state_values}
 \alias{get_finalized_state_value}
 \alias{put_finalized_state_data}
-\alias{put_finalized_state_values}
 \alias{put_finalized_state_value}
 \alias{read_finalized_state_value}
 \alias{write_finalized_state_value}
 \title{Load and store FinalizedState data}
 \usage{
-get_finalized_state_data(db, x, z, dimension)
+get_finalized_state_data(x, z, dimension, db)
 
-get_finalized_state_values(db, x, z, dimension)
+get_finalized_state_value(x, z, dimension, db)
 
-get_finalized_state_value(db, x, z, dimension)
+put_finalized_state_data(values, x, z, dimension, db)
 
-put_finalized_state_data(db, data)
-
-put_finalized_state_values(db, x, z, dimension, values)
-
-put_finalized_state_value(db, x, z, dimension, value)
+put_finalized_state_value(value, x, z, dimension, db)
 
 read_finalized_state_value(rawdata)
 
 write_finalized_state_value(value)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{data}{A named-vector of key-value pairs for FinalizedState data.}
+\item{db}{A bedrockdb object.}
 
-\item{values}{An integer vector}
+\item{values}{An integer vector. If \code{x} is missing, the names of \code{values} will be taken as the keys.}
 
-\item{value}{a scalar integer}
+\item{value}{A scalar integer vector.}
 
-\item{rawdata}{a raw vector}
+\item{rawdata}{a raw vector.}
 }
 \value{
-\code{get_finalized_state_data()} returns a named integer vector
-of the values returned by \code{get_finalized_state_value()}.
+\code{get_finalized_state__data()} returns a integer vector with names.
+\code{get_pending_ticks_value()} returns a single integer value.
 }
 \description{
 FinalizedState data (tag 54) holds a number which
 indicates a chunk's state of generation.
-
-\code{get_finalized_state_data()} and \code{get_finalized_state_value()} load FinalizedState
-data from \code{db}. \code{get_finalized_state_data()} will silently drop and keys not
-representing FinalizedState data. \code{get_finalized_state_value()} supports loading
-only a single value. \code{get_finalized_state_values()} is a synonym for
-\code{get_finalized_state_data()}.
-
-\code{put_finalized_state_data()}, \code{put_finalized_state_values()}, and
-\code{put_finalized_state_value()} store FinalizedState data into a \code{bedrockdb}.
-
-\code{read_finalized_state_value()} parses a binary FinalizedState record.
-
-\code{write_finalized_state_value()} converts a FinalizedState value
-to a raw vector.
 }
 \details{
 FinalizedState data contains the following information.\tabular{lll}{
@@ -71,4 +49,16 @@ FinalizedState data contains the following information.\tabular{lll}{
    1 \tab NeedsPopulation \tab Chunk needs to be populated with mobs \cr
    2 \tab Done \tab Chunk generation is fully complete \cr
 }
+
+
+\code{get_finalized_state_data()} and \code{get_finalized_state_value()} load FinalizedState
+data from \code{db}. \code{get_finalized_statevalue()} supports loading
+only a single value.
+
+\code{put_finalized_state_value()} and \code{put_finalized_state_data()} store
+FinalizedState data into \code{db}.
+
+\code{read_finalized_state_value()} parses a binary FinalizedState record and
+\code{write_finalized_state_value()} converts a FinalizedState value
+to a raw vector.
 }

@@ -1,67 +1,95 @@
 #' Get a list of keys stored in a bedrockdb.
 #'
+#' Returns a vector containing keys found in the bedrockdb
+#' with a specific `prefix`. If `prefix` is `NULL`, it will
+#' return all the keys. If `db` is missing, `get_keys()`,
+#' will check if `db` was passed as the first argument.
+#'
 #' @param db A `bedrockdb` object
-#' @param starts_with A string specifying chunk prefix or string prefix.
+#' @param prefix A string specifying chunk prefix or string prefix.
 #' @param readoptions A `bedrock_leveldb_readoptions` object
 #'
-#' @return
-#' A vector containing all the keys found in the bedrockdb.
+#' @return A character vector.
 #'
-#' If `starts_with` is specified, this vector will be filtered for
-#' based on the specified prefix.
+#' @examples
+#' dbpath <- rbedrock_example_world("example1.mcworld")
+#' db <- bedrockdb(dbpath)
+#' # get all keys in the world
+#' keys <- get_keys(db = db)
+#' # this also works
+#' keys <- get_keys(db)
+#' # get all the keys in the world with a prefix
+#' keys <- get_keys("plain:VILLAGE", db)
+#' close(db)
 #' @export
-get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
-    starts_with_raw <- .create_rawkey_prefix(starts_with)
-    rawkeys <- db$keys(starts_with_raw, readoptions)
+get_keys <- function(prefix = NULL, db, readoptions = NULL) {
+    if(missing(db) && is_bedrockdb(prefix)) {
+        db <- prefix
+        prefix <- NULL
+    }
+    if(!is_null(prefix)) {
+        prefix <- as.character(prefix)
+        prefix_raw <- .create_rawkey_prefix(prefix)
+    }
+    else {
+        prefix_raw <- NULL
+    }
+    rawkeys <- db$keys(prefix_raw, readoptions)
     res <- rawkeys_to_chrkeys(rawkeys)
-    if(!is.null(starts_with)) {
+    if(!is.null(prefix)) {
         # filter out keys from the wrong dimension
-        res <- str_subset(res, fixed(starts_with))
+        res <- str_subset(res, fixed(prefix))
     }
     res
 }
 
 #' Read values stored in a bedrockdb.
 #'
-#' `get_values()` and `get_data()` are synonyms.
-#'
 #' @param db A `bedrockdb` object
 #' @param keys A character vector of keys.
-#' @param starts_with A string specifying chunk prefix or string prefix.
+#' @param prefix A string specifying key prefix.
 #' @param key  A single key.
 #' @param readoptions A `bedrock_leveldb_readoptions` object
 #' 
-#' @return `get_values()` returns a named-list of raw vectors.
+#' @return `get_data()` returns a named-list of raw vectors. `get_value()` returns a raw vector.
 #' @export
-get_values <- function(db, keys, starts_with, readoptions = NULL) {
-    if(missing(keys)) {
-        starts_with <- .create_rawkey_prefix(starts_with)
+get_data <- function(keys, db, readoptions = NULL) {
+    if(.is_key_prefix(keys)) {
+        starts_with <- .create_rawkey_prefix(as.character(keys))
         dat <- db$mget_prefix(starts_with, readoptions)
-        dat <- rlang::set_names(dat$values, rawkeys_to_chrkeys(dat$keys))
+        dat <- set_names(dat$values, rawkeys_to_chrkeys(dat$keys))
         return(dat)
     }
     rawkeys <- chrkeys_to_rawkeys(keys)
     dat <- db$mget(rawkeys, readoptions)
-    rlang::set_names(dat, keys)
+    set_names(dat, keys)
 }
 
-#' @rdname get_values
+#' @rdname get_data
 #' @export
-get_data <- get_values
+key_prefix <- function(prefix) {
+    if(!is.character(prefix) || is.object(prefix)) {
+        prefix <- as.character(prefix)
+    }
+    structure(prefix, class = c("rbedrock_key_prefix", "character"))
+}
 
-#' @returns `get_value()` returns a raw vector.
-#' @rdname get_values
+.is_key_prefix <- function(x) {
+    inherits(x, "rbedrock_key_prefix")
+}
+
+#' @rdname get_data
 #' @export
-get_value <- function(db, key, readoptions = NULL) {
+get_value <- function(key, db, readoptions = NULL) {
     vec_assert(key, character(), 1L)
     rawkey <- chrkeys_to_rawkeys(key)[[1]]
     db$get(rawkey, readoptions)
 }
 
 #' @returns `has_values()` returns a logical vector.
-#' @rdname get_values
+#' @rdname get_data
 #' @export
-has_values <- function(db, keys, readoptions = NULL) {
+has_values <- function(keys, db, readoptions = NULL) {
     rawkeys <- chrkeys_to_rawkeys(keys)
     dat <- db$exists(rawkeys, readoptions)
     rlang::set_names(dat, keys)
@@ -70,33 +98,33 @@ has_values <- function(db, keys, readoptions = NULL) {
 #' Write values to a bedrockdb.
 #'
 #' @param db A `bedrockdb` object
+#' @param values A list of raw values. If `keys` is missing, the names of `values` will be taken as the keys.
 #' @param keys A character vector of keys.
-#' @param values A list of raw values.
 #' @param writeoptions A `bedrock_leveldb_writeoptions` object
+#' @param key  A key that will be used to store data.
+#' @param value A raw vector that contains the information to be written.
 #' 
 #' @return An invisible copy of `db`.
 #' @export
-put_values <- function(db, keys, values, writeoptions = NULL) {
-    values <- vec_recycle(values, length(keys))
+put_data <- function(values, keys, db, writeoptions = NULL) {
+    if(missing(keys) && is_named(values)) {
+        # if keys is missing use names from values
+        keys <- names(values)
+    } else {
+        # recycle values if necessary
+        values <- vec_recycle(values, length(keys))
+    }
+    # convert keys and call mput
     rawkeys <- chrkeys_to_rawkeys(keys)
     db$mput(rawkeys, values, writeoptions)
 }
 
-#' @param key  A key that will be used to store data.
-#' @param value A raw vector that contains the information to be written.
-#' @rdname put_values
+#' @rdname put_data
 #' @export
-put_value <- function(db, key, value, writeoptions = NULL) {
+put_value <- function(value, key, db, writeoptions = NULL) {
     vec_assert(key, character(), 1L)
     rawkey <- chrkeys_to_rawkeys(key)[[1]]
     db$put(rawkey, value, writeoptions)
-}
-
-#' @param data A named-list of raw values, specifying key-value pairs.
-#' @rdname put_values
-#' @export
-put_data <- function(db, data, writeoptions = NULL) {
-    put_values(db, names(data), data)
 }
 
 #' Remove values from a bedrockdb.
@@ -110,7 +138,7 @@ put_data <- function(db, data, writeoptions = NULL) {
 #' @return If `report == TRUE`, a logical vector indicating which keys were deleted.
 #' 
 #' @export
-delete_values <- function(db, keys, report = FALSE, readoptions = NULL, writeoptions = NULL) {
+delete_values <- function(keys, db, report = FALSE, readoptions = NULL, writeoptions = NULL) {
     rawkeys <- chrkeys_to_rawkeys(keys)
     ret <- db$delete(rawkeys, report, readoptions, writeoptions)
     if(!report) {

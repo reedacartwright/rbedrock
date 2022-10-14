@@ -3,51 +3,39 @@
 \name{RandomTicks}
 \alias{RandomTicks}
 \alias{get_random_ticks_data}
-\alias{get_random_ticks_values}
 \alias{get_random_ticks_value}
-\alias{put_random_ticks_values}
-\alias{put_random_ticks_value}
 \alias{put_random_ticks_data}
+\alias{put_random_ticks_value}
 \title{Load and store RandomTicks NBT data}
 \usage{
-get_random_ticks_data(db, x, z, dimension)
+get_random_ticks_data(x, z, dimension, db)
 
-get_random_ticks_values(db, x, z, dimension)
+get_random_ticks_value(x, z, dimension, db)
 
-get_random_ticks_value(db, x, z, dimension)
+put_random_ticks_data(values, x, z, dimension, db)
 
-put_random_ticks_values(db, x, z, dimension, values)
-
-put_random_ticks_value(db, x, z, dimension, value)
-
-put_random_ticks_data(db, data)
+put_random_ticks_value(value, x, z, dimension, db)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{values}{A list of nbt objects}
+\item{db}{A bedrockdb object.}
+
+\item{values}{A list of nbt objects. If \code{x} is missing, the names of \code{values} will be taken as the keys.}
 
 \item{value}{An nbt object.}
-
-\item{data}{A named-list specifying key-value pairs.}
 }
 \value{
 \code{get_random_ticks_data()} returns a named-list of nbt data.
-\code{get_random_ticks_values()} returns a single nbt value.
+\code{get_random_ticks_value()} returns a single nbt value.
 }
 \description{
 RandomTicks data (tag 59) holds a list of NBT values for
 random ticks.
-
 \code{get_random_ticks_data()} and \code{get_random_ticks_value()} load RandomTicks
-data from \code{db}. \code{get_random_ticks_data()} will silently drop and keys not
-representing RandomTicks data. \code{get_random_ticks_value()} supports loading
-only a single value. \code{get_random_ticks_values()} is a synonym for
-\code{get_random_ticks_data()}.
-
-\code{put_random_ticks_values()}, \code{put_random_ticks_value()}, and
+data from \code{db}. \code{get_random_ticks_value()} supports loading
+only a single value.
+\code{put_random_ticks_value()} and
 \code{put_random_ticks_data()} store RandomTicks data into \code{db}.
 }

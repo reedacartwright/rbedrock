@@ -2,51 +2,38 @@
 % Please edit documentation in R/blocks.R
 \name{get_chunk_blocks_data}
 \alias{get_chunk_blocks_data}
-\alias{get_chunk_blocks_values}
 \alias{get_chunk_blocks_value}
 \alias{put_chunk_blocks_data}
-\alias{put_chunk_blocks_values}
 \alias{put_chunk_blocks_value}
-\title{Load block data from one or more chunks}
+\title{Load and store block data from one or more chunks}
 \usage{
 get_chunk_blocks_data(
-  db,
   x,
   z,
   dimension,
-  names_only = FALSE,
-  extra_block = FALSE
-)
-
-get_chunk_blocks_values(
   db,
-  x,
-  z,
-  dimension,
   names_only = FALSE,
   extra_block = FALSE
 )
 
 get_chunk_blocks_value(
-  db,
   x,
   z,
   dimension,
+  db,
   names_only = FALSE,
   extra_block = FALSE
 )
 
-put_chunk_blocks_data(db, data, version = 9L)
+put_chunk_blocks_data(values, x, z, dimension, db, version = 9L)
 
-put_chunk_blocks_values(db, x, z, dimension, values, version = 9L)
-
-put_chunk_blocks_value(db, x, z, dimension, value, version = 9L)
+put_chunk_blocks_value(value, x, z, dimension, db, version = 9L)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
+
+\item{db}{A bedrockdb object.}
 
 \item{names_only}{A logical scalar. Return only the names of the blocks,
 ignoring block states.}
@@ -55,34 +42,31 @@ ignoring block states.}
 output (separated by ";"). This is mostly useful if you have waterlogged
 blocks. If the extra block is air, it will not be appended.}
 
-\item{data}{A named list of 16xNx16 character() arrays}
+\item{values}{A list of 16xNx16 character() arrays.
+If \code{x} is missing, the names of \code{values} will be taken as the keys.}
 
-\item{version}{Which format of subchunk data to use}
-
-\item{values}{A list of 16xNx16 character() arrays}
+\item{version}{Which format of subchunk data to use.}
 
 \item{value}{A 16xNx16 character array}
 }
 \value{
-\code{get_chunk_blocks_data()} returns a list of the of the values
-returned by \code{read_chunk_blocks_value()}.
-
 \code{get_chunk_blocks_value()}
 return a 16xNx16 character array. The axes represent the \code{x}, \code{y}, and \code{z}
 dimensions in that order. The size of the y-axis is based on the highest
 subchunk in the coordinate. Missing subchunks are considered air.
+\code{get_chunk_blocks_data()} returns a list of the of the values
+returned by \code{read_chunk_blocks_value()}.
 }
 \description{
 These functions return block data as strings containing the
 block name and block states. The strings' format is
 \code{blockname@state1=value1@state2=value2} etc.
 Blocks may have 0 or more states.
+}
+\details{
+\code{get_chunk_blokcs_data()} and \code{get_chunk_blocks_value()} load block data from \code{db}.
+\code{get_chunk_blocks_value()} only supports loading a single value.
 
-\code{get_chunk_blocks_value()} is an alias for \code{get_chunk_blocks_data()}
-
-\code{get_chunk_blocks_value()} loads block data from a \code{bedrockdb}.
-It only supports loading a single value.
-
-\code{put_chunk_blocks_data()}, \code{put_chunk_blocks_values()}, and
-\code{put_chunk_blocks_value()} stores block data into a \code{bedrockdb}.
+\code{put_chunk_blocks_data()} and
+\code{put_chunk_blocks_value()} store block data into a \code{bedrockdb}.
 }

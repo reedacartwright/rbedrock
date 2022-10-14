@@ -8,6 +8,7 @@
  * Maximum chunk key tag has been increased to 96.
  * [Breaking Change] Change key format to require prefixes in front of every key. This allows rbedrock to support multiple key formats.
  * Add nbt_raw_string to support reading and writing nbt_string data that contains embedded nulls.
+ * [Breaking Change] The order of parameters for most database access functions has been changed to better support pipes.
 
 ## RBedrock 0.2.0
  * Support subchunk version 9 introduced for Caves and Cliffs.
