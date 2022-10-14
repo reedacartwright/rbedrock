@@ -86,7 +86,7 @@ test_that("chrkeys_to_rawkeys signals errors", {
     long_string2 <- paste0("plain:", paste0(rep("a",10000),collapse=''))
     expect_error(chrkeys_to_rawkeys(long_string1), "exceeded buffer space")
     expect_error(chrkeys_to_rawkeys(long_string2), "exceeded buffer space")
-    expect_error(.Call(Cchrkeys_to_rawkeys, list("a","b")), "not a vector of strings")
+    expect_error(.Call(rbedrock_keys_hum_to_raw, list("a","b")), "not a vector of strings")
 })
 
 test_that("chrkeys_to_rawkeys supports actor digest keys keys", {

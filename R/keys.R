@@ -14,7 +14,7 @@
 #' @export
 chrkeys_to_rawkeys <- function(keys) {
     keys <- vec_cast(keys, character())
-    .Call(Cchrkeys_to_rawkeys, keys)
+    .Call(rbedrock_keys_hum_to_raw, keys)
 }
 
 #' @rdname chrkeys_to_rawkeys
@@ -23,7 +23,7 @@ rawkeys_to_chrkeys <- function(keys) {
     if(is.raw(keys)) {
         keys <- list(keys)
     }
-    .Call(Crawkeys_to_chrkeys, keys)
+    .Call(rbedrock_keys_raw_to_hum, keys)
 }
 
 #' @importFrom utils head

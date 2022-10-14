@@ -187,7 +187,7 @@ static SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned 
             // We've run out of space.
             return_nbt_error_tag(10);
         }
-        r_val = PROTECT(read_nbt_value(ptr, end));
+        r_val = PROTECT(rbedrock_nbt_read_value(ptr, end));
         if(Rf_isNull(r_val)) {
             UNPROTECT(1);
             break; // NULL value signals end of compound
@@ -250,7 +250,7 @@ static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end
     return_nbt_error_tag(tag);
 }
 
-SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end) {
+SEXP rbedrock_nbt_read_value(const unsigned char** ptr, const unsigned char* end) {
     SEXP r_name;
     SEXP r_payload;
     if(*ptr >= end) {
@@ -282,11 +282,11 @@ SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end) {
 }
 
 
-SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end) {
+SEXP rbedrock_nbt_read_values(const unsigned char** ptr, const unsigned char* end) {
     SEXP r_ret = PROTECT(create_stretchy_list());
     SEXP r_val;
     while(*ptr < end) {
-        r_val = PROTECT(read_nbt_value(ptr, end));
+        r_val = PROTECT(rbedrock_nbt_read_value(ptr, end));
         if(Rf_isNull(r_val)) {
             // We should not encounter a 0 tag in this context
             return_nbt_error_tag(0);
@@ -298,7 +298,7 @@ SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end) {
     return Rf_PairToVectorList(CDR(r_ret));
 }
 
-SEXP read_nbt(SEXP r_value) {
+SEXP rbedrock_nbt_read(SEXP r_value) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
     }
@@ -309,7 +309,7 @@ SEXP read_nbt(SEXP r_value) {
     size_t len = XLENGTH(r_value);
     const unsigned char *buffer = RAW(r_value);
     const unsigned char *p = buffer;
-    return read_nbt_values(&p, buffer+len);
+    return rbedrock_nbt_read_values(&p, buffer+len);
 }
 
 static R_xlen_t write_nbt_integer_payload(SEXP r_value, unsigned char** ptr,
@@ -487,7 +487,7 @@ static R_xlen_t write_nbt_list_payload(SEXP r_value, unsigned char** ptr, unsign
 }
 
 static R_xlen_t write_nbt_compound_payload(SEXP r_value, unsigned char** ptr, unsigned char* end) {
-    R_xlen_t len = write_nbt_values(r_value, ptr, end);
+    R_xlen_t len = rbedrock_nbt_write_values(r_value, ptr, end);
     len += write_nbt_tag(0, ptr, end);
     return len;
 }
@@ -525,7 +525,7 @@ static R_xlen_t write_nbt_payload(SEXP r_value, unsigned char** ptr, unsigned ch
     return_nbt_error0();
 }
 
-R_xlen_t write_nbt_value(SEXP r_value, unsigned char** ptr, unsigned char* end) {
+R_xlen_t rbedrock_nbt_write_value(SEXP r_value, unsigned char** ptr, unsigned char* end) {
     PROTECT(r_value);
     int tag = Rf_asInteger(get_list_element(r_value, "tag"));
     SEXP r_name = get_list_element(r_value, "name");
@@ -539,7 +539,7 @@ R_xlen_t write_nbt_value(SEXP r_value, unsigned char** ptr, unsigned char* end) 
     return len;
 }
 
-R_xlen_t write_nbt_values(SEXP r_value, unsigned char** ptr, unsigned char* end) {
+R_xlen_t rbedrock_nbt_write_values(SEXP r_value, unsigned char** ptr, unsigned char* end) {
     // validate data
     if(TYPEOF(r_value) != VECSXP) {
         return_nbt_error0();
@@ -548,13 +548,13 @@ R_xlen_t write_nbt_values(SEXP r_value, unsigned char** ptr, unsigned char* end)
     R_xlen_t len = 0;
 
     for(R_xlen_t i = 0; i < XLENGTH(r_value); ++i) {
-        len += write_nbt_value(VECTOR_ELT(r_value, i), ptr, end);
+        len += rbedrock_nbt_write_value(VECTOR_ELT(r_value, i), ptr, end);
     }
     UNPROTECT(1);
     return len;
 }
 
-SEXP write_nbt(SEXP r_value) {
+SEXP rbedrock_nbt_write(SEXP r_value) {
     // stack-based buffer
     unsigned char buffer[8192];
 
@@ -566,13 +566,13 @@ SEXP write_nbt(SEXP r_value) {
     
     // try to write the nbt data with the stack
     // fall back to a heap allocation if needed
-    R_xlen_t len = write_nbt_values(r_value, &p, p+8192);
+    R_xlen_t len = rbedrock_nbt_write_values(r_value, &p, p+8192);
     SEXP ret = PROTECT(Rf_allocVector(RAWSXP, len));
     if(len <= 8192 && p-buffer == len) {
         memcpy(RAW(ret), buffer, len);
     } else {
         p = RAW(ret);
-        R_xlen_t len2 = write_nbt_values(r_value, &p, RAW(ret)+len);
+        R_xlen_t len2 = rbedrock_nbt_write_values(r_value, &p, RAW(ret)+len);
         if(len2 != len || p-RAW(ret) != len2) {
             return_nbt_error();
         }

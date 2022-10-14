@@ -28,76 +28,77 @@
 #include <R.h>
 #include <Rinternals.h>
 
-SEXP bedrock_leveldb_open(SEXP r_path, SEXP r_create_if_missing,
+SEXP rbedrock_db_open(SEXP r_path, SEXP r_create_if_missing,
                           SEXP r_error_if_exists, SEXP r_paranoid_checks,
                           SEXP r_write_buffer_size, SEXP r_max_open_files,
                           SEXP r_block_size, SEXP r_cache_capacity,
                           SEXP r_bloom_filter_bits_per_key,
                           SEXP r_compression_level);
-SEXP bedrock_leveldb_close(SEXP r_db, SEXP r_error_if_closed);
-SEXP bedrock_leveldb_destroy(SEXP r_path);
-SEXP bedrock_leveldb_is_open(SEXP r_db);
-SEXP bedrock_leveldb_repair(SEXP r_path);
-SEXP bedrock_leveldb_property(SEXP r_db, SEXP r_name, SEXP r_error_if_missing);
+SEXP rbedrock_db_close(SEXP r_db, SEXP r_error_if_closed);
+SEXP rbedrock_db_destroy(SEXP r_path);
+SEXP rbedrock_db_is_open(SEXP r_db);
+SEXP rbedrock_db_repair(SEXP r_path);
+SEXP rbedrock_db_property(SEXP r_db, SEXP r_name, SEXP r_error_if_missing);
 
-SEXP bedrock_leveldb_get(SEXP r_db, SEXP r_key, SEXP r_readoptions);
-SEXP bedrock_leveldb_mget(SEXP r_db, SEXP r_keys, SEXP r_readoptions);
-SEXP bedrock_leveldb_mget_prefix(SEXP r_db, SEXP r_starts_with,
+SEXP rbedrock_db_get(SEXP r_db, SEXP r_key, SEXP r_readoptions);
+SEXP rbedrock_db_mget(SEXP r_db, SEXP r_keys, SEXP r_readoptions);
+SEXP rbedrock_db_mget_prefix(SEXP r_db, SEXP r_starts_with,
                           SEXP r_readoptions);
 
-SEXP bedrock_leveldb_put(SEXP r_db, SEXP r_key, SEXP r_value,
+SEXP rbedrock_db_put(SEXP r_db, SEXP r_key, SEXP r_value,
                          SEXP r_writeoptions);
-SEXP bedrock_leveldb_mput(SEXP r_db, SEXP r_key, SEXP r_value,
+SEXP rbedrock_db_mput(SEXP r_db, SEXP r_key, SEXP r_value,
                           SEXP r_writeoptions);
 
-SEXP bedrock_leveldb_delete(SEXP r_db, SEXP r_key, SEXP r_report,
+SEXP rbedrock_db_delete(SEXP r_db, SEXP r_key, SEXP r_report,
                             SEXP r_readoptions, SEXP r_writeoptions);
-SEXP bedrock_leveldb_delete_silent(SEXP r_db, SEXP r_key, SEXP r_writeoptions);
-SEXP bedrock_leveldb_delete_report(SEXP r_db, SEXP r_key, SEXP r_readoptions,
+SEXP rbedrock_db_delete_silent(SEXP r_db, SEXP r_key, SEXP r_writeoptions);
+SEXP rbedrock_db_delete_report(SEXP r_db, SEXP r_key, SEXP r_readoptions,
                                    SEXP r_writeoptions);
 
-SEXP bedrock_leveldb_iter_create(SEXP r_db, SEXP r_readoptions);
-SEXP bedrock_leveldb_iter_destroy(SEXP r_it, SEXP r_error_if_destroyed);
-SEXP bedrock_leveldb_iter_valid(SEXP r_it);
-SEXP bedrock_leveldb_iter_seek_to_first(SEXP r_it);
-SEXP bedrock_leveldb_iter_seek_to_last(SEXP r_it);
-SEXP bedrock_leveldb_iter_seek(SEXP r_it, SEXP r_key);
-SEXP bedrock_leveldb_iter_next(SEXP r_it, SEXP r_error_if_invalid);
-SEXP bedrock_leveldb_iter_prev(SEXP r_it, SEXP r_error_if_invalid);
-SEXP bedrock_leveldb_iter_key(SEXP r_it,
+SEXP rbedrock_db_iter_create(SEXP r_db, SEXP r_readoptions);
+SEXP rbedrock_db_iter_destroy(SEXP r_it, SEXP r_error_if_destroyed);
+SEXP rbedrock_db_iter_valid(SEXP r_it);
+SEXP rbedrock_db_iter_seek_to_first(SEXP r_it);
+SEXP rbedrock_db_iter_seek_to_last(SEXP r_it);
+SEXP rbedrock_db_iter_seek(SEXP r_it, SEXP r_key);
+SEXP rbedrock_db_iter_next(SEXP r_it, SEXP r_error_if_invalid);
+SEXP rbedrock_db_iter_prev(SEXP r_it, SEXP r_error_if_invalid);
+SEXP rbedrock_db_iter_key(SEXP r_it,
                               SEXP r_error_if_invalid);
-SEXP bedrock_leveldb_iter_value(SEXP r_it,
+SEXP rbedrock_db_iter_value(SEXP r_it,
                                 SEXP r_error_if_invalid);
 
-SEXP bedrock_leveldb_snapshot_create(SEXP r_db);
+SEXP rbedrock_db_snapshot_create(SEXP r_db);
 
-SEXP bedrock_leveldb_writebatch_create();
-SEXP bedrock_leveldb_writebatch_destroy(SEXP r_writebatch,
+SEXP rbedrock_db_writebatch_create();
+SEXP rbedrock_db_writebatch_destroy(SEXP r_writebatch,
                                         SEXP error_if_destroyed);
-SEXP bedrock_leveldb_writebatch_clear(SEXP r_writebatch);
-SEXP bedrock_leveldb_writebatch_put(SEXP r_writebatch, SEXP r_key,
+SEXP rbedrock_db_writebatch_clear(SEXP r_writebatch);
+SEXP rbedrock_db_writebatch_put(SEXP r_writebatch, SEXP r_key,
                                     SEXP r_value);
-SEXP bedrock_leveldb_writebatch_mput(SEXP r_writebatch, SEXP r_key,
+SEXP rbedrock_db_writebatch_mput(SEXP r_writebatch, SEXP r_key,
                                      SEXP r_value);
-SEXP bedrock_leveldb_writebatch_delete(SEXP r_writebatch, SEXP r_key);
-SEXP bedrock_leveldb_writebatch_mdelete(SEXP r_writebatch, SEXP r_keys);
-SEXP bedrock_leveldb_write(SEXP r_db, SEXP r_writebatch, SEXP r_writeoptions);
+SEXP rbedrock_db_writebatch_delete(SEXP r_writebatch, SEXP r_key);
+SEXP rbedrock_db_writebatch_mdelete(SEXP r_writebatch, SEXP r_keys);
+SEXP rbedrock_db_write(SEXP r_db, SEXP r_writebatch, SEXP r_writeoptions);
 
-SEXP bedrock_leveldb_approximate_sizes(SEXP r_db, SEXP r_start_key,
+SEXP rbedrock_db_approximate_sizes(SEXP r_db, SEXP r_start_key,
                                        SEXP r_limit_key);
-SEXP bedrock_leveldb_compact_range(SEXP r_db, SEXP r_start_key,
+SEXP rbedrock_db_compact_range(SEXP r_db, SEXP r_start_key,
                                    SEXP r_limit_key);
 
-SEXP bedrock_leveldb_readoptions(SEXP r_verify_checksums, SEXP r_fill_cache,
+SEXP rbedrock_db_readoptions(SEXP r_verify_checksums, SEXP r_fill_cache,
                                  SEXP r_snapshot);
-SEXP bedrock_leveldb_writeoptions(SEXP r_sync);
+SEXP rbedrock_db_writeoptions(SEXP r_sync);
 
-SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with,
+SEXP rbedrock_db_keys(SEXP r_db, SEXP r_starts_with,
                           SEXP r_readoptions);
-SEXP bedrock_leveldb_keys_len(SEXP r_db, SEXP r_starts_with,
+SEXP rbedrock_db_keys_len(SEXP r_db, SEXP r_starts_with,
                               SEXP r_readoptions);
-SEXP bedrock_leveldb_exists(SEXP r_db, SEXP r_key, SEXP r_readoptions);
-SEXP bedrock_leveldb_version();
-SEXP bedrock_leveldb_tag(SEXP r_db);
-void bedrock_leveldb_init();
-void bedrock_leveldb_cleanup();
+SEXP rbedrock_db_exists(SEXP r_db, SEXP r_key, SEXP r_readoptions);
+SEXP rbedrock_db_version();
+SEXP rbedrock_db_tag(SEXP r_db);
+
+void rbedrock_init_db();
+void rbedrock_cleanup_db();

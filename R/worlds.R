@@ -81,8 +81,8 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
     dbpath <- fs::path_real(fs::dir_create(fs::path(dirpath, "db")))
 
     # create db and close
-    db <- bedrock_leveldb_open(dbpath, create_if_missing=TRUE)
-    bedrock_leveldb_close(db, TRUE)
+    db <- db_open(dbpath, create_if_missing=TRUE)
+    db_close(db, TRUE)
 
     dat <- read_leveldat(rbedrock_example("default_level.dat"))
 
@@ -259,5 +259,5 @@ compact_world <- function(db) {
 repair_world <- function(id) {
     path <- .fixup_path(id)
     path <- fs::path(path, "db")
-    bedrock_leveldb_repair(path)
+    db_repair(path)
 }

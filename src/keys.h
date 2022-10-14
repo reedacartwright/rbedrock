@@ -23,5 +23,5 @@
 #include <R.h>
 #include <Rinternals.h>
 
-SEXP rawkeys_to_chrkeys(SEXP r_keys);
-SEXP chrkeys_to_rawkeys(SEXP r_keys);
+SEXP rbedrock_keys_raw_to_hum(SEXP r_keys);
+SEXP rbedrock_keys_hum_to_raw(SEXP r_keys);

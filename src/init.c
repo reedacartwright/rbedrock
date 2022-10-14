@@ -29,112 +29,112 @@
 #include <Rversion.h>
 #include <Rinternals.h>
 
-#include "bedrock_leveldb.h"
-#include "key_conv.h"
+#include "db.h"
+#include "keys.h"
 #include "nbt.h"
-#include "subchunk.h"
+#include "chunk.h"
 #include "random.h"
 
 // for testing:
-SEXP bedrock_leveldb_test_cleanup() {
-    bedrock_leveldb_cleanup();
-    bedrock_leveldb_init();
+SEXP rbedrock_db_test_cleanup() {
+    rbedrock_cleanup_db();
+    rbedrock_init_db();
     return R_NilValue;
 }
 
 static const R_CallMethodDef call_methods[] = {
-    {"Cbedrock_leveldb_open", (DL_FUNC)&bedrock_leveldb_open, 10},
-    {"Cbedrock_leveldb_close", (DL_FUNC)&bedrock_leveldb_close, 2},
-    {"Cbedrock_leveldb_destroy", (DL_FUNC)&bedrock_leveldb_destroy, 1},
-    {"Cbedrock_leveldb_is_open", (DL_FUNC)&bedrock_leveldb_is_open, 1},
-    {"Cbedrock_leveldb_repair", (DL_FUNC)&bedrock_leveldb_repair, 1},
-    {"Cbedrock_leveldb_property", (DL_FUNC)&bedrock_leveldb_property, 3},
+    {"rbedrock_db_open", (DL_FUNC)&rbedrock_db_open, 10},
+    {"rbedrock_db_close", (DL_FUNC)&rbedrock_db_close, 2},
+    {"rbedrock_db_destroy", (DL_FUNC)&rbedrock_db_destroy, 1},
+    {"rbedrock_db_is_open", (DL_FUNC)&rbedrock_db_is_open, 1},
+    {"rbedrock_db_repair", (DL_FUNC)&rbedrock_db_repair, 1},
+    {"rbedrock_db_property", (DL_FUNC)&rbedrock_db_property, 3},
 
-    {"Cbedrock_leveldb_get", (DL_FUNC)&bedrock_leveldb_get, 3},
-    {"Cbedrock_leveldb_mget", (DL_FUNC)&bedrock_leveldb_mget, 3},
-    {"Cbedrock_leveldb_mget_prefix", (DL_FUNC)&bedrock_leveldb_mget_prefix, 3},
-    {"Cbedrock_leveldb_put", (DL_FUNC)&bedrock_leveldb_put, 4},
-    {"Cbedrock_leveldb_mput", (DL_FUNC)&bedrock_leveldb_mput, 4},
-    {"Cbedrock_leveldb_delete", (DL_FUNC)&bedrock_leveldb_delete, 5},
+    {"rbedrock_db_get", (DL_FUNC)&rbedrock_db_get, 3},
+    {"rbedrock_db_mget", (DL_FUNC)&rbedrock_db_mget, 3},
+    {"rbedrock_db_mget_prefix", (DL_FUNC)&rbedrock_db_mget_prefix, 3},
+    {"rbedrock_db_put", (DL_FUNC)&rbedrock_db_put, 4},
+    {"rbedrock_db_mput", (DL_FUNC)&rbedrock_db_mput, 4},
+    {"rbedrock_db_delete", (DL_FUNC)&rbedrock_db_delete, 5},
 
-    {"Cbedrock_leveldb_iter_create", (DL_FUNC)&bedrock_leveldb_iter_create, 2},
-    {"Cbedrock_leveldb_iter_destroy", (DL_FUNC)&bedrock_leveldb_iter_destroy,
+    {"rbedrock_db_iter_create", (DL_FUNC)&rbedrock_db_iter_create, 2},
+    {"rbedrock_db_iter_destroy", (DL_FUNC)&rbedrock_db_iter_destroy,
      2},
-    {"Cbedrock_leveldb_iter_valid", (DL_FUNC)&bedrock_leveldb_iter_valid, 1},
-    {"Cbedrock_leveldb_iter_seek_to_first",
-     (DL_FUNC)&bedrock_leveldb_iter_seek_to_first, 1},
-    {"Cbedrock_leveldb_iter_seek_to_last",
-     (DL_FUNC)&bedrock_leveldb_iter_seek_to_last, 1},
-    {"Cbedrock_leveldb_iter_seek", (DL_FUNC)&bedrock_leveldb_iter_seek, 2},
-    {"Cbedrock_leveldb_iter_next", (DL_FUNC)&bedrock_leveldb_iter_next, 2},
-    {"Cbedrock_leveldb_iter_prev", (DL_FUNC)&bedrock_leveldb_iter_prev, 2},
-    {"Cbedrock_leveldb_iter_key", (DL_FUNC)&bedrock_leveldb_iter_key, 2},
-    {"Cbedrock_leveldb_iter_value", (DL_FUNC)&bedrock_leveldb_iter_value, 2},
+    {"rbedrock_db_iter_valid", (DL_FUNC)&rbedrock_db_iter_valid, 1},
+    {"rbedrock_db_iter_seek_to_first",
+     (DL_FUNC)&rbedrock_db_iter_seek_to_first, 1},
+    {"rbedrock_db_iter_seek_to_last",
+     (DL_FUNC)&rbedrock_db_iter_seek_to_last, 1},
+    {"rbedrock_db_iter_seek", (DL_FUNC)&rbedrock_db_iter_seek, 2},
+    {"rbedrock_db_iter_next", (DL_FUNC)&rbedrock_db_iter_next, 2},
+    {"rbedrock_db_iter_prev", (DL_FUNC)&rbedrock_db_iter_prev, 2},
+    {"rbedrock_db_iter_key", (DL_FUNC)&rbedrock_db_iter_key, 2},
+    {"rbedrock_db_iter_value", (DL_FUNC)&rbedrock_db_iter_value, 2},
 
-    {"Cbedrock_leveldb_snapshot_create",
-     (DL_FUNC)&bedrock_leveldb_snapshot_create, 1},
+    {"rbedrock_db_snapshot_create",
+     (DL_FUNC)&rbedrock_db_snapshot_create, 1},
 
-    {"Cbedrock_leveldb_writebatch_create",
-     (DL_FUNC)&bedrock_leveldb_writebatch_create, 0},
-    {"Cbedrock_leveldb_writebatch_destroy",
-     (DL_FUNC)&bedrock_leveldb_writebatch_destroy, 2},
-    {"Cbedrock_leveldb_writebatch_clear",
-     (DL_FUNC)&bedrock_leveldb_writebatch_clear, 1},
-    {"Cbedrock_leveldb_writebatch_put",
-     (DL_FUNC)&bedrock_leveldb_writebatch_put, 3},
-    {"Cbedrock_leveldb_writebatch_mput",
-     (DL_FUNC)&bedrock_leveldb_writebatch_mput, 3},
-    {"Cbedrock_leveldb_writebatch_delete",
-     (DL_FUNC)&bedrock_leveldb_writebatch_delete, 2},
-    {"Cbedrock_leveldb_writebatch_mdelete",
-     (DL_FUNC)&bedrock_leveldb_writebatch_mdelete, 2},
-    {"Cbedrock_leveldb_write", (DL_FUNC)&bedrock_leveldb_write, 3},
+    {"rbedrock_db_writebatch_create",
+     (DL_FUNC)&rbedrock_db_writebatch_create, 0},
+    {"rbedrock_db_writebatch_destroy",
+     (DL_FUNC)&rbedrock_db_writebatch_destroy, 2},
+    {"rbedrock_db_writebatch_clear",
+     (DL_FUNC)&rbedrock_db_writebatch_clear, 1},
+    {"rbedrock_db_writebatch_put",
+     (DL_FUNC)&rbedrock_db_writebatch_put, 3},
+    {"rbedrock_db_writebatch_mput",
+     (DL_FUNC)&rbedrock_db_writebatch_mput, 3},
+    {"rbedrock_db_writebatch_delete",
+     (DL_FUNC)&rbedrock_db_writebatch_delete, 2},
+    {"rbedrock_db_writebatch_mdelete",
+     (DL_FUNC)&rbedrock_db_writebatch_mdelete, 2},
+    {"rbedrock_db_write", (DL_FUNC)&rbedrock_db_write, 3},
 
-    {"Cbedrock_leveldb_approximate_sizes",
-     (DL_FUNC)&bedrock_leveldb_approximate_sizes, 3},
-    {"Cbedrock_leveldb_compact_range", (DL_FUNC)&bedrock_leveldb_compact_range,
+    {"rbedrock_db_approximate_sizes",
+     (DL_FUNC)&rbedrock_db_approximate_sizes, 3},
+    {"rbedrock_db_compact_range", (DL_FUNC)&rbedrock_db_compact_range,
      3},
 
-    {"Cbedrock_leveldb_readoptions", (DL_FUNC)&bedrock_leveldb_readoptions, 3},
-    {"Cbedrock_leveldb_writeoptions", (DL_FUNC)&bedrock_leveldb_writeoptions,
+    {"rbedrock_db_readoptions", (DL_FUNC)&rbedrock_db_readoptions, 3},
+    {"rbedrock_db_writeoptions", (DL_FUNC)&rbedrock_db_writeoptions,
      1},
 
-    {"Cbedrock_leveldb_keys_len", (DL_FUNC)&bedrock_leveldb_keys_len, 3},
-    {"Cbedrock_leveldb_keys", (DL_FUNC)&bedrock_leveldb_keys, 3},
-    {"Cbedrock_leveldb_exists", (DL_FUNC)&bedrock_leveldb_exists, 3},
-    {"Cbedrock_leveldb_version", (DL_FUNC)&bedrock_leveldb_version, 0},
+    {"rbedrock_db_keys_len", (DL_FUNC)&rbedrock_db_keys_len, 3},
+    {"rbedrock_db_keys", (DL_FUNC)&rbedrock_db_keys, 3},
+    {"rbedrock_db_exists", (DL_FUNC)&rbedrock_db_exists, 3},
+    {"rbedrock_db_version", (DL_FUNC)&rbedrock_db_version, 0},
 
     // For debugging:
-    {"Cbedrock_leveldb_tag", (DL_FUNC)&bedrock_leveldb_tag, 1},
+    {"rbedrock_db_tag", (DL_FUNC)&rbedrock_db_tag, 1},
 
     // For testing:
-    {"Cbedrock_leveldb_test_cleanup", (DL_FUNC)&bedrock_leveldb_test_cleanup,
+    {"rbedrock_db_test_cleanup", (DL_FUNC)&rbedrock_db_test_cleanup,
      0},
 
-    {"Crawkeys_to_chrkeys", (DL_FUNC)&rawkeys_to_chrkeys, 1},
-    {"Cchrkeys_to_rawkeys", (DL_FUNC)&chrkeys_to_rawkeys, 1},
+    {"rbedrock_keys_raw_to_hum", (DL_FUNC)&rbedrock_keys_raw_to_hum, 1},
+    {"rbedrock_keys_hum_to_raw", (DL_FUNC)&rbedrock_keys_hum_to_raw, 1},
 
-    {"Cread_nbt", (DL_FUNC)&read_nbt, 1},
-    {"Cwrite_nbt", (DL_FUNC)&write_nbt, 1},
+    {"rbedrock_nbt_read", (DL_FUNC)&rbedrock_nbt_read, 1},
+    {"rbedrock_nbt_write", (DL_FUNC)&rbedrock_nbt_write, 1},
 
-    {"Cread_subchunk_blocks", (DL_FUNC)&read_subchunk_blocks, 1},
-    {"Cwrite_subchunk_blocks", (DL_FUNC)&write_subchunk_blocks, 4},
-    {"Cread_chunk_biomes", (DL_FUNC)&read_chunk_biomes, 1},
-    {"Cwrite_chunk_biomes", (DL_FUNC)&write_chunk_biomes, 2},
+    {"rbedrock_chunk_read_subchunk", (DL_FUNC)&rbedrock_chunk_read_subchunk, 1},
+    {"rbedrock_chunk_write_subchunk", (DL_FUNC)&rbedrock_chunk_write_subchunk, 4},
+    {"rbedrock_chunk_read_biomes", (DL_FUNC)&rbedrock_chunk_read_biomes, 1},
+    {"rbedrock_chunk_write_biomes", (DL_FUNC)&rbedrock_chunk_write_biomes, 2},
 
-    {"Cmcpe_random_seed", (DL_FUNC)&mcpe_random_seed, 1},
-    {"Cmcpe_random_state", (DL_FUNC)&mcpe_random_state, 1},
-    {"Cmcpe_random_get_uint", (DL_FUNC)&mcpe_random_get_uint, 2},
-    {"Cmcpe_random_get_int", (DL_FUNC)&mcpe_random_get_int, 3},
-    {"Cmcpe_random_get_double", (DL_FUNC)&mcpe_random_get_double, 1},
-    {"Cmcpe_random_get_float", (DL_FUNC)&mcpe_random_get_float, 3},
+    {"rbedrock_random_seed", (DL_FUNC)&rbedrock_random_seed, 1},
+    {"rbedrock_random_state", (DL_FUNC)&rbedrock_random_state, 1},
+    {"rbedrock_random_get_uint", (DL_FUNC)&rbedrock_random_get_uint, 2},
+    {"rbedrock_random_get_int", (DL_FUNC)&rbedrock_random_get_int, 3},
+    {"rbedrock_random_get_double", (DL_FUNC)&rbedrock_random_get_double, 1},
+    {"rbedrock_random_get_float", (DL_FUNC)&rbedrock_random_get_float, 3},
 
-    {"Cmcpe_random_create_seed", (DL_FUNC)&mcpe_random_create_seed, 6},
+    {"rbedrock_random_create_seed", (DL_FUNC)&rbedrock_random_create_seed, 6},
 
     {NULL, NULL, 0}};
 
 void rbedrock_init_nbt();
-void rbedrock_init_blocks();
+void rbedrock_init_chunk();
 void rbedrock_init_random();
 
 void attribute_visible R_init_rbedrock(DllInfo *info) {
@@ -142,16 +142,16 @@ void attribute_visible R_init_rbedrock(DllInfo *info) {
     R_useDynamicSymbols(info, FALSE);
     R_forceSymbols(info, TRUE);
 
-    bedrock_leveldb_init();
+    rbedrock_init_db();
 
     rbedrock_init_nbt();
-    rbedrock_init_blocks();
+    rbedrock_init_chunk();
     rbedrock_init_random();
 }
 
 // This can't be easily tested
 // # nocov start
 void R_unload_rbedrock(DllInfo *info) {
-    bedrock_leveldb_cleanup();
+    rbedrock_cleanup_db();
 }
 // # nocov end

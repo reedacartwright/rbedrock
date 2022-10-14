@@ -52,8 +52,7 @@ put_nbt_data <- function(values, keys, db, writeoptions = NULL) {
 #' @rdname get_nbt_data
 #' @export
 read_nbt <- function(rawvalue, simplify = TRUE) {
-    res <- read_rnbt(rawvalue)
-    res <- from_rnbt(res)
+    res <- from_rnbt(read_rnbt(rawvalue))
     if(isTRUE(simplify) && length(res) == 1L && is.null(attributes(res))) {
         res <- res[[1]]
     }
@@ -72,8 +71,7 @@ write_nbt <- function(value) {
     if(is_nbt(value)) {
         value <- list(value)
     }
-    value <- to_rnbt(value)
-    .Call(Cwrite_nbt, value)
+    write_rnbt(to_rnbt(value))
 }
 
 #' @rdname get_nbt_data

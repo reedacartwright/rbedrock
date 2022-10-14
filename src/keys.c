@@ -21,7 +21,7 @@
 */
 
 #define R_NO_REMAP
-#include "key_conv.h"
+#include "keys.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -503,7 +503,7 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
 }
 
 // Take a VECSXP of raw, internal keys and covert them to human-readable keys.
-SEXP rawkeys_to_chrkeys(SEXP r_keys) {
+SEXP rbedrock_keys_raw_to_hum(SEXP r_keys) {
     // Maximum chunk data key size is 45 = 1+11+1+11+1+10+1+3+1+4+1
     // Maximum other key size is 3*len.
     char buffer[2048];
@@ -586,7 +586,7 @@ size_t chrkey_to_rawkey(const char *key, size_t key_len, unsigned char *buffer, 
     return percent_decode(key, key_len, buffer, buffer_len);    
 }
 
-SEXP chrkeys_to_rawkeys(SEXP r_keys) {
+SEXP rbedrock_keys_hum_to_raw(SEXP r_keys) {
     unsigned char buffer[2048];
     const int buffer_len = 2048;    
 

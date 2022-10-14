@@ -56,7 +56,6 @@ Minecraft saved games.
 }
 \examples{
 \dontrun{
-
 create_world(LevelName = "My World", RandomSeed = 10)
 }
 }
