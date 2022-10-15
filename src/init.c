@@ -105,7 +105,7 @@ static const R_CallMethodDef call_methods[] = {
     {"rbedrock_db_version", (DL_FUNC)&rbedrock_db_version, 0},
 
     // For debugging:
-    {"rbedrock_db_tag", (DL_FUNC)&rbedrock_db_tag, 1},
+    {"rbedrock_db_prot", (DL_FUNC)&rbedrock_db_prot, 1},
 
     // For testing:
     {"rbedrock_db_test_cleanup", (DL_FUNC)&rbedrock_db_test_cleanup,

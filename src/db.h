@@ -98,7 +98,7 @@ SEXP rbedrock_db_keys_len(SEXP r_db, SEXP r_starts_with,
                               SEXP r_readoptions);
 SEXP rbedrock_db_exists(SEXP r_db, SEXP r_key, SEXP r_readoptions);
 SEXP rbedrock_db_version();
-SEXP rbedrock_db_tag(SEXP r_db);
+SEXP rbedrock_db_prot(SEXP r_db);
 
 void rbedrock_init_db();
 void rbedrock_cleanup_db();

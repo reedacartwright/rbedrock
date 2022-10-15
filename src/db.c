@@ -33,27 +33,10 @@
 #include "keys.h"
 #include "support.h"
 
-typedef struct bedrockdb_handle {
-    leveldb_t *handle;
-    leveldb_cache_t *cache;
-    leveldb_filterpolicy_t *filter_policy;
-    leveldb_compressor_t *compressors[2];
-
-    SEXP r_ext_ptr;
-} bedrockdb_handle_t;
-
-#define MAX_BEDROCKDB 1024
-static unsigned int num_bedrockdb = 0; /* number of dbs opened in session */
-static bedrockdb_handle_t opened_handles[MAX_BEDROCKDB]; /* currently opened channels */
-
 leveldb_readoptions_t *default_readoptions;
 leveldb_writeoptions_t *default_writeoptions;
 
 // Internals:
-leveldb_t *rbedrock_db_get_db(SEXP r_db, bool closed_error);
-leveldb_iterator_t *rbedrock_db_get_iterator(SEXP r_it, bool closed_error);
-leveldb_snapshot_t *rbedrock_db_get_snapshot(SEXP r_snapshot,
-                                                 bool closed_error);
 leveldb_writebatch_t *rbedrock_db_get_writebatch(SEXP r_writebatch,
                                                      bool closed_error);
 leveldb_readoptions_t *rbedrock_db_get_readoptions(SEXP r_readoptions,
@@ -63,18 +46,17 @@ leveldb_writeoptions_t *rbedrock_db_get_writeoptions(SEXP r_writeoptions,
 bool check_iterator(leveldb_iterator_t *it, SEXP r_error_if_invalid);
 
 // Finalizers
-static void rbedrock_db_finalize(SEXP r_db);
-static void rbedrock_db_iter_finalize(SEXP r_it);
-static void rbedrock_db_snapshot_finalize(SEXP r_snapshot);
+static void finalize_handle(SEXP r_ptr);
+static void finalize_snapshot(SEXP r_ptr);
+static void finalize_iterator(SEXP r_ptr);
+
 static void rbedrock_db_writebatch_finalize(SEXP r_writebatch);
 static void rbedrock_db_readoptions_finalize(SEXP r_readoptions);
 static void rbedrock_db_writeoptions_finalize(SEXP r_writeoptions);
-static void rbedrock_db_cache_finalize(SEXP r_cache);
-static void rbedrock_db_filterpolicy_finalize(SEXP r_filterpolicy);
-static void rbedrock_db_compressor_finalize(SEXP r_compressor);
 
 // Other internals
-void rbedrock_db_handle_error(char *err);
+static void handle_leveldb_error(char *err);
+
 leveldb_options_t *rbedrock_db_collect_options(
     SEXP r_create_if_missing, SEXP r_error_if_exists, SEXP r_paranoid_checks,
     SEXP r_write_buffer_size, SEXP r_max_open_files, SEXP r_block_size);
@@ -90,16 +72,6 @@ void rbedrock_db_get_exists(leveldb_t *db, size_t num_key,
                                 const char **key_data, size_t *key_len,
                                 leveldb_readoptions_t *readoptions, int *found);
 
-enum rbedrock_db_tag_index {
-    TAG_PATH,
-    TAG_CACHE,
-    TAG_FILTERPOLICY,
-    TAG_ITERATORS,
-    TAG_COMPRESSOR0,
-    TAG_COMPRESSOR1,
-    TAG_LENGTH  // don't store anything here!
-};
-
 // For package management:
 void rbedrock_init_db() {
     default_readoptions = leveldb_readoptions_create();
@@ -111,11 +83,129 @@ void rbedrock_cleanup_db() {
     leveldb_writeoptions_destroy(default_writeoptions);  // #nocov
 }
 
-static int rbedrock_db_close_handle(bedrockdb_handle_t *handle) {
+/**** HANDLE FUNCTIONS ****/
 
+typedef struct bedrockdb_handle {
+    leveldb_t *db;                          /* leveldb handle */
+    leveldb_cache_t *cache;                 /* leveldb cache */
+    leveldb_filterpolicy_t *filter_policy;  /* leveldb filters */
+    leveldb_compressor_t *compressors[2];   /* leveldb compressors */
+    int slot;       /* location of this handle in the session history */
+    SEXP r_ext_ptr; /* address of external pointer for this handle */
+} bedrockdb_handle_t;
+
+#define MAX_HANDLES 1024
+static unsigned int num_bedrockdb = 0; /* number of dbs opened in session */
+static bedrockdb_handle_t * opened_handles[MAX_HANDLES]; /* currently opened channels */
+
+enum rbedrock_db_prot_index {
+    PROT_PATH,
+    PROT_ITERATORS,
+    PROT_SNAPSHOTS,
+    PROT_LENGTH  // don't store anything here!
+};
+
+static void * get_external_address(SEXP r_ptr, bool error_on_clear, const char * custom_msg) {
+    if(TYPEOF(r_ptr) != EXTPTRSXP) {
+        Rf_error("Invalid object: object is not an external pointer.");
+    }
+    void *ptr = R_ExternalPtrAddr(r_ptr);
+    if(!ptr && error_on_clear) {
+        if(custom_msg == NULL) {
+            Rf_error("Cannot access object: external pointer is cleared.");
+        } else {
+            Rf_error(custom_msg);
+        }
+    }
+    return ptr;
 }
 
-// Implementations:
+static SEXP get_protected(SEXP r_db) {
+    if(TYPEOF(r_db) != EXTPTRSXP) {
+        Rf_error("Invalid object: object is not an external pointer.");
+    }
+    return R_ExternalPtrProtected(r_db);
+}
+
+static bedrockdb_handle_t * get_handle_ptr(SEXP r_db, bool error_on_closed) {
+    return get_external_address(r_db, error_on_closed,
+        "Can't connect to db: leveldb handle is not open.");
+}
+
+static leveldb_t *get_db_ptr(SEXP r_db) {
+    bedrockdb_handle_t *handle = get_handle_ptr(r_db, true);
+    return handle->db;
+}
+
+static int close_handle_impl(bedrockdb_handle_t *handle) {
+    if(!handle) {
+        return 0;
+    }
+    /* Remove this handle from the list of open handles */
+    if(handle->slot < MAX_HANDLES) {
+        opened_handles[handle->slot] = NULL;
+    }
+
+    /* Destroy all iterators and snapshots. */
+    SEXP prot = get_protected(handle->r_ext_ptr);
+    SEXP r_iterators = VECTOR_ELT(prot, PROT_ITERATORS);
+    while(!Rf_isNull(r_iterators)) {
+        rbedrock_db_iter_destroy(CAR(r_iterators),
+                                     ScalarLogical(false));
+        r_iterators = CDR(r_iterators);
+    }
+
+    SEXP r_snapshots = VECTOR_ELT(prot, PROT_SNAPSHOTS);
+    while(!Rf_isNull(r_snapshots)) {
+        const leveldb_snapshot_t *snapshot =
+            get_external_address(CAR(r_snapshots), false, NULL);
+        if(handle->db) {
+            leveldb_release_snapshot(handle->db, snapshot);
+        }
+        R_ClearExternalPtr(CAR(r_snapshots));
+        r_snapshots = CDR(r_snapshots);
+    }
+
+    /* Close Db and Clean Up */
+    if(handle->db) {
+        leveldb_close(handle->db);
+        handle->db = NULL;
+    }
+    if(handle->cache) {
+        leveldb_cache_destroy(handle->cache);
+        handle->cache = NULL;
+    }
+    if(handle->filter_policy) {
+        leveldb_filterpolicy_destroy(handle->filter_policy);
+        handle->filter_policy = NULL;
+    }
+    if(handle->compressors[0]) {
+        leveldb_compressor_destroy(handle->compressors[0]);
+        handle->compressors[0] = NULL;
+    }
+    if(handle->compressors[1]) {
+        leveldb_compressor_destroy(handle->compressors[1]);
+        handle->compressors[1] = NULL;
+    }
+    R_ClearExternalPtr(handle->r_ext_ptr);
+    R_Free(handle);
+
+    return 1;
+}
+
+static void finalize_handle(SEXP r_ptr) {
+    bedrockdb_handle_t *handle = R_ExternalPtrAddr(r_ptr);
+    if(!handle) {
+        return;
+    }
+    Rf_warning("closing unused bedrockdb handle in slot %d\n", handle->slot);
+
+    close_handle_impl(handle);
+    R_ClearExternalPtr(r_ptr); /* not really needed */
+}
+
+/**** IMPLEMENTATIONS ****/
+
 SEXP rbedrock_db_open(SEXP r_path, SEXP r_create_if_missing,
                           SEXP r_error_if_exists, SEXP r_paranoid_checks,
                           SEXP r_write_buffer_size, SEXP r_max_open_files,
@@ -123,99 +213,81 @@ SEXP rbedrock_db_open(SEXP r_path, SEXP r_create_if_missing,
                           SEXP r_cache_capacity,
                           SEXP r_bloom_filter_bits_per_key,
                           SEXP r_compression_level) {
-    // Unimplemented options:
-    // * a general set_filter_policy
-    // * set_env
-    // * set_info_log
-    // * set_comparator
-    // * restart_interval
-    //
-    // There is some gymnastics here to avoid leaking in the case of an
-    // R error (perhaps thrown by the coersion functions).
-    SEXP r_cache_ptr = R_NilValue;
-    SEXP r_filterpolicy_ptr = R_NilValue;
-    SEXP r_compressor_0 = R_NilValue;
-    SEXP r_compressor_1 = R_NilValue;
-    leveldb_cache_t *cache = NULL;
-    leveldb_filterpolicy_t *filterpolicy = NULL;
-    leveldb_compressor_t *compressor_0 = NULL;
-    leveldb_compressor_t *compressor_1 = NULL;
 
-    bool has_cache = !Rf_isNull(r_cache_capacity);
-    bool has_filterpolicy = !Rf_isNull(r_bloom_filter_bits_per_key);
-    if(has_cache) {
-        cache = leveldb_cache_create_lru(scalar_size(r_cache_capacity));
-        r_cache_ptr = PROTECT(R_MakeExternalPtr(cache, R_NilValue, R_NilValue));
-        R_RegisterCFinalizer(r_cache_ptr, rbedrock_db_cache_finalize);
+    int compression_level = -1;
+    bedrockdb_handle_t * handle;
+
+    // Allocate metadata 
+    SEXP r_prot = PROTECT(allocVector(VECSXP, PROT_LENGTH));
+    SET_VECTOR_ELT(r_prot, PROT_PATH, r_path);
+    SET_VECTOR_ELT(r_prot, PROT_ITERATORS, R_NilValue);  // will be a pairlist
+    SET_VECTOR_ELT(r_prot, PROT_SNAPSHOTS, R_NilValue);  // will be a pairlist
+
+    // Allocate and register handle
+    handle = Calloc(1, bedrockdb_handle_t);
+    handle->slot = num_bedrockdb;
+    if(handle->slot < MAX_HANDLES) {
+        opened_handles[handle->slot] = handle;
     }
-    if(has_filterpolicy) {
+    SEXP r_db = PROTECT(R_MakeExternalPtr(handle, Rf_install("rbedrock_bedrockdb_handle"), r_prot));
+    handle->r_ext_ptr = r_db;
+    R_RegisterCFinalizerEx(r_db, finalize_handle, true);
+
+    // Setup Options
+    if(!Rf_isNull(r_cache_capacity)) {
+        handle->cache = leveldb_cache_create_lru(scalar_size(r_cache_capacity));
+    }
+    if(!Rf_isNull(r_bloom_filter_bits_per_key)) {
         size_t bits_per_key = scalar_size(r_bloom_filter_bits_per_key);
-        filterpolicy = leveldb_filterpolicy_create_bloom((int)bits_per_key);
-        r_filterpolicy_ptr =
-            PROTECT(R_MakeExternalPtr(filterpolicy, R_NilValue, R_NilValue));
-        R_RegisterCFinalizer(r_filterpolicy_ptr,
-                             rbedrock_db_filterpolicy_finalize);
+        handle->filter_policy = leveldb_filterpolicy_create_bloom((int)bits_per_key);
     }
+    if(!Rf_isNull(r_compression_level)) {
+        compression_level = scalar_int(r_compression_level);
+    }    
+    handle->compressors[0] = leveldb_compressor_create(leveldb_zlib_raw_compression, compression_level);
+    handle->compressors[1] = leveldb_compressor_create(leveldb_zlib_compression, compression_level);
+
     const char *path = scalar_character(r_path);
+
     leveldb_options_t *options = rbedrock_db_collect_options(
         r_create_if_missing, r_error_if_exists, r_paranoid_checks,
         r_write_buffer_size, r_max_open_files, r_block_size);
-    if(has_cache) {
-        leveldb_options_set_cache(options, cache);
+    if(handle->cache) {
+        leveldb_options_set_cache(options, handle->cache);
     }
-    if(has_filterpolicy) {
-        leveldb_options_set_filter_policy(options, filterpolicy);
+    if(handle->filter_policy) {
+        leveldb_options_set_filter_policy(options, handle->filter_policy);
     }
 
-    int compression_level = -1;
-    if(!Rf_isNull(r_compression_level)) {
-        compression_level = scalar_int(r_compression_level);
-    }
-    compressor_0 = leveldb_compressor_create(leveldb_zlib_raw_compression, compression_level);
-    r_compressor_0 = PROTECT(R_MakeExternalPtr(compressor_0, R_NilValue, R_NilValue));
-    R_RegisterCFinalizer(r_compressor_0, rbedrock_db_compressor_finalize);
-    compressor_1 = leveldb_compressor_create(leveldb_zlib_compression, compression_level);
-    r_compressor_1 = PROTECT(R_MakeExternalPtr(compressor_1, R_NilValue, R_NilValue));
-    R_RegisterCFinalizer(r_compressor_1, rbedrock_db_compressor_finalize);
+    leveldb_options_set_compressor(options, 0, handle->compressors[0]);
+    leveldb_options_set_compressor(options, 1, handle->compressors[1]);
 
-    leveldb_options_set_compressor(options, 0, compressor_0);
-    leveldb_options_set_compressor(options, 1, compressor_1);
-
+    // Open the database
     char *err = NULL;
-    leveldb_t *db = leveldb_open(options, path, &err);
+    handle->db = leveldb_open(options, path, &err);
     leveldb_options_destroy(options);
-    rbedrock_db_handle_error(err);
 
-    SEXP tag = PROTECT(allocVector(VECSXP, TAG_LENGTH));
-    SET_VECTOR_ELT(tag, TAG_PATH, r_path);
-    SET_VECTOR_ELT(tag, TAG_CACHE, r_cache_ptr);
-    SET_VECTOR_ELT(tag, TAG_FILTERPOLICY, r_filterpolicy_ptr);
-    SET_VECTOR_ELT(tag, TAG_ITERATORS, R_NilValue);  // will be a pairlist
-    SET_VECTOR_ELT(tag, TAG_COMPRESSOR0, r_compressor_0);
-    SET_VECTOR_ELT(tag, TAG_COMPRESSOR1, r_compressor_1);
-
-    SEXP r_db = PROTECT(R_MakeExternalPtr(db, tag, R_NilValue));
-    R_RegisterCFinalizer(r_db, rbedrock_db_finalize);
-    UNPROTECT(4 + has_cache + has_filterpolicy);
+    // Propagate message and clean up.
+    if(err) {
+        close_handle_impl(handle);
+        R_ClearExternalPtr(r_db);
+        handle_leveldb_error(err);
+    }
+    // Bump the opened DB number beca
+    ++num_bedrockdb;
+    UNPROTECT(2);
     return r_db;
 }
 
-// TODO: this needs to happen during finalize too!
 SEXP rbedrock_db_close(SEXP r_db, SEXP r_error_if_closed) {
-    leveldb_t *db =
-        rbedrock_db_get_db(r_db, scalar_logical(r_error_if_closed));
-    if(db != NULL) {
-        SEXP tag = rbedrock_db_tag(r_db);
-        SEXP r_iterators = VECTOR_ELT(tag, TAG_ITERATORS);
-        while(!Rf_isNull(r_iterators)) {
-            rbedrock_db_iter_destroy(CAR(r_iterators),
-                                         ScalarLogical(false));
-            r_iterators = CDR(r_iterators);
-        }
-        leveldb_close(db);
-        R_ClearExternalPtr(r_db);
-    }
-    return ScalarLogical(db != NULL);
+    bedrockdb_handle_t *handle = get_handle_ptr(r_db,
+        scalar_logical(r_error_if_closed));
+    int status = close_handle_impl(handle);
+    return ScalarLogical(status != 0);
+}
+
+SEXP rbedrock_db_is_open(SEXP r_db) {
+    return ScalarLogical(get_handle_ptr(r_db, false) != NULL);
 }
 
 SEXP rbedrock_db_destroy(SEXP r_path) {
@@ -224,12 +296,8 @@ SEXP rbedrock_db_destroy(SEXP r_path) {
     char *err = NULL;
     leveldb_destroy_db(options, path, &err);
     leveldb_options_destroy(options);
-    rbedrock_db_handle_error(err);
+    handle_leveldb_error(err);
     return ScalarLogical(true);
-}
-
-SEXP rbedrock_db_is_open(SEXP r_db) {
-    return ScalarLogical(rbedrock_db_get_db(r_db, false) != NULL);
 }
 
 SEXP rbedrock_db_repair(SEXP r_path) {
@@ -238,12 +306,12 @@ SEXP rbedrock_db_repair(SEXP r_path) {
     char *err = NULL;
     leveldb_repair_db(options, path, &err);
     leveldb_options_destroy(options);
-    rbedrock_db_handle_error(err);
+    handle_leveldb_error(err);
     return ScalarLogical(true);
 }
 
 SEXP rbedrock_db_property(SEXP r_db, SEXP r_name, SEXP r_error_if_missing) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     const char *name = scalar_character(r_name);
     bool error_if_missing = scalar_logical(r_error_if_missing);
     char *value = leveldb_property_value(db, name);
@@ -260,7 +328,7 @@ SEXP rbedrock_db_property(SEXP r_db, SEXP r_name, SEXP r_error_if_missing) {
 }
 
 SEXP rbedrock_db_get(SEXP r_db, SEXP r_key, SEXP r_readoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     const char *key_data = NULL;
     size_t key_len = get_key(r_key, &key_data);
 
@@ -271,7 +339,7 @@ SEXP rbedrock_db_get(SEXP r_db, SEXP r_key, SEXP r_readoptions) {
     size_t read_len;
     char *read =
         leveldb_get(db, readoptions, key_data, key_len, &read_len, &err);
-    rbedrock_db_handle_error(err);
+    handle_leveldb_error(err);
 
     SEXP ret;
     if(read != NULL) {
@@ -285,7 +353,7 @@ SEXP rbedrock_db_get(SEXP r_db, SEXP r_key, SEXP r_readoptions) {
 }
 
 SEXP rbedrock_db_mget(SEXP r_db, SEXP r_keys, SEXP r_readoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     leveldb_readoptions_t *readoptions =
         rbedrock_db_get_readoptions(r_readoptions, true);
 
@@ -300,7 +368,7 @@ SEXP rbedrock_db_mget(SEXP r_db, SEXP r_keys, SEXP r_readoptions) {
         size_t read_len;
         char *read = leveldb_get(db, readoptions, key_data[i], key_len[i],
                                  &read_len, &err);
-        rbedrock_db_handle_error(err);
+        handle_leveldb_error(err);
         if(read != NULL) {
             SEXP el = PROTECT(raw_string_to_sexp(read, read_len));
             SET_VECTOR_ELT(ret, i, el);
@@ -317,7 +385,7 @@ SEXP rbedrock_db_mget(SEXP r_db, SEXP r_keys, SEXP r_readoptions) {
 
 SEXP rbedrock_db_mget_prefix(SEXP r_db, SEXP r_starts_with,
                           SEXP r_readoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     leveldb_readoptions_t *readoptions =
         rbedrock_db_get_readoptions(r_readoptions, true);
     const char *starts_with = NULL;
@@ -356,7 +424,7 @@ SEXP rbedrock_db_mget_prefix(SEXP r_db, SEXP r_starts_with,
 
 SEXP rbedrock_db_put(SEXP r_db, SEXP r_key, SEXP r_value,
                          SEXP r_writeoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     leveldb_writeoptions_t *writeoptions =
         rbedrock_db_get_writeoptions(r_writeoptions, true);
     const char *key_data = NULL, *value_data = NULL;
@@ -366,7 +434,7 @@ SEXP rbedrock_db_put(SEXP r_db, SEXP r_key, SEXP r_value,
     char *err = NULL;
     leveldb_put(db, writeoptions, key_data, key_len, value_data, value_len,
                 &err);
-    rbedrock_db_handle_error(err);
+    handle_leveldb_error(err);
 
     return R_NilValue;
 }
@@ -400,7 +468,7 @@ SEXP rbedrock_db_delete(SEXP r_db, SEXP r_key, SEXP r_report,
 // report back anything about what was done (these keys may or may not
 // exist).
 SEXP rbedrock_db_delete_silent(SEXP r_db, SEXP r_key, SEXP r_writeoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     const char **key_data = NULL;
     size_t *key_len = NULL;
     size_t num_key = get_keys(r_key, &key_data, &key_len);
@@ -410,7 +478,7 @@ SEXP rbedrock_db_delete_silent(SEXP r_db, SEXP r_key, SEXP r_writeoptions) {
     for(size_t i = 0; i < num_key; ++i) {
         char *err = NULL;
         leveldb_delete(db, writeoptions, key_data[i], key_len[i], &err);
-        rbedrock_db_handle_error(err);
+        handle_leveldb_error(err);
     }
 
     return R_NilValue;
@@ -421,7 +489,7 @@ SEXP rbedrock_db_delete_silent(SEXP r_db, SEXP r_key, SEXP r_writeoptions) {
 // first place.  Then we go through and do the deletion.
 SEXP rbedrock_db_delete_report(SEXP r_db, SEXP r_key, SEXP r_readoptions,
                                    SEXP r_writeoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     const char **key_data = NULL;
     size_t *key_len = NULL;
     size_t num_key = get_keys(r_key, &key_data, &key_len);
@@ -458,7 +526,7 @@ SEXP rbedrock_db_delete_report(SEXP r_db, SEXP r_key, SEXP r_readoptions,
         // the if/else) because that way we don't leak the writebatch
         // object on error.
         leveldb_writebatch_destroy(writebatch);
-        rbedrock_db_handle_error(err);
+        handle_leveldb_error(err);
     } else {
         leveldb_writebatch_destroy(writebatch);
     }
@@ -467,54 +535,68 @@ SEXP rbedrock_db_delete_report(SEXP r_db, SEXP r_key, SEXP r_readoptions,
     return r_found;
 }
 
-// Iterators
+/**** ITERATORS ****/
+
+static void finalize_iterator(SEXP r_ptr) {
+    leveldb_iterator_t *it = get_external_address(r_ptr, false, NULL);
+    if(it != NULL) {
+        leveldb_iter_destroy(it);
+    }
+    R_ClearExternalPtr(r_ptr);
+}
+
+static leveldb_iterator_t * get_iterator(SEXP r_ptr) {
+    return get_external_address(r_ptr, true, NULL);
+}
+
 SEXP rbedrock_db_iter_create(SEXP r_db, SEXP r_readoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     leveldb_readoptions_t *readoptions =
         rbedrock_db_get_readoptions(r_readoptions, true);
     leveldb_iterator_t *it = leveldb_create_iterator(db, readoptions);
 
-    SEXP r_it = PROTECT(R_MakeExternalPtr(it, r_db, R_NilValue));
-    R_RegisterCFinalizer(r_it, rbedrock_db_iter_finalize);
+    SEXP r_prot = get_protected(r_db);
 
-    SEXP db_tag = rbedrock_db_tag(r_db);
-    SEXP r_iterators = VECTOR_ELT(db_tag, TAG_ITERATORS);
-    SET_VECTOR_ELT(db_tag, TAG_ITERATORS, CONS(r_it, r_iterators));
+    SEXP r_it = PROTECT(R_MakeExternalPtr(it, Rf_install("rbedrock_bedrockdb_iterator"), r_db));
+    R_RegisterCFinalizerEx(r_it, finalize_iterator, false);
+
+    SEXP r_iterators = VECTOR_ELT(r_prot, PROT_ITERATORS);
+    SET_VECTOR_ELT(r_prot, PROT_ITERATORS, CONS(r_it, r_iterators));
 
     UNPROTECT(1);
     return r_it;
 }
 
-SEXP rbedrock_db_iter_destroy(SEXP r_it, SEXP r_error_if_destroyed) {
-    bool error_if_destroyed = scalar_logical(r_error_if_destroyed);
-    leveldb_iterator_t *it =
-        rbedrock_db_get_iterator(r_it, error_if_destroyed);
+SEXP rbedrock_db_iter_destroy(SEXP r_ptr, SEXP r_error_on_clear) {
+    bool raise_error = scalar_logical(r_error_on_clear);
+
+    leveldb_iterator_t *it = get_external_address(r_ptr, raise_error, NULL);
     if(it != NULL) {
         leveldb_iter_destroy(it);
-        R_ClearExternalPtr(r_it);
     }
-    return ScalarLogical(it != NULL);
+    R_ClearExternalPtr(r_ptr);
+    return Rf_ScalarLogical(it != NULL);
 }
 
 SEXP rbedrock_db_iter_valid(SEXP r_it) {
-    leveldb_iterator_t *it = rbedrock_db_get_iterator(r_it, true);
+    leveldb_iterator_t *it = get_iterator(r_it);
     return ScalarLogical(leveldb_iter_valid(it));
 }
 
 SEXP rbedrock_db_iter_seek_to_first(SEXP r_it) {
-    leveldb_iterator_t *it = rbedrock_db_get_iterator(r_it, true);
+    leveldb_iterator_t *it = get_iterator(r_it);
     leveldb_iter_seek_to_first(it);
     return R_NilValue;
 }
 
 SEXP rbedrock_db_iter_seek_to_last(SEXP r_it) {
-    leveldb_iterator_t *it = rbedrock_db_get_iterator(r_it, true);
+    leveldb_iterator_t *it = get_iterator(r_it);
     leveldb_iter_seek_to_last(it);
     return R_NilValue;
 }
 
 SEXP rbedrock_db_iter_seek(SEXP r_it, SEXP r_key) {
-    leveldb_iterator_t *it = rbedrock_db_get_iterator(r_it, true);
+    leveldb_iterator_t *it = get_iterator(r_it);
     const char *key_data = NULL;
     size_t key_len = get_key(r_key, &key_data);
     leveldb_iter_seek(it, key_data, key_len);
@@ -522,7 +604,7 @@ SEXP rbedrock_db_iter_seek(SEXP r_it, SEXP r_key) {
 }
 
 SEXP rbedrock_db_iter_next(SEXP r_it, SEXP r_error_if_invalid) {
-    leveldb_iterator_t *it = rbedrock_db_get_iterator(r_it, true);
+    leveldb_iterator_t *it = get_iterator(r_it);
     if(check_iterator(it, r_error_if_invalid)) {
         leveldb_iter_next(it);
     }
@@ -530,7 +612,7 @@ SEXP rbedrock_db_iter_next(SEXP r_it, SEXP r_error_if_invalid) {
 }
 
 SEXP rbedrock_db_iter_prev(SEXP r_it, SEXP r_error_if_invalid) {
-    leveldb_iterator_t *it = rbedrock_db_get_iterator(r_it, true);
+    leveldb_iterator_t *it = get_iterator(r_it);
     if(check_iterator(it, r_error_if_invalid)) {
         leveldb_iter_prev(it);
     }
@@ -539,7 +621,7 @@ SEXP rbedrock_db_iter_prev(SEXP r_it, SEXP r_error_if_invalid) {
 
 SEXP rbedrock_db_iter_key(SEXP r_it,
                               SEXP r_error_if_invalid) {
-    leveldb_iterator_t *it = rbedrock_db_get_iterator(r_it, true);
+    leveldb_iterator_t *it = get_iterator(r_it);
     size_t len;
     if(!check_iterator(it, r_error_if_invalid)) {
         return R_NilValue;
@@ -550,7 +632,7 @@ SEXP rbedrock_db_iter_key(SEXP r_it,
 
 SEXP rbedrock_db_iter_value(SEXP r_it,
                                 SEXP r_error_if_invalid) {
-    leveldb_iterator_t *it = rbedrock_db_get_iterator(r_it, true);
+    leveldb_iterator_t *it = get_iterator(r_it);
     if(!check_iterator(it, r_error_if_invalid)) {
         return R_NilValue;
     }
@@ -559,16 +641,39 @@ SEXP rbedrock_db_iter_value(SEXP r_it,
     return raw_string_to_sexp(data, len);
 }
 
-// Snapshots
+/**** SNAPSHOT SUPPORT ****/
+
+static const leveldb_snapshot_t *get_snapshot(SEXP r_ptr) {
+    return get_external_address(r_ptr, true, NULL);
+}
+
+static void finalize_snapshot(SEXP r_ptr) {
+    const leveldb_snapshot_t *snapshot = get_external_address(r_ptr, false, NULL);
+
+    if(snapshot != NULL) {
+        SEXP r_prot = get_protected(r_ptr);
+        leveldb_t *db = get_external_address(r_prot, false, NULL);
+        if(db) {
+            leveldb_release_snapshot(db, snapshot);
+        }
+        R_ClearExternalPtr(r_ptr);
+    }
+}
+
 SEXP rbedrock_db_snapshot_create(SEXP r_db) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     const leveldb_snapshot_t *snapshot = leveldb_create_snapshot(db);
-    SEXP r_snapshot =
-        PROTECT(R_MakeExternalPtr((void *)snapshot, r_db, R_NilValue));
-    R_RegisterCFinalizer(r_snapshot, rbedrock_db_snapshot_finalize);
+    SEXP r_snapshot = PROTECT(R_MakeExternalPtr((void*)snapshot, Rf_install("rbedrock_bedrockdb_snapshot"), r_db));
+    R_RegisterCFinalizerEx(r_snapshot, finalize_snapshot, false);
+
+    SEXP r_prot = get_protected(r_db);
+    SEXP r_snaps = VECTOR_ELT(r_prot, PROT_SNAPSHOTS);
+    SET_VECTOR_ELT(r_prot, PROT_SNAPSHOTS, CONS(r_snapshot, r_snaps));
+
     UNPROTECT(1);
     return r_snapshot;
 }
+
 
 // Batch
 SEXP rbedrock_db_writebatch_create() {
@@ -664,20 +769,20 @@ SEXP rbedrock_db_writebatch_mdelete(SEXP r_writebatch, SEXP r_keys) {
 
 // NOTE: arguments 2 & 3 transposed with respect to leveldb API
 SEXP rbedrock_db_write(SEXP r_db, SEXP r_writebatch, SEXP r_writeoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     leveldb_writeoptions_t *writeoptions =
         rbedrock_db_get_writeoptions(r_writeoptions, true);
     leveldb_writebatch_t *writebatch =
         rbedrock_db_get_writebatch(r_writebatch, true);
     char *err = NULL;
     leveldb_write(db, writeoptions, writebatch, &err);
-    rbedrock_db_handle_error(err);
+    handle_leveldb_error(err);
     return R_NilValue;
 }
 
 SEXP rbedrock_db_approximate_sizes(SEXP r_db, SEXP r_start_key,
                                        SEXP r_limit_key) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
 
     const char **start_key = NULL, **limit_key = NULL;
     size_t *start_key_len = NULL, *limit_key_len = NULL;
@@ -701,7 +806,7 @@ SEXP rbedrock_db_approximate_sizes(SEXP r_db, SEXP r_start_key,
 
 SEXP rbedrock_db_compact_range(SEXP r_db, SEXP r_start_key,
                                    SEXP r_limit_key) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     const char *start_key = NULL, *limit_key = NULL;
     size_t start_key_len = get_key_maybe_nil(r_start_key, &start_key),
            limit_key_len = get_key_maybe_nil(r_limit_key, &limit_key);
@@ -730,7 +835,7 @@ SEXP rbedrock_db_readoptions(SEXP r_verify_checksums, SEXP r_fill_cache,
     }
     if(!Rf_isNull(r_snapshot)) {
         leveldb_readoptions_set_snapshot(
-            options, rbedrock_db_get_snapshot(r_snapshot, true));
+            options, get_snapshot(r_snapshot));
     }
 
     UNPROTECT(2);
@@ -753,7 +858,7 @@ SEXP rbedrock_db_writeoptions(SEXP r_sync) {
 // Built on top of the leveldb api.
 SEXP rbedrock_db_keys(SEXP r_db, SEXP r_starts_with,
                           SEXP r_readoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     leveldb_readoptions_t *readoptions =
         rbedrock_db_get_readoptions(r_readoptions, true);
     const char *starts_with = NULL;
@@ -787,7 +892,7 @@ SEXP rbedrock_db_keys(SEXP r_db, SEXP r_starts_with,
 
 SEXP rbedrock_db_keys_len(SEXP r_db, SEXP r_starts_with,
                               SEXP r_readoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     leveldb_readoptions_t *readoptions =
         rbedrock_db_get_readoptions(r_readoptions, true);
     const char *starts_with = NULL;
@@ -797,7 +902,7 @@ SEXP rbedrock_db_keys_len(SEXP r_db, SEXP r_starts_with,
 }
 
 SEXP rbedrock_db_exists(SEXP r_db, SEXP r_key, SEXP r_readoptions) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, true);
+    leveldb_t *db = get_db_ptr(r_db);
     leveldb_readoptions_t *readoptions =
         rbedrock_db_get_readoptions(r_readoptions, true);
     const char **key_data = NULL;
@@ -817,39 +922,6 @@ SEXP rbedrock_db_version() {
     INTEGER(ret)[1] = leveldb_minor_version();
     UNPROTECT(1);
     return ret;
-}
-
-// For internal use:
-SEXP rbedrock_db_tag(SEXP r_db) { return R_ExternalPtrTag(r_db); }
-
-// Internal function definitions:
-void rbedrock_db_finalize(SEXP r_db) {
-    leveldb_t *db = rbedrock_db_get_db(r_db, false);
-    if(db != NULL) {
-        leveldb_close(db);
-        R_ClearExternalPtr(r_db);
-    }
-}
-
-void rbedrock_db_iter_finalize(SEXP r_it) {
-    leveldb_iterator_t *it = rbedrock_db_get_iterator(r_it, false);
-    if(it != NULL) {
-        leveldb_iter_destroy(it);
-        R_ClearExternalPtr(r_it);
-    }
-}
-
-void rbedrock_db_snapshot_finalize(SEXP r_snapshot) {
-    leveldb_snapshot_t *snapshot =
-        rbedrock_db_get_snapshot(r_snapshot, false);
-    if(snapshot != NULL) {
-        leveldb_t *db =
-            rbedrock_db_get_db(rbedrock_db_tag(r_snapshot), false);
-        if(db) {
-            leveldb_release_snapshot(db, snapshot);
-        }
-        R_ClearExternalPtr(r_snapshot);
-    }
 }
 
 void rbedrock_db_writebatch_finalize(SEXP r_writebatch) {
@@ -877,78 +949,6 @@ void rbedrock_db_writeoptions_finalize(SEXP r_writeoptions) {
         leveldb_writeoptions_destroy(writeoptions);
         R_ClearExternalPtr(r_writeoptions);
     }
-}
-
-void rbedrock_db_cache_finalize(SEXP r_cache) {
-    if(TYPEOF(r_cache) == EXTPTRSXP) {
-        leveldb_cache_t *cache = (leveldb_cache_t *)R_ExternalPtrAddr(r_cache);
-        if(cache) {
-            leveldb_cache_destroy(cache);
-            R_ClearExternalPtr(r_cache);
-        }
-    }
-}
-
-void rbedrock_db_filterpolicy_finalize(SEXP r_filterpolicy) {
-    if(TYPEOF(r_filterpolicy) == EXTPTRSXP) {
-        leveldb_filterpolicy_t *filterpolicy =
-            (leveldb_filterpolicy_t *)R_ExternalPtrAddr(r_filterpolicy);
-        if(filterpolicy) {
-            leveldb_filterpolicy_destroy(filterpolicy);
-            R_ClearExternalPtr(r_filterpolicy);
-        }
-    }
-}
-
-void rbedrock_db_compressor_finalize(SEXP r_compressor) {
-    if(TYPEOF(r_compressor) == EXTPTRSXP) {
-        leveldb_compressor_t *compressor =
-            (leveldb_compressor_t *)R_ExternalPtrAddr(r_compressor);
-        if(compressor) {
-            leveldb_compressor_destroy(compressor);
-            R_ClearExternalPtr(r_compressor);
-        }
-    }
-}
-
-
-leveldb_t *rbedrock_db_get_db(SEXP r_db, bool closed_error) {
-    void *db = NULL;
-    if(TYPEOF(r_db) != EXTPTRSXP) {
-        Rf_error("Expected an external pointer");
-    }
-    db = (leveldb_t *)R_ExternalPtrAddr(r_db);
-    if(!db && closed_error) {
-        Rf_error("leveldb handle is not open; can't connect");
-    }
-    return (leveldb_t *)db;
-}
-
-// TODO: distinguish here between an iterator and db handle by
-// checking the SEXP on the tag?
-leveldb_iterator_t *rbedrock_db_get_iterator(SEXP r_it, bool closed_error) {
-    void *it = NULL;
-    if(TYPEOF(r_it) != EXTPTRSXP) {
-        Rf_error("Expected an external pointer");
-    }
-    it = (leveldb_iterator_t *)R_ExternalPtrAddr(r_it);
-    if(!it && closed_error) {
-        Rf_error("leveldb iterator is not open; can't connect");
-    }
-    return (leveldb_iterator_t *)it;
-}
-
-leveldb_snapshot_t *rbedrock_db_get_snapshot(SEXP r_snapshot,
-                                                 bool closed_error) {
-    void *snapshot = NULL;
-    if(TYPEOF(r_snapshot) != EXTPTRSXP) {
-        Rf_error("Expected an external pointer");
-    }
-    snapshot = (leveldb_snapshot_t *)R_ExternalPtrAddr(r_snapshot);
-    if(!snapshot && closed_error) {
-        Rf_error("leveldb snapshot is not open; can't connect");
-    }
-    return (leveldb_snapshot_t *)snapshot;
 }
 
 leveldb_writebatch_t *rbedrock_db_get_writebatch(SEXP r_writebatch,
@@ -996,15 +996,6 @@ leveldb_writeoptions_t *rbedrock_db_get_writeoptions(SEXP r_writeoptions,
     return (leveldb_writeoptions_t *)writeoptions;
 }
 
-void rbedrock_db_handle_error(char *err) {
-    if(err != NULL) {
-        size_t len = strlen(err);
-        char *msg = (char *)R_alloc(len + 1, sizeof(char));
-        memcpy(msg, err, len + 1);
-        leveldb_free(err);
-        error(msg);
-    }
-}
 
 size_t rbedrock_db_get_keys_len(leveldb_t *db, const char *starts_with,
                                     size_t starts_with_len,
@@ -1108,4 +1099,22 @@ bool iter_key_starts_with(leveldb_iterator_t *it, const char *starts_with,
     const char *key_data = leveldb_iter_key(it, &key_len);
     return key_len >= starts_with_len &&
            memcmp(key_data, starts_with, starts_with_len) == 0;
+}
+
+// Debugging function
+SEXP rbedrock_db_prot(SEXP r_db) {
+    return get_protected(r_db);
+}
+
+// Propagate leveldb error
+static void handle_leveldb_error(char *err) {
+    if(err != NULL) {
+        // err has been allocated by leveldb. We need to copy it into
+        // an R-managed buffer before throwing the error.
+        size_t len = strlen(err);
+        char *msg = (char *)R_alloc(len + 1, sizeof(char));
+        memcpy(msg, err, len + 1);
+        leveldb_free(err);
+        Rf_error(msg);
+    }
 }
