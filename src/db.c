@@ -678,15 +678,15 @@ static const leveldb_snapshot_t *get_snapshot(SEXP r_ptr) {
 
 static void finalize_snapshot(SEXP r_ptr) {
     const leveldb_snapshot_t *snapshot = get_external_address(r_ptr, false, NULL);
-
-    if(snapshot != NULL) {
-        SEXP r_prot = get_protected(r_ptr);
-        leveldb_t *db = get_external_address(r_prot, false, NULL);
-        if(db) {
-            leveldb_release_snapshot(db, snapshot);
-        }
-        R_ClearExternalPtr(r_ptr);
+    if(snapshot == NULL) {
+        return;
     }
+    SEXP r_prot = get_protected(r_ptr);
+    leveldb_t *db = get_external_address(r_prot, false, NULL);
+    if(db) {
+        leveldb_release_snapshot(db, snapshot);
+    }
+    R_ClearExternalPtr(r_ptr);
 }
 
 SEXP rbedrock_db_snapshot_create(SEXP r_db) {
@@ -703,13 +703,25 @@ SEXP rbedrock_db_snapshot_create(SEXP r_db) {
     return r_snapshot;
 }
 
+/**** WRITEBATCH ****/
 
-// Batch
+static void finalize_writebatch(SEXP r_ptr) {
+    leveldb_writebatch_t *ptr = get_external_address(r_ptr, false, NULL);
+    if(ptr != NULL) {
+        leveldb_writebatch_destroy(ptr);
+    }
+    R_ClearExternalPtr(r_ptr);
+}
+
+static leveldb_writebatch_t * get_writebatch(SEXP r_ptr) {
+    return get_external_address(r_ptr, true, NULL);
+}
+
 SEXP rbedrock_db_writebatch_create() {
     leveldb_writebatch_t *writebatch = leveldb_writebatch_create();
-    SEXP r_writebatch =
-        PROTECT(R_MakeExternalPtr((void *)writebatch, R_NilValue, R_NilValue));
-    R_RegisterCFinalizer(r_writebatch, rbedrock_db_writebatch_finalize);
+    SEXP r_writebatch = PROTECT(R_MakeExternalPtr(writebatch,
+        Rf_install("rbedrock_bedrockdb_writebatch"), R_NilValue));
+    R_RegisterCFinalizer(r_writebatch, finalize_writebatch);
     UNPROTECT(1);
     return r_writebatch;
 }
@@ -717,26 +729,27 @@ SEXP rbedrock_db_writebatch_create() {
 SEXP rbedrock_db_writebatch_destroy(SEXP r_writebatch,
                                         SEXP r_error_if_destroyed) {
     bool error_if_destroyed = scalar_logical(r_error_if_destroyed);
-    leveldb_writebatch_t *writebatch =
-        rbedrock_db_get_writebatch(r_writebatch, error_if_destroyed);
+
+    leveldb_writebatch_t *writebatch = get_external_address(r_writebatch,
+        error_if_destroyed, NULL);
+
     if(writebatch != NULL) {
         leveldb_writebatch_destroy(writebatch);
-        R_ClearExternalPtr(r_writebatch);
     }
+    R_ClearExternalPtr(r_writebatch);
+
     return ScalarLogical(writebatch != NULL);
 }
 
 SEXP rbedrock_db_writebatch_clear(SEXP r_writebatch) {
-    leveldb_writebatch_t *writebatch =
-        rbedrock_db_get_writebatch(r_writebatch, true);
+    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
     leveldb_writebatch_clear(writebatch);
     return R_NilValue;
 }
 
 SEXP rbedrock_db_writebatch_put(SEXP r_writebatch, SEXP r_key,
                                     SEXP r_value) {
-    leveldb_writebatch_t *writebatch =
-        rbedrock_db_get_writebatch(r_writebatch, true);
+    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
     const char *key_data = NULL, *value_data = NULL;
     size_t key_len = get_key(r_key, &key_data),
            value_len = get_value(r_value, &value_data);
@@ -747,8 +760,8 @@ SEXP rbedrock_db_writebatch_put(SEXP r_writebatch, SEXP r_key,
 
 SEXP rbedrock_db_writebatch_mput(SEXP r_writebatch, SEXP r_key,
                                      SEXP r_value) {
-    leveldb_writebatch_t *writebatch =
-        rbedrock_db_get_writebatch(r_writebatch, true);
+
+    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
     const char **key_data = NULL;
     size_t *key_len = NULL;
     size_t num_key = get_keys(r_key, &key_data, &key_len);
@@ -774,8 +787,7 @@ SEXP rbedrock_db_writebatch_mput(SEXP r_writebatch, SEXP r_key,
 }
 
 SEXP rbedrock_db_writebatch_delete(SEXP r_writebatch, SEXP r_key) {
-    leveldb_writebatch_t *writebatch =
-        rbedrock_db_get_writebatch(r_writebatch, true);
+    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
     const char *key_data = NULL;
     size_t key_len = get_key(r_key, &key_data);
     leveldb_writebatch_delete(writebatch, key_data, key_len);
@@ -783,8 +795,7 @@ SEXP rbedrock_db_writebatch_delete(SEXP r_writebatch, SEXP r_key) {
 }
 
 SEXP rbedrock_db_writebatch_mdelete(SEXP r_writebatch, SEXP r_keys) {
-    leveldb_writebatch_t *writebatch =
-        rbedrock_db_get_writebatch(r_writebatch, true);
+    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
     const char **key_data = NULL;
     size_t *key_len = NULL;
     size_t num_key = get_keys(r_keys, &key_data, &key_len);
@@ -809,41 +820,6 @@ SEXP rbedrock_db_write(SEXP r_db, SEXP r_writebatch, SEXP r_writeoptions) {
     leveldb_writeoptions_destroy(writeoptions);
 
     handle_leveldb_error(err);
-    return R_NilValue;
-}
-
-SEXP rbedrock_db_approximate_sizes(SEXP r_db, SEXP r_start_key,
-                                       SEXP r_limit_key) {
-    leveldb_t *db = get_db_ptr(r_db);
-
-    const char **start_key = NULL, **limit_key = NULL;
-    size_t *start_key_len = NULL, *limit_key_len = NULL;
-    size_t num_start = get_keys(r_start_key, &start_key, &start_key_len),
-           num_limit = get_keys(r_limit_key, &limit_key, &limit_key_len);
-    if(num_start != num_limit) {
-        Rf_error("Expected 'limit_key' to be a length %d vector", num_start);
-    }
-
-    uint64_t *sizes = (uint64_t *)R_alloc(num_start, sizeof(uint64_t));
-    leveldb_approximate_sizes(db, (int)num_start, start_key, start_key_len,
-                              limit_key, limit_key_len, sizes);
-    SEXP ret = PROTECT(allocVector(INTSXP, num_start));
-    int *isizes = INTEGER(ret);
-    for(size_t i = 0; i < num_start; ++i) {
-        isizes[i] = (int)sizes[i];
-    }
-    UNPROTECT(1);
-    return ret;
-}
-
-SEXP rbedrock_db_compact_range(SEXP r_db, SEXP r_start_key,
-                                   SEXP r_limit_key) {
-    leveldb_t *db = get_db_ptr(r_db);
-    const char *start_key = NULL, *limit_key = NULL;
-    size_t start_key_len = get_key_maybe_nil(r_start_key, &start_key),
-           limit_key_len = get_key_maybe_nil(r_limit_key, &limit_key);
-    leveldb_compact_range(db, start_key, start_key_len, limit_key,
-                          limit_key_len);
     return R_NilValue;
 }
 
@@ -1161,4 +1137,41 @@ static void handle_leveldb_error(char *err) {
     memcpy(msg, err, len + 1);
     leveldb_free(err);
     Rf_error(msg);
+}
+
+/**** ADDITIONAL FUNCTIONS ****/
+
+SEXP rbedrock_db_approximate_sizes(SEXP r_db, SEXP r_start_key,
+                                       SEXP r_limit_key) {
+    leveldb_t *db = get_db_ptr(r_db);
+
+    const char **start_key = NULL, **limit_key = NULL;
+    size_t *start_key_len = NULL, *limit_key_len = NULL;
+    size_t num_start = get_keys(r_start_key, &start_key, &start_key_len),
+           num_limit = get_keys(r_limit_key, &limit_key, &limit_key_len);
+    if(num_start != num_limit) {
+        Rf_error("Expected 'limit_key' to be a length %d vector", num_start);
+    }
+
+    uint64_t *sizes = (uint64_t *)R_alloc(num_start, sizeof(uint64_t));
+    leveldb_approximate_sizes(db, (int)num_start, start_key, start_key_len,
+                              limit_key, limit_key_len, sizes);
+    SEXP ret = PROTECT(allocVector(INTSXP, num_start));
+    int *isizes = INTEGER(ret);
+    for(size_t i = 0; i < num_start; ++i) {
+        isizes[i] = (int)sizes[i];
+    }
+    UNPROTECT(1);
+    return ret;
+}
+
+SEXP rbedrock_db_compact_range(SEXP r_db, SEXP r_start_key,
+                                   SEXP r_limit_key) {
+    leveldb_t *db = get_db_ptr(r_db);
+    const char *start_key = NULL, *limit_key = NULL;
+    size_t start_key_len = get_key_maybe_nil(r_start_key, &start_key),
+           limit_key_len = get_key_maybe_nil(r_limit_key, &limit_key);
+    leveldb_compact_range(db, start_key, start_key_len, limit_key,
+                          limit_key_len);
+    return R_NilValue;
 }
