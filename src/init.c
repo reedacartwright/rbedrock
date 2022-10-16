@@ -95,10 +95,6 @@ static const R_CallMethodDef call_methods[] = {
     {"rbedrock_db_compact_range", (DL_FUNC)&rbedrock_db_compact_range,
      3},
 
-    {"rbedrock_db_readoptions", (DL_FUNC)&rbedrock_db_readoptions, 3},
-    {"rbedrock_db_writeoptions", (DL_FUNC)&rbedrock_db_writeoptions,
-     1},
-
     {"rbedrock_db_keys_len", (DL_FUNC)&rbedrock_db_keys_len, 3},
     {"rbedrock_db_keys", (DL_FUNC)&rbedrock_db_keys, 3},
     {"rbedrock_db_exists", (DL_FUNC)&rbedrock_db_exists, 3},

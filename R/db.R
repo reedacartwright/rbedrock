@@ -206,20 +206,6 @@ db_approximate_sizes <- function(db, start, limit) {
 db_compact_range <- function(db, start, limit) {
     .Call(rbedrock_db_compact_range, db, start, limit)
 }
-db_readoptions <- function(verify_checksums = NULL, fill_cache = NULL, 
-    snapshot = NULL) {
-    ptr <- .Call(rbedrock_db_readoptions, verify_checksums, fill_cache, snapshot)
-    attr(ptr, "options") <- list(verify_checksums = verify_checksums, fill_cache = fill_cache, 
-        snapshot = snapshot)
-    class(ptr) <- c("rbedrock_db_readoptions", "rbedrock_db_options")
-    ptr
-}
-db_writeoptions <- function(sync = NULL) {
-    ptr <- .Call(rbedrock_db_writeoptions, sync)
-    class(ptr) <- c("rbedrock_db_writeoptions", "rbedrock_db_options")
-    attr(ptr, "options") <- list(sync = sync)
-    ptr
-}
 db_keys_len <- function(db, starts_with = NULL, readoptions = NULL) {
     .Call(rbedrock_db_keys_len, db, starts_with, readoptions)
 }

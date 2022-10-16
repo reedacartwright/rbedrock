@@ -52,9 +52,6 @@ SEXP rbedrock_db_mput(SEXP r_db, SEXP r_key, SEXP r_value,
 
 SEXP rbedrock_db_delete(SEXP r_db, SEXP r_key, SEXP r_report,
                             SEXP r_readoptions, SEXP r_writeoptions);
-SEXP rbedrock_db_delete_silent(SEXP r_db, SEXP r_key, SEXP r_writeoptions);
-SEXP rbedrock_db_delete_report(SEXP r_db, SEXP r_key, SEXP r_readoptions,
-                                   SEXP r_writeoptions);
 
 SEXP rbedrock_db_iter_create(SEXP r_db, SEXP r_readoptions);
 SEXP rbedrock_db_iter_destroy(SEXP r_it, SEXP r_error_if_destroyed);
