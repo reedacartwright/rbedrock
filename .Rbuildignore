@@ -1,9 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^src/leveldb-mcpe/build$
-^src/leveldb-mcpe/.appveyor.yml$
-^src/leveldb-mcpe/.clang-format$
-^src/leveldb-mcpe/.travis.yml$
+^src/vendor/leveldb-mcpe/build$
+^src/vendor/leveldb-mcpe/.appveyor.yml$
+^src/vendor/leveldb-mcpe/.clang-format$
+^src/vendor/leveldb-mcpe/.travis.yml$
 ^rbedrock.sublime-project$
 ^rbedrock.sublime-workspace$
 ^\.github$

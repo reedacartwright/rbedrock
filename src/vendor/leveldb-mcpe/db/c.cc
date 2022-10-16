@@ -20,6 +20,7 @@
 #include "leveldb/write_batch.h"
 #include "leveldb/zlib_compressor.h"
 #include "leveldb/snappy_compressor.h"
+#include "leveldb/decompress_allocator.h"
 
 using leveldb::Cache;
 using leveldb::Comparator;
@@ -45,6 +46,7 @@ using leveldb::WritableFile;
 using leveldb::WriteBatch;
 using leveldb::WriteOptions;
 using leveldb::Compressor;
+using leveldb::DecompressAllocator;
 
 extern "C" {
 
@@ -89,6 +91,9 @@ struct leveldb_filelock_t {
 };
 struct leveldb_compressor_t {
   Compressor* rep;
+};
+struct leveldb_decompress_allocator_t {
+  DecompressAllocator* rep;
 };
 
 struct leveldb_comparator_t : public Comparator {
@@ -454,8 +459,11 @@ leveldb_compressor_t* leveldb_compressor_create(int t, int l) {
   }
   return result;
 }
+
 void leveldb_compressor_destroy(leveldb_compressor_t* compressor) {
-  delete compressor->rep;
+  if(compressor->rep != nullptr) {
+    delete compressor->rep;
+  }
   delete compressor;
 }
 
@@ -544,6 +552,22 @@ void leveldb_readoptions_set_fill_cache(leveldb_readoptions_t* opt, uint8_t v) {
 void leveldb_readoptions_set_snapshot(leveldb_readoptions_t* opt,
                                       const leveldb_snapshot_t* snap) {
   opt->rep.snapshot = (snap ? snap->rep : nullptr);
+}
+
+void leveldb_readoptions_set_decompress_allocator(leveldb_readoptions_t* opt,
+                                                     leveldb_decompress_allocator_t* dca) {
+  opt->rep.decompress_allocator = (dca ? dca->rep : nullptr);
+}
+
+leveldb_decompress_allocator_t* leveldb_decompress_allocator_create() {
+  leveldb_decompress_allocator_t* result = new leveldb_decompress_allocator_t;
+  result->rep = new DecompressAllocator();
+  return result;
+}
+
+void leveldb_decompress_allocator_destroy(leveldb_decompress_allocator_t* ptr) {
+  delete ptr->rep;
+  delete ptr;
 }
 
 leveldb_writeoptions_t* leveldb_writeoptions_create() {
