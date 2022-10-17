@@ -149,6 +149,9 @@ db_iter_destroy <- function(it, error_if_destroyed = FALSE) {
 db_iter_valid <- function(it) {
     .Call(rbedrock_db_iter_valid, it)
 }
+db_iter_isnil <- function(it) {
+    .Call(rbedrock_db_iter_isnil, it)
+}
 db_iter_seek_to_first <- function(it) {
     .Call(rbedrock_db_iter_seek_to_first, it)
 }

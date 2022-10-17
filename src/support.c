@@ -246,3 +246,67 @@ SEXP get_list_element(SEXP r_value, const char *name) {
     }
     return r_ret;
 }
+
+/* Doubly Linked Lists. From CPP11 */
+
+// CAR points to previous node
+// CDR points to next node
+// TAG points to the object being held
+// head has CAR == NULL
+// tail has CDR == NULL
+
+SEXP double_list_create() {
+    return Rf_cons(R_NilValue, R_NilValue);
+}
+
+SEXP double_list_insert(SEXP before, SEXP obj) {
+    if(obj == R_NilValue) {
+        return R_NilValue;
+    }
+    // before <-> after
+    PROTECT(obj);
+    PROTECT(before);
+    SEXP after = CDR(before);
+
+    // before <-> after
+    // before <- cell -> after
+    SEXP cell = PROTECT(Rf_cons(before, after));
+    SET_TAG(cell, obj);
+
+    // before <- after
+    // before <-> cell -> after
+    SETCDR(before, cell);
+
+    if(CDR(cell) != R_NilValue) {
+        // before <-> cell <-> after
+        SETCAR(CDR(cell), cell);
+    }
+    UNPROTECT(3);
+
+    return cell;
+}
+
+void double_list_remove(SEXP cell) {
+    if(cell == R_NilValue) {
+        return;
+    }
+    PROTECT(cell);
+
+    // before <-> cell <-> after
+    SEXP before = CAR(cell);
+    SEXP after = CDR(cell);
+
+    if (before == R_NilValue && after == R_NilValue) {
+      Rf_error("should never happen");
+    }
+
+    // before <-> after
+    // cell
+    SETCDR(before, after);
+    if (after != R_NilValue) {
+      SETCAR(after, before);
+    }
+    SETCAR(cell, R_NilValue);
+    SETCDR(cell, R_NilValue);
+    UNPROTECT(1);
+}

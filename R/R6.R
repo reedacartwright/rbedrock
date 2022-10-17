@@ -180,6 +180,9 @@ R6_bedrockdb_iterator <- R6::R6Class("rbedrock_db_iterator", public = list(it = 
     valid = function() {
         db_iter_valid(self$it)
     },
+    isnil = function() {
+        db_iter_isnil(self$it)
+    },    
     seek_to_first = function() {
         db_iter_seek_to_first(self$it)
         invisible(self)

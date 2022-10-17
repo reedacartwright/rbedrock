@@ -56,6 +56,7 @@ SEXP rbedrock_db_delete(SEXP r_db, SEXP r_key, SEXP r_report,
 SEXP rbedrock_db_iter_create(SEXP r_db, SEXP r_readoptions);
 SEXP rbedrock_db_iter_destroy(SEXP r_it, SEXP r_error_if_destroyed);
 SEXP rbedrock_db_iter_valid(SEXP r_it);
+SEXP rbedrock_db_iter_isnil(SEXP r_it);
 SEXP rbedrock_db_iter_seek_to_first(SEXP r_it);
 SEXP rbedrock_db_iter_seek_to_last(SEXP r_it);
 SEXP rbedrock_db_iter_seek(SEXP r_it, SEXP r_key);

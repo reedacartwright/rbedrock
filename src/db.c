@@ -79,6 +79,10 @@ static SEXP delete_report_impl(SEXP r_db, SEXP r_key, SEXP r_readoptions,
 
 
 // For package management:
+
+
+SEXP g_open_handles;
+
 void rbedrock_init_db() {
     default_readoptions = leveldb_readoptions_create();
     default_writeoptions = leveldb_writeoptions_create();
@@ -152,13 +156,26 @@ static int close_handle_impl(bedrockdb_handle_t *handle) {
         opened_handles[handle->slot] = NULL;
     }
 
-    /* Destroy all iterators and snapshots. */
+    /* Destroy all remaining iterators and snapshots. */
     SEXP prot = get_protected(handle->r_ext_ptr);
-    SEXP r_iterators = VECTOR_ELT(prot, PROT_ITERATORS);
-    while(!Rf_isNull(r_iterators)) {
-        rbedrock_db_iter_destroy(CAR(r_iterators),
-                                     ScalarLogical(false));
-        r_iterators = CDR(r_iterators);
+    SEXP r_list = VECTOR_ELT(prot, PROT_ITERATORS);
+    SEXP r_first = CDR(r_list);
+    if(r_first != R_NilValue) {
+        // Detach the list
+        PROTECT(r_first);
+        SETCAR(r_first, R_NilValue);
+        SETCDR(r_list, R_NilValue);
+        // Destroy all iterators
+        while(!Rf_isNull(r_first)) {
+            SEXP r_ptr = TAG(r_first);
+            leveldb_iterator_t *it = get_external_address(r_ptr, false, NULL);
+            if(it != NULL) {
+                leveldb_iter_destroy(it);
+            }
+            R_ClearExternalPtr(r_ptr);
+            r_first = CDR(r_first);
+        }
+        UNPROTECT(1);
     }
 
     SEXP r_snapshots = VECTOR_ELT(prot, PROT_SNAPSHOTS);
@@ -226,8 +243,8 @@ SEXP rbedrock_db_open(SEXP r_path, SEXP r_create_if_missing,
     // Allocate metadata 
     SEXP r_prot = PROTECT(allocVector(VECSXP, PROT_LENGTH));
     SET_VECTOR_ELT(r_prot, PROT_PATH, r_path);
-    SET_VECTOR_ELT(r_prot, PROT_ITERATORS, R_NilValue);  // will be a pairlist
-    SET_VECTOR_ELT(r_prot, PROT_SNAPSHOTS, R_NilValue);  // will be a pairlist
+    SET_VECTOR_ELT(r_prot, PROT_ITERATORS, double_list_create());
+    SET_VECTOR_ELT(r_prot, PROT_SNAPSHOTS, R_NilValue);
 
     // Allocate and register handle
     handle = Calloc(1, bedrockdb_handle_t);
@@ -289,6 +306,7 @@ SEXP rbedrock_db_close(SEXP r_db, SEXP r_error_if_closed) {
     bedrockdb_handle_t *handle = get_handle_ptr(r_db,
         scalar_logical(r_error_if_closed));
     int status = close_handle_impl(handle);
+    R_ClearExternalPtr(r_db); /* not really needed */
     return ScalarLogical(status != 0);
 }
 
@@ -563,6 +581,11 @@ static void finalize_iterator(SEXP r_ptr) {
     leveldb_iterator_t *it = get_external_address(r_ptr, false, NULL);
     if(it != NULL) {
         leveldb_iter_destroy(it);
+        
+        SEXP cell = R_ExternalPtrProtected(r_ptr);
+        if(cell != R_NilValue) {
+            double_list_remove(cell);
+        }
     }
     R_ClearExternalPtr(r_ptr);
 }
@@ -577,7 +600,7 @@ static SEXP create_iterator(SEXP r_db, SEXP r_readoptions) {
     leveldb_iterator_t *it = leveldb_create_iterator(db, readoptions);
     leveldb_readoptions_destroy(readoptions);
 
-    SEXP r_it = PROTECT(R_MakeExternalPtr(it, Rf_install("rbedrock_bedrockdb_iterator"), r_db));
+    SEXP r_it = PROTECT(R_MakeExternalPtr(it, Rf_install("rbedrock_bedrockdb_iterator"), R_NilValue));
     R_RegisterCFinalizerEx(r_it, finalize_iterator, false);
 
     UNPROTECT(1);
@@ -590,7 +613,8 @@ SEXP rbedrock_db_iter_create(SEXP r_db, SEXP r_readoptions) {
     // Register iterator with db so it gets reclaimed when db closes
     SEXP r_prot = get_protected(r_db);
     SEXP r_iterators = VECTOR_ELT(r_prot, PROT_ITERATORS);
-    SET_VECTOR_ELT(r_prot, PROT_ITERATORS, CONS(r_it, r_iterators));
+    SEXP cell = double_list_insert(r_iterators, r_it);
+    R_SetExternalPtrProtected(r_it, cell);
 
     UNPROTECT(1);
     return r_it;
@@ -600,11 +624,22 @@ SEXP rbedrock_db_iter_destroy(SEXP r_ptr, SEXP r_error_on_clear) {
     bool raise_error = scalar_logical(r_error_on_clear);
 
     leveldb_iterator_t *it = get_external_address(r_ptr, raise_error, NULL);
+
     if(it != NULL) {
         leveldb_iter_destroy(it);
+
+        SEXP cell = R_ExternalPtrProtected(r_ptr);
+        if(cell != R_NilValue) {
+            double_list_remove(cell);
+        }
     }
     R_ClearExternalPtr(r_ptr);
     return Rf_ScalarLogical(it != NULL);
+}
+
+SEXP rbedrock_db_iter_isnil(SEXP r_it) {
+    leveldb_iterator_t *it = get_external_address(r_it, false, NULL);
+    return ScalarLogical(it == NULL);
 }
 
 SEXP rbedrock_db_iter_valid(SEXP r_it) {

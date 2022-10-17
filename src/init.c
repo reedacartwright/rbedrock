@@ -61,6 +61,7 @@ static const R_CallMethodDef call_methods[] = {
     {"rbedrock_db_iter_destroy", (DL_FUNC)&rbedrock_db_iter_destroy,
      2},
     {"rbedrock_db_iter_valid", (DL_FUNC)&rbedrock_db_iter_valid, 1},
+    {"rbedrock_db_iter_isnil", (DL_FUNC)&rbedrock_db_iter_isnil, 1},
     {"rbedrock_db_iter_seek_to_first",
      (DL_FUNC)&rbedrock_db_iter_seek_to_first, 1},
     {"rbedrock_db_iter_seek_to_last",
