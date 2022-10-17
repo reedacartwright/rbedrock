@@ -177,70 +177,70 @@ R6_bedrockdb_iterator <- R6::R6Class("rbedrock_db_iterator", public = list(it = 
         self$it <- db_iter_create(db, readoptions)
     },
     destroy = function(error_if_destroyed = FALSE) {
-        ret <- db_iter_destroy(self$it, error_if_destroyed)
+        ret <- iter_destroy(self$it, error_if_destroyed)
         invisible(ret)
     },
     valid = function() {
-        db_iter_valid(self$it)
+        iter_valid(self$it)
     },
     isnil = function() {
-        db_iter_isnil(self$it)
+        iter_isnil(self$it)
     },
     seek_to_first = function() {
-        db_iter_seek_to_first(self$it)
+        iter_seek_to_first(self$it)
         invisible(self)
     },
     seek_to_last = function() {
-        db_iter_seek_to_last(self$it)
+        iter_seek_to_last(self$it)
         invisible(self)
     },
     seek = function(key) {
-        db_iter_seek(self$it, key)
+        iter_seek(self$it, key)
         invisible(self)
     },
     move_next = function(error_if_invalid = FALSE) {
-        db_iter_next(self$it, error_if_invalid)
+        iter_next(self$it, error_if_invalid)
         invisible(self)
     },
     move_prev = function(error_if_invalid = FALSE) {
-        db_iter_prev(self$it, error_if_invalid)
+        iter_prev(self$it, error_if_invalid)
         invisible(self)
     },
     key = function(error_if_invalid = FALSE) {
-        db_iter_key(self$it, error_if_invalid)
+        iter_key(self$it, error_if_invalid)
     },
     value = function(error_if_invalid = FALSE) {
-        db_iter_value(self$it, error_if_invalid)
+        iter_value(self$it, error_if_invalid)
     }
 ))
 
 R6_bedrockdb_writebatch <- R6::R6Class("rbedrock_db_writebatch", public = list(ptr = NULL, 
     db = NULL, initialize = function(db) {
         self$db <- db
-        self$ptr <- db_writebatch_create()
+        self$ptr <- writebatch_create()
     },
     destroy = function(error_if_destroyed = FALSE) {
-        ret <- db_writebatch_destroy(self$ptr, error_if_destroyed)
+        ret <- writebatch_destroy(self$ptr, error_if_destroyed)
         invisible(ret)
     },
     clear = function() {
-        db_writebatch_clear(self$ptr)
+        writebatch_clear(self$ptr)
         invisible(self)
     },
     put = function(key, value) {
-        db_writebatch_put(self$ptr, key, value)
+        writebatch_put(self$ptr, key, value)
         invisible(self)
     },
     mput = function(keys, values) {
-        db_writebatch_mput(self$ptr, keys, values)
+        writebatch_mput(self$ptr, keys, values)
         invisible(self)
     },
     delete = function(key) {
-        db_writebatch_delete(self$ptr, key)
+        writebatch_delete(self$ptr, key)
         invisible(self)
     },
     mdelete = function(keys) {
-        db_writebatch_mdelete(self$ptr, keys)
+        writebatch_mdelete(self$ptr, keys)
         invisible(self)
     },    
     write = function(writeoptions = NULL) {

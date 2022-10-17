@@ -43,21 +43,21 @@ test_that("bedrockdb clears open snapshots when closed",{
     snap2 <- db$snapshot()
     snap3 <- db$snapshot()
     snap4 <- db$snapshot()
-    expect_false(db_snapshot_isnil(snap1))
-    expect_false(db_snapshot_isnil(snap2))
-    expect_false(db_snapshot_isnil(snap3))
-    expect_false(db_snapshot_isnil(snap4))
+    expect_false(snapshot_isnil(snap1))
+    expect_false(snapshot_isnil(snap2))
+    expect_false(snapshot_isnil(snap3))
+    expect_false(snapshot_isnil(snap4))
     
     db$snapshot_release(snap3)
-    expect_true(db_snapshot_isnil(snap3))
+    expect_true(snapshot_isnil(snap3))
     
     expect_silent(close(db))
     expect_silent(gc())
 
-    expect_true(db_snapshot_isnil(snap1))
-    expect_true(db_snapshot_isnil(snap2))
-    expect_true(db_snapshot_isnil(snap3))
-    expect_true(db_snapshot_isnil(snap4))
+    expect_true(snapshot_isnil(snap1))
+    expect_true(snapshot_isnil(snap2))
+    expect_true(snapshot_isnil(snap3))
+    expect_true(snapshot_isnil(snap4))
 
     # clean up
     fs::dir_delete(dbpath)

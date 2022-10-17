@@ -143,35 +143,36 @@ db_delete <- function(db, key, report = FALSE, readoptions = NULL, writeoptions 
 db_iter_create <- function(db, readoptions = NULL) {
     .Call(rbedrock_db_iter_create, db, readoptions)
 }
-db_iter_destroy <- function(it, error_if_destroyed = FALSE) {
-    .Call(rbedrock_db_iter_destroy, it, error_if_destroyed)
+
+iter_destroy <- function(it, error_if_destroyed = FALSE) {
+    .Call(rbedrock_iter_destroy, it, error_if_destroyed)
 }
-db_iter_valid <- function(it) {
-    .Call(rbedrock_db_iter_valid, it)
+iter_valid <- function(it) {
+    .Call(rbedrock_iter_valid, it)
 }
-db_iter_isnil <- function(it) {
-    .Call(rbedrock_db_iter_isnil, it)
+iter_isnil <- function(it) {
+    .Call(rbedrock_iter_isnil, it)
 }
-db_iter_seek_to_first <- function(it) {
-    .Call(rbedrock_db_iter_seek_to_first, it)
+iter_seek_to_first <- function(it) {
+    .Call(rbedrock_iter_seek_to_first, it)
 }
-db_iter_seek_to_last <- function(it) {
-    .Call(rbedrock_db_iter_seek_to_last, it)
+iter_seek_to_last <- function(it) {
+    .Call(rbedrock_iter_seek_to_last, it)
 }
-db_iter_seek <- function(it, key) {
-    .Call(rbedrock_db_iter_seek, it, key)
+iter_seek <- function(it, key) {
+    .Call(rbedrock_iter_seek, it, key)
 }
-db_iter_next <- function(it, error_if_invalid = FALSE) {
-    .Call(rbedrock_db_iter_next, it, error_if_invalid)
+iter_next <- function(it, error_if_invalid = FALSE) {
+    .Call(rbedrock_iter_next, it, error_if_invalid)
 }
-db_iter_prev <- function(it, error_if_invalid = FALSE) {
-    .Call(rbedrock_db_iter_prev, it, error_if_invalid)
+iter_prev <- function(it, error_if_invalid = FALSE) {
+    .Call(rbedrock_iter_prev, it, error_if_invalid)
 }
-db_iter_key <- function(it, error_if_invalid = FALSE) {
-    .Call(rbedrock_db_iter_key, it, error_if_invalid)
+iter_key <- function(it, error_if_invalid = FALSE) {
+    .Call(rbedrock_iter_key, it, error_if_invalid)
 }
-db_iter_value <- function(it, error_if_invalid = FALSE) {
-    .Call(rbedrock_db_iter_value, it, error_if_invalid)
+iter_value <- function(it, error_if_invalid = FALSE) {
+    .Call(rbedrock_iter_value, it, error_if_invalid)
 }
 db_snapshot <- function(db) {
     ptr <- .Call(rbedrock_db_snapshot_create, db)
@@ -182,30 +183,33 @@ db_snapshot <- function(db) {
 db_snapshot_release <- function(db, snapshot, error_if_released = FALSE) {
     .Call(rbedrock_db_snapshot_release, db, snapshot, error_if_released)
 }
-db_snapshot_isnil <- function(snapshot) {
-    .Call(rbedrock_db_snapshot_isnil, snapshot)
+
+snapshot_isnil <- function(snapshot) {
+    .Call(rbedrock_snapshot_isnil, snapshot)
 }
-db_writebatch_create <- function() {
-    .Call(rbedrock_db_writebatch_create)
+
+writebatch_create <- function() {
+    .Call(rbedrock_writebatch_create)
 }
-db_writebatch_destroy <- function(writebatch, error_if_destroyed = FALSE) {
-    .Call(rbedrock_db_writebatch_destroy, writebatch, error_if_destroyed)
+writebatch_destroy <- function(writebatch, error_if_destroyed = FALSE) {
+    .Call(rbedrock_writebatch_destroy, writebatch, error_if_destroyed)
 }
-db_writebatch_clear <- function(writebatch) {
-    .Call(rbedrock_db_writebatch_clear, writebatch)
+writebatch_clear <- function(writebatch) {
+    .Call(rbedrock_writebatch_clear, writebatch)
 }
-db_writebatch_put <- function(writebatch, key, value) {
-    .Call(rbedrock_db_writebatch_put, writebatch, key, value)
+writebatch_put <- function(writebatch, key, value) {
+    .Call(rbedrock_writebatch_put, writebatch, key, value)
 }
-db_writebatch_mput <- function(writebatch, key, value) {
-    .Call(rbedrock_db_writebatch_mput, writebatch, key, value)
+writebatch_mput <- function(writebatch, key, value) {
+    .Call(rbedrock_writebatch_mput, writebatch, key, value)
 }
-db_writebatch_delete <- function(writebatch, key) {
-    .Call(rbedrock_db_writebatch_delete, writebatch, key)
+writebatch_delete <- function(writebatch, key) {
+    .Call(rbedrock_writebatch_delete, writebatch, key)
 }
-db_writebatch_mdelete <- function(writebatch, keys) {
-    .Call(rbedrock_db_writebatch_mdelete, writebatch, keys)
+writebatch_mdelete <- function(writebatch, keys) {
+    .Call(rbedrock_writebatch_mdelete, writebatch, keys)
 }
+
 db_write <- function(db, writebatch, writeoptions = NULL) {
     .Call(rbedrock_db_write, db, writebatch, writeoptions)
 }
@@ -224,8 +228,8 @@ db_keys <- function(db, starts_with = NULL, readoptions = NULL) {
 db_exists <- function(db, key, readoptions = NULL) {
     .Call(rbedrock_db_exists, db, key, readoptions)
 }
-db_version <- function() {
-    ret <- list(.Call(rbedrock_db_version))
+leveldb_version <- function() {
+    ret <- list(.Call(rbedrock_leveldb_version))
     class(ret) <- "numeric_version"
     ret
 }
