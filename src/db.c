@@ -115,6 +115,12 @@ enum rbedrock_db_prot_index {
     PROT_LENGTH  // don't store anything here!
 };
 
+enum rbedrock_db_snap_prot_index {
+    SNAP_PROT_CELL,
+    SNAP_PROT_DB,
+    SNAP_PROT_LENGTH  // don't store anything here!
+};
+
 static void * get_external_address(SEXP r_ptr, bool error_on_clear, const char * custom_msg) {
     if(TYPEOF(r_ptr) != EXTPTRSXP) {
         Rf_error("Invalid object: object is not an external pointer.");
@@ -178,15 +184,24 @@ static int close_handle_impl(bedrockdb_handle_t *handle) {
         UNPROTECT(1);
     }
 
-    SEXP r_snapshots = VECTOR_ELT(prot, PROT_SNAPSHOTS);
-    while(!Rf_isNull(r_snapshots)) {
-        const leveldb_snapshot_t *snapshot =
-            get_external_address(CAR(r_snapshots), false, NULL);
-        if(handle->db) {
-            leveldb_release_snapshot(handle->db, snapshot);
+    r_list = VECTOR_ELT(prot, PROT_SNAPSHOTS);
+    r_first = CDR(r_list);
+    if(r_first != R_NilValue) {
+        // Detach the list
+        PROTECT(r_first);
+        SETCAR(r_first, R_NilValue);
+        SETCDR(r_list, R_NilValue);
+        // Destroy all iterators
+        while(!Rf_isNull(r_first)) {
+            SEXP r_ptr = TAG(r_first);
+             const leveldb_snapshot_t *snapshot = get_external_address(r_ptr, false, NULL);
+            if(snapshot != NULL && handle->db != NULL) {
+                leveldb_release_snapshot(handle->db, snapshot);
+            }
+            R_ClearExternalPtr(r_ptr);
+            r_first = CDR(r_first);
         }
-        R_ClearExternalPtr(CAR(r_snapshots));
-        r_snapshots = CDR(r_snapshots);
+        UNPROTECT(1);
     }
 
     /* Close Db and Clean Up */
@@ -244,7 +259,7 @@ SEXP rbedrock_db_open(SEXP r_path, SEXP r_create_if_missing,
     SEXP r_prot = PROTECT(allocVector(VECSXP, PROT_LENGTH));
     SET_VECTOR_ELT(r_prot, PROT_PATH, r_path);
     SET_VECTOR_ELT(r_prot, PROT_ITERATORS, double_list_create());
-    SET_VECTOR_ELT(r_prot, PROT_SNAPSHOTS, R_NilValue);
+    SET_VECTOR_ELT(r_prot, PROT_SNAPSHOTS, double_list_create());
 
     // Allocate and register handle
     handle = Calloc(1, bedrockdb_handle_t);
@@ -716,10 +731,14 @@ static void finalize_snapshot(SEXP r_ptr) {
     if(snapshot == NULL) {
         return;
     }
-    SEXP r_prot = get_protected(r_ptr);
-    leveldb_t *db = get_external_address(r_prot, false, NULL);
+    SEXP r_prot = R_ExternalPtrProtected(r_ptr);
+    leveldb_t *db = get_external_address(VECTOR_ELT(r_prot, SNAP_PROT_DB), false, NULL);
     if(db) {
         leveldb_release_snapshot(db, snapshot);
+        SEXP cell = VECTOR_ELT(r_prot, SNAP_PROT_CELL);
+        if(cell != R_NilValue) {
+            double_list_remove(cell);
+        }
     }
     R_ClearExternalPtr(r_ptr);
 }
@@ -727,15 +746,46 @@ static void finalize_snapshot(SEXP r_ptr) {
 SEXP rbedrock_db_snapshot_create(SEXP r_db) {
     leveldb_t *db = get_db_ptr(r_db);
     const leveldb_snapshot_t *snapshot = leveldb_create_snapshot(db);
-    SEXP r_snapshot = PROTECT(R_MakeExternalPtr((void*)snapshot, Rf_install("rbedrock_bedrockdb_snapshot"), r_db));
+
+    SEXP r_snapshot = PROTECT(R_MakeExternalPtr((void*)snapshot, Rf_install("rbedrock_bedrockdb_snapshot"), R_NilValue));
     R_RegisterCFinalizerEx(r_snapshot, finalize_snapshot, false);
 
-    SEXP r_prot = get_protected(r_db);
-    SEXP r_snaps = VECTOR_ELT(r_prot, PROT_SNAPSHOTS);
-    SET_VECTOR_ELT(r_prot, PROT_SNAPSHOTS, CONS(r_snapshot, r_snaps));
+    SEXP r_db_prot = get_protected(r_db);
+    SEXP r_snaps = VECTOR_ELT(r_db_prot, PROT_SNAPSHOTS);
+    SEXP cell = double_list_insert(r_snaps, r_snapshot);
 
-    UNPROTECT(1);
+    // Allocate metadata 
+    SEXP r_prot = PROTECT(allocVector(VECSXP, SNAP_PROT_LENGTH));
+    SET_VECTOR_ELT(r_prot, SNAP_PROT_CELL, cell);
+    SET_VECTOR_ELT(r_prot, SNAP_PROT_DB,   r_db);
+
+    R_SetExternalPtrProtected(r_snapshot, r_prot);
+
+    UNPROTECT(2);
     return r_snapshot;
+}
+
+SEXP rbedrock_db_snapshot_release(SEXP r_db, SEXP r_snapshot, SEXP r_error_if_released) {
+    bool raise_error = scalar_logical(r_error_if_released);
+
+    leveldb_t *db = get_db_ptr(r_db);
+    const leveldb_snapshot_t *snapshot = get_external_address(r_snapshot, raise_error, NULL);
+    if(db == NULL || snapshot == NULL) {
+        return R_NilValue;
+    }
+    leveldb_release_snapshot(db, snapshot);
+    SEXP r_prot = R_ExternalPtrProtected(r_snapshot);
+    SEXP cell = VECTOR_ELT(r_prot, SNAP_PROT_CELL);
+    if(cell != R_NilValue) {
+        double_list_remove(cell);
+    }
+    R_ClearExternalPtr(r_snapshot);
+    return R_NilValue;
+}
+
+SEXP rbedrock_db_snapshot_isnil(SEXP r_snapshot) {
+    const leveldb_snapshot_t *snapshot = get_external_address(r_snapshot, false, NULL);
+    return ScalarLogical(snapshot == NULL);
 }
 
 /**** WRITEBATCH ****/

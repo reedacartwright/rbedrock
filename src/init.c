@@ -74,6 +74,8 @@ static const R_CallMethodDef call_methods[] = {
 
     {"rbedrock_db_snapshot_create",
      (DL_FUNC)&rbedrock_db_snapshot_create, 1},
+    {"rbedrock_db_snapshot_release", (DL_FUNC)&rbedrock_db_snapshot_release, 3},
+    {"rbedrock_db_snapshot_isnil", (DL_FUNC)&rbedrock_db_snapshot_isnil, 1},
 
     {"rbedrock_db_writebatch_create",
      (DL_FUNC)&rbedrock_db_writebatch_create, 0},

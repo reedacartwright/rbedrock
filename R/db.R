@@ -179,6 +179,12 @@ db_snapshot <- function(db) {
     class(ptr) <- "rbedrock_db_snapshot"
     ptr
 }
+db_snapshot_release <- function(db, snapshot, error_if_released = FALSE) {
+    .Call(rbedrock_db_snapshot_release, db, snapshot, error_if_released)
+}
+db_snapshot_isnil <- function(snapshot) {
+    .Call(rbedrock_db_snapshot_isnil, snapshot)
+}
 db_writebatch_create <- function() {
     .Call(rbedrock_db_writebatch_create)
 }

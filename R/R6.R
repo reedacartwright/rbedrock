@@ -160,6 +160,9 @@ R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL, path = NULL,
     snapshot = function() {
         db_snapshot(self$db)
     },
+    snapshot_release = function(snapshot, error_if_released = FALSE) {
+        db_snapshot_release(self$db, snapshot, error_if_released);
+    },
     approximate_sizes = function(start, limit) {
         db_approximate_sizes(self$db, start, limit)
     },
@@ -182,7 +185,7 @@ R6_bedrockdb_iterator <- R6::R6Class("rbedrock_db_iterator", public = list(it = 
     },
     isnil = function() {
         db_iter_isnil(self$it)
-    },    
+    },
     seek_to_first = function() {
         db_iter_seek_to_first(self$it)
         invisible(self)

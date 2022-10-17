@@ -68,6 +68,8 @@ SEXP rbedrock_db_iter_value(SEXP r_it,
                                 SEXP r_error_if_invalid);
 
 SEXP rbedrock_db_snapshot_create(SEXP r_db);
+SEXP rbedrock_db_snapshot_release(SEXP r_db, SEXP r_snapshot, SEXP r_error_if_released);
+SEXP rbedrock_db_snapshot_isnil(SEXP r_snapshot);
 
 SEXP rbedrock_db_writebatch_create();
 SEXP rbedrock_db_writebatch_destroy(SEXP r_writebatch,
