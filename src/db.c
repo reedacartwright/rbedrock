@@ -74,10 +74,6 @@ static void exists_impl(leveldb_t *db, size_t num_key,
                         leveldb_readoptions_t *readoptions, int *found);
 
 // For package management:
-
-
-SEXP g_open_handles;
-
 void rbedrock_init_db(void) {
     default_readoptions = leveldb_readoptions_create();
     default_writeoptions = leveldb_writeoptions_create();
@@ -318,6 +314,14 @@ SEXP rbedrock_db_close(SEXP r_db, SEXP r_error_if_closed) {
     int status = close_handle_impl(handle);
     R_ClearExternalPtr(r_db); /* not really needed */
     return ScalarLogical(status != 0);
+}
+
+SEXP rbedrock_closeall(void) {
+    int m = (num_bedrockdb < MAX_HANDLES) ? num_bedrockdb : MAX_HANDLES;
+    for(int i = 0; i < m; ++i) {
+        close_handle_impl(opened_handles[i]);
+    }
+    return R_NilValue;
 }
 
 SEXP rbedrock_db_is_open(SEXP r_db) {

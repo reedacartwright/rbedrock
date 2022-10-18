@@ -62,3 +62,18 @@ test_that("bedrockdb clears open snapshots when closed",{
     # clean up
     fs::dir_delete(dbpath)
 })
+
+test_that("close_all_bedrockdb works", {
+    dbpath1 <- rbedrock_example_world("example1.mcworld")
+    dbpath2 <- rbedrock_example_world("example2.mcworld")
+    db1 <- bedrockdb(dbpath1)
+    db2 <- bedrockdb(dbpath2)
+    expect_true(db1$is_open())
+    expect_true(db2$is_open())
+    close_all_bedrockdb()
+    expect_false(db1$is_open())
+    expect_false(db2$is_open())
+    # clean up
+    fs::dir_delete(dbpath1)
+    fs::dir_delete(dbpath2)
+})

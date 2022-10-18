@@ -4,6 +4,7 @@
 \alias{bedrockdb}
 \alias{close.rbedrock_db}
 \alias{is_bedrockdb}
+\alias{close_all_bedrockdb}
 \title{Open a Bedrock Edition world for reading and writing.}
 \usage{
 bedrockdb(
@@ -22,6 +23,8 @@ bedrockdb(
 \method{close}{rbedrock_db}(con, compact = FALSE, ...)
 
 is_bedrockdb(x)
+
+close_all_bedrockdb(x)
 }
 \arguments{
 \item{path}{The path to a world folder. If the path does not exist, it is

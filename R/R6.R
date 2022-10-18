@@ -97,6 +97,12 @@ is_bedrockdb <- function(x) {
     inherits(x, "rbedrock_db")
 }
 
+#' @rdname bedrockdb
+#' @export
+close_all_bedrockdb <- function(x) {
+    .Call(rbedrock_closeall)
+}
+
 #' @importFrom R6 R6Class
 R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL, path = NULL, levelname = NULL, 
     initialize = function(path, ...) {

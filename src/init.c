@@ -87,6 +87,8 @@ static const R_CallMethodDef call_methods[] = {
     {"rbedrock_db_exists", (DL_FUNC)&rbedrock_db_exists, 3},
     {"rbedrock_leveldb_version", (DL_FUNC)&rbedrock_leveldb_version, 0},
 
+    {"rbedrock_closeall", (DL_FUNC)&rbedrock_closeall, 0},
+
     // For debugging:
     {"rbedrock_db_prot", (DL_FUNC)&rbedrock_db_prot, 1},
 

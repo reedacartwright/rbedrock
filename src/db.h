@@ -35,6 +35,7 @@ SEXP rbedrock_db_open(SEXP r_path, SEXP r_create_if_missing,
                           SEXP r_bloom_filter_bits_per_key,
                           SEXP r_compression_level);
 SEXP rbedrock_db_close(SEXP r_db, SEXP r_error_if_closed);
+SEXP rbedrock_closeall(void);
 SEXP rbedrock_db_destroy(SEXP r_path);
 SEXP rbedrock_db_is_open(SEXP r_db);
 SEXP rbedrock_db_repair(SEXP r_path);
