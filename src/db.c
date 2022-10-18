@@ -33,9 +33,6 @@
 #include "keys.h"
 #include "support.h"
 
-leveldb_readoptions_t *default_readoptions;
-leveldb_writeoptions_t *default_writeoptions;
-
 // Internals:
 leveldb_writebatch_t *rbedrock_db_get_writebatch(SEXP r_writebatch,
                                                      bool closed_error);
@@ -74,14 +71,22 @@ static void exists_impl(leveldb_t *db, size_t num_key,
                         leveldb_readoptions_t *readoptions, int *found);
 
 // For package management:
+leveldb_readoptions_t *default_readoptions;
+leveldb_writeoptions_t *default_writeoptions;
+leveldb_decompress_allocator_t *default_decompress_allocator;
+
 void rbedrock_init_db(void) {
     default_readoptions = leveldb_readoptions_create();
     default_writeoptions = leveldb_writeoptions_create();
+    default_decompress_allocator = leveldb_decompress_allocator_create();
+    leveldb_readoptions_set_decompress_allocator(default_readoptions,
+        default_decompress_allocator);
 }
 
 void rbedrock_cleanup_db(void) {
     leveldb_readoptions_destroy(default_readoptions);    // #nocov
     leveldb_writeoptions_destroy(default_writeoptions);  // #nocov
+    leveldb_decompress_allocator_destroy(default_decompress_allocator); // #nocov
 }
 
 /**** HANDLE FUNCTIONS ****/
@@ -782,7 +787,9 @@ SEXP rbedrock_snapshot_isnil(SEXP r_snapshot) {
 
 static leveldb_readoptions_t * create_readoptions(SEXP r_list) {
     if(Rf_isNull(r_list)) {
-        return leveldb_readoptions_create();
+        leveldb_readoptions_t *options = leveldb_readoptions_create();
+        leveldb_readoptions_set_decompress_allocator(options, default_decompress_allocator);
+        return options;
     }
     if(TYPEOF(r_list) != VECSXP) {
         Rf_error("Invalid readoptions: object is not a list.");
@@ -810,6 +817,7 @@ static leveldb_readoptions_t * create_readoptions(SEXP r_list) {
     leveldb_readoptions_set_verify_checksums(options, verify_checksums);
     leveldb_readoptions_set_fill_cache(options, fill_cache);
     leveldb_readoptions_set_snapshot(options, snapshot);
+    leveldb_readoptions_set_decompress_allocator(options, default_decompress_allocator);
     return options;
 }
 
