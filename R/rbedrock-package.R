@@ -4,6 +4,7 @@
 #' @import vctrs
 #' @import rlang
 #' @import stringr
+#' @useDynLib rbedrock, .registration = TRUE
 "_PACKAGE"
 
 #' Pipe operator

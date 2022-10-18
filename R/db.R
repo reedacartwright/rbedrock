@@ -92,7 +92,6 @@
 #' @export
 #' @keywords internal
 #' @author Rich FitzJohn
-#' @useDynLib rbedrock, .registration = TRUE
 db_open <- function(path, create_if_missing = NULL, error_if_exists = NULL, 
     paranoid_checks = NULL, write_buffer_size = NULL, max_open_files = NULL, block_size = NULL, 
     cache_capacity = NULL, bloom_filter_bits_per_key = NULL, compression_level = NULL) {
