@@ -84,7 +84,7 @@ test_that("put_value throws errors are incorrect arguments",{
     expect_error(put_value("hello Error", "plain:Test%02", db=db), "expected raw")
 })
 
-test_that("put_data writes data into the db", {
+test_that("put_data stores data into the db", {
     put_data(list("plain:Test%01" = as.raw(0x1), "plain:Test%02" = as.raw(0x2)), db = db)
     put_result <- get_data(c("plain:Test%01", "plain:Test%02"), db = db)
     expect_equal(put_result, list("plain:Test%01" = as.raw(0x1), "plain:Test%02" = as.raw(0x2)))
@@ -94,15 +94,49 @@ test_that("put_data writes data into the db", {
     expect_equal(put_result, list("plain:Test%01" = as.raw(0x10), "plain:Test%02" = as.raw(0x20)))
 })
 
-test_that("delete_values removes data from the db", {
+test_that("delete_data removes data from the db", {
     put_data(list("plain:Test%01" = as.raw(0x1), "plain:Test%02" = as.raw(0x2)), db = db)
-    delete_ret <- delete_values(c("plain:Test%01", "plain:Test%02"), db = db)
-    expect_null(delete_ret)
+    delete_data(c("plain:Test%01", "plain:Test%02"), db = db)
     delete_result <- get_data(c("plain:Test%01", "plain:Test%02"), db = db)
     expect_equal(delete_result, list("plain:Test%01" = NULL, "plain:Test%02" = NULL))
-    put_data(list("plain:Test%01" = as.raw(0x1), "plain:Test%02" = as.raw(0x2)), db = db)
-    delete_ret <- delete_values(c("plain:Test%01", "plain:Test%03","plain:Test%02"), db = db, report=TRUE)
-    expect_equal(delete_ret, c(TRUE, FALSE, TRUE))
+})
+
+test_that("delete_value removes a value from the db", {
+    put_value(as.raw(0x1), "plain:Test%01", db = db)
+    expect_true(has_value("plain:Test%01", db = db))
+    delete_value("plain:Test%01", db = db)
+    expect_false(has_values("plain:Test%01", db = db))
+})
+
+test_that("write_data writes data into a db", {
+    vdat <- list(
+        "plain:Test%10" = as.raw(0x10),
+        "plain:Test%20" = as.raw(0x20),
+        "plain:Test%30" = as.raw(0x30)
+        )
+    put_data(vdat, db = db)
+    dat <- list(
+        "plain:Test%10" = NULL,
+        "plain:Test%20" = as.raw(0x40),
+        "plain:Test%30" = zap()
+    )
+    write_data(dat, db = db)
+    expect_equal(has_values(names(dat), db = db), set_names(c(FALSE, TRUE, FALSE), names(dat)))
+    result <- get_data(names(dat), db = db)
+
+    expected_result <- dat
+    expected_result["plain:Test%30"] <- list(NULL)
+    expect_equal(result, expected_result)
+
+    # Test specifying both names and values
+    put_data(vdat, db = db)
+    write_data(set_names(dat, NULL), names(dat), db = db)
+    expect_equal(has_values(names(dat), db = db), set_names(c(FALSE, TRUE, FALSE), names(dat)))
+    result <- get_data(names(dat), db = db)
+
+    expected_result <- dat
+    expected_result["plain:Test%30"] <- list(NULL)
+    expect_equal(result, expected_result)
 })
 
 # clean up

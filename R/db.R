@@ -134,16 +134,21 @@ db_mget_prefix <- function(db, starts_with, readoptions = NULL) {
 db_put <- function(db, key, value, writeoptions = NULL) {
     .Call(rbedrock_db_put, db, key, value, writeoptions)
 }
-db_mput <- function(db, key, value, writeoptions = NULL) {
-    .Call(rbedrock_db_mput, db, key, value, writeoptions)
+db_delete <- function(db, key, writeoptions = NULL) {
+    .Call(rbedrock_db_delete, db, key, writeoptions)
 }
-db_delete <- function(db, key, report = FALSE, readoptions = NULL, writeoptions = NULL) {
-    .Call(rbedrock_db_delete, db, key, report, readoptions, writeoptions)
+db_write <- function(db, keys, values, writeoptions = NULL, allow_delete = TRUE) {
+    .Call(rbedrock_db_write, db, keys, values, writeoptions, allow_delete)
+}
+db_mput <- function(db, keys, values, writeoptions = NULL) {
+    db_write(db, keys, values, writeoptions, allow_delete = FALSE)
+}
+db_mdelete <- function(db, keys, writeoptions = NULL) {
+    db_write(db, keys, NULL, writeoptions, allow_delete = TRUE)
 }
 db_iter_create <- function(db, readoptions = NULL) {
     .Call(rbedrock_db_iter_create, db, readoptions)
 }
-
 iter_destroy <- function(it, error_if_destroyed = FALSE) {
     .Call(rbedrock_iter_destroy, it, error_if_destroyed)
 }
@@ -183,35 +188,8 @@ db_snapshot <- function(db) {
 db_snapshot_release <- function(db, snapshot, error_if_released = FALSE) {
     .Call(rbedrock_db_snapshot_release, db, snapshot, error_if_released)
 }
-
 snapshot_isnil <- function(snapshot) {
     .Call(rbedrock_snapshot_isnil, snapshot)
-}
-
-writebatch_create <- function() {
-    .Call(rbedrock_writebatch_create)
-}
-writebatch_destroy <- function(writebatch, error_if_destroyed = FALSE) {
-    .Call(rbedrock_writebatch_destroy, writebatch, error_if_destroyed)
-}
-writebatch_clear <- function(writebatch) {
-    .Call(rbedrock_writebatch_clear, writebatch)
-}
-writebatch_put <- function(writebatch, key, value) {
-    .Call(rbedrock_writebatch_put, writebatch, key, value)
-}
-writebatch_mput <- function(writebatch, key, value) {
-    .Call(rbedrock_writebatch_mput, writebatch, key, value)
-}
-writebatch_delete <- function(writebatch, key) {
-    .Call(rbedrock_writebatch_delete, writebatch, key)
-}
-writebatch_mdelete <- function(writebatch, keys) {
-    .Call(rbedrock_writebatch_mdelete, writebatch, keys)
-}
-
-db_write <- function(db, writebatch, writeoptions = NULL) {
-    .Call(rbedrock_db_write, db, writebatch, writeoptions)
 }
 db_approximate_sizes <- function(db, start, limit) {
     .Call(rbedrock_db_approximate_sizes, db, start, limit)

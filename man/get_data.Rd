@@ -5,6 +5,7 @@
 \alias{key_prefix}
 \alias{get_value}
 \alias{has_values}
+\alias{has_value}
 \title{Read values stored in a bedrockdb.}
 \usage{
 get_data(keys, db, readoptions = NULL)
@@ -14,6 +15,8 @@ key_prefix(prefix)
 get_value(key, db, readoptions = NULL)
 
 has_values(keys, db, readoptions = NULL)
+
+has_value(key, db, readoptions = NULL)
 }
 \arguments{
 \item{keys}{A character vector of keys.}
@@ -28,6 +31,8 @@ has_values(keys, db, readoptions = NULL)
 }
 \value{
 \code{get_data()} returns a named-list of raw vectors. \code{get_value()} returns a raw vector.
+
+\code{has_values()} returns a logical vector.
 
 \code{has_values()} returns a logical vector.
 }

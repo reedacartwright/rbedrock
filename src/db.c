@@ -73,11 +73,6 @@ static void exists_impl(leveldb_t *db, size_t num_key,
                         const char **key_data, size_t *key_len,
                         leveldb_readoptions_t *readoptions, int *found);
 
-static SEXP delete_silent_impl(SEXP r_db, SEXP r_key, SEXP r_writeoptions);
-static SEXP delete_report_impl(SEXP r_db, SEXP r_key, SEXP r_readoptions,
-                                   SEXP r_writeoptions);
-
-
 // For package management:
 
 
@@ -475,6 +470,81 @@ SEXP rbedrock_db_mget_prefix(SEXP r_db, SEXP r_starts_with,
     return r_ret;
 }
 
+static SEXP db_write_impl(SEXP r_db, SEXP r_keys, SEXP r_values, SEXP r_writeoptions) {
+    leveldb_t *db = get_db_ptr(r_db);
+
+    R_xlen_t num_ops = XLENGTH(r_keys);
+
+    // Avoid any R functions that can throw until these two
+    // objects are destroyed.
+    // This might fail. Do it first;
+    leveldb_writeoptions_t *writeoptions = create_writeoptions(r_writeoptions);
+    leveldb_writebatch_t *batch = leveldb_writebatch_create();
+
+    for(R_xlen_t i=0; i < num_ops; ++i) {
+        SEXP r_key = VECTOR_ELT(r_keys, i);
+        SEXP r_value = R_NilValue;
+        if(!Rf_isNull(r_values)) {
+            r_value = VECTOR_ELT(r_values, i);
+        }
+        if(Rf_isNull(r_value)) {
+            leveldb_writebatch_delete(batch, (char*)RAW(r_key), XLENGTH(r_key));
+        } else {
+            leveldb_writebatch_put(batch, (char*)RAW(r_key), XLENGTH(r_key),
+                (char*)RAW(r_value), XLENGTH(r_value));
+        }
+    }
+    char *err = NULL;
+    leveldb_write(db, writeoptions, batch, &err);
+    leveldb_writebatch_destroy(batch);
+    leveldb_writeoptions_destroy(writeoptions);
+
+    // this may throw
+    handle_leveldb_error(err);
+    return R_NilValue;
+}
+
+SEXP rbedrock_db_write(SEXP r_db, SEXP r_keys, SEXP r_values, SEXP r_writeoptions, SEXP r_allow_delete) {
+    bool allow_delete = scalar_logical(r_allow_delete);
+
+    // Validate inputs
+    if(TYPEOF(r_keys) != VECSXP) {
+        Rf_error("Invalid writebatch: keys must be a list of raws.");
+    }
+    if(TYPEOF(r_values) != VECSXP) {
+        if(!r_allow_delete) {
+            Rf_error("Invalid writebatch: values must be a list of raws.");
+        }
+        if(!Rf_isNull(r_values)) {
+            Rf_error("Invalid writebatch: values must be a list or NULL.");
+        }
+    }
+
+    R_xlen_t num_ops = XLENGTH(r_keys);
+    if(!Rf_isNull(r_values) && XLENGTH(r_values) != num_ops) {
+        Rf_error("Invalid writebatch: keys and values have different lengths; %d and %d.",
+            XLENGTH(r_keys), XLENGTH(r_values));
+    }
+    for(R_xlen_t i=0; i < num_ops; ++i) {
+        if(TYPEOF(VECTOR_ELT(r_keys, i)) != RAWSXP) {
+            Rf_error("Invalid writebatch: keys must raw.");
+        }
+        if(Rf_isNull(r_values)) {
+            continue;
+        }
+        if(TYPEOF(VECTOR_ELT(r_values, i)) != RAWSXP) {
+            if(!r_allow_delete) {
+                Rf_error("Invalid writebatch: values must be raw.");
+            }
+            if(!Rf_isNull(VECTOR_ELT(r_values, i))) {
+                Rf_error("Invalid writebatch: values must be raw or NULL.");
+            }
+        }
+    }
+
+    return db_write_impl(r_db, r_keys, r_values, r_writeoptions);
+}
+
 SEXP rbedrock_db_put(SEXP r_db, SEXP r_key, SEXP r_value,
                          SEXP r_writeoptions) {
     leveldb_t *db = get_db_ptr(r_db);
@@ -492,102 +562,18 @@ SEXP rbedrock_db_put(SEXP r_db, SEXP r_key, SEXP r_value,
     return R_NilValue;
 }
 
-// This is a slightly odd construction and could be done entirely in R
-// space (indeed, perhaps it should be?).  But using the higher level
-// R API here means that we can avoid leaks of the writebatch object
-// if any of the keys can't be extracted.  The total cost of doing
-// this is at most a couple of allocations and it avoids a lot of
-// duplicated code.
-SEXP rbedrock_db_mput(SEXP r_db, SEXP r_key, SEXP r_value,
-                          SEXP r_writeoptions) {
-    SEXP r_writebatch = PROTECT(rbedrock_writebatch_create());
-    rbedrock_writebatch_mput(r_writebatch, r_key, r_value);
-    rbedrock_db_write(r_db, r_writebatch, r_writeoptions);
-    UNPROTECT(1);
-    return R_NilValue;
-}
-
-SEXP rbedrock_db_delete(SEXP r_db, SEXP r_key, SEXP r_report,
-                            SEXP r_readoptions, SEXP r_writeoptions) {
-    if(scalar_logical(r_report)) {
-        return delete_report_impl(r_db, r_key, r_readoptions,
-                                             r_writeoptions);
-    } else {
-        return delete_silent_impl(r_db, r_key, r_writeoptions);
-    }
-}
-
-// This is the simple delete: it just deletes things and does not
-// report back anything about what was done (these keys may or may not
-// exist).
-SEXP delete_silent_impl(SEXP r_db, SEXP r_key, SEXP r_writeoptions) {
+SEXP rbedrock_db_delete(SEXP r_db, SEXP r_key, SEXP r_writeoptions) {
     leveldb_t *db = get_db_ptr(r_db);
-    const char **key_data = NULL;
-    size_t *key_len = NULL;
-    size_t num_key = get_keys(r_key, &key_data, &key_len);
-
-    leveldb_writeoptions_t *writeoptions = create_writeoptions(r_writeoptions);
-    SEXP r_ptr = PROTECT(wrap_writeoptions(writeoptions));
-
-    for(size_t i = 0; i < num_key; ++i) {
-        char *err = NULL;
-        leveldb_delete(db, writeoptions, key_data[i], key_len[i], &err);
-        if(err) {
-            leveldb_writeoptions_destroy(writeoptions);
-            R_ClearExternalPtr(r_ptr);
-            handle_leveldb_error(err);
-        }
-    }
-    leveldb_writeoptions_destroy(writeoptions);
-    R_ClearExternalPtr(r_ptr);
-    UNPROTECT(1);
-    return R_NilValue;
-}
-
-// This is quite a bit more complicated; we first iterate through and
-// find out what exists, arranging to return that back to R in the
-// first place.  Then we go through and do the deletion.
-SEXP delete_report_impl(SEXP r_db, SEXP r_key, SEXP r_readoptions,
-                                   SEXP r_writeoptions) {
-    leveldb_t *db = get_db_ptr(r_db);
-    const char **key_data = NULL;
-    size_t *key_len = NULL;
-    size_t num_key = get_keys(r_key, &key_data, &key_len);
-
-    // This might fail so I'm doing it up here
-    leveldb_writeoptions_t *writeoptions = create_writeoptions(r_writeoptions);
-    SEXP r_ptr = PROTECT(wrap_writeoptions(writeoptions));
-
-    SEXP r_found = PROTECT(allocVector(LGLSXP, num_key));
-    int *found = INTEGER(r_found);
-
-    // NOTE: leak danger on throw, so nothing between here and the
-    // writebatch_destroys may throw (and therefore can't use the R
-    // API).
-    leveldb_writebatch_t *writebatch = leveldb_writebatch_create();
-
-    // First, work out what exists:
-    exists_impl(db, num_key, key_data, key_len, default_readoptions, found);
-
-    bool do_delete = false;
-    for(size_t i = 0; i < num_key; ++i) {
-        if(found[i]) {
-            leveldb_writebatch_delete(writebatch, key_data[i], key_len[i]);
-            do_delete = true;
-        }
-    }
-
+    const char *key_data = NULL;
+    size_t key_len = get_key(r_key, &key_data);
     char *err = NULL;
-    if(do_delete) {
-        leveldb_write(db, writeoptions, writebatch, &err);
-    }
 
-    leveldb_writebatch_destroy(writebatch);
+    leveldb_writeoptions_t *writeoptions = create_writeoptions(r_writeoptions);
+    leveldb_delete(db, writeoptions, key_data, key_len, &err);
     leveldb_writeoptions_destroy(writeoptions);
-    R_ClearExternalPtr(r_ptr);
     handle_leveldb_error(err);
-    UNPROTECT(2);
-    return r_found;
+
+    return R_NilValue;
 }
 
 /**** ITERATORS ****/
@@ -786,124 +772,6 @@ SEXP rbedrock_db_snapshot_release(SEXP r_db, SEXP r_snapshot, SEXP r_error_if_re
 SEXP rbedrock_snapshot_isnil(SEXP r_snapshot) {
     const leveldb_snapshot_t *snapshot = get_external_address(r_snapshot, false, NULL);
     return ScalarLogical(snapshot == NULL);
-}
-
-/**** WRITEBATCH ****/
-
-static void finalize_writebatch(SEXP r_ptr) {
-    leveldb_writebatch_t *ptr = get_external_address(r_ptr, false, NULL);
-    if(ptr != NULL) {
-        leveldb_writebatch_destroy(ptr);
-    }
-    R_ClearExternalPtr(r_ptr);
-}
-
-static leveldb_writebatch_t * get_writebatch(SEXP r_ptr) {
-    return get_external_address(r_ptr, true, NULL);
-}
-
-SEXP rbedrock_writebatch_create() {
-    leveldb_writebatch_t *writebatch = leveldb_writebatch_create();
-    SEXP r_writebatch = PROTECT(R_MakeExternalPtr(writebatch,
-        Rf_install("rbedrock_bedrockdb_writebatch"), R_NilValue));
-    R_RegisterCFinalizer(r_writebatch, finalize_writebatch);
-    UNPROTECT(1);
-    return r_writebatch;
-}
-
-SEXP rbedrock_writebatch_destroy(SEXP r_writebatch,
-                                        SEXP r_error_if_destroyed) {
-    bool error_if_destroyed = scalar_logical(r_error_if_destroyed);
-
-    leveldb_writebatch_t *writebatch = get_external_address(r_writebatch,
-        error_if_destroyed, NULL);
-
-    if(writebatch != NULL) {
-        leveldb_writebatch_destroy(writebatch);
-    }
-    R_ClearExternalPtr(r_writebatch);
-
-    return ScalarLogical(writebatch != NULL);
-}
-
-SEXP rbedrock_writebatch_clear(SEXP r_writebatch) {
-    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
-    leveldb_writebatch_clear(writebatch);
-    return R_NilValue;
-}
-
-SEXP rbedrock_writebatch_put(SEXP r_writebatch, SEXP r_key,
-                                    SEXP r_value) {
-    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
-    const char *key_data = NULL, *value_data = NULL;
-    size_t key_len = get_key(r_key, &key_data),
-           value_len = get_value(r_value, &value_data);
-    leveldb_writebatch_put(writebatch, key_data, key_len, value_data,
-                           value_len);
-    return R_NilValue;
-}
-
-SEXP rbedrock_writebatch_mput(SEXP r_writebatch, SEXP r_key,
-                                     SEXP r_value) {
-
-    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
-    const char **key_data = NULL;
-    size_t *key_len = NULL;
-    size_t num_key = get_keys(r_key, &key_data, &key_len);
-
-    const bool value_is_string = TYPEOF(r_value) == STRSXP;
-    if(!value_is_string && TYPEOF(r_value) != VECSXP) {
-        Rf_error("Expected a character vector or list for 'value'");
-    }
-    if((size_t)length(r_value) != num_key) {
-        Rf_error("Expected %d values but recieved %d", num_key,
-                 length(r_value));
-    }
-    for(size_t i = 0; i < num_key; ++i) {
-        const char *value_data;
-        SEXP el =
-            value_is_string ? STRING_ELT(r_value, i) : VECTOR_ELT(r_value, i);
-        size_t value_len = get_value(el, &value_data);
-        leveldb_writebatch_put(writebatch, key_data[i], key_len[i], value_data,
-                               value_len);
-    }
-
-    return R_NilValue;
-}
-
-SEXP rbedrock_writebatch_delete(SEXP r_writebatch, SEXP r_key) {
-    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
-    const char *key_data = NULL;
-    size_t key_len = get_key(r_key, &key_data);
-    leveldb_writebatch_delete(writebatch, key_data, key_len);
-    return R_NilValue;
-}
-
-SEXP rbedrock_writebatch_mdelete(SEXP r_writebatch, SEXP r_keys) {
-    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
-    const char **key_data = NULL;
-    size_t *key_len = NULL;
-    size_t num_key = get_keys(r_keys, &key_data, &key_len);
-
-    for(size_t i = 0; i < num_key; ++i) {
-        leveldb_writebatch_delete(writebatch, key_data[i], key_len[i]);
-    }
-
-    return R_NilValue;
-}
-
-// NOTE: arguments 2 & 3 transposed with respect to leveldb API
-SEXP rbedrock_db_write(SEXP r_db, SEXP r_writebatch, SEXP r_writeoptions) {
-    leveldb_t *db = get_db_ptr(r_db);
-    leveldb_writebatch_t *writebatch = get_writebatch(r_writebatch);
-
-    char *err = NULL;
-    leveldb_writeoptions_t *writeoptions = create_writeoptions(r_writeoptions);
-    leveldb_write(db, writeoptions, writebatch, &err);
-    leveldb_writeoptions_destroy(writeoptions);
-
-    handle_leveldb_error(err);
-    return R_NilValue;
 }
 
 /**** READOPTIONS ****/

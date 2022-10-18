@@ -95,7 +95,15 @@ has_values <- function(keys, db, readoptions = NULL) {
     rlang::set_names(dat, keys)
 }
 
-#' Write values to a bedrockdb.
+#' @returns `has_values()` returns a logical vector.
+#' @rdname get_data
+#' @export
+has_value <- function(key, db, readoptions = NULL) {
+    rawkey <- chrkeys_to_rawkeys(key)
+    db$exists(rawkey, readoptions)
+}
+
+#' Store values to a bedrockdb.
 #'
 #' @param db A `bedrockdb` object
 #' @param values A list of raw values. If `keys` is missing, the names of `values` will be taken as the keys.
@@ -104,6 +112,9 @@ has_values <- function(keys, db, readoptions = NULL) {
 #' @param key  A key that will be used to store data.
 #' @param value A raw vector that contains the information to be written.
 #' 
+#' @seealso [delete_data] for removing key-values pairs from `db`.
+#' @seealso [write_data] for applying a batch of `put` and `delete` operations to `db`.
+#'
 #' @return An invisible copy of `db`.
 #' @export
 put_data <- function(values, keys, db, writeoptions = NULL) {
@@ -131,18 +142,51 @@ put_value <- function(value, key, db, writeoptions = NULL) {
 #'
 #' @param db A `bedrockdb` object
 #' @param keys A character vector of keys.
-#' @param report A logical indicating whether to generate a report on deleted keys
-#' @param readoptions A `bedrock_leveldb_readoptions` object
+#' @param key A scalar character.
 #' @param writeoptions A `bedrock_leveldb_writeoptions` object
 #'
-#' @return If `report == TRUE`, a logical vector indicating which keys were deleted.
-#' 
 #' @export
-delete_values <- function(keys, db, report = FALSE, readoptions = NULL, writeoptions = NULL) {
+delete_data <- function(keys, db, writeoptions = NULL) {
     rawkeys <- chrkeys_to_rawkeys(keys)
-    ret <- db$delete(rawkeys, report, readoptions, writeoptions)
-    if(!report) {
-        return(invisible(ret))
+    db$mdelete(rawkeys, writeoptions)
+    invisible()
+}
+
+#' @rdname delete_data
+#' @export
+delete_value <- function(key, db, writeoptions = NULL) {
+    vec_assert(key, character(), 1L)
+    rawkey <- chrkeys_to_rawkeys(key)[[1]]
+    db$delete(rawkey, writeoptions)
+    invisible()
+}
+
+#' Write values to a bedrockdb.
+#'
+#' `write_data()` commits a batch of write and delete  
+#'
+#' @param db A `bedrockdb` object
+#' @param values A list of raw values. Use `zap()` or `NULL` to indicate that a value should be delete.
+#' If `keys` is missing, the names of `values` will be taken as the keys.
+#' @param keys A character vector of keys.
+#' @param writeoptions A `bedrock_leveldb_writeoptions` object
+#' 
+#' @return An invisible copy of `db`.
+#' @export
+write_data <- function(values, keys, db, writeoptions = NULL) {
+    if(missing(keys) && is_named(values)) {
+        keys <- names(values)
+    } else {
+        # recycle values if necessary
+        values <- vec_recycle(values, length(keys))
     }
-    ret
+    vec_assert(values, list())
+
+    # convert keys
+    rawkeys <- chrkeys_to_rawkeys(keys)
+    # convert zaps
+    is_z <- purrr::map_lgl(values, rlang::is_zap)
+    values[is_z] <- list(NULL)
+
+    db$write(rawkeys, values, writeoptions)
 }

@@ -138,9 +138,17 @@ R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL, path = NULL,
         db_mput(self$db, keys, values, writeoptions)
         invisible(self)
     },
-    delete = function(keys, report = FALSE, readoptions = NULL, writeoptions = NULL) {
-        db_delete(self$db, keys, report, readoptions, 
-            writeoptions)
+    delete = function(key, writeoptions = NULL) {
+        db_delete(self$db, key, writeoptions)
+        invisible(self)
+    },
+    mdelete = function(keys, writeoptions = NULL) {
+        db_mdelete(self$db, keys, writeoptions)
+        invisible(self)
+    },
+    write = function(keys, values, writeoptions = NULL) {
+        db_write(self$db, keys, values, writeoptions)
+        invisible(self)
     },
     exists = function(key, readoptions = NULL) {
         db_exists(self$db, key, readoptions)
@@ -153,9 +161,6 @@ R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL, path = NULL,
     },
     iterator = function(readoptions = NULL) {
         R6_bedrockdb_iterator$new(self$db, readoptions)
-    },
-    writebatch = function() {
-        R6_bedrockdb_writebatch$new(self$db)
     },
     snapshot = function() {
         db_snapshot(self$db)
@@ -211,40 +216,5 @@ R6_bedrockdb_iterator <- R6::R6Class("rbedrock_db_iterator", public = list(it = 
     },
     value = function(error_if_invalid = FALSE) {
         iter_value(self$it, error_if_invalid)
-    }
-))
-
-R6_bedrockdb_writebatch <- R6::R6Class("rbedrock_db_writebatch", public = list(ptr = NULL, 
-    db = NULL, initialize = function(db) {
-        self$db <- db
-        self$ptr <- writebatch_create()
-    },
-    destroy = function(error_if_destroyed = FALSE) {
-        ret <- writebatch_destroy(self$ptr, error_if_destroyed)
-        invisible(ret)
-    },
-    clear = function() {
-        writebatch_clear(self$ptr)
-        invisible(self)
-    },
-    put = function(key, value) {
-        writebatch_put(self$ptr, key, value)
-        invisible(self)
-    },
-    mput = function(keys, values) {
-        writebatch_mput(self$ptr, keys, values)
-        invisible(self)
-    },
-    delete = function(key) {
-        writebatch_delete(self$ptr, key)
-        invisible(self)
-    },
-    mdelete = function(keys) {
-        writebatch_mdelete(self$ptr, keys)
-        invisible(self)
-    },    
-    write = function(writeoptions = NULL) {
-        db_write(self$db, self$ptr, writeoptions)
-        invisible(self)
     }
 ))

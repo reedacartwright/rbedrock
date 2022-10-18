@@ -3,7 +3,7 @@
 \name{put_data}
 \alias{put_data}
 \alias{put_value}
-\title{Write values to a bedrockdb.}
+\title{Store values to a bedrockdb.}
 \usage{
 put_data(values, keys, db, writeoptions = NULL)
 
@@ -26,5 +26,10 @@ put_value(value, key, db, writeoptions = NULL)
 An invisible copy of \code{db}.
 }
 \description{
-Write values to a bedrockdb.
+Store values to a bedrockdb.
+}
+\seealso{
+\link{delete_data} for removing key-values pairs from \code{db}.
+
+\link{write_data} for applying a batch of \code{put} and \code{delete} operations to \code{db}.
 }
