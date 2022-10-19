@@ -111,13 +111,14 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(
     db = NULL,
     path = NULL,
     levelname = NULL,
-
+    leveldat = NULL,
     initialize = function(path, ...) {
         path <- fs::path_real(.fixup_path(path))
-        namefile <- fs::path(path, "levelname.txt")
-        self$levelname <- readr::read_file(namefile)
+        dat <- read_leveldat(path)
+        self$levelname <- payload(dat$LevelName)
         self$path <- fs::path(path, "db")
         self$db <- bedrock_leveldb_open(self$path, ...)
+        self$leveldat <- dat
     },
     close = function(error_if_closed = FALSE) {
         ret <- bedrock_leveldb_close(self$db, error_if_closed)
