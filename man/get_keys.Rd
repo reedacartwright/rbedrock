@@ -4,7 +4,7 @@
 \alias{get_keys}
 \title{Get a list of keys stored in a bedrockdb.}
 \usage{
-get_keys(prefix = NULL, db, readoptions = NULL)
+get_keys(prefix = NULL, db = the_db(), readoptions = NULL)
 }
 \arguments{
 \item{prefix}{A string specifying chunk prefix or string prefix.}

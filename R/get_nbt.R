@@ -24,7 +24,7 @@
 #'
 #' @export
 get_nbt_data <- function(keys, db, readoptions = NULL, simplify = TRUE) {
-    dat <- get_data(keys = keys, db = db, readoptions = readoptions)
+    dat <- get_data(keys, db, readoptions)
     read_nbt_data(dat, simplify = simplify)
 }
 

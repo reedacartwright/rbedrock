@@ -22,11 +22,14 @@
 #' keys <- get_keys("plain:VILLAGE", db)
 #' close(db)
 #' @export
-get_keys <- function(prefix = NULL, db, readoptions = NULL) {
-    if(missing(db) && is_bedrockdb(prefix)) {
+get_keys <- function(prefix = NULL, db = the_db(), readoptions = NULL) {
+    if(is_bedrockdb(prefix)) {
         db <- prefix
         prefix <- NULL
     }
+
+    db <- maybe_missing(db, the_db())
+    bedrockdb_assert_open(db)
     if(!is_null(prefix)) {
         prefix <- as.character(prefix)
         prefix_raw <- .create_rawkey_prefix(prefix)
@@ -54,6 +57,9 @@ get_keys <- function(prefix = NULL, db, readoptions = NULL) {
 #' @return `get_data()` returns a named-list of raw vectors. `get_value()` returns a raw vector.
 #' @export
 get_data <- function(keys, db, readoptions = NULL) {
+    db <- maybe_missing(db, the_db())
+    bedrockdb_assert_open(db)
+
     if(.is_key_prefix(keys)) {
         starts_with <- .create_rawkey_prefix(as.character(keys))
         dat <- db$mget_prefix(starts_with, readoptions)
@@ -81,6 +87,8 @@ key_prefix <- function(prefix) {
 #' @rdname get_data
 #' @export
 get_value <- function(key, db, readoptions = NULL) {
+    db <- maybe_missing(db, the_db())
+    bedrockdb_assert_open(db)
     vec_assert(key, character(), 1L)
     rawkey <- chrkeys_to_rawkeys(key)[[1]]
     db$get(rawkey, readoptions)
@@ -90,6 +98,8 @@ get_value <- function(key, db, readoptions = NULL) {
 #' @rdname get_data
 #' @export
 has_values <- function(keys, db, readoptions = NULL) {
+    db <- maybe_missing(db, the_db())
+    bedrockdb_assert_open(db)
     rawkeys <- chrkeys_to_rawkeys(keys)
     dat <- db$exists(rawkeys, readoptions)
     rlang::set_names(dat, keys)
@@ -99,6 +109,8 @@ has_values <- function(keys, db, readoptions = NULL) {
 #' @rdname get_data
 #' @export
 has_value <- function(key, db, readoptions = NULL) {
+    db <- maybe_missing(db, the_db())
+    bedrockdb_assert_open(db)
     rawkey <- chrkeys_to_rawkeys(key)
     db$exists(rawkey, readoptions)
 }
@@ -118,6 +130,8 @@ has_value <- function(key, db, readoptions = NULL) {
 #' @return An invisible copy of `db`.
 #' @export
 put_data <- function(values, keys, db, writeoptions = NULL) {
+    db <- maybe_missing(db, the_db())
+    bedrockdb_assert_open(db)
     if(missing(keys) && is_named(values)) {
         # if keys is missing use names from values
         keys <- names(values)
@@ -133,6 +147,8 @@ put_data <- function(values, keys, db, writeoptions = NULL) {
 #' @rdname put_data
 #' @export
 put_value <- function(value, key, db, writeoptions = NULL) {
+    db <- maybe_missing(db, the_db())
+    bedrockdb_assert_open(db)
     vec_assert(key, character(), 1L)
     rawkey <- chrkeys_to_rawkeys(key)[[1]]
     db$put(rawkey, value, writeoptions)
@@ -147,6 +163,8 @@ put_value <- function(value, key, db, writeoptions = NULL) {
 #'
 #' @export
 delete_data <- function(keys, db, writeoptions = NULL) {
+    db <- maybe_missing(db, the_db())
+    bedrockdb_assert_open(db)
     rawkeys <- chrkeys_to_rawkeys(keys)
     db$mdelete(rawkeys, writeoptions)
     invisible()
@@ -155,6 +173,8 @@ delete_data <- function(keys, db, writeoptions = NULL) {
 #' @rdname delete_data
 #' @export
 delete_value <- function(key, db, writeoptions = NULL) {
+    db <- maybe_missing(db, the_db())
+    bedrockdb_assert_open(db)
     vec_assert(key, character(), 1L)
     rawkey <- chrkeys_to_rawkeys(key)[[1]]
     db$delete(rawkey, writeoptions)
@@ -174,6 +194,8 @@ delete_value <- function(key, db, writeoptions = NULL) {
 #' @return An invisible copy of `db`.
 #' @export
 write_data <- function(values, keys, db, writeoptions = NULL) {
+    db <- maybe_missing(db, the_db())
+    bedrockdb_assert_open(db)
     if(missing(keys) && is_named(values)) {
         keys <- names(values)
     } else {

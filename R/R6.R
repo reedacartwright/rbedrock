@@ -103,6 +103,93 @@ close_all_bedrockdb <- function(x) {
     .Call(rbedrock_closeall)
 }
 
+#' Attach a bedrockdb globally
+#'
+#' @description
+#'
+#'  * `attach_db()` assigns a `bedrockdb` to a global variable. This global variable will be
+#' used as the default `db` for functions that load and store values if their `db` argument
+#' is missing.
+#'
+#'  * `the_db()` returns the current default db.
+#' 
+#'  * `local_db()` temporarily sets `the_db` for the duration of a stack
+#'   frame (by default the current one). `the_db` is set back to its
+#'   old value when the frame returns.
+#' 
+#'  * `with_db()` changes `the_db` while an expression is
+#'   evaluated. `db` is restored when the expression returns.
+#'
+#' @param db A `bedrockdb`.
+#' @param .expr An expression to evaluate with temporary db.
+#' @param .frame The environment of a stack frame which defines the
+#'   scope of the temporary options. When the frame returns, the
+#'   options are set back to their original values.
+#'
+#' @examples
+#' # Load database
+#' dbpath <- rbedrock_example_world("example1.mcworld")
+#' db <- bedrockdb(dbpath)
+#' 
+#' \dontrun{
+#' # This will fail because no db is specified.
+#' keys <- get_keys()
+#' }
+#' # Attach a default db for database commands.
+#' attach_db(db)
+#'
+#' # Get all keys. (This now works.)
+#' keys <- get_keys()
+#' 
+#' # Detach it.
+#' attach_db()
+#'
+#' # Use local_db to attach a db locally inside a function
+#' f <- function(db) {
+#'   local_db(db)
+#'   get_keys()
+#' }
+#' 
+#' # Evaluate an expression with a db attached temporarily.
+#' with_db(get_keys(), db = db)
+#'
+#' # Clean up.
+#' close(db)
+#' fs::dir_delete(dbpath)
+#'
+#' @export
+attach_db <- function(db) {
+    rlang::push_options(rbedrock.the_db = maybe_missing(db))
+}
+
+#' @rdname attach_db
+#' @export
+local_db <- function(db, .frame = caller_env()) {
+    rlang::local_options(rbedrock.the_db = db, .frame = .frame)
+}
+
+#' @rdname attach_db
+#' @export
+with_db <- function(.expr, db) {
+    rlang::with_options(.expr, rbedrock.the_db = db)
+}
+
+#' @rdname attach_db
+#' @export
+the_db <- function() {
+    rlang::peek_option("rbedrock.the_db")
+}
+
+bedrockdb_assert_open <- function(db, arg = caller_arg(db)) {
+    if(is_missing(db)) {
+        abort(str_glue("argument `{arg}` is missing, with no default"))
+    }
+    if(!is_bedrockdb(db) || !(db$is_open())) {
+        abort(str_glue("`{arg}` is not an open bedrockdb"))
+    }
+    invisible(TRUE)
+}
+
 #' @importFrom R6 R6Class
 R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL, path = NULL, levelname = NULL, 
     initialize = function(path, ...) {

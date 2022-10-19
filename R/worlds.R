@@ -12,16 +12,21 @@ NULL
 #' `options(rbedrock.worlds_dir_path = "custom/path")` to customize the path
 #' as needed.
 #'
-#' @param default If `TRUE`, return most likely world path on the system.
+#' @param force_default If `TRUE`, return most likely world path on the system.
 #'
 #' @rdname minecraft_worlds
 #' @export
-worlds_dir_path <- function(default = FALSE) {
-    if(isTRUE(default)) {
-        .worlds_dir_path_def()
-    } else {
-        rbedrock_opt("worlds_dir_path")
+worlds_dir_path <- function(force_default = FALSE) {
+    opt <- getOption("rbedrock.worlds_dir_path")
+    if(is_null(opt) || isTRUE(force_default)) {
+        if (.Platform$OS.type == "windows") {
+            datadir <- rappdirs::user_data_dir("Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\LocalState","")
+        } else {
+            datadir <- rappdirs::user_data_dir("mcpelauncher")
+        }
+        opt <- fs::path_abs(fs::path(datadir, "games/com.mojang/minecraftWorlds"))        
     }
+    opt
 }
 
 #' @description
@@ -212,7 +217,7 @@ get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
     "k", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z")
 
 .rand_world_id <- function() {
-    opt <- rbedrock_opt("rand_world_id")
+    opt <- getOption("rbedrock.rand_world_id")
     if(opt == "pretty") {
         return(.rand_world_id_pretty())
     } else if(opt == "mcpe") {
