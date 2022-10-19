@@ -151,7 +151,7 @@ static leveldb_t *get_db_ptr(SEXP r_db) {
 
 static int close_handle_impl(bedrockdb_handle_t *handle) {
     if(!handle) {
-        return 0;
+        return -1;
     }
     /* Remove this handle from the list of open handles */
     if(handle->slot < MAX_HANDLES) {
@@ -224,7 +224,7 @@ static int close_handle_impl(bedrockdb_handle_t *handle) {
     R_ClearExternalPtr(handle->r_ext_ptr);
     R_Free(handle);
 
-    return 1;
+    return 0;
 }
 
 static void finalize_handle(SEXP r_ptr) {
