@@ -71,9 +71,9 @@ fi
 
 echo set CMAKE_BIN=$CMAKE_BIN
 
-echo ==== Configuring src/leveldb-mcpe via CMake ====
+echo ==== Configuring src/vendor/leveldb-mcpe via CMake ====
 
-build_dir=src/leveldb-mcpe/build
+build_dir=src/vendor/leveldb-mcpe/build
 
 (mkdir -p "${build_dir}" &&
   cd "${build_dir}" &&

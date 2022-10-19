@@ -84,7 +84,7 @@ read_data3d_value <- function(rawdata) {
     vec_assert(rawdata, raw())    
     h <- readBin(rawdata[1:512], integer(), n=256L, size=2L, endian="little", signed = TRUE)
     dim(h) <- c(16L,16L)
-    b <- .Call(Cread_chunk_biomes, rawdata[-(1:512)])
+    b <- .Call(rbedrock_chunk_read_biomes, rawdata[-(1:512)])
     # trim trailing null values
     pos <- purrr::detect_index(b, ~!is_null(.$values), .dir = "backward")
     if(pos == 0) {
@@ -151,6 +151,6 @@ write_data3d_value <- function(height_map, biome_map) {
     }
 
     h <- writeBin(height_map, raw(), size = 2L, endian="little")
-    b <- .Call(Cwrite_chunk_biomes, values_list, palette_list)
+    b <- .Call(rbedrock_chunk_write_biomes, values_list, palette_list)
     c(h,b)
 }

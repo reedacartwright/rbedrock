@@ -6,7 +6,7 @@
 static SEXP g_palette_symbol = NULL;
 static SEXP g_offset_symbol = NULL;
 
-void rbedrock_init_blocks() {
+void rbedrock_init_chunk() {
     g_palette_symbol = Rf_install("palette");
     g_offset_symbol = Rf_install("offset");
 }
@@ -16,7 +16,7 @@ void rbedrock_init_blocks() {
 // https://gist.github.com/Tomcc/a96af509e275b1af483b25c543cfbf37
 // [version:byte][num_storages:byte][block storage1]...[blockStorageN]
 
-SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char *end,
+SEXP rbedrock_chunk_read_palette_ids(const unsigned char **buffer, const unsigned char *end,
     bool *is_persistent, int *palette_size) {
     const unsigned char *p = *buffer;
     if(end-p < 1) {
@@ -93,7 +93,7 @@ static int calc_bits_per_block(int sz) {
     return p[i];
 }
 
-SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t palette_size) {
+SEXP rbedrock_chunk_write_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t palette_size) {
     // Check Data
     if(!Rf_isInteger(r_values)) {
         return_subchunk_error();
@@ -159,7 +159,7 @@ SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t pale
     return r_ret;
 }
 
-SEXP read_subchunk_blocks(SEXP r_value) {
+SEXP rbedrock_chunk_read_subchunk(SEXP r_value) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
     }
@@ -194,7 +194,7 @@ SEXP read_subchunk_blocks(SEXP r_value) {
     for(int i = 0; i < num_layers; ++i) {
         bool is_persistent;
         int palette_size;
-        SEXP r_blocks = PROTECT(read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
+        SEXP r_blocks = PROTECT(rbedrock_chunk_read_palette_ids(&p, end, &is_persistent, &palette_size));
         if(is_persistent == false) {
             // Chunk storage is runtime
             error_return("Subchunk does not have Persistent IDs.");
@@ -206,7 +206,7 @@ SEXP read_subchunk_blocks(SEXP r_value) {
             if(p >= end) {
                 return_subchunk_error();
             }
-            r_val = PROTECT(read_nbt_value(&p, end));
+            r_val = PROTECT(rbedrock_nbt_read_value(&p, end));
             if(Rf_isNull(r_val)) {
                 // We should not encounter a 0 tag in this context
                 return_nbt_error_tag(0);
@@ -230,7 +230,7 @@ SEXP read_subchunk_blocks(SEXP r_value) {
     return r_ret;
 }
 
-SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
+SEXP rbedrock_chunk_write_subchunk(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
     R_xlen_t num_layers = XLENGTH(r_values);
     if(XLENGTH(r_palettes) != num_layers) {
         return_subchunk_error();
@@ -243,9 +243,9 @@ SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP 
             return_subchunk_error();
         }
         // Write the palette ids using persistent storage
-        SET_VECTOR_ELT(r_retv, 2*i, write_subchunk_palette_ids(r_layer, true, XLENGTH(r_pal)));
+        SET_VECTOR_ELT(r_retv, 2*i, rbedrock_chunk_write_palette_ids(r_layer, true, XLENGTH(r_pal)));
         // write palette
-        SET_VECTOR_ELT(r_retv, 2*i+1, write_nbt(r_pal));
+        SET_VECTOR_ELT(r_retv, 2*i+1, rbedrock_nbt_write(r_pal));
     }
 
     int version = Rf_asInteger(r_version);
@@ -276,7 +276,7 @@ SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP 
     return r_ret;
 }
 
-SEXP read_chunk_biomes(SEXP r_value) {
+SEXP rbedrock_chunk_read_biomes(SEXP r_value) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
     }
@@ -295,7 +295,7 @@ SEXP read_chunk_biomes(SEXP r_value) {
         // construct a list to hold this subchunk
         const char *names[] = {"values", "palette", ""};
         SEXP r_val = PROTECT(Rf_mkNamed(VECSXP, names));
-        SEXP r_values = PROTECT(read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
+        SEXP r_values = PROTECT(rbedrock_chunk_read_palette_ids(&p, end, &is_persistent, &palette_size));
         SET_VECTOR_ELT(r_val, 0, r_values);
         UNPROTECT(1);
         if(palette_size > 0) {
@@ -322,7 +322,7 @@ SEXP read_chunk_biomes(SEXP r_value) {
     return Rf_PairToVectorList(CDR(r_ret));
 }
 
-SEXP write_chunk_biomes(SEXP r_values, SEXP r_palettes) {
+SEXP rbedrock_chunk_write_biomes(SEXP r_values, SEXP r_palettes) {
     R_xlen_t num_subchunks = XLENGTH(r_values);
     if(XLENGTH(r_palettes) != num_subchunks) {
         return_subchunk_error();
@@ -332,7 +332,7 @@ SEXP write_chunk_biomes(SEXP r_values, SEXP r_palettes) {
         SEXP r_val = VECTOR_ELT(r_values, i);
         SEXP r_pal = VECTOR_ELT(r_palettes, i);
         // Write the palette ids using runtime storage
-        SET_VECTOR_ELT(r_retv, 2*i, write_subchunk_palette_ids(r_val, false, XLENGTH(r_pal)));
+        SET_VECTOR_ELT(r_retv, 2*i, rbedrock_chunk_write_palette_ids(r_val, false, XLENGTH(r_pal)));
         // write palette
         if(!Rf_isInteger(r_pal)) {
             return_subchunk_error();

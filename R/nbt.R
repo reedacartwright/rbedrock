@@ -499,14 +499,14 @@ to_rnbt_payload.rbedrock_nbt_list <- function(x) {
 #' @keywords internal
 #' @export
 read_rnbt <- function(rawdata) {
-    .Call(Cread_nbt, rawdata)
+    .Call(rbedrock_nbt_read, rawdata)
 }
 
 #' @rdname rnbt
 #' @keywords internal
 #' @export
 write_rnbt <- function(object) {
-    .Call(Cwrite_nbt, object)
+    .Call(rbedrock_nbt_write, object)
 }
 
 # printing ---------------------------------------------------------------------

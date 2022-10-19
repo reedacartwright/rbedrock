@@ -25,7 +25,7 @@ NULL
 #' @export
 bedrock_random_seed <- function(value) {
     value <- as.integer(value)
-    .Call(Cmcpe_random_seed, value)
+    .Call(rbedrock_random_seed, value)
 }
 
 #' @description
@@ -37,7 +37,7 @@ bedrock_random_seed <- function(value) {
 #' @rdname bedrock_random
 #' @export
 bedrock_random_state <- function(new_state = NULL) {
-    invisible(.Call(Cmcpe_random_state, new_state))
+    invisible(.Call(rbedrock_random_state, new_state))
 }
 
 #' @description
@@ -57,7 +57,7 @@ bedrock_random_get_uint <- function(n, max) {
     if(missing(max)) {
         max <- NULL
     }
-    .Call(Cmcpe_random_get_uint, n, max)
+    .Call(rbedrock_random_get_uint, n, max)
 }
 
 #' @description
@@ -80,7 +80,7 @@ bedrock_random_get_int <- function(n, min, max) {
         }
     }
 
-    .Call(Cmcpe_random_get_int, n, min, max)
+    .Call(rbedrock_random_get_int, n, min, max)
 }
 
 #' @description
@@ -103,7 +103,7 @@ bedrock_random_get_float <- function(n, min, max) {
         }
     }
 
-    .Call(Cmcpe_random_get_float, n, min, max)
+    .Call(rbedrock_random_get_float, n, min, max)
 }
 
 #' @description
@@ -114,7 +114,7 @@ bedrock_random_get_float <- function(n, min, max) {
 #' @export
 bedrock_random_get_double <- function(n) {
     n <- as.integer(n)
-    .Call(Cmcpe_random_get_double, n)
+    .Call(rbedrock_random_get_double, n)
 }
 
 #' Random Number Seeds for Minecraft
@@ -151,5 +151,5 @@ bedrock_random_create_seed <- function(x, z, a, b, salt, type) {
     b <- as.integer(b)
     salt <- as.integer(salt)
     type <- as.integer(type)
-    .Call(Cmcpe_random_create_seed, x, z, a, b, salt, type)
+    .Call(rbedrock_random_create_seed, x, z, a, b, salt, type)
 }

@@ -150,6 +150,10 @@ int main(int argc, char** argv) {
   leveldb_options_t* options;
   leveldb_readoptions_t* roptions;
   leveldb_writeoptions_t* woptions;
+  leveldb_decompress_allocator_t* dca;
+  leveldb_compressor_t *raw_compressor;
+  leveldb_compressor_t *zlib_compressor;
+
   char* dbname;
   char* err = NULL;
   int run = -1;
@@ -176,11 +180,18 @@ int main(int argc, char** argv) {
   leveldb_options_set_block_size(options, 1024);
   leveldb_options_set_block_restart_interval(options, 8);
   leveldb_options_set_max_file_size(options, 3 << 20);
-  leveldb_options_set_compression(options, leveldb_no_compression);
+
+  raw_compressor = leveldb_compressor_create(leveldb_zlib_raw_compression, -1);
+  zlib_compressor = leveldb_compressor_create(leveldb_zlib_compression, -1);
+
+  leveldb_options_set_compressor(options, 0, raw_compressor);
+  leveldb_options_set_compressor(options, 1, zlib_compressor);
 
   roptions = leveldb_readoptions_create();
+  dca = leveldb_decompress_allocator_create();
   leveldb_readoptions_set_verify_checksums(roptions, 1);
   leveldb_readoptions_set_fill_cache(roptions, 0);
+  leveldb_readoptions_set_decompress_allocator(roptions, dca);
 
   woptions = leveldb_writeoptions_create();
   leveldb_writeoptions_set_sync(woptions, 1);
@@ -374,6 +385,9 @@ int main(int argc, char** argv) {
   leveldb_options_destroy(options);
   leveldb_readoptions_destroy(roptions);
   leveldb_writeoptions_destroy(woptions);
+  leveldb_compressor_destroy(raw_compressor);
+  leveldb_compressor_destroy(zlib_compressor);
+  leveldb_decompress_allocator_destroy(dca);
   leveldb_free(dbname);
   leveldb_cache_destroy(cache);
   leveldb_comparator_destroy(cmp);

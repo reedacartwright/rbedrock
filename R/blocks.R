@@ -130,18 +130,18 @@ chunk_origin <- function(x) {
         abort("`value` must have an origin.")
     }
     
-    bottom <- origin[2] %/% 16L
     
-    # identify existing chunk data.
-    old_keys <- get_keys(key_prefix(prefix), db = db)
-    
+    # schedule deletion of all old keys
+    old_keys <- str_c(prefix, ":", -4:19)
+    data <- rep_named(old_keys, list(NULL))
+
     # construct new chunk data
-    data <- list()
+    bottom <- origin[2] %/% 16L
     subtags <- seq.int(bottom, length.out=(d[2] %/% 16L))
     new_keys <- str_c(prefix, ":", subtags)
     for(s in seq_along(subtags)) {
         subchunk <- value[,(s-1L)*16L+(1:16),]
-        # skip empty chunks
+        # skip empty subchunks
         if(all(subchunk == "minecraft:air")) {
             next
         }
@@ -149,15 +149,7 @@ chunk_origin <- function(x) {
         data[[new_keys[s]]] <- write_subchunk_blocks_value(subchunk,
             version=version, missing_offset=subtags[s])
     }
-    put_keys <- names(data)
-    del_keys <- old_keys[!(old_keys %in% put_keys)]
-    # write as a batch
-    batch <- db$writebatch()
-    batch$mdelete(chrkeys_to_rawkeys(del_keys))
-    batch$mput(chrkeys_to_rawkeys(put_keys), data)
-    batch$write()
-    # clean up
-    batch$destroy()
+    write_data(data, db = db)
 
     invisible()
 }
@@ -408,7 +400,7 @@ read_subchunk_layers_value <- function(rawdata) {
         return(NULL)
     }
     vec_assert(rawdata, raw())
-    x <- .Call(Cread_subchunk_blocks, rawdata)
+    x <- .Call(rbedrock_chunk_read_subchunk, rawdata)
     x <- purrr::modify(x, function(y) {
         y$palette <- from_rnbt(y$palette)
         y
@@ -450,7 +442,7 @@ write_subchunk_layers_value <- function(object, version=9L, missing_offset=NA_in
         to_rnbt(x[["palette"]])
     })
 
-    .Call(Cwrite_subchunk_blocks, values, palette, version, offset)
+    .Call(rbedrock_chunk_write_subchunk, values, palette, version, offset)
 }
 
 .block_string <- function(x, names_only = FALSE) {

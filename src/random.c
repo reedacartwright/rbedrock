@@ -16,7 +16,7 @@
 
 #include <stdio.h>
 
-static void mcpe_random_seed_impl(uint32_t value);
+static void rbedrock_random_seed_impl(uint32_t value);
 
 /*
  * We have an array of 624 32-bit values, and there are 31 unused bits, so we
@@ -30,19 +30,19 @@ static const uint32_t MAGIC = 0x9908b0df;
 
 // State for a singleton Mersenne Twister. If you want to make this into a
 // class, these are what you need to isolate.
-struct mcpe_random_ {
+struct rbedrock_random_ {
     uint32_t mt[SIZE];
     uint32_t mt_tempered[SIZE];
     uint32_t index;
 };
 
-typedef struct mcpe_random_ mcpe_random_t;
+typedef struct rbedrock_random_ rbedrock_random_t;
 
-static mcpe_random_t g_state;
+static rbedrock_random_t g_state;
 
 
 void rbedrock_init_random() {
-    mcpe_random_seed_impl(5489u);
+    rbedrock_random_seed_impl(5489u);
 }
 
 #define M32(x) (0x80000000 & x) // 32nd MSB
@@ -53,7 +53,7 @@ void rbedrock_init_random() {
     g_state.mt[i] = g_state.mt[expr] ^ (y >> 1) ^ ((((int32_t)((y) << 31)) >> 31) & MAGIC); \
     ++i;
 
-static void mcpe_random_update_state() {
+static void rbedrock_random_update_state() {
     size_t i = 0;
     uint32_t y;
 
@@ -87,15 +87,15 @@ static void mcpe_random_update_state() {
     g_state.index = 0;
 }
 
-static uint32_t mcpe_random_next() {
+static uint32_t rbedrock_random_next() {
     if ( g_state.index == SIZE ) {
-        mcpe_random_update_state();
+        rbedrock_random_update_state();
         g_state.index = 0;
     }
     return g_state.mt_tempered[g_state.index++];
 }
 
-static void mcpe_random_seed_impl(uint32_t value) {
+static void rbedrock_random_seed_impl(uint32_t value) {
     g_state.mt[0] = value;
     g_state.index = SIZE;
 
@@ -104,19 +104,19 @@ static void mcpe_random_seed_impl(uint32_t value) {
     }  
 }
 
-SEXP mcpe_random_seed(SEXP r_seed) {
-    mcpe_random_seed_impl(Rf_asInteger(r_seed));
+SEXP rbedrock_random_seed(SEXP r_seed) {
+    rbedrock_random_seed_impl(Rf_asInteger(r_seed));
     return R_NilValue;
 }
 
 // returns g_state as a raw vector
 // can set it as well
-SEXP mcpe_random_state(SEXP r_state) {
+SEXP rbedrock_random_state(SEXP r_state) {
     SEXP ret = PROTECT(Rf_allocVector(RAWSXP, sizeof(g_state)));
     memcpy(RAW(ret), &g_state, sizeof(g_state));
     if(!Rf_isNull(r_state)) {
         if((TYPEOF(r_state) != RAWSXP) || XLENGTH(r_state) != sizeof(g_state)) {
-            Rf_error("mcpe_random_state: value 'state' is not a raw vector of length %d.", sizeof(g_state));
+            Rf_error("rbedrock_random_state: value 'state' is not a raw vector of length %d.", sizeof(g_state));
             return R_NilValue;
         }
         memcpy(&g_state, RAW(r_state), sizeof(g_state));
@@ -126,19 +126,19 @@ SEXP mcpe_random_state(SEXP r_state) {
 }
 
 // fill a numeric vector with unsigned integers
-SEXP mcpe_random_get_uint(SEXP r_n, SEXP r_max) {
+SEXP rbedrock_random_get_uint(SEXP r_n, SEXP r_max) {
     size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(REALSXP, num));
     double *p = REAL(ret);
     if(Rf_isNull(r_max)) {
         for(size_t i=0; i < num; ++i) {
-            p[i] = (double)mcpe_random_next();
+            p[i] = (double)rbedrock_random_next();
 
         }
     } else {
         uint32_t maxval = Rf_asInteger(r_max);
         for(size_t i=0; i < num; ++i) {
-            uint32_t u = mcpe_random_next() % maxval;
+            uint32_t u = rbedrock_random_next() % maxval;
             p[i] = (double)u;
         }
     }
@@ -148,7 +148,7 @@ SEXP mcpe_random_get_uint(SEXP r_n, SEXP r_max) {
 
 
 // fill a numeric vector with integers
-SEXP mcpe_random_get_int(SEXP r_n, SEXP r_min, SEXP r_max) {
+SEXP rbedrock_random_get_int(SEXP r_n, SEXP r_min, SEXP r_max) {
     size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(INTSXP, num));
     int *p = INTEGER(ret);
@@ -159,7 +159,7 @@ SEXP mcpe_random_get_int(SEXP r_n, SEXP r_min, SEXP r_max) {
         for(size_t i=0; i < num; ++i) {
             p[i] = minval;
             if(minval < maxval) {
-                int val = (int)(mcpe_random_next() % width);
+                int val = (int)(rbedrock_random_next() % width);
                 p[i] +=  val;
             }
         }
@@ -169,13 +169,13 @@ SEXP mcpe_random_get_int(SEXP r_n, SEXP r_min, SEXP r_max) {
             if(width == 0) {
                 p[i] = 0;
             } else {
-                int val = (int)(mcpe_random_next() % width);
+                int val = (int)(rbedrock_random_next() % width);
                 p[i] = val;
             }
         }
     } else {
          for(size_t i=0; i < num; ++i) {
-            int val = (int)(mcpe_random_next() >> 1);
+            int val = (int)(rbedrock_random_next() >> 1);
             p[i] = val;
         }       
     }
@@ -183,24 +183,24 @@ SEXP mcpe_random_get_int(SEXP r_n, SEXP r_min, SEXP r_max) {
     return ret;
 }
 
-SEXP mcpe_random_get_double(SEXP r_n) {
+SEXP rbedrock_random_get_double(SEXP r_n) {
     size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(REALSXP, num));
     double *p = REAL(ret);
     for(size_t i=0; i < num; ++i) {
-        p[i] = mcpe_random_next()/4294967296.0;
+        p[i] = rbedrock_random_next()/4294967296.0;
     }
     UNPROTECT(1);
     return ret;    
 }
 
 // fill a numeric vector with floats
-SEXP mcpe_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max) {
+SEXP rbedrock_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max) {
     size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(REALSXP, num));
     double *p = REAL(ret);
     for(size_t i=0; i < num; ++i) {
-        p[i] = (float)(mcpe_random_next()/4294967296.0);
+        p[i] = (float)(rbedrock_random_next()/4294967296.0);
     }
 
     if(!Rf_isNull(r_max) && !Rf_isNull(r_min)) {
@@ -220,7 +220,7 @@ SEXP mcpe_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max) {
     return ret;
 }
 
-SEXP mcpe_random_create_seed(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt, SEXP r_type) {
+SEXP rbedrock_random_create_seed(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt, SEXP r_type) {
     unsigned int x = Rf_asInteger(r_x);
     unsigned int z = Rf_asInteger(r_z);
     unsigned int a = Rf_asInteger(r_a);
