@@ -134,7 +134,7 @@ NULL
 #' @export
 get_actors_data <- function(x, z, dimension, db) {
     keys <- get_acdig_data(x, z, dimension, db)
-    purrr::map(keys, ~get_nbt_data(keys = ., db = db))
+    purrr::map(keys, get_nbt_data, db = db)
 }
 
 #' @rdname Actors
