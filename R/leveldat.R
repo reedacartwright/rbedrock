@@ -17,9 +17,12 @@
 #' dat <- read_leveldat(dbpath)
 #' dat$hasBeenLoadedInCreative <- FALSE
 #' write_leveldat(dat, dbpath)
-#' 
+#'
 #' @export
 read_leveldat <- function(path, old = FALSE) {
+    if(is_bedrockdb(path)) {
+        path <- fs::path_dir(path$path)
+    }
     path <- .fixup_path(path, verify = TRUE)
     # if path is a directory append filename
     if (fs::is_dir(path)) {
@@ -38,6 +41,9 @@ read_leveldat <- function(path, old = FALSE) {
 #' @export
 #' @rdname read_leveldat
 write_leveldat <- function(object, path, old = FALSE, version = 8L) {
+    if(is_bedrockdb(path)) {
+        path <- fs::path_dir(path$path)
+    }
     path <- .fixup_path(path)
     # if path is a directory append filename
     if (fs::is_dir(path)) {
