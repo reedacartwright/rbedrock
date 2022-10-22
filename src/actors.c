@@ -51,14 +51,18 @@ SEXP rbedrock_actor_make_storagekeys(SEXP ids) {
         Rf_error("argument is not an integer64");
     }
     R_xlen_t len = XLENGTH(ids);
-    SEXP result = PROTECT(Rf_allocVector(RAWSXP, len*sizeof(double)));
+    SEXP result = PROTECT(Rf_allocVector(VECSXP, len));
     for(R_xlen_t i = 0; i < len; ++i) {
         uint64_t u;
-        memcpy(&u, &REAL(result)[i], 8);
+        memcpy(&u, &REAL(ids)[i], 8);
         uint64_t lo = (uint32_t)u;
         u = 2*lo - u; // negate the upper 32-bit of u while keeping the lower bits unchanged
         u = __builtin_bswap64(u); // probably not 100% portable
-        memcpy(RAW(result)+8*i, &u, 8);
+
+        // store result
+        SET_VECTOR_ELT(result, i, Rf_allocVector(RAWSXP, 8));
+        SEXP elt = VECTOR_ELT(result, i);
+        memcpy(RAW(elt), &u, 8);
     }
 
     UNPROTECT(1);

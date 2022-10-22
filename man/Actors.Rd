@@ -4,22 +4,45 @@
 \alias{Actors}
 \alias{get_actors_data}
 \alias{get_actors_value}
+\alias{put_actors_data}
+\alias{put_actors_value}
 \title{Read and write Actor data}
 \usage{
 get_actors_data(x, z, dimension, db)
 
 get_actors_value(x, z, dimension, db)
+
+put_actors_data(values, x, z, dimension, db)
+
+put_actors_value(value, x, z, dimension, db)
 }
 \arguments{
 \item{x, z, dimension}{Chunk coordinates to extract data from.
-\code{x} can also be a character vector of db keys.
-#@param value A character vector.
-#@param values A list of character vectors. If named, the names represent db
-#keys.
-#@param rawdata A raw vector.}
+\code{x} can also be a character vector of db keys.}
 
 \item{db}{A bedrockdb object.}
+
+\item{values}{A list of character vectors.
+If \code{x} is missing, the names of \code{values} will be taken as the keys.}
+
+\item{value}{A list of nbt actors data}
 }
 \description{
-Read and write Actor data
+After 1.18.30, the nbt data of each actor is saved independently in the database,
+using a key with a prefix and a 16-character storage key: 'actor:0123456789abcdef'.
+The keys of all actors in a chunk are saved in an \link{ActorDigest} record, with format
+'acdig:x:z:dimension'.
+}
+\details{
+\code{get_actors_value()} loads Actors data for a single chunk in \code{db}.
+\code{get_actors_data()} loads Actors data from multiple chunks in \code{db}.
+
+\code{put_actors_value()} and \code{put_actors_data()} store one/multiple chunks
+Actors data into \code{db} and update the chunks' ActorDigests.
+When storing Actors data, an actor's storage key will be recalculated from
+the actor's \code{UniqueID}. The actor's position and dimension are not verified
+to be in the chunk it is assigned to.
+}
+\seealso{
+\link{ActorDigest}, \link{Entity}
 }

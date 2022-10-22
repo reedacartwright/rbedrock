@@ -24,3 +24,5 @@
 #include <Rinternals.h>
 #include <stdbool.h>
 
+SEXP rbedrock_actor_make_uniqueids(SEXP low_counter, SEXP high_counter);
+SEXP rbedrock_actor_make_storagekeys(SEXP ids);

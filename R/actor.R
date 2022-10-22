@@ -9,8 +9,7 @@ NULL
 
 #' @description
 #' `get_acdig_data()` and `get_acdig_value()` load ActorDigest
-#' data from `db`. They return `NULL` for any key that is not
-#' does not represent ActorDigest data. `get_acdig_value()` supports loading
+#' data from `db`.  `get_acdig_value()` supports loading
 #' only a single value.
 #'
 #' `put_acdig_data()` and `put_acdig_value()` store ActorDigest data into `db`.
@@ -24,14 +23,19 @@ NULL
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
 #' @param value A character vector.
-#' @param values A list of character vectors. If named, the names represent db
-#'    keys.
+#' @param values A list of character vectors.
+#' If `x` is missing, the names of `values` will be taken as the keys.
 #' @param rawdata A raw vector.
 #'
 #' @return `get_acdig_values()` returns a vector of actor keys.
 #' `get_acdig_data()` returns a named list of the of the values
 #' returned by `get_acdig_value()`.
 #'
+#' @seealso [Actors], [Entity]
+#'
+#' @name ActorDigest
+NULL
+
 #' @rdname ActorDigest
 #' @export
 get_acdig_data <- function(x, z, dimension, db) {
@@ -116,16 +120,30 @@ create_acdig_keys <- function(x, z, dimension) {
     str_c("acdig", args[[1]], args[[2]], args[[3]], sep = ":")
 }
 
-
 #' Read and write Actor data
+#'
+#' After 1.18.30, the nbt data of each actor is saved independently in the database,
+#' using a key with a prefix and a 16-character storage key: 'actor:0123456789abcdef'.
+#' The keys of all actors in a chunk are saved in an [ActorDigest] record, with format
+#' 'acdig:x:z:dimension'.
+#'
+#' `get_actors_value()` loads Actors data for a single chunk in `db`.
+#' `get_actors_data()` loads Actors data from multiple chunks in `db`.
+#'
+#' `put_actors_value()` and `put_actors_data()` store one/multiple chunks
+#' Actors data into `db` and update the chunks' ActorDigests.
+#' When storing Actors data, an actor's storage key will be recalculated from
+#' the actor's `UniqueID`. The actor's position and dimension are not verified
+#' to be in the chunk it is assigned to.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
-#' #@param value A character vector.
-#' #@param values A list of character vectors. If named, the names represent db
-#' #keys.
-#' #@param rawdata A raw vector.
+#' @param value A list of nbt actors data
+#' @param values A list of character vectors.
+#' If `x` is missing, the names of `values` will be taken as the keys.
+#'
+#' @seealso [ActorDigest], [Entity]
 #'
 #' @name Actors
 NULL
@@ -142,6 +160,53 @@ get_actors_data <- function(x, z, dimension, db) {
 get_actors_value <- function(x, z, dimension, db) {
     keys <- get_acdig_value(x, z, dimension, db)
     get_nbt_data(keys, db = db)
+}
+
+#' @rdname Actors
+#' @export
+put_actors_data <- function(values, x, z, dimension, db) {
+    dig_keys <- .process_acdig_key_args(x, z, dimension,
+        values = values, assert_validity = TRUE)
+    purrr::map2(values, dig_keys, .put_actors_value_impl, db = db)
+}
+
+#' @rdname Actors
+#' @export
+put_actors_value <- function(value, x, z, dimension, db) {
+    dig_key <- .process_acdig_key_args(x, z, dimension,
+        assert_scalar=TRUE, assert_validity = TRUE)
+    .put_actors_value_impl(value, dig_key, db)
+}
+
+.put_actors_value_impl <- function(value, dig_key, db) {
+    ids <- purrr::map_dbl(value, "UniqueID")
+    class(ids) <- "integer64"
+    storage_keys <- .make_storagekeys(ids)
+    actor_keys <- read_acdig_value(unlist(storage_keys))
+
+    # update storage keys
+    nbt_storage_key <- function(k) {
+        obj <- nbt_raw_string(k)
+        obj <- nbt_compound(StorageKey = obj)
+        obj <- nbt_compound(EntityStorageKeyComponent = obj)
+        obj <- nbt_compound(internalComponents = obj)
+        obj
+    }
+    nbt_dat <- purrr::map(storage_keys, nbt_storage_key)
+    value <- purrr::list_modify(value, !!!nbt_dat)
+
+    dat <- write_nbt_data(value)
+    names(dat) <- actor_keys
+
+    dat[[dig_key]] <- write_acdig_value(actor_keys)
+
+    put_data(dat, db = db)
+
+}
+
+.make_storagekeys <- function(ids) {
+    vec_assert(ids, bit64::integer64())
+    .Call(rbedrock_actor_make_storagekeys, ids)
 }
 
 .is_acdig_key <- function(keys) {
@@ -172,7 +237,7 @@ get_actors_value <- function(x, z, dimension, db) {
     }
     vec_assert(x, character(), size = if (isTRUE(assert_scalar)) 1L else NULL)
     if (isTRUE(assert_validity) && !isTRUE(all(.is_valid_acdig_key(x)))) {
-        abort("Invalid actor key.")
+        abort("Invalid acdig key.")
     }
     x
 }
