@@ -35,7 +35,6 @@ test_that("bedrockdb clears open iterators when closed",{
     fs::dir_delete(dbpath)
 })
 
-
 test_that("bedrockdb clears open snapshots when closed",{
     dbpath <- rbedrock_example_world("example1.mcworld")
     db <- bedrockdb(dbpath)
@@ -76,4 +75,29 @@ test_that("close_all_bedrockdb works", {
     # clean up
     fs::dir_delete(dbpath1)
     fs::dir_delete(dbpath2)
+})
+
+test_that("create_unique_ids works", {
+    epoch <- bit64::as.integer64(-2)
+
+    dbpath <- rbedrock_example_world("example2.mcworld")    
+    db <- bedrockdb(dbpath)
+
+    expect_equal(db$leveldat$worldStartCount, nbt_long(epoch + 2^32))
+
+    u1 <- db$create_unique_ids(5)
+    u2 <- db$create_unique_ids(5)
+    close(db)
+
+    expect_equal(c(u1,u2), (2^32*epoch)+1:10)
+
+    db <- bedrockdb(dbpath)
+    u1 <- db$create_unique_ids(10)
+    u2 <- db$create_unique_ids(10)
+    expect_equal(c(u1,u2), (2^32*(epoch-1))+1:20)
+
+    close(db)
+
+    # clean up
+    fs::dir_delete(dbpath)
 })

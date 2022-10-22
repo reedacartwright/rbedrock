@@ -193,6 +193,7 @@ bedrockdb_assert_open <- function(db, arg = caller_arg(db)) {
 #' @importFrom R6 R6Class
 R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL,
     path = NULL, levelname = NULL, leveldat = NULL,
+    leveldat_is_dirty = FALSE, unique_id = NULL,
     initialize = function(path, ...) {
         path <- fs::path_real(.fixup_path(path))
         dat <- read_leveldat(path)
@@ -202,6 +203,9 @@ R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL,
         self$leveldat <- dat
     },
     close = function(error_if_closed = FALSE) {
+        if(self$leveldat_is_dirty) {
+            write_leveldat(self$leveldat, fs::path_dir(self$path))
+        }
         ret <- db_close(self$db, error_if_closed)
         invisible(ret)
     },
@@ -269,6 +273,17 @@ R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL,
     compact_range = function(start = NULL, limit = NULL) {
         db_compact_range(self$db, start, limit)
         invisible(self)
+    },
+    create_unique_ids = function(n) {
+        if(is_null(self$unique_id)) {
+            cnt <- payload(self$leveldat$worldStartCount %||% nbt_long(0))
+            self$leveldat$worldStartCount <- nbt_long(cnt - 1)
+            self$leveldat_is_dirty <- TRUE
+            self$unique_id <- (cnt - 2^32) * 2^32
+        }
+        ret <- self$unique_id + seq_len(n)
+        self$unique_id <- self$unique_id + n
+        ret
     }
 ))
 

@@ -71,21 +71,13 @@ static void exists_impl(leveldb_t *db, size_t num_key,
                         leveldb_readoptions_t *readoptions, int *found);
 
 // For package management:
-leveldb_readoptions_t *default_readoptions;
-leveldb_writeoptions_t *default_writeoptions;
-leveldb_decompress_allocator_t *default_decompress_allocator;
+leveldb_decompress_allocator_t *default_decompress_allocator = NULL;
 
 void rbedrock_init_db(void) {
-    default_readoptions = leveldb_readoptions_create();
-    default_writeoptions = leveldb_writeoptions_create();
     default_decompress_allocator = leveldb_decompress_allocator_create();
-    leveldb_readoptions_set_decompress_allocator(default_readoptions,
-        default_decompress_allocator);
 }
 
 void rbedrock_cleanup_db(void) {
-    leveldb_readoptions_destroy(default_readoptions);    // #nocov
-    leveldb_writeoptions_destroy(default_writeoptions);  // #nocov
     leveldb_decompress_allocator_destroy(default_decompress_allocator); // #nocov
 }
 
@@ -417,7 +409,9 @@ SEXP rbedrock_db_mget(SEXP r_db, SEXP r_keys, SEXP r_readoptions) {
         char *read = leveldb_get(db, readoptions, key_data[i], key_len[i],
                                  &read_len, &err);
         if(err) {
-            leveldb_free(read);
+            if(read != NULL) {
+                leveldb_free(read);
+            }
             leveldb_readoptions_destroy(readoptions);
             R_ClearExternalPtr(r_ptr);
             handle_leveldb_error(err);
@@ -593,7 +587,7 @@ static void finalize_iterator(SEXP r_ptr) {
         leveldb_iter_destroy(it);
         
         SEXP cell = R_ExternalPtrProtected(r_ptr);
-        if(cell != R_NilValue) {
+        if(!Rf_isNull(cell)) {
             double_list_remove(cell);
         }
     }
@@ -1046,9 +1040,6 @@ bool check_iterator(leveldb_iterator_t *it, SEXP r_error_if_invalid) {
     }
     return valid;
 }
-
-leveldb_readoptions_t *default_readoptions = NULL;
-leveldb_writeoptions_t *default_writeoptions = NULL;
 
 bool iter_key_starts_with(leveldb_iterator_t *it, const char *starts_with,
                           size_t starts_with_len) {

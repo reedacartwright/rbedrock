@@ -34,6 +34,7 @@
 #include "nbt.h"
 #include "chunk.h"
 #include "random.h"
+#include "actors.h"
 
 // for testing:
 SEXP rbedrock_db_test_cleanup() {
@@ -106,6 +107,9 @@ static const R_CallMethodDef call_methods[] = {
     {"rbedrock_chunk_write_subchunk", (DL_FUNC)&rbedrock_chunk_write_subchunk, 4},
     {"rbedrock_chunk_read_biomes", (DL_FUNC)&rbedrock_chunk_read_biomes, 1},
     {"rbedrock_chunk_write_biomes", (DL_FUNC)&rbedrock_chunk_write_biomes, 2},
+
+    {"rbedrock_actor_make_uniqueids", (DL_FUNC)&rbedrock_actor_make_uniqueids, 2},
+    {"rbedrock_actor_make_storagekeys", (DL_FUNC)&rbedrock_actor_make_storagekeys, 1},
 
     {"rbedrock_random_seed", (DL_FUNC)&rbedrock_random_seed, 1},
     {"rbedrock_random_state", (DL_FUNC)&rbedrock_random_state, 1},
