@@ -109,6 +109,16 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
     inform(str_glue("Success: Minecraft world created at '{dirpath}'."))
     invisible(dirpath)
 }
+#### RULES FOR CREATING DEFAULT LEVEL DAT ####
+# RandomSeed <- 0
+# SpawnX <- NA
+# SpawnY <- NA
+# SpawnZ <- NA
+# Time <- 0
+# CurrentTick <- 0
+# worldStartCount <- 4294967295
+# LevelName <- "My RBedrock World"
+# LastPlayed <- 0
 
 #' @description
 #' `export_world()` exports a world to an archive file.
