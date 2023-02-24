@@ -92,8 +92,8 @@
 #' @export
 #' @keywords internal
 #' @author Rich FitzJohn
-db_open <- function(path, create_if_missing = NULL, error_if_exists = NULL, 
-    paranoid_checks = NULL, write_buffer_size = NULL, max_open_files = NULL, block_size = NULL, 
+db_open <- function(path, create_if_missing = NULL, error_if_exists = NULL,
+    paranoid_checks = NULL, write_buffer_size = NULL, max_open_files = NULL, block_size = NULL,
     cache_capacity = NULL, bloom_filter_bits_per_key = NULL, compression_level = NULL) {
     ptr <- .Call(rbedrock_db_open, path, create_if_missing, error_if_exists, 
         paranoid_checks, write_buffer_size, max_open_files, block_size, 
