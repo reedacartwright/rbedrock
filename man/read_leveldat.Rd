@@ -21,10 +21,18 @@ directory.}
 \item{version}{The level.dat format version for the file header.}
 }
 \value{
-\code{read_leveldat} returns an nbtnode object.
+\code{read_leveldat} returns nbt data.
 
 \code{write_leveldat} returns a copy of the data written.
 }
 \description{
 Read and write data from a world's level.dat file.
+}
+\examples{
+# Fix level.dat after opening a world in creative.
+dbpath <- rbedrock_example_world("example1.mcworld")
+dat <- read_leveldat(dbpath)
+dat$hasBeenLoadedInCreative <- FALSE
+write_leveldat(dat, dbpath)
+
 }

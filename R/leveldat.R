@@ -7,10 +7,17 @@
 #' @param object NBT data to be written to level.dat.
 #' @param version The level.dat format version for the file header.
 #'
-#' @return `read_leveldat` returns an nbtnode object.
+#' @return `read_leveldat` returns nbt data.
 #'
 #' `write_leveldat` returns a copy of the data written.
 #'
+#' @examples
+#' # Fix level.dat after opening a world in creative.
+#' dbpath <- rbedrock_example_world("example1.mcworld")
+#' dat <- read_leveldat(dbpath)
+#' dat$hasBeenLoadedInCreative <- FALSE
+#' write_leveldat(dat, dbpath)
+#' 
 #' @export
 read_leveldat <- function(path, old = FALSE) {
     path <- .fixup_path(path, verify = TRUE)
