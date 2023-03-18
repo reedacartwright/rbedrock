@@ -3,7 +3,8 @@
 #' rbedrock comes bundled with a number of sample files in its `inst/extdata`
 #' directory. This function make them easy to access.
 #'
-#' @param path Name of file or directory. If `NULL`, the examples will be listed.
+#' @param path Name of file or directory. If `NULL`, the examples will be
+#'        listed.
 #' @export
 #' @examples
 #' rbedrock_example()

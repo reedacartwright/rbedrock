@@ -11,7 +11,7 @@ NULL
 #' `get_entity_data()` and `get_entity_value()` load Entity
 #' data from `db`. `get_entity_data()` will silently drop and keys not
 #' representing Entity data. `get_entity_value()` supports loading
-#' only a single value. `get_entity_values()` is a synonym for 
+#' only a single value. `get_entity_values()` is a synonym for
 #' `get_entity_data()`.
 #'
 #' @param db A bedrockdb object.
@@ -24,7 +24,7 @@ NULL
 #' @rdname Entity
 #' @export
 get_entity_data <- function(db, x, z, dimension) {
-    keys <- .process_key_args(x,z,dimension, tag=50L)
+    keys <- .process_key_args(x, z, dimension, tag = 50L)
     get_nbt_values(db, keys, simplify = FALSE)
 }
 
@@ -35,7 +35,7 @@ get_entity_values <- get_entity_data
 #' @rdname Entity
 #' @export
 get_entity_value <- function(db, x, z, dimension) {
-    key <- .process_key_args(x, z, dimension, tag=50L)
+    key <- .process_key_args(x, z, dimension, tag = 50L)
     vec_assert(key, character(), 1L)
     get_nbt_value(db, key, simplify = FALSE)
 }
@@ -50,14 +50,15 @@ get_entity_value <- function(db, x, z, dimension) {
 #' @rdname Entity
 #' @export
 put_entity_values <- function(db, x, z, dimension, values) {
-    keys <- .process_key_args(x, z, dimension, tag=50L, stop_if_filtered = TRUE)
+    keys <- .process_key_args(x, z, dimension, tag = 50L,
+                              stop_if_filtered = TRUE)
     put_nbt_values(db, keys, values)
 }
 
 #' @rdname Entity
 #' @export
 put_entity_value <- function(db, x, z, dimension, value) {
-    key <- .process_key_args(x, z, dimension, tag=50L)
+    key <- .process_key_args(x, z, dimension, tag = 50L)
     vec_assert(key, character(), 1L)
     put_nbt_value(db, key, value)
 }

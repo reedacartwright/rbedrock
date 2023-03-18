@@ -314,6 +314,7 @@ new_nbt_list <- function(x) {
     structure(y, class = c("rbedrock_nbt_list", "rbedrock_nbt", cls))
 }
 
+# nolint start : commented_code_linter
 # new_nbt_byte_list <- function(x) {
 #     new_rbedrock_nbt_scalar(x, "byte_list", integer())
 # }
@@ -342,6 +343,7 @@ new_nbt_list <- function(x) {
 # new_nbt_string_list <- function(x) {
 #     new_rbedrock_nbt_scalar(x, "string_list", character())
 # }
+# nolint end
 
 ######
 

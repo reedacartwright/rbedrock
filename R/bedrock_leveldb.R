@@ -83,12 +83,12 @@
 #'   'filter policy' to reduce disk reads.  A good value for
 #'   bits_per_key is 10, which yields a filter with ~ 1% false
 #'   positive rate.  Further information from the LevelDB headers
-#'   (filter_policy.h) 'This object is responsible for
+#'   (filter_policy.h) "This object is responsible for
 #'   creating a small filter from a set of keys.  These filters are
 #'   stored in leveldb and are consulted automatically by leveldb to
 #'   decide whether or not to read some information from disk. In
 #'   many cases, a filter can cut down the number of disk seeks form
-#'   a handful to a single disk seek per `DB::Get()` call'
+#'   a handful to a single disk seek per `DB::Get()` call"
 #' @export
 #' @keywords internal
 #' @author Rich FitzJohn
@@ -119,107 +119,141 @@ bedrock_leveldb_open <- function(path, create_if_missing = NULL,
     class(ptr) <- c("bedrock_leveldb_connection", "bedrock_leveldb_options")
     ptr
 }
+
+#nolint start : object_length_linter
 bedrock_leveldb_close <- function(db, error_if_closed = FALSE) {
     .Call(Cbedrock_leveldb_close, db, error_if_closed)
 }
+
 bedrock_leveldb_destroy <- function(path) {
     .Call(Cbedrock_leveldb_destroy, path)
 }
+
 bedrock_leveldb_is_open <- function(db) {
     .Call(Cbedrock_leveldb_is_open, db)
 }
+
 bedrock_leveldb_repair <- function(path) {
     .Call(Cbedrock_leveldb_repair, path)
 }
+
 bedrock_leveldb_property <- function(db, path, error_if_missing = FALSE) {
     .Call(Cbedrock_leveldb_property, db, path, error_if_missing)
 }
+
 bedrock_leveldb_get <- function(db, key, readoptions = NULL) {
     .Call(Cbedrock_leveldb_get, db, key, readoptions)
 }
+
 bedrock_leveldb_mget <- function(db, key, readoptions = NULL) {
     .Call(Cbedrock_leveldb_mget, db, key, readoptions)
 }
+
 bedrock_leveldb_mget_prefix <- function(db, starts_with, readoptions = NULL) {
     .Call(Cbedrock_leveldb_mget_prefix, db, starts_with, readoptions)
 }
+
 bedrock_leveldb_put <- function(db, key, value, writeoptions = NULL) {
     .Call(Cbedrock_leveldb_put, db, key, value, writeoptions)
 }
+
 bedrock_leveldb_mput <- function(db, key, value, writeoptions = NULL) {
     .Call(Cbedrock_leveldb_mput, db, key, value, writeoptions)
 }
+
 bedrock_leveldb_delete <- function(db, key, report = FALSE, readoptions = NULL,
                                    writeoptions = NULL) {
     .Call(Cbedrock_leveldb_delete, db, key, report, readoptions, writeoptions)
 }
+
 bedrock_leveldb_iter_create <- function(db, readoptions = NULL) {
     .Call(Cbedrock_leveldb_iter_create, db, readoptions)
 }
+
 bedrock_leveldb_iter_destroy <- function(it, error_if_destroyed = FALSE) {
     .Call(Cbedrock_leveldb_iter_destroy, it, error_if_destroyed)
 }
+
 bedrock_leveldb_iter_valid <- function(it) {
     .Call(Cbedrock_leveldb_iter_valid, it)
 }
+
 bedrock_leveldb_iter_seek_to_first <- function(it) {
     .Call(Cbedrock_leveldb_iter_seek_to_first, it)
 }
+
 bedrock_leveldb_iter_seek_to_last <- function(it) {
     .Call(Cbedrock_leveldb_iter_seek_to_last, it)
 }
+
 bedrock_leveldb_iter_seek <- function(it, key) {
     .Call(Cbedrock_leveldb_iter_seek, it, key)
 }
+
 bedrock_leveldb_iter_next <- function(it, error_if_invalid = FALSE) {
     .Call(Cbedrock_leveldb_iter_next, it, error_if_invalid)
 }
+
 bedrock_leveldb_iter_prev <- function(it, error_if_invalid = FALSE) {
     .Call(Cbedrock_leveldb_iter_prev, it, error_if_invalid)
 }
+
 bedrock_leveldb_iter_key <- function(it, error_if_invalid = FALSE) {
     .Call(Cbedrock_leveldb_iter_key, it, error_if_invalid)
 }
+
 bedrock_leveldb_iter_value <- function(it, error_if_invalid = FALSE) {
     .Call(Cbedrock_leveldb_iter_value, it, error_if_invalid)
 }
+
 bedrock_leveldb_snapshot <- function(db) {
     ptr <- .Call(Cbedrock_leveldb_snapshot_create, db)
     attr(ptr, "timestamp") <- Sys.time()
     class(ptr) <- "bedrock_leveldb_snapshot"
     ptr
 }
+
 bedrock_leveldb_writebatch_create <- function() {
     .Call(Cbedrock_leveldb_writebatch_create)
 }
+
 bedrock_leveldb_writebatch_destroy <- function(writebatch,
                                                error_if_destroyed = FALSE) {
     .Call(Cbedrock_leveldb_writebatch_destroy, writebatch, error_if_destroyed)
 }
+
 bedrock_leveldb_writebatch_clear <- function(writebatch) {
     .Call(Cbedrock_leveldb_writebatch_clear, writebatch)
 }
+
 bedrock_leveldb_writebatch_put <- function(writebatch, key, value) {
     .Call(Cbedrock_leveldb_writebatch_put, writebatch, key, value)
 }
+
 bedrock_leveldb_writebatch_mput <- function(writebatch, key, value) {
     .Call(Cbedrock_leveldb_writebatch_mput, writebatch, key, value)
 }
+
 bedrock_leveldb_writebatch_delete <- function(writebatch, key) {
     .Call(Cbedrock_leveldb_writebatch_delete, writebatch, key)
 }
+
 bedrock_leveldb_writebatch_mdelete <- function(writebatch, keys) {
     .Call(Cbedrock_leveldb_writebatch_mdelete, writebatch, keys)
 }
+
 bedrock_leveldb_write <- function(db, writebatch, writeoptions = NULL) {
     .Call(Cbedrock_leveldb_write, db, writebatch, writeoptions)
 }
+
 bedrock_leveldb_approximate_sizes <- function(db, start, limit) {
     .Call(Cbedrock_leveldb_approximate_sizes, db, start, limit)
 }
+
 bedrock_leveldb_compact_range <- function(db, start, limit) {
     .Call(Cbedrock_leveldb_compact_range, db, start, limit)
 }
+
 bedrock_leveldb_readoptions <- function(verify_checksums = NULL,
                                         fill_cache = NULL,
                                         snapshot = NULL) {
@@ -231,56 +265,70 @@ bedrock_leveldb_readoptions <- function(verify_checksums = NULL,
     class(ptr) <- c("bedrock_leveldb_readoptions", "bedrock_leveldb_options")
     ptr
 }
+
 bedrock_leveldb_writeoptions <- function(sync = NULL) {
     ptr <- .Call(Cbedrock_leveldb_writeoptions, sync)
     class(ptr) <- c("bedrock_leveldb_writeoptions", "bedrock_leveldb_options")
     attr(ptr, "options") <- list(sync = sync)
     ptr
 }
+
 bedrock_leveldb_keys_len <- function(db, starts_with = NULL,
                                      readoptions = NULL) {
     .Call(Cbedrock_leveldb_keys_len, db, starts_with, readoptions)
 }
+
 bedrock_leveldb_keys <- function(db, starts_with = NULL, readoptions = NULL) {
     .Call(Cbedrock_leveldb_keys, db, starts_with, readoptions)
 }
+
 bedrock_leveldb_exists <- function(db, key, readoptions = NULL) {
     .Call(Cbedrock_leveldb_exists, db, key, readoptions)
 }
+
 bedrock_leveldb_version <- function() {
     ret <- list(.Call(Cbedrock_leveldb_version))
     class(ret) <- "numeric_version"
     ret
 }
+#nolint end
+
 #' @export
 as.character.bedrock_leveldb_snapshot <- function(x, ...) {
     sprintf("<bedrock_leveldb_snapshot> @ %s", attr(x, "timestamp"))
 }
+
 #' @export
 print.bedrock_leveldb_snapshot <- function(x, ...) {
     cat(as.character(x), "\n")
     invisible(x)
 }
+
 #' @export
 names.bedrock_leveldb_options <- function(x, ...) {
     names(attr(x, "options", exact = TRUE))
 }
+
 #' @export
 `$.bedrock_leveldb_options` <- function(x, i) {
     attr(x, "options")[[i]]
 }
+
 #' @export
 `[[.bedrock_leveldb_options` <- function(x, i, ...) {
     attr(x, "options")[[i]]
 }
+
 #' @export
 `$<-.bedrock_leveldb_options` <- function(x, i, value) {
     stop(sprintf("%s objects are immutable", class(x)[[1L]]))
 }
+
 #' @export
 `[[<-.bedrock_leveldb_options` <- function(x, ..., value) {
     stop(sprintf("%s objects are immutable", class(x)[[1L]]))
 }
+
 #' @export
 as.character.bedrock_leveldb_options <- function(x, ...) {
     f <- function(x) {
@@ -295,6 +343,7 @@ as.character.bedrock_leveldb_options <- function(x, ...) {
                                                      value))
     paste(txt, collapse = "\n")
 }
+
 #' @export
 print.bedrock_leveldb_options <- function(x, ...) {
     cat(as.character(x), "\n")

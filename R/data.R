@@ -14,7 +14,7 @@ get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
     starts_with_raw <- .create_rawkey_prefix(starts_with)
     rawkeys <- db$keys(starts_with_raw, readoptions)
     res <- rawkeys_to_chrkeys(rawkeys)
-    if(!is.null(starts_with)) {
+    if (!is.null(starts_with)) {
         # filter out keys from the wrong dimension
         res <- str_subset(res, fixed(starts_with))
     }
@@ -30,11 +30,11 @@ get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
 #' @param starts_with A string specifying chunk prefix or string prefix.
 #' @param key  A single key.
 #' @param readoptions A `bedrock_leveldb_readoptions` object
-#' 
+#'
 #' @return `get_values()` returns a named-list of raw vectors.
 #' @export
 get_values <- function(db, keys, starts_with, readoptions = NULL) {
-    if(missing(keys)) {
+    if (missing(keys)) {
         starts_with <- .create_rawkey_prefix(starts_with)
         dat <- db$mget_prefix(starts_with, readoptions)
         dat <- rlang::set_names(dat$values, rawkeys_to_chrkeys(dat$keys))
@@ -73,7 +73,7 @@ has_values <- function(db, keys, readoptions = NULL) {
 #' @param keys A character vector of keys.
 #' @param values A list of raw values.
 #' @param writeoptions A `bedrock_leveldb_writeoptions` object
-#' 
+#'
 #' @return An invisible copy of `db`.
 #' @export
 put_values <- function(db, keys, values, writeoptions = NULL) {
@@ -103,17 +103,20 @@ put_data <- function(db, data, writeoptions = NULL) {
 #'
 #' @param db A `bedrockdb` object
 #' @param keys A character vector of keys.
-#' @param report A logical indicating whether to generate a report on deleted keys
+#' @param report A logical indicating whether to generate a report on deleted
+#'        keys
 #' @param readoptions A `bedrock_leveldb_readoptions` object
 #' @param writeoptions A `bedrock_leveldb_writeoptions` object
 #'
-#' @return If `report == TRUE`, a logical vector indicating which keys were deleted.
-#' 
+#' @return If `report == TRUE`, a logical vector indicating which keys were
+#' deleted.
+#'
 #' @export
-delete_values <- function(db, keys, report = FALSE, readoptions = NULL, writeoptions = NULL) {
+delete_values <- function(db, keys, report = FALSE, readoptions = NULL,
+                          writeoptions = NULL) {
     rawkeys <- chrkeys_to_rawkeys(keys)
     ret <- db$delete(rawkeys, report, readoptions, writeoptions)
-    if(!report) {
+    if (!report) {
         return(invisible(ret))
     }
     ret

@@ -11,7 +11,7 @@ NULL
 #' `get_chunk_version_data()` and `get_chunk_version_value()` load Version
 #' data from `db`. `get_chunk_version_data()` will silently drop and keys not
 #' representing Version data. `get_chunk_version_value()` supports loading
-#' only a single value. `get_chunk_version_values()` is a synonym for 
+#' only a single value. `get_chunk_version_values()` is a synonym for
 #' `get_chunk_version_data()`.
 #'
 #' @param db A bedrockdb object.
@@ -42,7 +42,7 @@ get_chunk_version_value <- function(db, x, z, dimension) {
     key <- .process_chunk_version_key_args(x, z, dimension)
     vec_assert(key, character(), 1L)
     val <- get_value(db, key)
-    if(is.null(val)) {
+    if (is.null(val)) {
         key <- str_replace(key, ":44$", ":118")
         val <- get_value(db, key)
     }
@@ -50,12 +50,12 @@ get_chunk_version_value <- function(db, x, z, dimension) {
 }
 
 .process_chunk_version_key_args <- function(x, z, dimension) {
-    if(missing(z) && is.character(x)) {
+    if (missing(z) && is.character(x)) {
         # replace legacy tags with new
         x <- str_replace(x, ":118$", ":44")
         x <- unique(x)
     }
-    .process_key_args(x, z, dimension, tag=44L)
+    .process_key_args(x, z, dimension, tag = 44L)
 }
 
 #' @description
@@ -77,8 +77,9 @@ put_chunk_version_data <- function(db, data) {
 #' @rdname ChunkVersion
 #' @export
 put_chunk_version_values <- function(db, x, z, dimension, values) {
-    keys <- .process_key_args(x, z, dimension, tag=44L, stop_if_filtered = TRUE)
-    values <- vec_recycle(values, length(keys), x_arg="values")
+    keys <- .process_key_args(x, z, dimension, tag = 44L,
+                              stop_if_filtered = TRUE)
+    values <- vec_recycle(values, length(keys), x_arg = "values")
     values <- purrr::map(values, write_chunk_version_value)
     put_values(db, keys, values)
 }
@@ -88,7 +89,7 @@ put_chunk_version_values <- function(db, x, z, dimension, values) {
 #' @rdname ChunkVersion
 #' @export
 put_chunk_version_value <- function(db, x, z, dimension, value) {
-    key <- .process_key_args(x, z, dimension, tag=44L)
+    key <- .process_key_args(x, z, dimension, tag = 44L)
     vec_assert(key, character(), 1L)
     value <- write_chunk_version_value(value)
     put_value(db, key, value)
@@ -102,7 +103,7 @@ put_chunk_version_value <- function(db, x, z, dimension, value) {
 #' @rdname ChunkVersion
 #' @export
 read_chunk_version_value <- function(rawdata) {
-    if(is.null(rawdata)) {
+    if (is.null(rawdata)) {
         return(NULL)
     }
     vec_assert(rawdata, raw())

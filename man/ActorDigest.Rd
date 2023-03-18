@@ -31,7 +31,8 @@ create_acdig_keys(x, z, dimension)
 
 \item{db}{A bedrockdb object.}
 
-\item{values}{A list of character vectors. If named, the names represent db keys.}
+\item{values}{A list of character vectors. If named, the names represent db
+keys.}
 
 \item{value}{A character vector.}
 

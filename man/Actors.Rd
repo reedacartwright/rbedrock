@@ -14,7 +14,8 @@ get_actors_value(x, z, dimension, db)
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.
 #@param value A character vector.
-#@param values A list of character vectors. If named, the names represent db keys.
+#@param values A list of character vectors. If named, the names represent db
+#keys.
 #@param rawdata A raw vector.}
 
 \item{db}{A bedrockdb object.}
