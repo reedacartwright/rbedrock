@@ -12,8 +12,8 @@ bedrockdb(
   paranoid_checks = NULL,
   write_buffer_size = 4194304L,
   max_open_files = NULL,
-  block_size = NULL,
-  cache_capacity = 41943040L,
+  block_size = 163840L,
+  cache_capacity = 83886080L,
   bloom_filter_bits_per_key = 10L,
   compression_level = -1L
 )
