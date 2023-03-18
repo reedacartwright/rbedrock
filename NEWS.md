@@ -11,6 +11,7 @@
  * Change default parameters to bedrockdb to match Minecraft. This reduces the size of worlds modified by rbedrock.
  * Generate random world seeds using 64-bits.
  * [Fix] Generate default package options on loading rbedrock. This fixes users not being able to find the world directory on Window.
+ * Create 1.19+ worlds by default when using create_world()
 
 
 ## RBedrock 0.2.0
