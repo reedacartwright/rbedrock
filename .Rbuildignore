@@ -11,3 +11,4 @@
 ^\.clang_complete$
 ^cran-comments.md$
 ^CRAN-RELEASE$
+^codecov\.yml$
