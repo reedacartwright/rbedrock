@@ -10,7 +10,7 @@
 \alias{get_world_path}
 \title{Utilities for working with Minecraft world folders.}
 \usage{
-worlds_dir_path(default = FALSE)
+worlds_dir_path(force_default = FALSE)
 
 list_worlds(worlds_dir = worlds_dir_path())
 
@@ -23,7 +23,7 @@ import_world(file, id = NULL, ..., worlds_dir = worlds_dir_path())
 get_world_path(id, worlds_dir = worlds_dir_path())
 }
 \arguments{
-\item{default}{If \code{TRUE}, return most likely world path on the system.}
+\item{force_default}{If \code{TRUE}, return most likely world path on the system.}
 
 \item{worlds_dir}{The path of a \code{minecraftWorlds} directory.}
 
