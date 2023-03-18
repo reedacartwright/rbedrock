@@ -202,7 +202,7 @@ int scalar_int(SEXP x) {
 /* These functions must be called with arguments protected */
 
 /* Create a stretchy-list dotted pair */
-SEXP create_stretchy_list() {
+SEXP create_stretchy_list(void) {
     SEXP s = CONS(R_NilValue, R_NilValue);
     SETCAR(s, s);
     return s;

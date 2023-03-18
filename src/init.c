@@ -36,7 +36,7 @@
 #include "random.h"
 
 // for testing:
-SEXP bedrock_leveldb_test_cleanup() {
+SEXP bedrock_leveldb_test_cleanup(void) {
     bedrock_leveldb_cleanup();
     bedrock_leveldb_init();
     return R_NilValue;
@@ -133,9 +133,9 @@ static const R_CallMethodDef call_methods[] = {
 
     {NULL, NULL, 0}};
 
-void rbedrock_init_nbt();
-void rbedrock_init_blocks();
-void rbedrock_init_random();
+void rbedrock_init_nbt(void);
+void rbedrock_init_blocks(void);
+void rbedrock_init_random(void);
 
 void attribute_visible R_init_rbedrock(DllInfo *info) {
     R_registerRoutines(info, NULL, call_methods, NULL, NULL);

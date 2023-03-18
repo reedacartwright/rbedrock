@@ -6,7 +6,7 @@
 static SEXP g_palette_symbol = NULL;
 static SEXP g_offset_symbol = NULL;
 
-void rbedrock_init_blocks() {
+void rbedrock_init_blocks(void) {
     g_palette_symbol = Rf_install("palette");
     g_offset_symbol = Rf_install("offset");
 }

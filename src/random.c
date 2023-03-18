@@ -41,7 +41,7 @@ typedef struct mcpe_random_ mcpe_random_t;
 static mcpe_random_t g_state;
 
 
-void rbedrock_init_random() {
+void rbedrock_init_random(void) {
     mcpe_random_seed_impl(5489u);
 }
 
@@ -53,7 +53,7 @@ void rbedrock_init_random() {
     g_state.mt[i] = g_state.mt[expr] ^ (y >> 1) ^ ((((int32_t)((y) << 31)) >> 31) & MAGIC); \
     ++i;
 
-static void mcpe_random_update_state() {
+static void mcpe_random_update_state(void) {
     size_t i = 0;
     uint32_t y;
 
@@ -87,7 +87,7 @@ static void mcpe_random_update_state() {
     g_state.index = 0;
 }
 
-static uint32_t mcpe_random_next() {
+static uint32_t mcpe_random_next(void) {
     if ( g_state.index == SIZE ) {
         mcpe_random_update_state();
         g_state.index = 0;

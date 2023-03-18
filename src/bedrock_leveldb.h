@@ -71,7 +71,7 @@ SEXP bedrock_leveldb_iter_value(SEXP r_it,
 
 SEXP bedrock_leveldb_snapshot_create(SEXP r_db);
 
-SEXP bedrock_leveldb_writebatch_create();
+SEXP bedrock_leveldb_writebatch_create(void);
 SEXP bedrock_leveldb_writebatch_destroy(SEXP r_writebatch,
                                         SEXP error_if_destroyed);
 SEXP bedrock_leveldb_writebatch_clear(SEXP r_writebatch);
@@ -97,7 +97,7 @@ SEXP bedrock_leveldb_keys(SEXP r_db, SEXP r_starts_with,
 SEXP bedrock_leveldb_keys_len(SEXP r_db, SEXP r_starts_with,
                               SEXP r_readoptions);
 SEXP bedrock_leveldb_exists(SEXP r_db, SEXP r_key, SEXP r_readoptions);
-SEXP bedrock_leveldb_version();
+SEXP bedrock_leveldb_version(void);
 SEXP bedrock_leveldb_tag(SEXP r_db);
-void bedrock_leveldb_init();
-void bedrock_leveldb_cleanup();
+void bedrock_leveldb_init(void);
+void bedrock_leveldb_cleanup(void);

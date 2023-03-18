@@ -32,7 +32,7 @@ static SEXP g_tag_symbol = NULL;
 static SEXP g_ptype_symbol = NULL;
 static SEXP g_bytes_read_symbol = NULL;
 
-void rbedrock_init_nbt() {
+void rbedrock_init_nbt(void) {
     g_tag_symbol = Rf_install("tag");
     g_ptype_symbol = Rf_install("ptype");
     g_bytes_read_symbol = Rf_install("bytes_read");

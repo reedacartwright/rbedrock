@@ -542,7 +542,7 @@ SEXP bedrock_leveldb_snapshot_create(SEXP r_db) {
 }
 
 // Batch
-SEXP bedrock_leveldb_writebatch_create() {
+SEXP bedrock_leveldb_writebatch_create(void) {
     leveldb_writebatch_t *writebatch = leveldb_writebatch_create();
     SEXP r_writebatch =
         PROTECT(R_MakeExternalPtr((void *)writebatch, R_NilValue, R_NilValue));
@@ -782,7 +782,7 @@ SEXP bedrock_leveldb_exists(SEXP r_db, SEXP r_key, SEXP r_readoptions) {
     return r_found;
 }
 
-SEXP bedrock_leveldb_version() {
+SEXP bedrock_leveldb_version(void) {
     SEXP ret = PROTECT(allocVector(INTSXP, 2));
     INTEGER(ret)[0] = leveldb_major_version();
     INTEGER(ret)[1] = leveldb_minor_version();
@@ -794,12 +794,12 @@ SEXP bedrock_leveldb_version() {
 SEXP bedrock_leveldb_tag(SEXP r_db) { return R_ExternalPtrTag(r_db); }
 
 // For package management:
-void bedrock_leveldb_init() {
+void bedrock_leveldb_init(void) {
     default_readoptions = leveldb_readoptions_create();
     default_writeoptions = leveldb_writeoptions_create();
 }
 
-void bedrock_leveldb_cleanup() {
+void bedrock_leveldb_cleanup(void) {
     leveldb_readoptions_destroy(default_readoptions);    // #nocov
     leveldb_writeoptions_destroy(default_writeoptions);  // #nocov
 }
