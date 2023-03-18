@@ -120,9 +120,9 @@ create_acdig_keys <- function(x, z, dimension) {
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
-##' @param value A character vector.
-##' @param values A list of character vectors. If named, the names represent db keys.
-##' @param rawdata A raw vector.
+#' #@param value A character vector.
+#' #@param values A list of character vectors. If named, the names represent db keys.
+#' #@param rawdata A raw vector.
 #'
 #' @name Actors
 NULL
