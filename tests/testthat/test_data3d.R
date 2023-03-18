@@ -27,15 +27,15 @@ test_that("Writing Data3D recycles values", {
     r <- write_data3d_value(0, 10)
     val <- read_data3d_value(r)
 
-    expect_equal(val$height_map, array(0, c(16,16)))
-    expect_equal(val$biome_map, array(10, c(16,16*24,16)))
+    expect_equal(val$height_map, array(0, c(16, 16)))
+    expect_equal(val$biome_map, array(10, c(16, 16 * 24, 16)))
 
     r <- write_data3d_value(0, 1:256)
     val <- read_data3d_value(r)
-    expect_equal(val$biome_map[,1,], array(1:256, c(16,16)))
-    expect_equal(val$biome_map[,64,], array(1:256, c(16,16)))
-    expect_equal(val$biome_map[,100,], array(1:256, c(16,16)))
-    expect_equal(val$biome_map[,384,], array(1:256, c(16,16)))
+    expect_equal(val$biome_map[, 1, ], array(1:256, c(16, 16)))
+    expect_equal(val$biome_map[, 64, ], array(1:256, c(16, 16)))
+    expect_equal(val$biome_map[, 100, ], array(1:256, c(16, 16)))
+    expect_equal(val$biome_map[, 384, ], array(1:256, c(16, 16)))
 })
 
 close(db)

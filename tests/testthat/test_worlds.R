@@ -1,8 +1,8 @@
-
 test_that("create_world creates a world that can be loaded", {
     worlds_dir <- tempdir(TRUE)
 
-    dbpath <- expect_message(create_world(id = "test", 
+    dbpath <- expect_message(create_world(
+        id = "test",
         LevelName = "test",
         RandomSeed = 1234,
         showcoordinates = TRUE,
@@ -18,7 +18,7 @@ test_that("create_world creates a world that can be loaded", {
 
     # test that all the values have been properly set
     dat <- read_leveldat(dbpath, old = FALSE)
-    expect_equal(dat$LevelName,  nbt_string("test"))
+    expect_equal(dat$LevelName, nbt_string("test"))
     expect_equal(dat$RandomSeed, nbt_long(1234L))
     expect_equal(dat$showcoordinates, nbt_byte(TRUE))
     expect_equal(dat$GameType, nbt_int(1))
@@ -29,6 +29,6 @@ test_that("create_world creates a world that can be loaded", {
 
     # can the DB be opened
     db <- expect_silent(bedrockdb(dbpath))
-    close(db, compact=FALSE)
+    close(db, compact = FALSE)
     fs::dir_delete(dbpath)
 })

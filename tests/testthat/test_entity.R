@@ -12,7 +12,7 @@ test_that("get_entity_data returns specific Entity data", {
     expect_vector(dat, list(), 2L)
     expect_named(dat)
     expect_true(all(grepl(":50$", names(dat))))
-    for(i in seq_along(dat)) {
+    for (i in seq_along(dat)) {
         expect_named(dat[[!!i]], NULL)
     }
 })
