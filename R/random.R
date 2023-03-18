@@ -8,7 +8,7 @@
 #' @examples
 #' # seed the global random number generator
 #' bedrock_random_seed(5490L)
-#' 
+#'
 #' # save and restore rng state
 #' saved_state <- bedrock_random_state()
 #' bedrock_random_get_uint(10)
@@ -18,8 +18,8 @@ NULL
 
 #' @description
 #' `bedrock_random_seed()` seeds the random number generator.
-#' 
-#' @param value a scalar integer 
+#'
+#' @param value a scalar integer
 #'
 #' @rdname bedrock_random
 #' @export
@@ -31,8 +31,8 @@ bedrock_random_seed <- function(value) {
 #' @description
 #' `bedrock_random_state()` returns the current state of the random number
 #' generator as a raw vector.
-#' 
-#' @param new_state a raw vector 
+#'
+#' @param new_state a raw vector
 #'
 #' @rdname bedrock_random
 #' @export
@@ -43,7 +43,7 @@ bedrock_random_state <- function(new_state = NULL) {
 #' @description
 #' `bedrock_random_get_uint()` returns a 32-bit random integer.
 #' Default range is `[0, 2^32-1]`.
-#' 
+#'
 #' @param n number of observations.
 #' @param min,max lower and upper limits of the distribution. Must be finite.
 #' If only one is specified, it is taken as `max`. If neither is specified,
@@ -54,7 +54,7 @@ bedrock_random_state <- function(new_state = NULL) {
 
 bedrock_random_get_uint <- function(n, max) {
     n <- as.integer(n)
-    if(missing(max)) {
+    if (missing(max)) {
         max <- NULL
     }
     .Call(Cmcpe_random_get_uint, n, max)
@@ -68,14 +68,14 @@ bedrock_random_get_uint <- function(n, max) {
 #' @export
 bedrock_random_get_int <- function(n, min, max) {
     n <- as.integer(n)
-    if(!missing(min) && missing(max)) {
+    if (!missing(min) && missing(max)) {
         max <- min
         min <- NULL
     } else {
-        if(missing(min)) {
+        if (missing(min)) {
             min <- NULL
         }
-        if(missing(max)) {
+        if (missing(max)) {
             max <- NULL
         }
     }
@@ -91,14 +91,14 @@ bedrock_random_get_int <- function(n, min, max) {
 #' @export
 bedrock_random_get_float <- function(n, min, max) {
     n <- as.integer(n)
-    if(!missing(min) && missing(max)) {
+    if (!missing(min) && missing(max)) {
         max <- min
         min <- NULL
     } else {
-        if(missing(min)) {
+        if (missing(min)) {
             min <- NULL
         }
-        if(missing(max)) {
+        if (missing(max)) {
             max <- NULL
         }
     }

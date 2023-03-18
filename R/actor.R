@@ -9,7 +9,7 @@ NULL
 
 #' @description
 #' `get_acdig_data()` and `get_acdig_value()` load ActorDigest
-#' data from `db`. They return `NULL` for any key that is not 
+#' data from `db`. They return `NULL` for any key that is not
 #' does not represent ActorDigest data. `get_acdig_value()` supports loading
 #' only a single value.
 #'
@@ -24,13 +24,14 @@ NULL
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
 #' @param value A character vector.
-#' @param values A list of character vectors. If named, the names represent db keys.
+#' @param values A list of character vectors. If named, the names represent db
+#'    keys.
 #' @param rawdata A raw vector.
 #'
 #' @return `get_acdig_values()` returns a vector of actor keys.
 #' `get_acdig_data()` returns a named list of the of the values
 #' returned by `get_acdig_value()`.
-#' 
+#'
 #' @rdname ActorDigest
 #' @export
 get_acdig_data <- function(x, z, dimension, db) {
@@ -46,8 +47,8 @@ get_acdig_data <- function(x, z, dimension, db) {
 #' @rdname ActorDigest
 #' @export
 get_acdig_value <- function(x, z, dimension, db) {
-    key <- .process_acdig_key_args(x, z, dimension, assert_scalar=TRUE)
-    if(!.is_valid_acdig_key(key)) {
+    key <- .process_acdig_key_args(x, z, dimension, assert_scalar = TRUE)
+    if (!.is_valid_acdig_key(key)) {
         return(NULL)
     }
     dat <- get_value(db, key)
@@ -57,7 +58,7 @@ get_acdig_value <- function(x, z, dimension, db) {
 #' @rdname ActorDigest
 #' @export
 put_acdig_data <- function(values, x, z, dimension, db) {
-    keys <- .process_acdig_key_args(x, z, dimension, values=values,
+    keys <- .process_acdig_key_args(x, z, dimension, values = values,
         assert_validity = TRUE)
     values <- purrr::map(values, write_acdig_value)
     put_values(db, keys, values)
@@ -67,7 +68,7 @@ put_acdig_data <- function(values, x, z, dimension, db) {
 #' @export
 put_acdig_value <- function(value, x, z, dimension, db) {
     key <- .process_acdig_key_args(x, z, dimension,
-        assert_scalar=TRUE, assert_validity = TRUE)
+        assert_scalar = TRUE, assert_validity = TRUE)
     value <- write_acdig_value(value)
     put_value(db, key, value)
 }
@@ -75,35 +76,36 @@ put_acdig_value <- function(value, x, z, dimension, db) {
 #' @rdname ActorDigest
 #' @export
 read_acdig_value <- function(rawdata) {
-    if(is.null(rawdata)) {
+    if (is.null(rawdata)) {
         return(NULL)
     }
     vec_assert(rawdata, raw())
-    if((length(rawdata) %% 8) != 0) {
-        abort("Invalid actor digest data. Length of rawdata must be a multiple of 8.")
+    if ((length(rawdata) %% 8) != 0) {
+        abort(str_c("Invalid actor digest data. ",
+                    "Length of rawdata must be a multiple of 8."))
     }
-    m <- matrix(rawdata, nrow=8)
-    if(ncol(m) == 0) {
+    m <- matrix(rawdata, nrow = 8)
+    if (ncol(m) == 0) {
         character()
     } else {
-        str_c("actor:", toupper(apply(m, 2, str_c, collapse="")))
+        str_c("actor:", toupper(apply(m, 2, str_c, collapse = "")))
     }
 }
 
 #' @rdname ActorDigest
 #' @export
 write_acdig_value <- function(value) {
-    if(is.null(value)) {
+    if (is.null(value)) {
         return(NULL)
     }
     vec_assert(value, character())
     b <- .is_valid_actor_key(value)
-    if(!isTRUE(all(b))) {
+    if (!isTRUE(all(b))) {
         abort("Invalid actor key.")
     }
     dat <- str_remove(value, "^actor:")
     dat <- str_extract_all(dat, "..")
-    dat <- purrr::map(dat, strtoi, base=16L)
+    dat <- purrr::map(dat, strtoi, base = 16L)
     as.raw(purrr::as_vector(dat))
 }
 
@@ -111,7 +113,7 @@ write_acdig_value <- function(value) {
 #' @export
 create_acdig_keys <- function(x, z, dimension) {
     args <- vec_recycle_common(x, z, dimension)
-    str_c("acdig", args[[1]], args[[2]], args[[3]], sep=":")
+    str_c("acdig", args[[1]], args[[2]], args[[3]], sep = ":")
 }
 
 
@@ -121,7 +123,8 @@ create_acdig_keys <- function(x, z, dimension) {
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
 #' #@param value A character vector.
-#' #@param values A list of character vectors. If named, the names represent db keys.
+#' #@param values A list of character vectors. If named, the names represent db
+#' #keys.
 #' #@param rawdata A raw vector.
 #'
 #' @name Actors
@@ -131,42 +134,44 @@ NULL
 #' @export
 get_actors_data <- function(x, z, dimension, db) {
     keys <- get_acdig_data(x, z, dimension, db)
-    purrr::map(keys, ~get_nbt_data(keys=., db=db))
+    purrr::map(keys, ~get_nbt_data(keys = ., db = db))
 }
 
 #' @rdname Actors
 #' @export
 get_actors_value <- function(x, z, dimension, db) {
     keys <- get_acdig_value(x, z, dimension, db)
-    get_nbt_data(keys, db=db)
+    get_nbt_data(keys, db = db)
 }
 
 .is_acdig_key <- function(keys) {
-    str_starts(keys, pattern=fixed("acdig:"))
+    str_starts(keys, pattern = fixed("acdig:"))
 }
 
 .is_valid_acdig_key <- function(keys) {
-    str_detect(keys, pattern="^acdig:-?[0-9]+:-?[0-9]+:[0-2]$")
+    str_detect(keys, pattern = "^acdig:-?[0-9]+:-?[0-9]+:[0-2]$")
 }
 
 .is_actor_key <- function(keys) {
-    str_starts(keys, pattern=fixed("actor:"))    
+    str_starts(keys, pattern = fixed("actor:"))
 }
 
 .is_valid_actor_key <- function(keys) {
-    str_detect(keys, pattern="^actor:[0-9a-fA-F]{16}$")
+    str_detect(keys, pattern = "^actor:[0-9a-fA-F]{16}$")
 }
 
-.process_acdig_key_args <- function(x, z, d, values = NULL, assert_scalar = FALSE, assert_validity = FALSE) {
-    if(missing(x) && is_named(values)) {
+.process_acdig_key_args <- function(x, z, d, values = NULL,
+                                    assert_scalar = FALSE,
+                                    assert_validity = FALSE) {
+    if (missing(x) && is_named(values)) {
         # if x is missing use names from values
         x <- names(values)
-    } else if(!missing(z)) {
+    } else if (!missing(z)) {
         # if z is not missing, create keys from x, z, and d
         x <- create_acdig_keys(x, z, d)
     }
-    vec_assert(x, character(), size = if(isTRUE(assert_scalar)) 1L else NULL)
-    if(isTRUE(assert_validity) && !isTRUE(all(.is_valid_acdig_key(x)))) {
+    vec_assert(x, character(), size = if (isTRUE(assert_scalar)) 1L else NULL)
+    if (isTRUE(assert_validity) && !isTRUE(all(.is_valid_acdig_key(x)))) {
         abort("Invalid actor key.")
     }
     x

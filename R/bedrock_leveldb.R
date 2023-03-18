@@ -88,21 +88,33 @@
 #'   stored in leveldb and are consulted automatically by leveldb to
 #'   decide whether or not to read some information from disk. In
 #'   many cases, a filter can cut down the number of disk seeks form
-#'   a handful to a single disk seek per DB::Get() call'
+#'   a handful to a single disk seek per `DB::Get()` call'
 #' @export
 #' @keywords internal
 #' @author Rich FitzJohn
 #' @useDynLib rbedrock, .registration = TRUE
-bedrock_leveldb_open <- function(path, create_if_missing = NULL, error_if_exists = NULL, 
-    paranoid_checks = NULL, write_buffer_size = NULL, max_open_files = NULL, block_size = NULL, 
-    cache_capacity = NULL, bloom_filter_bits_per_key = NULL, compression_level = NULL) {
-    ptr <- .Call(Cbedrock_leveldb_open, path, create_if_missing, error_if_exists, 
-        paranoid_checks, write_buffer_size, max_open_files, block_size, 
-        cache_capacity, bloom_filter_bits_per_key, compression_level)
-    attr(ptr, "options") <- list(path = path, create_if_missing = create_if_missing, 
-        error_if_exists = error_if_exists, paranoid_checks = paranoid_checks, write_buffer_size = write_buffer_size, 
-        max_open_files = max_open_files, block_size = block_size, 
-        cache_capacity = cache_capacity, bloom_filter_bits_per_key = bloom_filter_bits_per_key,
+bedrock_leveldb_open <- function(path, create_if_missing = NULL,
+                                 error_if_exists = NULL,
+                                 paranoid_checks = NULL,
+                                 write_buffer_size = NULL,
+                                 max_open_files = NULL,
+                                 block_size = NULL,
+                                 cache_capacity = NULL,
+                                 bloom_filter_bits_per_key = NULL,
+                                 compression_level = NULL) {
+    ptr <- .Call(Cbedrock_leveldb_open, path, create_if_missing,
+                 error_if_exists, paranoid_checks, write_buffer_size,
+                 max_open_files, block_size, cache_capacity,
+                 bloom_filter_bits_per_key, compression_level)
+    attr(ptr, "options") <- list(path = path,
+        create_if_missing = create_if_missing,
+        error_if_exists = error_if_exists,
+        paranoid_checks = paranoid_checks,
+        write_buffer_size = write_buffer_size,
+        max_open_files = max_open_files,
+        block_size = block_size,
+        cache_capacity = cache_capacity,
+        bloom_filter_bits_per_key = bloom_filter_bits_per_key,
         compression_level = compression_level)
     class(ptr) <- c("bedrock_leveldb_connection", "bedrock_leveldb_options")
     ptr
@@ -137,7 +149,8 @@ bedrock_leveldb_put <- function(db, key, value, writeoptions = NULL) {
 bedrock_leveldb_mput <- function(db, key, value, writeoptions = NULL) {
     .Call(Cbedrock_leveldb_mput, db, key, value, writeoptions)
 }
-bedrock_leveldb_delete <- function(db, key, report = FALSE, readoptions = NULL, writeoptions = NULL) {
+bedrock_leveldb_delete <- function(db, key, report = FALSE, readoptions = NULL,
+                                   writeoptions = NULL) {
     .Call(Cbedrock_leveldb_delete, db, key, report, readoptions, writeoptions)
 }
 bedrock_leveldb_iter_create <- function(db, readoptions = NULL) {
@@ -179,7 +192,8 @@ bedrock_leveldb_snapshot <- function(db) {
 bedrock_leveldb_writebatch_create <- function() {
     .Call(Cbedrock_leveldb_writebatch_create)
 }
-bedrock_leveldb_writebatch_destroy <- function(writebatch, error_if_destroyed = FALSE) {
+bedrock_leveldb_writebatch_destroy <- function(writebatch,
+                                               error_if_destroyed = FALSE) {
     .Call(Cbedrock_leveldb_writebatch_destroy, writebatch, error_if_destroyed)
 }
 bedrock_leveldb_writebatch_clear <- function(writebatch) {
@@ -206,11 +220,14 @@ bedrock_leveldb_approximate_sizes <- function(db, start, limit) {
 bedrock_leveldb_compact_range <- function(db, start, limit) {
     .Call(Cbedrock_leveldb_compact_range, db, start, limit)
 }
-bedrock_leveldb_readoptions <- function(verify_checksums = NULL, fill_cache = NULL, 
-    snapshot = NULL) {
-    ptr <- .Call(Cbedrock_leveldb_readoptions, verify_checksums, fill_cache, snapshot)
-    attr(ptr, "options") <- list(verify_checksums = verify_checksums, fill_cache = fill_cache, 
-        snapshot = snapshot)
+bedrock_leveldb_readoptions <- function(verify_checksums = NULL,
+                                        fill_cache = NULL,
+                                        snapshot = NULL) {
+    ptr <- .Call(Cbedrock_leveldb_readoptions, verify_checksums, fill_cache,
+                 snapshot)
+    attr(ptr, "options") <- list(verify_checksums = verify_checksums,
+                                 fill_cache = fill_cache,
+                                 snapshot = snapshot)
     class(ptr) <- c("bedrock_leveldb_readoptions", "bedrock_leveldb_options")
     ptr
 }
@@ -220,7 +237,8 @@ bedrock_leveldb_writeoptions <- function(sync = NULL) {
     attr(ptr, "options") <- list(sync = sync)
     ptr
 }
-bedrock_leveldb_keys_len <- function(db, starts_with = NULL, readoptions = NULL) {
+bedrock_leveldb_keys_len <- function(db, starts_with = NULL,
+                                     readoptions = NULL) {
     .Call(Cbedrock_leveldb_keys_len, db, starts_with, readoptions)
 }
 bedrock_leveldb_keys <- function(db, starts_with = NULL, readoptions = NULL) {
@@ -273,7 +291,8 @@ as.character.bedrock_leveldb_options <- function(x, ...) {
         }
     }
     value <- vapply(names(x), function(i) f(x[[i]]), character(1))
-    txt <- c(sprintf("<%s>", class(x)[[1]]), sprintf("  - %s: %s", names(x), value))
+    txt <- c(sprintf("<%s>", class(x)[[1]]), sprintf("  - %s: %s", names(x),
+                                                     value))
     paste(txt, collapse = "\n")
 }
 #' @export
