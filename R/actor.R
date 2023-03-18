@@ -122,10 +122,10 @@ create_acdig_keys <- function(x, z, dimension) {
 
 #' Read and write Actor data
 #'
-#' After 1.18.30, the nbt data of each actor is saved independently in the database,
-#' using a key with a prefix and a 16-character storage key: 'actor:0123456789abcdef'.
-#' The keys of all actors in a chunk are saved in an [ActorDigest] record, with format
-#' 'acdig:x:z:dimension'.
+#' After 1.18.30, the nbt data of each actor is saved independently in the
+#' database, using a key with a prefix and a 16-character storage key:
+#' 'actor:0123456789abcdef'. The keys of all actors in a chunk are saved in an
+#' [ActorDigest] record, with format acdig:x:z:dimension'.
 #'
 #' `get_actors_value()` loads Actors data for a single chunk in `db`.
 #' `get_actors_data()` loads Actors data from multiple chunks in `db`.
@@ -174,7 +174,7 @@ put_actors_data <- function(values, x, z, dimension, db) {
 #' @export
 put_actors_value <- function(value, x, z, dimension, db) {
     dig_key <- .process_acdig_key_args(x, z, dimension,
-        assert_scalar=TRUE, assert_validity = TRUE)
+        assert_scalar = TRUE, assert_validity = TRUE)
     .put_actors_value_impl(value, dig_key, db)
 }
 

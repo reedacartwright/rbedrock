@@ -12,7 +12,8 @@
  * Generate random world seeds using 64-bits.
  * [Fix] Generate default package options on loading rbedrock. This fixes users not being able to find the world directory on Window.
  * Create 1.19+ worlds by default when using create_world()
-
+ * Add functions for stroing actors data for a chunk.
+ * Add utility functions for working with unique ids.
 
 ## RBedrock 0.2.0
  * Support subchunk version 9 introduced for Caves and Cliffs.

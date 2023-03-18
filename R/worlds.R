@@ -110,6 +110,7 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
     invisible(dirpath)
 }
 #### RULES FOR CREATING DEFAULT LEVEL DAT ####
+# nolint start: commented_code_linter
 # RandomSeed <- 0
 # SpawnX <- NA
 # SpawnY <- NA
@@ -119,6 +120,7 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
 # worldStartCount <- 4294967295
 # LevelName <- "My RBedrock World"
 # LastPlayed <- 0
+# nolint end
 
 #' @description
 #' `export_world()` exports a world to an archive file.

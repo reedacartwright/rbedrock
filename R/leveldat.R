@@ -20,7 +20,7 @@
 #'
 #' @export
 read_leveldat <- function(path, old = FALSE) {
-    if(is_bedrockdb(path)) {
+    if (is_bedrockdb(path)) {
         path <- fs::path_dir(path$path)
     }
     path <- .fixup_path(path, verify = TRUE)
@@ -41,7 +41,7 @@ read_leveldat <- function(path, old = FALSE) {
 #' @export
 #' @rdname read_leveldat
 write_leveldat <- function(object, path, old = FALSE, version = 8L) {
-    if(is_bedrockdb(path)) {
+    if (is_bedrockdb(path)) {
         path <- fs::path_dir(path$path)
     }
     path <- .fixup_path(path)

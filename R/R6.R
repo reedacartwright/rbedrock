@@ -46,6 +46,10 @@
 #' @param cache_capacity Internal leveldb option
 #' @param bloom_filter_bits_per_key Internal leveldb option
 #' @param compression_level Internal leveldb option
+#' @param compact Compact database before closing.
+#' @param con An database object created by bedrockdb.
+#' @param ... arguments passed to or from other methods.
+#' @param x An object.
 #'
 #' @return On success, `bedrockdb` returns an R6 class of type 'bedrockdb'.
 #'
@@ -93,10 +97,6 @@ bedrockdb <- function(path,
 }
 
 #' @export
-#' @param compact Compact database before closing.
-#' @param con An database object created by bedrockdb.
-#' @param ... arguments passed to or from other methods.
-#'
 #' @rdname bedrockdb
 close.bedrockdb <- function(con, compact = FALSE, ...) {
     if (isTRUE(compact)) {
@@ -104,6 +104,12 @@ close.bedrockdb <- function(con, compact = FALSE, ...) {
         con$compact_range()
     }
     con$close()
+}
+
+#' @export
+#' @rdname bedrockdb
+is_bedrockdb <- function(x) {
+    inherits(x, "bedrockdb")
 }
 
 #' @importFrom R6 R6Class
@@ -123,7 +129,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(
         self$leveldat <- dat
     },
     close = function(error_if_closed = FALSE) {
-        if(self$leveldat_is_dirty) {
+        if (self$leveldat_is_dirty) {
             write_leveldat(self$leveldat, fs::path_dir(self$path))
         }
         ret <- bedrock_leveldb_close(self$db, error_if_closed)
@@ -188,7 +194,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(
         invisible(self)
     },
     create_unique_ids = function(n) {
-        if(is_null(self$unique_id)) {
+        if (is_null(self$unique_id)) {
             cnt <- payload(self$leveldat$worldStartCount %||% nbt_long(0))
             self$leveldat$worldStartCount <- nbt_long(cnt - 1)
             self$leveldat_is_dirty <- TRUE
