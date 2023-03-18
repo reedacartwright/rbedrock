@@ -17,30 +17,19 @@ If you are not already using R, you will need to install the latest [R](https://
 
 ```r
 # The easiest way to install rbedrock is from CRAN.
-# If this doesn't work, you will need to install the development version (see below).
 install.packages("rbedrock")
 
+# Or the the development version from GitHub:
+# install.packages("remotes")
+remotes::install_github("reedacartwright/rbedrock")
+
 # Install tidyverse (not needed, but useful)
-if(!require(tidyverse)) {
-    install.packages("tidyverse")
-}
+# install.packages("tidyverse")
 ```
 
 If you are not on Windows or Mac, this will install rbedrock from source, and you will need to have suitable development tools installed on your machine. This includes [CMake](https://cmake.org/download/).
 
-## Development Version
-
-To get a bug fix or to use a feature from the development version, you can install the development version of rbedrock from GitHub.
-
-``` r
-if (!require(devtools)) {
-    install.packages("devtools")
-}
-devtools::install_github("reedacartwright/rbedrock")
-```
-
-To install the development version you will need to have suitable development tools installed on your machine. This includes [CMake](https://cmake.org/download/) on Unix.
-
+<!--
 ## Development Version (Windows)
 
 ``` r
@@ -68,6 +57,7 @@ if (!require(devtools)) {
 }
 devtools::install_github("reedacartwright/rbedrock")
 ```
+-->
 
 ## Installation Tutorial Videos
 
