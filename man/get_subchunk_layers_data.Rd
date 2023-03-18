@@ -40,9 +40,11 @@ write_subchunk_layers_value(object, version = 9L, missing_offset = NA_integer_)
 
 \item{data}{A named-vector of key-value pairs for SubchunkBlocks data.}
 
-\item{values}{A list of lists of 16x16x16 integer indexes with associated block_palettes.}
+\item{values}{A list of lists of 16x16x16 integer indexes with associated
+block_palettes.}
 
-\item{value}{A list of 16x16x16 integer indexes with associated block_palettes.}
+\item{value}{A list of 16x16x16 integer indexes with associated
+block_palettes.}
 
 \item{missing_offset}{subchunk offset to use if one is not found in \code{rawdata}}
 }

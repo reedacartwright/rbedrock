@@ -70,12 +70,12 @@ close(db)
 \dontrun{
 
 # open a world in the minecraftWorlds folder using a world id.
-db <- bedrockdb("lrkkYFpUABA=") 
+db <- bedrockdb("lrkkYFpUABA=")
 # do something with db ...
 close(db)
 
 # open a world using absolute path
-db <- bedrockdb("C:\\\\\\\\minecraftWorlds\\\\\\\\my_world") 
+db <- bedrockdb("C:\\\\\\\\minecraftWorlds\\\\\\\\my_world")
 # do something with db ...
 close(db)
 }

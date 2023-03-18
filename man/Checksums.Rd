@@ -30,7 +30,8 @@ write_checksums_value(object)
 
 \item{rawdata}{a raw vector holding binary Checksums data}
 
-\item{object}{a named character vector in the same format as returned by \code{read_checksums_value()}.}
+\item{object}{a named character vector in the same format as returned by
+\code{read_checksums_value()}.}
 }
 \value{
 \code{get_checksums_data()} returns a named-list of the values returned

@@ -19,8 +19,9 @@ rawkeys_to_chrkeys(keys)
 }\if{html}{\out{</div>}}
 }
 \description{
-rbedrock represents database keys two different ways. \code{chrkeys} are a human-readable
-format understood by most functions. \code{rawkeys} are used internally, by the methods
-of \code{bedrockdb} objects and \verb{bedrock_leveldb_*} functions.
+rbedrock represents database keys two different ways. \code{chrkeys} are a
+human-readable format understood by most functions. \code{rawkeys} are used
+internally, by the methods of \code{bedrockdb} objects and \verb{bedrock_leveldb_*}
+functions.
 }
 \keyword{internal}

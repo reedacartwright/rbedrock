@@ -130,6 +130,18 @@ read_data3d_value <- function(rawdata) {
     list(height_map = h, biome_map = b)
 }
 
+.reshape_biome_map <- function(value) {
+    if (length(value) == 1L) {
+        return(array(value, c(16L, 16L * 24L, 16L)))
+    } else if (length(value) == 256L) {
+        return(aperm(array(value, c(16L, 16L, 16L * 24L)),
+                           c(1L, 3L, 2L)))
+    } else if (length(value) %% 4096 != 0) {
+        abort("Invalid biome_map dimensions.")
+    }
+    array(value, c(16L, length(value) / 256L, 16L))
+}
+
 #' @description
 #' `write_data3d_value` encodes Data3D data into a raw vector.
 #'
@@ -157,16 +169,7 @@ write_data3d_value <- function(height_map, biome_map) {
     biome_map <- vec_cast(c(biome_map), integer(), x_arg = "biome_map")
 
     # reshape biome_map
-    if (length(biome_map) == 1L) {
-        biome_map <- array(biome_map, c(16L, 16L * 24L, 16L))
-    } else if (length(biome_map) == 256L) {
-        biome_map <- aperm(array(biome_map, c(16L, 16L, 16L * 24L)),
-                           c(1L, 3L, 2L))
-    } else if (length(biome_map) %% 4096 != 0) {
-        abort("Invalid biome_map dimensions.")
-    } else {
-        biome_map <- array(biome_map, c(16L, length(biome_map) / 256L, 16L))
-    }
+    biome_map <- .reshape_biome_map(biome_map)
 
     values_list <- rep(list(integer(0L)), 25)
     palette_list <- rep(list(integer(0L)), 25)

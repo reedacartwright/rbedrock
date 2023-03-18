@@ -10,7 +10,8 @@ rbedrock_example(path = NULL)
 rbedrock_example_world(path)
 }
 \arguments{
-\item{path}{Name of file or directory. If \code{NULL}, the examples will be listed.}
+\item{path}{Name of file or directory. If \code{NULL}, the examples will be
+listed.}
 }
 \description{
 rbedrock comes bundled with a number of sample files in its \code{inst/extdata}

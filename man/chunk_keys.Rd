@@ -51,7 +51,8 @@ silently dropped.
 \code{create_chunk_keys()} returns a vector of chunk keys formed from its
 arguments.
 
-\code{chunk_positions()} returns a matrix containing the chunk coordinates of keys.
+\code{chunk_positions()} returns a matrix containing the chunk coordinates of
+keys.
 
 \code{chunk_origins()} returns a matrix containing the block coordinate of the NW
 corner of keys.

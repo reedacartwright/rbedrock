@@ -50,11 +50,11 @@ of the values returned by \code{get_finalized_state_value()}.
 FinalizedState data (tag 54) holds a number which
 indicates a chunk's state of generation.
 
-\code{get_finalized_state_data()} and \code{get_finalized_state_value()} load FinalizedState
-data from \code{db}. \code{get_finalized_state_data()} will silently drop and keys not
-representing FinalizedState data. \code{get_finalized_state_value()} supports loading
-only a single value. \code{get_finalized_state_values()} is a synonym for
-\code{get_finalized_state_data()}.
+\code{get_finalized_state_data()} and \code{get_finalized_state_value()} load
+FinalizedState data from \code{db}. \code{get_finalized_state_data()} will silently
+drop and keys not representing FinalizedState data.
+\code{get_finalized_state_value()} supports loading only a single value.
+\code{get_finalized_state_values()} is a synonym for \code{get_finalized_state_data()}.
 
 \code{put_finalized_state_data()}, \code{put_finalized_state_values()}, and
 \code{put_finalized_state_value()} store FinalizedState data into a \code{bedrockdb}.

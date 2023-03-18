@@ -142,10 +142,19 @@ chunk_origin <- function(x) {
     return(x)
 }
 
-.put_chunk_blocks_value_impl <- function(db, prefix, value, version = 9L) {
+.valid_blocks_value <- function(value) {
+    if (!is.character(value) || length(value) %% 16L != 0L) {
+        return(FALSE)
+    }
     d <- dim(value)
-    if (!is.character(value) || is.null(d) || length(d) != 3L ||
-        d[1] != 16L || d[3] != 16L || (d[2] %% 16L) != 0L) {
+    if (length(d) != 3L || d[1] != 16L || d[3] != 16L) {
+        return(FALSE)
+    }
+    return(TRUE)
+}
+
+.put_chunk_blocks_value_impl <- function(db, prefix, value, version = 9L) {
+    if (!.valid_blocks_value(value)) {
         abort("`value` must be a 16 x 16*N x 16 character array.")
     }
 
@@ -161,7 +170,7 @@ chunk_origin <- function(x) {
 
     # construct new chunk data
     data <- list()
-    subtags <- seq.int(bottom, length.out = (d[2] %/% 16L))
+    subtags <- seq.int(bottom, length.out = (dim(value)[2] %/% 16L))
     new_keys <- str_c(prefix, ":", subtags)
     for (s in seq_along(subtags)) {
         subchunk <- value[, (s - 1L) * 16L + (1:16), ]

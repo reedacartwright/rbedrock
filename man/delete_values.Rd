@@ -17,14 +17,16 @@ delete_values(
 
 \item{keys}{A character vector of keys.}
 
-\item{report}{A logical indicating whether to generate a report on deleted keys}
+\item{report}{A logical indicating whether to generate a report on deleted
+keys}
 
 \item{readoptions}{A \code{bedrock_leveldb_readoptions} object}
 
 \item{writeoptions}{A \code{bedrock_leveldb_writeoptions} object}
 }
 \value{
-If \code{report == TRUE}, a logical vector indicating which keys were deleted.
+If \code{report == TRUE}, a logical vector indicating which keys were
+deleted.
 }
 \description{
 Remove values from a bedrockdb.
