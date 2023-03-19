@@ -28,10 +28,10 @@ If \code{x} is missing, the names of \code{values} will be taken as the keys.}
 \item{value}{A list of nbt actors data}
 }
 \description{
-After 1.18.30, the nbt data of each actor is saved independently in the database,
-using a key with a prefix and a 16-character storage key: 'actor:0123456789abcdef'.
-The keys of all actors in a chunk are saved in an \link{ActorDigest} record, with format
-'acdig:x:z:dimension'.
+After 1.18.30, the nbt data of each actor is saved independently in the
+database, using a key with a prefix and a 16-character storage key:
+'actor:0123456789abcdef'. The keys of all actors in a chunk are saved in an
+\link{ActorDigest} record, with format acdig:x:z:dimension'.
 }
 \details{
 \code{get_actors_value()} loads Actors data for a single chunk in \code{db}.
