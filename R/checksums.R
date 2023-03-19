@@ -132,7 +132,7 @@ write_checksums_value <- function(object) {
         c(writeBin(tag[i], raw(), size = 2L, endian = "little"),
             as.raw(subtag[i]), hash[[i]])
     })
-    c(ret, purrr::flatten_raw(retp))
+    c(ret, purrr::list_c(retp))
 }
 
 .update_checksums_value_impl <- function(db, key) {
