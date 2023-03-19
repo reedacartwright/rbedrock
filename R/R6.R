@@ -103,7 +103,7 @@ close.bedrockdb <- function(con, compact = FALSE, ...) {
         inform("Compacting database...")
         con$compact_range()
     }
-    con$close()
+    con$close(...)
 }
 
 #' @export
