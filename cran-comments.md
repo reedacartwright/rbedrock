@@ -4,7 +4,8 @@
 
 - CRAN warnings identified on 2023-03-20 have been fixed.
 
-- References to compiling with CXX11 have been removed.
+- This resubmission fixes the NOTE identified on the first submission.
+  - References to compiling with CXX11 have been removed.
 
 ## Test environments
 

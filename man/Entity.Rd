@@ -39,7 +39,7 @@ put_entity_data(db, data)
 \code{get_entity_values()} returns a single nbt value.
 }
 \description{
-Entity data (tag 50) holds a list of NBT values for mobs and other enties
+Entity data (tag 50) holds a list of NBT values for mobs and other entities
 in the game. After 1.18.30, entity data was migrated to a new actor digest
 format and no longer saved with chunk data.
 
