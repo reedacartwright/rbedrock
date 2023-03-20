@@ -1,4 +1,4 @@
-## RBedrock Development
+## RBedrock 0.3.0
  * Added support for reading and writing 1.18.30+ actor digests.
  * Chunk data functions have been expanded.
  * [Breaking Change] Biome functions now return CNC biomes data (CnC biome functions have been renamed.) Accessing legacy biome data can be done with legacy biome functions.
