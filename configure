@@ -80,9 +80,11 @@ build_dir=src/leveldb-mcpe/build
     "-DCMAKE_AR=${AR}" \
     "-DCMAKE_RANLIB=${RANLIB}" \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLEVELDB_BUILD_TESTS:BOOL=OFF \
+    -DBUILD_SHARED_LIBS:bool=OFF \
+    -DCMAKE_POSITION_INDEPENDENT_CODE:bool=ON \
     -DCMAKE_CXX_STANDARD=17 \
     -DCMAKE_CXX_EXTENSIONS:BOOL=OFF \
+    -DLEVELDB_BUILD_TESTS:BOOL=OFF \
     -Wno-dev
 )
 
