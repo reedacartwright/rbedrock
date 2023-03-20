@@ -4,6 +4,7 @@ test_that("rbedrock_example shows all example data", {
         "block_states.csv",
         "example1.mcworld",
         "example2.mcworld",
+        "example3.mcworld",
         "default_level.dat"
     ))
 })
