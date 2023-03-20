@@ -161,7 +161,7 @@ get_actors_data <- function(x, z, dimension, db) {
 #' @export
 get_actors_value <- function(x, z, dimension, db) {
     keys <- get_acdig_value(x, z, dimension, db)
-    if(is.null(keys)) {
+    if (is.null(keys)) {
         return(NULL)
     }
     get_nbt_data(keys, db = db)

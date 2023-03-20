@@ -134,8 +134,8 @@ test_that("get_actors_data() returns a list of lists of NBT data.", {
 update_storage_key <- function(x, y) {
     y <- bit64::as.integer64(y)
     x$UniqueID <- y
-    y <- writeBin(structure(y, class=NULL), raw(), endian="big")
-    x$internalComponents$EntityStorageKeyComponent$StorageKey <- 
+    y <- writeBin(structure(y, class = NULL), raw(), endian = "big")
+    x$internalComponents$EntityStorageKeyComponent$StorageKey <-
         nbt_raw_string(y)
     x
 }
