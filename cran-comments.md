@@ -4,6 +4,8 @@
 
 - CRAN warnings identified on 2023-03-20 have been fixed.
 
+- References to compiling with CXX11 have been removed.
+
 ## Test environments
 
 * Arch Linux - R 4.2.2 (Local Install)
