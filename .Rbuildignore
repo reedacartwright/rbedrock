@@ -13,3 +13,4 @@
 ^CRAN-RELEASE$
 ^codecov\.yml$
 ^\.lintr$
+^CRAN-SUBMISSION$
