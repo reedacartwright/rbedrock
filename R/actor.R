@@ -152,13 +152,18 @@ NULL
 #' @export
 get_actors_data <- function(x, z, dimension, db) {
     keys <- get_acdig_data(x, z, dimension, db)
-    purrr::map(keys, get_nbt_data, db = db)
+    purrr::map(keys, function(x) {
+        if (is.null(x)) NULL else get_nbt_data(x, db = db)
+    })
 }
 
 #' @rdname Actors
 #' @export
 get_actors_value <- function(x, z, dimension, db) {
     keys <- get_acdig_value(x, z, dimension, db)
+    if(is.null(keys)) {
+        return(NULL)
+    }
     get_nbt_data(keys, db = db)
 }
 
