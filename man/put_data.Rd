@@ -10,7 +10,8 @@ put_data(values, keys, db, writeoptions = NULL)
 put_value(value, key, db, writeoptions = NULL)
 }
 \arguments{
-\item{values}{A list of raw values. If \code{keys} is missing, the names of \code{values} will be taken as the keys.}
+\item{values}{A list of raw values. If \code{keys} is missing, the names of
+\code{values} will be taken as the keys.}
 
 \item{keys}{A character vector of keys.}
 
@@ -31,5 +32,6 @@ Store values to a bedrockdb.
 \seealso{
 \link{delete_data} for removing key-values pairs from \code{db}.
 
-\link{write_data} for applying a batch of \code{put} and \code{delete} operations to \code{db}.
+\link{write_data} for applying a batch of \code{put} and \code{delete} operations
+to \code{db}.
 }

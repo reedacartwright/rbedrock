@@ -22,7 +22,8 @@ put_random_ticks_value(value, x, z, dimension, db)
 
 \item{db}{A bedrockdb object.}
 
-\item{values}{A list of nbt objects. If \code{x} is missing, the names of \code{values} will be taken as the keys.}
+\item{values}{A list of nbt objects. If \code{x} is missing, the names of \code{values}
+will be taken as the keys.}
 
 \item{value}{An nbt object.}
 }

@@ -7,7 +7,8 @@
 write_data(values, keys, db, writeoptions = NULL)
 }
 \arguments{
-\item{values}{A list of raw values. Use \code{zap()} or \code{NULL} to indicate that a value should be delete.
+\item{values}{A list of raw values. Use \code{zap()} or \code{NULL} to indicate
+that a value should be delete.
 If \code{keys} is missing, the names of \code{values} will be taken as the keys.}
 
 \item{keys}{A character vector of keys.}

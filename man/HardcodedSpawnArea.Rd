@@ -34,8 +34,9 @@ write_hsa_value(value)
 
 \item{pretty}{If \code{TRUE}, return as a tibble with extra information.}
 
-\item{values}{A table or a list of tables containing HSA coordinates and tags.
-If \code{values} is a table, the HSA bounding boxes will be split across chunks as needed.}
+\item{values}{A table or a list of tables containing HSA coordinates and
+tags. If \code{values} is a table, the HSA bounding boxes will be split across
+chunks as needed.}
 
 \item{merge}{Merge the new HSAs with existing HSAs.}
 
@@ -60,7 +61,8 @@ specifies the type: 1 = NetherFortress, 2 = SwampHut,
 3 = OceanMonument, and 5 = PillagerOutpost.
 }
 \details{
-\code{get_hsa_data()} and \code{get_hsa_value()} load HardcodedSpawnArea data from \code{db}.
+\code{get_hsa_data()} and \code{get_hsa_value()} load HardcodedSpawnArea data from
+\code{db}.
 \code{get_hsa_value()} only supports loading a single value.
 
 \code{put_hsa_data()} and \code{put_hsa_value()} puts HSA data into \code{db}.

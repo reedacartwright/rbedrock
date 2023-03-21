@@ -10,9 +10,9 @@
 #' | 0     | NeedsInstaticking | Chunk needs to be ticked |
 #' | 1     | NeedsPopulation | Chunk needs to be populated with mobs |
 #' | 2     | Done            | Chunk generation is fully complete |
-#' 
-#' `get_finalized_state_data()` and `get_finalized_state_value()` load FinalizedState
-#' data from `db`. `get_finalized_statevalue()` supports loading
+#'
+#' `get_finalized_state_data()` and `get_finalized_state_value()` load
+#' FinalizedState data from `db`. `get_finalized_statevalue()` supports loading
 #' only a single value.
 #'
 #' `put_finalized_state_value()` and `put_finalized_state_data()` store
@@ -25,7 +25,8 @@
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
-#' @param values An integer vector. If `x` is missing, the names of `values` will be taken as the keys.
+#' @param values An integer vector. If `x` is missing, the names of `values`
+#' will be taken as the keys.
 #' @param value A scalar integer vector.
 #' @param rawdata a raw vector.
 #'
@@ -38,14 +39,14 @@ NULL
 #' @rdname FinalizedState
 #' @export
 get_finalized_state_data <- function(x, z, dimension, db) {
-    dat <- .get_chunk_data(x, z, dimension, db, tag=54L)
+    dat <- .get_chunk_data(x, z, dimension, db, tag = 54L)
     purrr::map_int(dat, read_finalized_state_value)
 }
 
 #' @rdname FinalizedState
 #' @export
 get_finalized_state_value <- function(x, z, dimension, db) {
-    dat <- .get_chunk_value(x, z, dimension, db, tag=54L)
+    dat <- .get_chunk_value(x, z, dimension, db, tag = 54L)
     read_finalized_state_value(dat)
 }
 
@@ -53,25 +54,25 @@ get_finalized_state_value <- function(x, z, dimension, db) {
 #' @export
 put_finalized_state_data <- function(values, x, z, dimension, db) {
     dat <- purrr::map(values, write_finalized_state_value)
-    .put_chunk_data(dat, x, z, dimension, db, tag=54L)
+    .put_chunk_data(dat, x, z, dimension, db, tag = 54L)
 }
 
 #' @rdname FinalizedState
 #' @export
 put_finalized_state_value <- function(value, x, z, dimension, db) {
     value <- write_finalized_state_value(value)
-    .put_chunk_value(value, x, z, dimension, db, tag=54L)
+    .put_chunk_value(value, x, z, dimension, db, tag = 54L)
 }
 
 #' @rdname FinalizedState
 #' @export
 read_finalized_state_value <- function(rawdata) {
-    readBin(rawdata, integer(), n=1L, size=4L, endian="little")
+    readBin(rawdata, integer(), n = 1L, size = 4L, endian = "little")
 }
 
 #' @rdname FinalizedState
 #' @export
 write_finalized_state_value <- function(value) {
     stopifnot(rlang::is_scalar_integerish(value))
-    writeBin(as.integer(value), raw(), size=4L, endian="little")
+    writeBin(as.integer(value), raw(), size = 4L, endian = "little")
 }

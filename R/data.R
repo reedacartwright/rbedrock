@@ -23,23 +23,22 @@
 #' close(db)
 #' @export
 get_keys <- function(prefix = NULL, db = the_db(), readoptions = NULL) {
-    if(is_bedrockdb(prefix)) {
+    if (is_bedrockdb(prefix)) {
         db <- prefix
         prefix <- NULL
     }
 
     db <- maybe_missing(db, the_db())
     bedrockdb_assert_open(db)
-    if(!is_null(prefix)) {
+    if (!is_null(prefix)) {
         prefix <- as.character(prefix)
         prefix_raw <- .create_rawkey_prefix(prefix)
-    }
-    else {
+    } else {
         prefix_raw <- NULL
     }
     rawkeys <- db$keys(prefix_raw, readoptions)
     res <- rawkeys_to_chrkeys(rawkeys)
-    if(!is.null(prefix)) {
+    if (!is.null(prefix)) {
         # filter out keys from the wrong dimension
         res <- str_subset(res, fixed(prefix))
     }
@@ -53,14 +52,14 @@ get_keys <- function(prefix = NULL, db = the_db(), readoptions = NULL) {
 #' @param prefix A string specifying key prefix.
 #' @param key  A single key.
 #' @param readoptions A `bedrock_leveldb_readoptions` object
-#' 
-#' @return `get_data()` returns a named-list of raw vectors. `get_value()` returns a raw vector.
+#'
+#' @return `get_data()` returns a named-list of raw vectors. `get_value()`
+#' returns a raw vector.
 #' @export
 get_data <- function(keys, db, readoptions = NULL) {
     db <- maybe_missing(db, the_db())
     bedrockdb_assert_open(db)
-
-    if(.is_key_prefix(keys)) {
+    if (.is_key_prefix(keys)) {
         starts_with <- .create_rawkey_prefix(as.character(keys))
         dat <- db$mget_prefix(starts_with, readoptions)
         dat <- set_names(dat$values, rawkeys_to_chrkeys(dat$keys))
@@ -74,7 +73,7 @@ get_data <- function(keys, db, readoptions = NULL) {
 #' @rdname get_data
 #' @export
 key_prefix <- function(prefix) {
-    if(!is.character(prefix) || is.object(prefix)) {
+    if (!is.character(prefix) || is.object(prefix)) {
         prefix <- as.character(prefix)
     }
     structure(prefix, class = c("rbedrock_key_prefix", "character"))
@@ -118,21 +117,23 @@ has_value <- function(key, db, readoptions = NULL) {
 #' Store values to a bedrockdb.
 #'
 #' @param db A `bedrockdb` object
-#' @param values A list of raw values. If `keys` is missing, the names of `values` will be taken as the keys.
+#' @param values A list of raw values. If `keys` is missing, the names of
+#' `values` will be taken as the keys.
 #' @param keys A character vector of keys.
 #' @param writeoptions A `bedrock_leveldb_writeoptions` object
 #' @param key  A key that will be used to store data.
 #' @param value A raw vector that contains the information to be written.
-#' 
+#'
 #' @seealso [delete_data] for removing key-values pairs from `db`.
-#' @seealso [write_data] for applying a batch of `put` and `delete` operations to `db`.
+#' @seealso [write_data] for applying a batch of `put` and `delete` operations
+#' to `db`.
 #'
 #' @return An invisible copy of `db`.
 #' @export
 put_data <- function(values, keys, db, writeoptions = NULL) {
     db <- maybe_missing(db, the_db())
     bedrockdb_assert_open(db)
-    if(missing(keys) && is_named(values)) {
+    if (missing(keys) && is_named(values)) {
         # if keys is missing use names from values
         keys <- names(values)
     } else {
@@ -183,20 +184,21 @@ delete_value <- function(key, db, writeoptions = NULL) {
 
 #' Write values to a bedrockdb.
 #'
-#' `write_data()` commits a batch of write and delete  
+#' `write_data()` commits a batch of write and delete
 #'
 #' @param db A `bedrockdb` object
-#' @param values A list of raw values. Use `zap()` or `NULL` to indicate that a value should be delete.
+#' @param values A list of raw values. Use `zap()` or `NULL` to indicate
+#' that a value should be delete.
 #' If `keys` is missing, the names of `values` will be taken as the keys.
 #' @param keys A character vector of keys.
 #' @param writeoptions A `bedrock_leveldb_writeoptions` object
-#' 
+#'
 #' @return An invisible copy of `db`.
 #' @export
 write_data <- function(values, keys, db, writeoptions = NULL) {
     db <- maybe_missing(db, the_db())
     bedrockdb_assert_open(db)
-    if(missing(keys) && is_named(values)) {
+    if (missing(keys) && is_named(values)) {
         keys <- names(values)
     } else {
         # recycle values if necessary

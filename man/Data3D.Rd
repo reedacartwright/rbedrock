@@ -53,7 +53,7 @@ chunk.
 }
 \details{
 \code{get_data3d_data()} and \code{get_data3d_value()} load Data3D data from \code{db}.
-\code{get_data3d_value()} only supports loading a single value.'
+\code{get_data3d_value()} only supports loading a single value.
 
 \code{put_data3d_data()} and \code{put_data3d_value()} store Data3D data into \code{db}.
 

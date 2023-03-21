@@ -28,7 +28,8 @@ write_finalized_state_value(value)
 
 \item{db}{A bedrockdb object.}
 
-\item{values}{An integer vector. If \code{x} is missing, the names of \code{values} will be taken as the keys.}
+\item{values}{An integer vector. If \code{x} is missing, the names of \code{values}
+will be taken as the keys.}
 
 \item{value}{A scalar integer vector.}
 
@@ -51,8 +52,8 @@ FinalizedState data contains the following information.\tabular{lll}{
 }
 
 
-\code{get_finalized_state_data()} and \code{get_finalized_state_value()} load FinalizedState
-data from \code{db}. \code{get_finalized_statevalue()} supports loading
+\code{get_finalized_state_data()} and \code{get_finalized_state_value()} load
+FinalizedState data from \code{db}. \code{get_finalized_statevalue()} supports loading
 only a single value.
 
 \code{put_finalized_state_value()} and \code{put_finalized_state_data()} store

@@ -34,7 +34,8 @@ write_nbt_data(values)
 
 \item{readoptions}{A \code{bedrock_leveldb_readoptions} object.}
 
-\item{simplify}{If TRUE, simplifies a list containing a single unnamed \code{nbtnode}.}
+\item{simplify}{If TRUE, simplifies a list containing a single unnamed
+\code{nbtnode}.}
 
 \item{key}{A single key.}
 
@@ -49,12 +50,15 @@ write_nbt_data(values)
 \item{rawvalues}{A list of \code{raw} vectors.}
 }
 \description{
-The Named Binary Tag (NBT) format is used by Minecraft for various data types.
+The Named Binary Tag (NBT) format is used by Minecraft for various data
+types.
 }
 \details{
-\code{get_nbt_data()} and \code{get_nbt_value()} load nbt-formatted data from \code{db} and parses it.
+\code{get_nbt_data()} and \code{get_nbt_value()} load nbt-formatted data from \code{db}
+and parses it.
 
-\code{put_nbt_value()} and \code{put_nbt_data()} store nbt data into \code{db} in binary form.
+\code{put_nbt_value()} and \code{put_nbt_data()} store nbt data into \code{db} in binary
+form.
 
 \code{read_nbt()} reads NBT data from a \code{raw} vector.
 \code{read_nbt_data()} calls \code{read_nbt()} on each element of a list.

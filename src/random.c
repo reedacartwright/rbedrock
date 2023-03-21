@@ -13,7 +13,6 @@
 
 #include "random.h"
 
-
 #include <stdio.h>
 
 static void rbedrock_random_seed_impl(uint32_t value);
@@ -40,8 +39,7 @@ typedef struct rbedrock_random_ rbedrock_random_t;
 
 static rbedrock_random_t g_state;
 
-
-void rbedrock_init_random() {
+void rbedrock_init_random(void) {
     rbedrock_random_seed_impl(5489u);
 }
 
@@ -53,7 +51,7 @@ void rbedrock_init_random() {
     g_state.mt[i] = g_state.mt[expr] ^ (y >> 1) ^ ((((int32_t)((y) << 31)) >> 31) & MAGIC); \
     ++i;
 
-static void rbedrock_random_update_state() {
+static void rbedrock_random_update_state(void) {
     size_t i = 0;
     uint32_t y;
 
@@ -87,7 +85,7 @@ static void rbedrock_random_update_state() {
     g_state.index = 0;
 }
 
-static uint32_t rbedrock_random_next() {
+static uint32_t rbedrock_random_next(void) {
     if ( g_state.index == SIZE ) {
         rbedrock_random_update_state();
         g_state.index = 0;

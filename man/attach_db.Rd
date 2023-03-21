@@ -26,9 +26,9 @@ options are set back to their original values.}
 }
 \description{
 \itemize{
-\item \code{attach_db()} assigns a \code{bedrockdb} to a global variable. This global variable will be
-used as the default \code{db} for functions that load and store values if their \code{db} argument
-is missing.
+\item \code{attach_db()} assigns a \code{bedrockdb} to a global variable. This global
+variable will be used as the default \code{db} for functions that load and
+store values if their \code{db} argument is missing.
 \item \code{the_db()} returns the current default db.
 \item \code{local_db()} temporarily sets \code{the_db} for the duration of a stack
 frame (by default the current one). \code{the_db} is set back to its

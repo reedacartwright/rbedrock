@@ -8,7 +8,7 @@ test_that("bedrockdb can open and close a database", {
     fs::dir_delete(dbpath)
 })
 
-test_that("bedrockdb clears open iterators when closed",{
+test_that("bedrockdb clears open iterators when closed", {
     dbpath <- rbedrock_example_world("example1.mcworld")
     db <- bedrockdb(dbpath)
     it1 <- db$iterator()
@@ -19,10 +19,10 @@ test_that("bedrockdb clears open iterators when closed",{
     expect_false(it2$isnil())
     expect_false(it3$isnil())
     expect_false(it4$isnil())
-    
-    it3$destroy();
+
+    it3$destroy()
     expect_true(it3$isnil())
-    
+
     expect_silent(close(db))
     expect_silent(gc())
 
@@ -35,7 +35,7 @@ test_that("bedrockdb clears open iterators when closed",{
     fs::dir_delete(dbpath)
 })
 
-test_that("bedrockdb clears open snapshots when closed",{
+test_that("bedrockdb clears open snapshots when closed", {
     dbpath <- rbedrock_example_world("example1.mcworld")
     db <- bedrockdb(dbpath)
     snap1 <- db$snapshot()
@@ -46,10 +46,10 @@ test_that("bedrockdb clears open snapshots when closed",{
     expect_false(snapshot_isnil(snap2))
     expect_false(snapshot_isnil(snap3))
     expect_false(snapshot_isnil(snap4))
-    
+
     db$snapshot_release(snap3)
     expect_true(snapshot_isnil(snap3))
-    
+
     expect_silent(close(db))
     expect_silent(gc())
 
@@ -80,7 +80,7 @@ test_that("close_all_bedrockdb works", {
 test_that("create_unique_ids works", {
     epoch <- bit64::as.integer64(-2)
 
-    dbpath <- rbedrock_example_world("example2.mcworld")    
+    dbpath <- rbedrock_example_world("example2.mcworld")
     db <- bedrockdb(dbpath)
 
     expect_equal(db$leveldat$worldStartCount, nbt_long(epoch + 2^32))
@@ -89,12 +89,12 @@ test_that("create_unique_ids works", {
     u2 <- db$create_unique_ids(5)
     close(db)
 
-    expect_equal(c(u1,u2), (2^32*epoch)+1:10)
+    expect_equal(c(u1, u2), (2 ^ 32 * epoch) + 1:10)
 
     db <- bedrockdb(dbpath)
     u1 <- db$create_unique_ids(10)
     u2 <- db$create_unique_ids(10)
-    expect_equal(c(u1,u2), (2^32*(epoch-1))+1:20)
+    expect_equal(c(u1, u2), (2 ^ 32 * (epoch - 1)) + 1:20)
 
     close(db)
 

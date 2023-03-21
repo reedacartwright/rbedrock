@@ -12,12 +12,13 @@
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
 #'
-#' @param values A list of nbt objects. If `x` is missing, the names of `values` will be taken as the keys.
+#' @param values A list of nbt objects. If `x` is missing, the names of `values`
+#' will be taken as the keys.
 #' @param value An nbt object.
 #'
 #' @return `get_random_ticks_data()` returns a named-list of nbt data.
 #' `get_random_ticks_value()` returns a single nbt value.
-#' 
+#'
 #' @name RandomTicks
 NULL
 
@@ -44,4 +45,3 @@ put_random_ticks_data <- function(values, x, z, dimension, db) {
 put_random_ticks_value <- function(value, x, z, dimension, db) {
     .put_chunk_nbt_value(value, x, z, dimension, db, tag = 59L)
 }
-

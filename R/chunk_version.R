@@ -13,11 +13,16 @@
 #'
 #' `read_chunk_version_value()` decodes Version data and
 #' `write_chunk_version_value()` encodes Version data.
+#' data from `db`. `get_chunk_version_data()` will silently drop and keys not
+#' representing Version data. `get_chunk_version_value()` supports loading
+#' only a single value. `get_chunk_version_values()` is a synonym for
+#' `get_chunk_version_data()`.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract version data from.
 #'    `x` can also be a character vector of db keys.
-#' @param values An integer vector. If `x` is missing, the names of `values` will be taken as the keys.
+#' @param values An integer vector. If `x` is missing, the names of `values`
+#' will be taken as the keys.
 #' @param value A scalar integer vector.
 #' @param rawdata A scalar raw.
 #' @param num A scalar integer.
@@ -45,8 +50,8 @@ get_chunk_version_data <- function(x, z, dimension, db) {
 get_chunk_version_value <- function(x, z, dimension, db) {
     key <- .process_chunk_key_args(x, z, dimension, tag = 44L,
         assert_validity = TRUE, assert_scalar = TRUE)
-    dat <- get_value(key, db)
-    if(is.null(val)) {
+    val <- get_value(key, db)
+    if (is.null(val)) {
         key <- str_replace(key, ":44$", ":118")
         val <- get_value(key, db = db)
     }
@@ -58,7 +63,7 @@ get_chunk_version_value <- function(x, z, dimension, db) {
 put_chunk_version_data <- function(values, x, z, dimension, db) {
     keys <- .process_chunk_key_args(x, z, dimension, tag = 44L,
         values = values, assert_validity = TRUE)
-    values <- vec_recycle(values, length(keys), x_arg="values")
+    values <- vec_recycle(values, length(keys), x_arg = "values")
     values <- purrr::map(values, write_chunk_version_value)
     put_data(values, keys, db = db)
 }
@@ -75,7 +80,7 @@ put_chunk_version_value <- function(value, x, z, dimension, db) {
 #' @rdname ChunkVersion
 #' @export
 read_chunk_version_value <- function(rawdata) {
-    if(is.null(rawdata)) {
+    if (is.null(rawdata)) {
         return(NULL)
     }
     vec_assert(rawdata, raw())

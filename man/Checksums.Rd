@@ -27,7 +27,8 @@ write_checksums_value(object)
 
 \item{rawdata}{a raw vector holding binary Checksums data.}
 
-\item{object}{a named character vector in the same format as returned by \code{read_checksums_value()}.}
+\item{object}{a named character vector in the same format as returned by
+\code{read_checksums_value()}.}
 }
 \value{
 \code{write_checksums_value()} returns a raw vector.
@@ -56,6 +57,7 @@ records in \code{db} and updates the Checksums record to match.
 
 \code{read_checksums_value()} parses a binary Checksums record
 into a list of checksums.
+
 \code{write_checksums_value()} converts Checksums from a named list into
 binary format.
 }

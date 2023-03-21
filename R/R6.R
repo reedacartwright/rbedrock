@@ -34,7 +34,7 @@
 #' higher-level functions. The handle to the database can be closed
 #' by passing it to `close`.
 #'
-#' @param path The path to a world folder. If the path does not exist, it is 
+#' @param path The path to a world folder. If the path does not exist, it is
 #'   assumed to be the base name of a world folder in the local minecraftWorlds
 #'   directory.
 #' @param create_if_missing Create world database if it doesn't exist.
@@ -52,7 +52,7 @@
 #' @param x An object.
 #'
 #' @return On success, `bedrockdb` returns an R6 class of type 'bedrockdb'.
-#'         
+#'
 #' @export
 #' @examples
 #' # open an example works and get all keys
@@ -64,59 +64,74 @@
 #' \dontrun{
 #'
 #' # open a world in the minecraftWorlds folder using a world id.
-#' db <- bedrockdb("lrkkYFpUABA=") 
+#' db <- bedrockdb("lrkkYFpUABA=")
 #' # do something with db ...
 #' close(db)
 #'
 #' # open a world using absolute path
-#' db <- bedrockdb("C:\\\\minecraftWorlds\\\\my_world") 
+#' db <- bedrockdb("C:\\\\minecraftWorlds\\\\my_world")
 #' # do something with db ...
 #' close(db)
 #' }
 
-bedrockdb <- function(path, create_if_missing = FALSE, error_if_exists = NULL, paranoid_checks = NULL,
-    write_buffer_size = 4194304L, max_open_files = NULL, block_size = 163840L,
-    cache_capacity = 83886080L, bloom_filter_bits_per_key = 10L, compression_level = -1L) {
-    R6_bedrockdb$new(path, create_if_missing, error_if_exists, paranoid_checks, write_buffer_size, 
-        max_open_files, block_size, cache_capacity, bloom_filter_bits_per_key, compression_level)
+bedrockdb <- function(path,
+                      create_if_missing = FALSE,
+                      error_if_exists = NULL,
+                      paranoid_checks = NULL,
+                      write_buffer_size = 4194304L,
+                      max_open_files = NULL,
+                      block_size = 163840L,
+                      cache_capacity = 83886080L,
+                      bloom_filter_bits_per_key = 10L,
+                      compression_level = -1L) {
+    R6_bedrockdb$new(path,
+                     create_if_missing,
+                     error_if_exists,
+                     paranoid_checks,
+                     write_buffer_size,
+                     max_open_files,
+                     block_size,
+                     cache_capacity,
+                     bloom_filter_bits_per_key,
+                     compression_level)
 }
 
 #' @export
 #' @rdname bedrockdb
 close.rbedrock_db <- function(con, compact = FALSE, ...) {
-    if(isTRUE(compact)) {
+    if (isTRUE(compact)) {
         inform("Compacting database...")
         con$compact_range()
     }
     con$close(...)
 }
 
-#' @rdname bedrockdb
 #' @export
-is_bedrockdb <- function(x) {
-    inherits(x, "rbedrock_db")
-}
-
 #' @rdname bedrockdb
-#' @export
 close_all_bedrockdb <- function(x) {
     .Call(rbedrock_closeall)
+}
+
+#' @export
+#' @rdname bedrockdb
+is_bedrockdb <- function(x) {
+    inherits(x, "rbedrock_db")
 }
 
 #' Attach a bedrockdb globally
 #'
 #' @description
 #'
-#'  * `attach_db()` assigns a `bedrockdb` to a global variable. This global variable will be
-#' used as the default `db` for functions that load and store values if their `db` argument
-#' is missing.
+#'  * `attach_db()` assigns a `bedrockdb` to a global variable. This global
+#'  variable will be used as the default `db` for functions that load and
+#'  store values if their `db` argument is missing.
 #'
 #'  * `the_db()` returns the current default db.
-#' 
+#'
 #'  * `local_db()` temporarily sets `the_db` for the duration of a stack
 #'   frame (by default the current one). `the_db` is set back to its
 #'   old value when the frame returns.
-#' 
+#'
 #'  * `with_db()` changes `the_db` while an expression is
 #'   evaluated. `db` is restored when the expression returns.
 #'
@@ -130,7 +145,7 @@ close_all_bedrockdb <- function(x) {
 #' # Load database
 #' dbpath <- rbedrock_example_world("example1.mcworld")
 #' db <- bedrockdb(dbpath)
-#' 
+#'
 #' \dontrun{
 #' # This will fail because no db is specified.
 #' keys <- get_keys()
@@ -140,7 +155,7 @@ close_all_bedrockdb <- function(x) {
 #'
 #' # Get all keys. (This now works.)
 #' keys <- get_keys()
-#' 
+#'
 #' # Detach it.
 #' attach_db()
 #'
@@ -149,7 +164,7 @@ close_all_bedrockdb <- function(x) {
 #'   local_db(db)
 #'   get_keys()
 #' }
-#' 
+#'
 #' # Evaluate an expression with a db attached temporarily.
 #' with_db(get_keys(), db = db)
 #'
@@ -181,19 +196,23 @@ the_db <- function() {
 }
 
 bedrockdb_assert_open <- function(db, arg = caller_arg(db)) {
-    if(is_missing(db)) {
+    if (is_missing(db)) {
         abort(str_glue("argument `{arg}` is missing, with no default"))
     }
-    if(!is_bedrockdb(db) || !(db$is_open())) {
+    if (!is_bedrockdb(db) || !(db$is_open())) {
         abort(str_glue("`{arg}` is not an open bedrockdb"))
     }
     invisible(TRUE)
 }
 
 #' @importFrom R6 R6Class
-R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL,
-    path = NULL, levelname = NULL, leveldat = NULL,
-    leveldat_is_dirty = FALSE, unique_id = NULL,
+R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(
+    db = NULL,
+    path = NULL,
+    levelname = NULL,
+    leveldat = NULL,
+    leveldat_is_dirty = FALSE,
+    unique_id = NULL,
     initialize = function(path, ...) {
         path <- fs::path_real(.fixup_path(path))
         dat <- read_leveldat(path)
@@ -203,7 +222,7 @@ R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL,
         self$leveldat <- dat
     },
     close = function(error_if_closed = FALSE) {
-        if(self$leveldat_is_dirty) {
+        if (self$leveldat_is_dirty) {
             write_leveldat(self$leveldat, fs::path_dir(self$path))
         }
         ret <- db_close(self$db, error_if_closed)
@@ -228,7 +247,7 @@ R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL,
     },
     mget_prefix = function(starts_with, readoptions = NULL) {
         db_mget_prefix(self$db, starts_with, readoptions)
-    },    
+    },
     put = function(key, value, writeoptions = NULL) {
         db_put(self$db, key, value, writeoptions)
         invisible(self)
@@ -265,7 +284,7 @@ R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL,
         db_snapshot(self$db)
     },
     snapshot_release = function(snapshot, error_if_released = FALSE) {
-        db_snapshot_release(self$db, snapshot, error_if_released);
+        db_snapshot_release(self$db, snapshot, error_if_released)
     },
     approximate_sizes = function(start, limit) {
         db_approximate_sizes(self$db, start, limit)
@@ -275,7 +294,7 @@ R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL,
         invisible(self)
     },
     create_unique_ids = function(n) {
-        if(is_null(self$unique_id)) {
+        if (is_null(self$unique_id)) {
             cnt <- payload(self$leveldat$worldStartCount %||% nbt_long(0))
             self$leveldat$worldStartCount <- nbt_long(cnt - 1)
             self$leveldat_is_dirty <- TRUE
@@ -287,7 +306,8 @@ R6_bedrockdb <- R6::R6Class("rbedrock_db", public = list(db = NULL,
     }
 ))
 
-R6_bedrockdb_iterator <- R6::R6Class("rbedrock_db_iterator", public = list(it = NULL, 
+R6_bedrockdb_iterator <- R6::R6Class("rbedrock_db_iterator", public = list(
+    it = NULL,
     initialize = function(db, readoptions) {
         self$it <- db_iter_create(db, readoptions)
     },

@@ -28,7 +28,8 @@ write_chunk_version_value(num)
 
 \item{db}{A bedrockdb object.}
 
-\item{values}{An integer vector. If \code{x} is missing, the names of \code{values} will be taken as the keys.}
+\item{values}{An integer vector. If \code{x} is missing, the names of \code{values}
+will be taken as the keys.}
 
 \item{value}{A scalar integer vector.}
 
@@ -51,4 +52,8 @@ only a single value.
 
 \code{read_chunk_version_value()} decodes Version data and
 \code{write_chunk_version_value()} encodes Version data.
+data from \code{db}. \code{get_chunk_version_data()} will silently drop and keys not
+representing Version data. \code{get_chunk_version_value()} supports loading
+only a single value. \code{get_chunk_version_values()} is a synonym for
+\code{get_chunk_version_data()}.
 }

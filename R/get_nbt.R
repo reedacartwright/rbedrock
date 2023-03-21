@@ -1,10 +1,13 @@
 #' Read and write NBT data
 #'
-#' The Named Binary Tag (NBT) format is used by Minecraft for various data types.
+#' The Named Binary Tag (NBT) format is used by Minecraft for various data
+#' types.
 #'
-#' `get_nbt_data()` and `get_nbt_value()` load nbt-formatted data from `db` and parses it.
+#' `get_nbt_data()` and `get_nbt_value()` load nbt-formatted data from `db`
+#' and parses it.
 #'
-#' `put_nbt_value()` and `put_nbt_data()` store nbt data into `db` in binary form.
+#' `put_nbt_value()` and `put_nbt_data()` store nbt data into `db` in binary
+#' form.
 #'
 #' `read_nbt()` reads NBT data from a `raw` vector.
 #' `read_nbt_data()` calls `read_nbt()` on each element of a list.
@@ -15,7 +18,8 @@
 #' @param keys A character vector of keys.
 #' @param key  A single key.
 #' @param readoptions A `bedrock_leveldb_readoptions` object.
-#' @param simplify If TRUE, simplifies a list containing a single unnamed `nbtnode`.
+#' @param simplify If TRUE, simplifies a list containing a single unnamed
+#' `nbtnode`.
 #' @param value An nbt object.
 #' @param values A list of nbt objects.
 #' @param writeoptions A `bedrock_leveldb_writeoptions` object.
@@ -53,7 +57,7 @@ put_nbt_data <- function(values, keys, db, writeoptions = NULL) {
 #' @export
 read_nbt <- function(rawvalue, simplify = TRUE) {
     res <- from_rnbt(read_rnbt(rawvalue))
-    if(isTRUE(simplify) && length(res) == 1L && is.null(attributes(res))) {
+    if (isTRUE(simplify) && length(res) == 1L && is.null(attributes(res))) {
         res <- res[[1]]
     }
     res
@@ -68,7 +72,7 @@ read_nbt_data <- function(rawvalues, simplify = TRUE) {
 #' @rdname get_nbt_data
 #' @export
 write_nbt <- function(value) {
-    if(is_nbt(value)) {
+    if (is_nbt(value)) {
         value <- list(value)
     }
     write_rnbt(to_rnbt(value))

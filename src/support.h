@@ -41,7 +41,7 @@ size_t scalar_size(SEXP x);
 int scalar_int(SEXP x);
 const char *scalar_character(SEXP x);
 
-SEXP create_stretchy_list();
+SEXP create_stretchy_list(void);
 void grow_stretchy_list(SEXP l, SEXP s);
 SEXP create_stretchy_list_with_name(SEXP s, SEXP tag);
 void grow_stretchy_list_with_name(SEXP l, SEXP s, SEXP tag);

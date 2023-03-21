@@ -63,8 +63,8 @@ subchunk_coords(ind, origins = subchunk_origins(names(ind)))
 output (separated by ";"). This is mostly useful if you have waterlogged
 blocks. If the extra block is air, it will not be appended.}
 
-\item{values}{A list of 16x16x16 character() arrays. If \code{x} is missing, the names of \code{values} will be taken as the keys.
-ignoring block states.}
+\item{values}{A list of 16x16x16 character() arrays. If \code{x} is missing,
+the names of \code{values} will be taken as the keys.}
 
 \item{version}{Which format of subchunk data to use}
 
@@ -87,8 +87,8 @@ indexes for blocks in a subchunk.}
 \code{get_subchunk_blocks_value()} and \code{read_subchunk_blocks_value()}
 return a 16x16x16 character array. The axes represent the \code{x}, \code{y}, and \code{z}
 dimensions in that order.
-\code{get_subchunk_blocks_data()}
-return a list of the of the values returned by \code{read_subchunk_blocks_value()}.
+\code{get_subchunk_blocks_data()} returns a list of the of the values returned by
+\code{read_subchunk_blocks_value()}.
 \code{read_subchunk_blocks_value()} returns a 16x16x16 character array.
 The axes represent the \code{x}, \code{y}, and \code{z} dimensions in that order.
 
@@ -117,7 +117,8 @@ block name and block states. The strings' format is
 \code{blockname@state1=value1@state2=value2} etc.
 Blocks may have 0 or more states.
 
-\code{get_subchunk_blocks_data()} and \code{get_subchunk_blocks_value()} load SubchunkBlocks data from \code{db}.
+\code{get_subchunk_blocks_data()} and \code{get_subchunk_blocks_value()} load
+SubchunkBlocks data from \code{db}.
 \code{get_subchunk_blocks_value()} only supports loading a single value.
 
 \code{put_subchunk_blocks_data()}, \code{put_subchunk_blocks_values()}, and

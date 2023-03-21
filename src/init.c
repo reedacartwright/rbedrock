@@ -37,7 +37,7 @@
 #include "actors.h"
 
 // for testing:
-SEXP rbedrock_db_test_cleanup() {
+SEXP rbedrock_db_test_cleanup(void) {
     rbedrock_cleanup_db();
     rbedrock_init_db();
     return R_NilValue;
@@ -117,14 +117,14 @@ static const R_CallMethodDef call_methods[] = {
     {"rbedrock_random_get_int", (DL_FUNC)&rbedrock_random_get_int, 3},
     {"rbedrock_random_get_double", (DL_FUNC)&rbedrock_random_get_double, 1},
     {"rbedrock_random_get_float", (DL_FUNC)&rbedrock_random_get_float, 3},
-
     {"rbedrock_random_create_seed", (DL_FUNC)&rbedrock_random_create_seed, 6},
 
-    {NULL, NULL, 0}};
+    {NULL, NULL, 0}
+};
 
-void rbedrock_init_nbt();
-void rbedrock_init_chunk();
-void rbedrock_init_random();
+void rbedrock_init_nbt(void);
+void rbedrock_init_chunk(void);
+void rbedrock_init_random(void);
 
 void attribute_visible R_init_rbedrock(DllInfo *info) {
     R_registerRoutines(info, NULL, call_methods, NULL, NULL);

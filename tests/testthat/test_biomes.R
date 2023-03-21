@@ -11,7 +11,7 @@ test_that("put_legacy_biomes_value() accepts strings", {
     dat <- get_legacy_biomes_value(32, 3, 0, db = db)
     expect_equal(dat, matrix("plains", 16L, 16L))
 
-    new_dat <- sample(c("plains","desert","ocean"),256,replace=TRUE)
+    new_dat <- sample(c("plains", "desert", "ocean"), 256, replace = TRUE)
     put_legacy_biomes_value(new_dat, 32, 3, 0, db = db)
     dat <- get_legacy_biomes_value(32, 3, 0, db = db)
     expect_equal(dat, matrix(new_dat, 16L, 16L))
@@ -22,17 +22,17 @@ test_that("put_legacy_biomes_value() accepts strings", {
 test_that("put_legacy_biomes_value() accepts integers", {
     set.seed(102032)
     put_legacy_biomes_value(1L, 32, 3, 0, db = db)
-    dat <- get_legacy_biomes_value(32, 3, 0, db = db, return_names=FALSE)
+    dat <- get_legacy_biomes_value(32, 3, 0, db = db, return_names = FALSE)
     expect_equal(dat, matrix(1L, 16L, 16L))
 
-    new_dat <- sample(c(1, 10, 20),256,replace=TRUE)
+    new_dat <- sample(c(1, 10, 20), 256, replace = TRUE)
     put_legacy_biomes_value(new_dat, 32, 3, 0, db)
-    dat <- get_legacy_biomes_value(32, 3, 0, db = db, return_names=FALSE)
+    dat <- get_legacy_biomes_value(32, 3, 0, db = db, return_names = FALSE)
     expect_equal(dat, matrix(new_dat, 16L, 16L))
 })
 
 test_that("put_legacy_biomes_data() accepts strings", {
-    keys <- c("chunk:37:5:0:45","chunk:37:6:0:45")
+    keys <- c("chunk:37:5:0:45", "chunk:37:6:0:45")
     put_legacy_biomes_data("plains", keys, db = db)
 
     new_dat <- list(
@@ -45,7 +45,7 @@ test_that("put_legacy_biomes_data() accepts strings", {
 })
 
 test_that("put_legacy_biomes_data() accepts integers", {
-    keys <- c("chunk:37:5:0:45","chunk:37:6:0:45")
+    keys <- c("chunk:37:5:0:45", "chunk:37:6:0:45")
     put_legacy_biomes_data(2L, keys, db = db)
 
     new_dat <- list(

@@ -7,7 +7,8 @@
 #' specifies the type: 1 = NetherFortress, 2 = SwampHut,
 #' 3 = OceanMonument, and 5 = PillagerOutpost.
 #'
-#' `get_hsa_data()` and `get_hsa_value()` load HardcodedSpawnArea data from `db`.
+#' `get_hsa_data()` and `get_hsa_value()` load HardcodedSpawnArea data from
+#' `db`.
 #' `get_hsa_value()` only supports loading a single value.
 #'
 #' `put_hsa_data()` and `put_hsa_value()` puts HSA data into `db`.
@@ -17,8 +18,9 @@
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
-#' @param values A table or a list of tables containing HSA coordinates and tags.
-#'   If `values` is a table, the HSA bounding boxes will be split across chunks as needed.
+#' @param values A table or a list of tables containing HSA coordinates and
+#' tags. If `values` is a table, the HSA bounding boxes will be split across
+#' chunks as needed.
 #' @param rawdata A scalar raw.
 #' @param value A table containing HSA coordinates
 #' @param merge Merge the new HSAs with existing HSAs.
@@ -54,7 +56,7 @@ NULL
 get_hsa_data <- function(x, z, dimension, db, simplify = TRUE) {
     dat <- .get_chunk_data(x, z, dimension, db, tag = 57L)
     hsa <- purrr::map(dat, read_hsa_value, pretty = simplify)
-    if(isTRUE(simplify)) {
+    if (isTRUE(simplify)) {
         hsa <- dplyr::bind_rows(hsa, .id = "key")
         hsa$dimension <- .get_dimension_from_chunk_key(hsa$key)
         hsa <- dplyr::relocate(hsa, "key", .after = dplyr::last_col())
@@ -69,7 +71,7 @@ get_hsa_value <- function(x, z, dimension, db) {
     read_hsa_value(dat)
 }
 
-.HSA_LIST = c(
+.HSA_LIST <- c(
    "NetherFortress",
    "SwampHut",
    "OceanMonument",
@@ -81,34 +83,35 @@ get_hsa_value <- function(x, z, dimension, db) {
 #' @rdname HardcodedSpawnArea
 #' @export
 read_hsa_value <- function(rawdata, pretty = TRUE) {
-    if(is.null(rawdata)) {
-        mat <- data.frame(matrix(integer(0L),0,7))
+    if (is.null(rawdata)) {
+        mat <- data.frame(matrix(integer(0L), 0, 7))
     } else {
-        sz <- readBin(rawdata, integer(), n=1L, size= 4L, endian = "little")
-        vec_assert(rawdata, raw(), sz*25L+4)
-        
+        sz <- readBin(rawdata, integer(), n = 1L, size = 4L, endian = "little")
+        vec_assert(rawdata, raw(), sz * 25L + 4)
+
         rawdata <- rawdata[-c(1:4)]
-        stopifnot(length(rawdata) == sz*25L)
-        mat <- matrix(0L, nrow=sz, ncol=7)
-        for(i in 1:sz) {
-            aabb <- readBin(rawdata, integer(), n = 6, size = 4, endian = "little")
+        stopifnot(length(rawdata) == sz * 25L)
+        mat <- matrix(0L, nrow = sz, ncol = 7)
+        for (i in 1:sz) {
+            aabb <- readBin(rawdata, integer(), n = 6, size = 4,
+                endian = "little")
             tag <- as.raw(rawdata[25])
-            mat[i,] <- c(tag, aabb)
+            mat[i, ] <- c(tag, aabb)
             rawdata <- rawdata[-c(1:25)]
         }
     }
     hsa <- as.data.frame(mat)
     names(hsa) <- c("tag", "x1", "y1", "z1", "x2", "y2", "z2")
-    if(isTRUE(pretty)) {
+    if (isTRUE(pretty)) {
         # store results in a tibble
         hsa <- tibble::as_tibble(hsa)
         # prettify tag
-        hsa$tag <- .HSA_LIST[mat[,1]]
+        hsa$tag <- .HSA_LIST[mat[, 1]]
         # include HSS information.
         hsa$xspot <- (hsa$x1 + hsa$x2 + 1L) %/% 2L
         hsa$yspot <- pmax.int(hsa$y1, hsa$y2) -
-            ifelse(hsa$tag %in% .HSA_LIST[c(2,5)], 4L, 1L)
-        hsa$zspot <- (hsa$z1 + hsa$z2 + 1L) %/% 2L        
+            ifelse(hsa$tag %in% .HSA_LIST[c(2, 5)], 4L, 1L)
+        hsa$zspot <- (hsa$z1 + hsa$z2 + 1L) %/% 2L
     }
     hsa
 }
@@ -117,7 +120,7 @@ read_hsa_value <- function(rawdata, pretty = TRUE) {
 #' @export
 put_hsa_data <- function(values, x, z, dimension, db, merge = TRUE) {
     # if values is a data.frame, split HSAs across chunks as necessary
-    if(is.data.frame(values)) {
+    if (is.data.frame(values)) {
         # create HSA data
         x1 <- pmin(values$x1, values$x2)
         x2 <- pmax(values$x1, values$x2)
@@ -127,25 +130,25 @@ put_hsa_data <- function(values, x, z, dimension, db, merge = TRUE) {
         z2 <- pmax(values$z1, values$z2)
         tag <- values$tag
         dimension <- values$dimension
-        if(is.character(tag)) {
+        if (is.character(tag)) {
             tag <- match(tag, .HSA_LIST)
             stopifnot(all(!is.na(tag)))
         }
-        if(is.null(dimension)) {
+        if (is.null(dimension)) {
             dimension <- ifelse(tag == 1L, 1L, 0L)
         }
         dat <- NULL
-        for(i in seq_along(x1)) {
+        for (i in seq_along(x1)) {
             # identify which chunks the row overlaps
             a <- seq.int(x1[i] %/% 16L, x2[i] %/% 16L)
             b <- seq.int(z1[i] %/% 16L, z2[i] %/% 16L)
-            chunks <- tidyr::expand_grid(x=a, z=b, d=dimension[i])
+            chunks <- tidyr::expand_grid(x = a, z = b, d = dimension[i])
             chunks$key <- create_chunk_keys(chunks$x, chunks$z, chunks$d, 57L)
             # identify intersection between hsa and chunks.
-            a1 <- pmax(chunks$x*16L, x1[i])
-            b1 <- pmax(chunks$z*16L, z1[i])
-            a2 <- pmin(chunks$x*16L+15L, x2[i])
-            b2 <- pmin(chunks$z*16L+15L, z2[i])
+            a1 <- pmax(chunks$x * 16L, x1[i])
+            b1 <- pmax(chunks$z * 16L, z1[i])
+            a2 <- pmin(chunks$x * 16L + 15L, x2[i])
+            b2 <- pmin(chunks$z * 16L + 15L, z2[i])
             # construct table of hsa
             dati <- data.frame(
                 tag = tag[i],
@@ -167,7 +170,7 @@ put_hsa_data <- function(values, x, z, dimension, db, merge = TRUE) {
     ret <- set_names(values, keys)
 
     # merge existing values
-    if(isTRUE(merge)) {
+    if (isTRUE(merge)) {
         mdat <- get_hsa_data(keys, db = db, simplify = FALSE)
         values <- purrr::map(set_names(keys), function(k) {
             dplyr::bind_rows(mdat[[k]], values[[k]])
@@ -184,25 +187,25 @@ put_hsa_data <- function(values, x, z, dimension, db, merge = TRUE) {
 #' @export
 put_hsa_value <- function(value, x, z, dimension, db) {
     value <- write_hsa_value(value)
-    .put_chunk_value(value, x, z, dimension, tag=57L, db = db)
+    .put_chunk_value(value, x, z, dimension, tag = 57L, db = db)
 }
 
 #' @export
 #' @rdname HardcodedSpawnArea
 write_hsa_value <- function(value) {
     len <- nrow(value)
-    ret <- raw(4L + 25L*len)
+    ret <- raw(4L + 25L * len)
     ret[1:4] <- writeBin(as.integer(len), raw(), size = 4, endian = "little")
-    hsa <- value[, c("x1","y1","z1","x2","y2","z2","tag")]
-    if(is.character(hsa$tag)) {
+    hsa <- value[, c("x1", "y1", "z1", "x2", "y2", "z2", "tag")]
+    if (is.character(hsa$tag)) {
         hsa$tag <- match(hsa$tag, .HSA_LIST)
         stopifnot(all(!is.na(hsa$tag)))
     }
     for (i in 1:len) {
-        pos <- i*25L - 21L
-        n <- as.integer(hsa[i,])
-        ret[pos+1:24] <- writeBin(n[1:6], raw(), size = 4, endian = "little")
-        ret[pos+25L] <- writeBin(n[7], raw(), size = 1, endian = "little")
+        pos <- i * 25L - 21L
+        n <- as.integer(hsa[i, ])
+        ret[pos + 1:24] <- writeBin(n[1:6], raw(), size = 4, endian = "little")
+        ret[pos + 25L] <- writeBin(n[7], raw(), size = 1, endian = "little")
     }
     ret
 }

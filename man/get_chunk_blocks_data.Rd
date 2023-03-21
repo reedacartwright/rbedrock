@@ -64,7 +64,8 @@ block name and block states. The strings' format is
 Blocks may have 0 or more states.
 }
 \details{
-\code{get_chunk_blokcs_data()} and \code{get_chunk_blocks_value()} load block data from \code{db}.
+\code{get_chunk_blokcs_data()} and \code{get_chunk_blocks_value()} load block data
+from \code{db}.
 \code{get_chunk_blocks_value()} only supports loading a single value.
 
 \code{put_chunk_blocks_data()} and

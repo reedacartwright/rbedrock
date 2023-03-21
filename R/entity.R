@@ -14,7 +14,8 @@
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
-#' @param values A list of nbt objects. If `x` is missing, the names of `values` will be taken as the keys.
+#' @param values A list of nbt objects. If `x` is missing, the names of `values`
+#' will be taken as the keys.
 #' @param value An nbt object.
 
 #' @return `get_entity_data()` returns a named-list of nbt data.

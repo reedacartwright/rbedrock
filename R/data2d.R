@@ -25,8 +25,9 @@
 #' should be a list a `list()` with both "height_map" and "biome_map" elements.
 #' @param rawdata A raw vector.
 #'
-#' @return `get_data2d_value()` returns a list with components "height_map" and "biome_map".
-#' `get_data2d_data()` returns a list of the of the values returned by  `get_data2d_value()`.
+#' @return `get_data2d_value()` returns a list with components "height_map" and
+#' "biome_map". `get_data2d_data()` returns a list of the of the values
+#' returned by  `get_data2d_value()`.
 #'
 #' @examples
 #' heights <- matrix(63,16,16)
@@ -65,12 +66,12 @@ get_data2d_value <- function(x, z, dimension, db) {
 put_data2d_data <- function(height_maps, biome_maps, x, z, dimension, db) {
     keys <- .process_chunk_key_args(x, z, dimension, tag = 45L,
         values = height_maps, assert_validity = TRUE)
-    if(missing(biome_maps)) {
-        values <- vec_recycle(height_maps, length(keys), x_arg="height_maps")
+    if (missing(biome_maps)) {
+        values <- vec_recycle(height_maps, length(keys), x_arg = "height_maps")
         values <- purrr::map(values, write_data2d_value)
     } else {
-        h <- vec_recycle(height_maps, length(keys), x_arg="height_maps")
-        b <- vec_recycle(biome_maps, length(keys), x_arg="biome_maps")
+        h <- vec_recycle(height_maps, length(keys), x_arg = "height_maps")
+        b <- vec_recycle(biome_maps, length(keys), x_arg = "biome_maps")
         values <- purrr::map2(h, b, write_data2d_value)
     }
     put_data(values, keys, db)
@@ -88,18 +89,18 @@ put_data2d_value <- function(height_map, biome_map, x, z, dimension, db) {
 #' @rdname Data2D
 #' @export
 read_data2d_value <- function(rawdata) {
-    if(is.null(rawdata)) {
+    if (is.null(rawdata)) {
         return(NULL)
     }
-    vec_assert(rawdata, raw(), 768L)    
+    vec_assert(rawdata, raw(), 768L)
 
-    h <- readBin(rawdata[1L:512L], integer(), n=256L, size=2L,
-        endian="little", signed = TRUE)
-    b <- readBin(rawdata[513L:768L], integer(), n=256L, size=1L,
-        endian="little", signed = FALSE)
-    dim(h) <- c(16L,16L)
-    dim(b) <- c(16L,16L)
-    
+    h <- readBin(rawdata[1L:512L], integer(), n = 256L, size = 2L,
+        endian = "little", signed = TRUE)
+    b <- readBin(rawdata[513L:768L], integer(), n = 256L, size = 1L,
+        endian = "little", signed = FALSE)
+    dim(h) <- c(16L, 16L)
+    dim(b) <- c(16L, 16L)
+
     list(height_map = h, biome_map = b)
 }
 
@@ -107,27 +108,27 @@ read_data2d_value <- function(rawdata) {
 #' @export
 write_data2d_value <- function(height_map, biome_map) {
     # support passing a list
-    if(missing(biome_map)) {
-        if(is.null(height_map)) {
+    if (missing(biome_map)) {
+        if (is.null(height_map)) {
             return(NULL)
         }
         object <- height_map
         height_map <- object$height_map
         biome_map <- object$biome_map
-    } else if(is.null(height_map) && is.null(biome_map)) {
+    } else if (is.null(height_map) && is.null(biome_map)) {
         return(NULL)
     }
-    if(is.null(height_map) || is.null(biome_map)) {
+    if (is.null(height_map) || is.null(biome_map)) {
         abort("Invalid Data2D data.")
     }
 
-    height_map <- vec_cast(c(height_map), integer(), x_arg="height_map")
-    biome_map <- vec_cast(c(biome_map), integer(), x_arg="biome_map")
-    height_map <- vec_recycle(height_map, 256, x_arg="height_map")
-    biome_map <- vec_recycle(biome_map, 256, x_arg="biome_map")
+    height_map <- vec_cast(c(height_map), integer(), x_arg = "height_map")
+    biome_map <- vec_cast(c(biome_map), integer(), x_arg = "biome_map")
+    height_map <- vec_recycle(height_map, 256, x_arg = "height_map")
+    biome_map <- vec_recycle(biome_map, 256, x_arg = "biome_map")
 
-    h <- writeBin(height_map, raw(), size = 2L, endian="little")
-    b <- writeBin(biome_map, raw(), size = 1L, endian="little")
+    h <- writeBin(height_map, raw(), size = 2L, endian = "little")
+    b <- writeBin(biome_map, raw(), size = 1L, endian = "little")
 
-    c(h,b)
+    c(h, b)
 }

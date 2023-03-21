@@ -1,6 +1,6 @@
 Package: rbedrock
 Title: Analysis and Manipulation of Data from Minecraft Bedrock Edition
-Version: 0.2.0.9000
+Version: 0.3.0.9000
 Authors@R: c(
     person("Reed", "Cartwright",
            role = c("aut", "cre"),
@@ -18,7 +18,7 @@ Encoding: UTF-8
 Language: en-US
 LazyData: true
 RoxygenNote: 7.2.0
-SystemRequirements: C++11, cmake, zlib, GNU make, Solaris: g++ is a requirement
+SystemRequirements: cmake, zlib, GNU make, Solaris: g++ is a requirement
 NeedsCompilation: yes
 Roxygen: list(markdown = TRUE)
 Depends:
@@ -43,5 +43,6 @@ Suggests:
     zip,
     testthat,
     jsonlite,
+    covr
 URL: https://github.com/reedacartwright/rbedrock
 BugReports: https://github.com/reedacartwright/rbedrock/issues

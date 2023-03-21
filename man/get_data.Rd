@@ -30,7 +30,8 @@ has_value(key, db, readoptions = NULL)
 \item{key}{A single key.}
 }
 \value{
-\code{get_data()} returns a named-list of raw vectors. \code{get_value()} returns a raw vector.
+\code{get_data()} returns a named-list of raw vectors. \code{get_value()}
+returns a raw vector.
 
 \code{has_values()} returns a logical vector.
 

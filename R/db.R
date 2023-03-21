@@ -83,162 +83,216 @@
 #'   'filter policy' to reduce disk reads.  A good value for
 #'   bits_per_key is 10, which yields a filter with ~ 1% false
 #'   positive rate.  Further information from the LevelDB headers
-#'   (filter_policy.h) 'This object is responsible for
+#'   (filter_policy.h) "This object is responsible for
 #'   creating a small filter from a set of keys.  These filters are
 #'   stored in leveldb and are consulted automatically by leveldb to
 #'   decide whether or not to read some information from disk. In
 #'   many cases, a filter can cut down the number of disk seeks form
-#'   a handful to a single disk seek per DB::Get() call'
+#'   a handful to a single disk seek per `DB::Get()` call"
 #' @export
 #' @keywords internal
 #' @author Rich FitzJohn
-db_open <- function(path, create_if_missing = NULL, error_if_exists = NULL,
-    paranoid_checks = NULL, write_buffer_size = NULL, max_open_files = NULL, block_size = NULL,
-    cache_capacity = NULL, bloom_filter_bits_per_key = NULL, compression_level = NULL) {
-    ptr <- .Call(rbedrock_db_open, path, create_if_missing, error_if_exists, 
-        paranoid_checks, write_buffer_size, max_open_files, block_size, 
-        cache_capacity, bloom_filter_bits_per_key, compression_level)
-    attr(ptr, "options") <- list(path = path, create_if_missing = create_if_missing, 
-        error_if_exists = error_if_exists, paranoid_checks = paranoid_checks, write_buffer_size = write_buffer_size, 
-        max_open_files = max_open_files, block_size = block_size, 
-        cache_capacity = cache_capacity, bloom_filter_bits_per_key = bloom_filter_bits_per_key,
+db_open <- function(path, create_if_missing = NULL,
+                                 error_if_exists = NULL,
+                                 paranoid_checks = NULL,
+                                 write_buffer_size = NULL,
+                                 max_open_files = NULL,
+                                 block_size = NULL,
+                                 cache_capacity = NULL,
+                                 bloom_filter_bits_per_key = NULL,
+                                 compression_level = NULL) {
+    ptr <- .Call(rbedrock_db_open, path, create_if_missing,
+                 error_if_exists, paranoid_checks, write_buffer_size,
+                 max_open_files, block_size, cache_capacity,
+                 bloom_filter_bits_per_key, compression_level)
+    attr(ptr, "options") <- list(path = path,
+        create_if_missing = create_if_missing,
+        error_if_exists = error_if_exists,
+        paranoid_checks = paranoid_checks,
+        write_buffer_size = write_buffer_size,
+        max_open_files = max_open_files,
+        block_size = block_size,
+        cache_capacity = cache_capacity,
+        bloom_filter_bits_per_key = bloom_filter_bits_per_key,
         compression_level = compression_level)
     class(ptr) <- c("rbedrock_db_connection", "rbedrock_db_options")
     ptr
 }
+
 db_close <- function(db, error_if_closed = FALSE) {
     .Call(rbedrock_db_close, db, error_if_closed)
 }
+
 db_destroy <- function(path) {
     .Call(rbedrock_db_destroy, path)
 }
+
 db_is_open <- function(db) {
     .Call(rbedrock_db_is_open, db)
 }
+
 db_repair <- function(path) {
     .Call(rbedrock_db_repair, path)
 }
+
 db_property <- function(db, path, error_if_missing = FALSE) {
     .Call(rbedrock_db_property, db, path, error_if_missing)
 }
+
 db_get <- function(db, key, readoptions = NULL) {
     .Call(rbedrock_db_get, db, key, readoptions)
 }
+
 db_mget <- function(db, key, readoptions = NULL) {
     .Call(rbedrock_db_mget, db, key, readoptions)
 }
+
 db_mget_prefix <- function(db, starts_with, readoptions = NULL) {
     .Call(rbedrock_db_mget_prefix, db, starts_with, readoptions)
 }
+
 db_put <- function(db, key, value, writeoptions = NULL) {
     .Call(rbedrock_db_put, db, key, value, writeoptions)
 }
+
 db_delete <- function(db, key, writeoptions = NULL) {
     .Call(rbedrock_db_delete, db, key, writeoptions)
 }
-db_write <- function(db, keys, values, writeoptions = NULL, allow_delete = TRUE) {
+
+db_write <- function(db, keys, values, writeoptions = NULL,
+    allow_delete = TRUE) {
     .Call(rbedrock_db_write, db, keys, values, writeoptions, allow_delete)
 }
+
 db_mput <- function(db, keys, values, writeoptions = NULL) {
     db_write(db, keys, values, writeoptions, allow_delete = FALSE)
 }
+
 db_mdelete <- function(db, keys, writeoptions = NULL) {
     db_write(db, keys, NULL, writeoptions, allow_delete = TRUE)
 }
+
 db_iter_create <- function(db, readoptions = NULL) {
     .Call(rbedrock_db_iter_create, db, readoptions)
 }
+
 iter_destroy <- function(it, error_if_destroyed = FALSE) {
     .Call(rbedrock_iter_destroy, it, error_if_destroyed)
 }
+
 iter_valid <- function(it) {
     .Call(rbedrock_iter_valid, it)
 }
+
 iter_isnil <- function(it) {
     .Call(rbedrock_iter_isnil, it)
 }
+
 iter_seek_to_first <- function(it) {
     .Call(rbedrock_iter_seek_to_first, it)
 }
+
 iter_seek_to_last <- function(it) {
     .Call(rbedrock_iter_seek_to_last, it)
 }
+
 iter_seek <- function(it, key) {
     .Call(rbedrock_iter_seek, it, key)
 }
+
 iter_next <- function(it, error_if_invalid = FALSE) {
     .Call(rbedrock_iter_next, it, error_if_invalid)
 }
+
 iter_prev <- function(it, error_if_invalid = FALSE) {
     .Call(rbedrock_iter_prev, it, error_if_invalid)
 }
+
 iter_key <- function(it, error_if_invalid = FALSE) {
     .Call(rbedrock_iter_key, it, error_if_invalid)
 }
+
 iter_value <- function(it, error_if_invalid = FALSE) {
     .Call(rbedrock_iter_value, it, error_if_invalid)
 }
+
 db_snapshot <- function(db) {
     ptr <- .Call(rbedrock_db_snapshot_create, db)
     attr(ptr, "timestamp") <- Sys.time()
     class(ptr) <- "rbedrock_db_snapshot"
     ptr
 }
+
 db_snapshot_release <- function(db, snapshot, error_if_released = FALSE) {
     .Call(rbedrock_db_snapshot_release, db, snapshot, error_if_released)
 }
+
 snapshot_isnil <- function(snapshot) {
     .Call(rbedrock_snapshot_isnil, snapshot)
 }
+
 db_approximate_sizes <- function(db, start, limit) {
     .Call(rbedrock_db_approximate_sizes, db, start, limit)
 }
+
 db_compact_range <- function(db, start, limit) {
     .Call(rbedrock_db_compact_range, db, start, limit)
 }
+
 db_keys_len <- function(db, starts_with = NULL, readoptions = NULL) {
     .Call(rbedrock_db_keys_len, db, starts_with, readoptions)
 }
+
 db_keys <- function(db, starts_with = NULL, readoptions = NULL) {
     .Call(rbedrock_db_keys, db, starts_with, readoptions)
 }
+
 db_exists <- function(db, key, readoptions = NULL) {
     .Call(rbedrock_db_exists, db, key, readoptions)
 }
+
 leveldb_version <- function() {
     ret <- list(.Call(rbedrock_leveldb_version))
     class(ret) <- "numeric_version"
     ret
 }
+
 #' @export
 as.character.rbedrock_db_snapshot <- function(x, ...) {
     sprintf("<rbedrock_db_snapshot> @ %s", attr(x, "timestamp"))
 }
+
 #' @export
 print.rbedrock_db_snapshot <- function(x, ...) {
     cat(as.character(x), "\n")
     invisible(x)
 }
+
 #' @export
 names.rbedrock_db_options <- function(x, ...) {
     names(attr(x, "options", exact = TRUE))
 }
+
 #' @export
 `$.rbedrock_db_options` <- function(x, i) {
     attr(x, "options")[[i]]
 }
+
 #' @export
 `[[.rbedrock_db_options` <- function(x, i, ...) {
     attr(x, "options")[[i]]
 }
+
 #' @export
 `$<-.rbedrock_db_options` <- function(x, i, value) {
     stop(sprintf("%s objects are immutable", class(x)[[1L]]))
 }
+
 #' @export
 `[[<-.rbedrock_db_options` <- function(x, ..., value) {
     stop(sprintf("%s objects are immutable", class(x)[[1L]]))
 }
+
 #' @export
 as.character.rbedrock_db_options <- function(x, ...) {
     f <- function(x) {
@@ -249,9 +303,11 @@ as.character.rbedrock_db_options <- function(x, ...) {
         }
     }
     value <- vapply(names(x), function(i) f(x[[i]]), character(1))
-    txt <- c(sprintf("<%s>", class(x)[[1]]), sprintf("  - %s: %s", names(x), value))
+    txt <- c(sprintf("<%s>", class(x)[[1]]), sprintf("  - %s: %s", names(x),
+                                                     value))
     paste(txt, collapse = "\n")
 }
+
 #' @export
 print.rbedrock_db_options <- function(x, ...) {
     cat(as.character(x), "\n")

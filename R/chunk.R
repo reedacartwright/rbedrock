@@ -3,7 +3,7 @@
 #' @description
 #' Chunk keys are keys to chunk data. A chunk key has a format which indicates
 #' the chunk it holds data for and the type of data it holds. This format is
-#' either `chunk:x:z:d:t` or `chunk:x:z:d:t:s`, where `x` and `z` indicates the 
+#' either `chunk:x:z:d:t` or `chunk:x:z:d:t:s`, where `x` and `z` indicates the
 #' coordinates of the chunk in chunk space, `d` indicates the dimension of
 #' the chunk, and `t` and `s` indicate the tag and subtag of the chunk.
 #'
@@ -14,7 +14,7 @@ NULL
 #' `parse_chunk_keys()` splits chunk keys into their individual elements and
 #' returns a table with the results. Keys that do not contain chunk data are
 #' silently dropped.
-#' 
+#'
 #' @param keys A character vector of database keys.
 #'
 #' @rdname chunk_keys
@@ -24,10 +24,10 @@ NULL
 #' @export
 parse_chunk_keys <- function(keys) {
     vec_assert(keys, character())
-    keys <- .subset_chunk_keys(keys) 
-    m <- str_split(keys, fixed(":"), simplify=TRUE)
-    m <- m[,-1, drop=FALSE]
-    if(ncol(m) == 4) {
+    keys <- .subset_chunk_keys(keys)
+    m <- str_split(keys, fixed(":"), simplify = TRUE)
+    m <- m[, -1, drop = FALSE]
+    if (ncol(m) == 4) {
         m <- cbind(m, NA_character_)
     }
 
@@ -55,46 +55,47 @@ parse_chunk_keys <- function(keys) {
 #' @rdname chunk_keys
 #' @export
 create_chunk_keys <- function(x, z, dimension, tag, subtag) {
-    if(is.character(tag)) {
+    if (is.character(tag)) {
         tag <- chunk_tag_int(tag)
     }
-    if(missing(subtag)) {
+    if (missing(subtag)) {
         subtag <- NA_character_
     }
-    args <- vec_recycle_common(x,z,dimension,tag,subtag)
-    tag <- str_c(args[[4]], args[[5]], sep=":") %|% as.character(args[[4]])
+    args <- vec_recycle_common(x, z, dimension, tag, subtag)
+    tag <- str_c(args[[4]], args[[5]], sep = ":") %|% as.character(args[[4]])
 
-    str_c("chunk", args[[1]], args[[2]], args[[3]], tag, sep=":")
+    str_c("chunk", args[[1]], args[[2]], args[[3]], tag, sep = ":")
 }
 
 #' @rdname chunk_keys
 #' @export
 create_chunk_key_prefixes <- function(x, z, dimension, tag) {
-    if(!missing(tag)) {
+    if (!missing(tag)) {
         args <- vec_recycle_common(x, z, dimension, tag)
-        str_c("chunk", args[[1]], args[[2]], args[[3]], args[[4]], sep=":")
+        str_c("chunk", args[[1]], args[[2]], args[[3]], args[[4]], sep = ":")
     } else {
         args <- vec_recycle_common(x, z, dimension)
-        str_c("chunk", args[[1]], args[[2]], args[[3]], sep=":")
+        str_c("chunk", args[[1]], args[[2]], args[[3]], sep = ":")
     }
 }
 
 #' @description
-#' `chunk_positions()` returns a matrix containing the chunk coordinates of keys.
+#' `chunk_positions()` returns a matrix containing the chunk coordinates of
+#' keys.
 #' @export
 #' @rdname chunk_keys
 chunk_positions <- function(keys) {
-    .extract_chunk_key_components(keys, which=1:2)
+    .extract_chunk_key_components(keys, which = 1:2)
 }
 
 #' @description
-#' `chunk_origins()` returns a matrix containing the block coordinate of the NW 
+#' `chunk_origins()` returns a matrix containing the block coordinate of the NW
 #' corner of keys.
 #' @export
 #' @rdname chunk_keys
 chunk_origins <- function(keys) {
     pos <- chunk_positions(keys)
-    pos*16L
+    pos * 16L
 }
 
 #' @export
@@ -115,7 +116,7 @@ filter_chunk_keys <- function(keys, tag) {
     "SubChunkBlocks" = 47L,
     "LegacyTerrain" = 48L, # removed
     "BlockEntity" = 49L,
-    "Entity"= 50L,
+    "Entity" = 50L,
     "PendingTicks" = 51L,
     "LegacyBlockExtraData" = 52L, # removed
     "BiomeState" = 53L,
@@ -126,7 +127,8 @@ filter_chunk_keys <- function(keys, tag) {
     "RandomTicks" = 58L,
     "Checksums" = 59L, # introduced in 1.16
     "GenerationSeed" = 60L, # introduced in 1.18
-    "GeneratedPreCavesAndCliffsBlending" = 61L, # introduced in 1.18, not used any more (?)
+    # 61L was introduced in 1.18, not used any more (?)
+    "GeneratedPreCavesAndCliffsBlending" = 61L,
     "BlendingBiomeHeight" = 62L, # introduced in 1.18, not used any more (?)
     "MetaDataHash" = 63L,
     "BlendingData" = 64L,
@@ -156,21 +158,21 @@ chunk_tag_int <- function(tags) {
 }
 
 .is_chunk_key <- function(keys) {
-    str_starts(keys, pattern=fixed("chunk:"))
+    str_starts(keys, pattern = fixed("chunk:"))
 }
 
 .subset_chunk_keys <- function(keys, negate = FALSE) {
-   str_subset(keys, "^chunk:", negate = negate)
+    str_subset(keys, "^chunk:", negate = negate)
 }
 
-.extract_chunk_key_components <- function(keys, which=1:5) {
-    m <- str_split(keys, fixed(":"), simplify=TRUE)
-    if(length(m) == 0) {
-        dim(m) <- c(0L,6L)
+.extract_chunk_key_components <- function(keys, which = 1:5) {
+    m <- str_split(keys, fixed(":"), simplify = TRUE)
+    if (length(m) == 0) {
+        dim(m) <- c(0L, 6L)
     }
-    is_chunk <- m[,1] == "chunk"
-    ret <- m[, which+1, drop=FALSE]
-    ret[!is_chunk,] <- NA_character_
+    is_chunk <- m[, 1] == "chunk"
+    ret <- m[, which + 1, drop = FALSE]
+    ret[!is_chunk, ] <- NA_character_
     mode(ret) <- "integer"
     ret
 }
@@ -181,7 +183,7 @@ chunk_tag_int <- function(tags) {
 
 .get_tag_from_chunk_key <- function(keys, as_string = FALSE) {
     res <- c(.extract_chunk_key_components(keys, 4))
-    if(as_string) {
+    if (as_string) {
         res <- chunk_tag_str(res)
     }
     res
@@ -205,76 +207,80 @@ chunk_tag_int <- function(tags) {
 
 .check_chunk_key_tag <- function(keys, tag, subtag, silent = FALSE) {
     vec_assert(tag, size = 1)
-    if(!missing(subtag)) {
+    if (!missing(subtag)) {
         vec_assert(subtag, size = 1)
         m <- .extract_chunk_key_components(keys, 4:5)
-        b <- (m[,1] == tag) & (m[,2] == subtag)
+        b <- (m[, 1] == tag) & (m[, 2] == subtag)
     } else {
         m <- .extract_chunk_key_components(keys, 4)
-        b <- (m[,1] == tag)
+        b <- (m[, 1] == tag)
     }
     # keys that aren't chunk keys or are malformed will may have NA here
     b <- b & !is.na(b)
     isgood <- isTRUE(all(b))
-    if(isFALSE(silent) && !isgood) {
+    if (isFALSE(silent) && !isgood) {
         abort(str_glue("One or more keys have a tag that is not {tag}."))
     }
     b
 }
 
 .is_valid_chunk_key <- function(keys) {
-    str_detect(keys, pattern="^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+:-?[0-9]+(:-?[0-9]+)?$")
+    str_detect(keys,
+        pattern = "^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+:-?[0-9]+(:-?[0-9]+)?$")
 }
 
 .is_valid_chunk_key_prefix <- function(keys) {
-    str_detect(keys, pattern="^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+$")
+    str_detect(keys, pattern = "^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+$")
 }
 
 .is_valid_chunk_key_prefix_with_tag <- function(keys) {
-    str_detect(keys, pattern="^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+:-?[0-9]+$")
+    str_detect(keys, pattern = "^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+:-?[0-9]+$")
 }
 
-.process_chunk_key_args <- function(x, z, dimension, tag, subtag, values = NULL, assert_scalar = FALSE,
-    assert_validity = FALSE) {
-    if(missing(x) && is_named(values)) {
+.process_chunk_key_args <- function(x, z, dimension, tag, subtag,
+                                    values = NULL, assert_scalar = FALSE,
+                                    assert_validity = FALSE) {
+    if (missing(x) && is_named(values)) {
         # if x is missing use names from values
         x <- names(values)
-    } else if(!missing(z)) {
+    } else if (!missing(z)) {
         # if z is not missing, create keys from x, z, and dimension
         x <- create_chunk_keys(x, z, dimension, tag, subtag)
     }
-    if(.is_key_prefix(x)) {
-        vec_assert(x, size = if(isTRUE(assert_scalar)) 1L else NULL)        
+    if (.is_key_prefix(x)) {
+        vec_assert(x, size = if (isTRUE(assert_scalar)) 1L else NULL)
     } else {
-        vec_assert(x, character(), size = if(isTRUE(assert_scalar)) 1L else NULL)
+        vec_assert(x, character(),
+                   size = if (isTRUE(assert_scalar)) 1L else NULL)
     }
-    if(isTRUE(assert_validity)) {
-        if(!missing(tag)) {
+    if (isTRUE(assert_validity)) {
+        if (!missing(tag)) {
             .check_chunk_key_tag(x, tag, silent = FALSE)
         }
-        if(!isTRUE(all(.is_valid_chunk_key(x)))) {
+        if (!isTRUE(all(.is_valid_chunk_key(x)))) {
             abort("One or more chunk keys is invalid.")
         }
     }
     x
 }
 
-.process_chunk_key_args_prefix <- function(x, z, dimension, tag, values = NULL, assert_scalar = FALSE,
-    assert_validity = FALSE) {
-    if(missing(x) && is_named(values)) {
+.process_chunk_key_args_prefix <- function(x, z, dimension, tag, values = NULL,
+                                           assert_scalar = FALSE,
+                                           assert_validity = FALSE) {
+    if (missing(x) && is_named(values)) {
         # if x is missing, use names from values
-        x <- names(values)        
-    } else if(!(missing(z))) {
-        x <- create_chunk_key_prefixes(x, z, dimension, tag = tag) 
+        x <- names(values)
+    } else if (!(missing(z))) {
+        x <- create_chunk_key_prefixes(x, z, dimension, tag = tag)
     }
-    vec_assert(x, character(), size = if(isTRUE(assert_scalar)) 1L else NULL)
-    if(isTRUE(assert_validity)) {
-        if(!missing(tag)) {
+    vec_assert(x, character(), size = if (isTRUE(assert_scalar)) 1L else NULL)
+    if (isTRUE(assert_validity)) {
+        if (!missing(tag)) {
             .check_chunk_key_tag(x, tag, silent = FALSE)
-            if(!isTRUE(all(.is_valid_chunk_key_prefix_with_tag(x)))) {
+            if (!isTRUE(all(.is_valid_chunk_key_prefix_with_tag(x)))) {
                 abort("One or more chunk keys is invalid.")
             }
-        } else if(!isTRUE(all(.is_valid_chunk_key_prefix(x)))) {
+        } else if (!isTRUE(all(.is_valid_chunk_key_prefix(x)))) {
             abort("One or more chunk keys is invalid.")
         }
     }
@@ -284,10 +290,11 @@ chunk_tag_int <- function(tags) {
 .process_key_args <- function(x, z, dimension, tag, subtag,
     stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
-    if(missing(z) && is.character(x)) {
+    if (missing(z) && is.character(x)) {
         # if tag exists, we are going to filter on data type
-        if(!missing(tag)) {
-            b <- .check_chunk_key_tag(x, tag, subtag, silent=!stop_if_filtered)
+        if (!missing(tag)) {
+            b <- .check_chunk_key_tag(x, tag, subtag,
+                                      silent = !stop_if_filtered)
             x <- x[b]
         }
         return(x)
@@ -295,19 +302,20 @@ chunk_tag_int <- function(tags) {
     create_chunk_keys(x, z, dimension, tag, subtag)
 }
 
-.process_key_args_prefix <- function(x, z, dimension, stop_if_filtered = FALSE) {
+.process_key_args_prefix <- function(x, z, dimension,
+                                     stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
-    if(missing(z) && is.character(x)) {
+    if (missing(z) && is.character(x)) {
         x <- .get_stem_from_chunk_key(x)
         b <- !is.na(x)
-        if(stop_if_filtered && any(!b)) {
+        if (stop_if_filtered && any(!b)) {
             stop("Some keys passed to .process_key_arg_prefix are not chunk keys.")
         }
         return(x[b])
     }
     args <- vec_recycle_common(x, z, dimension)
 
-    str_c("chunk", args[[1]], args[[2]], args[[3]], sep=":")
+    str_c("chunk", args[[1]], args[[2]], args[[3]], sep = ":")
 }
 
 .get_chunk_data <- function(x, z, dimension, db, tag, subtag) {
@@ -326,13 +334,13 @@ chunk_tag_int <- function(tags) {
 .put_chunk_data <- function(values, x, z, dimension, db, tag, subtag) {
     keys <- .process_chunk_key_args(x, z, dimension, tag = tag, subtag = subtag,
         values = values, assert_validity = TRUE)
-    put_data(values = values, keys=keys, db = db)
+    put_data(values = values, keys = keys, db = db)
 }
 
 .put_chunk_value <- function(value, x, z, dimension, db, tag, subtag) {
     key <- .process_chunk_key_args(x, z, dimension, tag = tag, subtag = subtag,
         assert_validity = TRUE, assert_scalar = TRUE)
-    put_value(value=value, key = key, db = db)
+    put_value(value = value, key = key, db = db)
 }
 
 .get_chunk_nbt_data <- function(x, z, dimension, db, tag) {
@@ -351,11 +359,11 @@ chunk_tag_int <- function(tags) {
 .put_chunk_nbt_data <- function(values, x, z, dimension, db, tag) {
     keys <- .process_chunk_key_args(x, z, dimension, tag = tag, values = values,
         assert_validity = TRUE)
-    put_nbt_data(values = values, keys=keys, db = db)
+    put_nbt_data(values = values, keys = keys, db = db)
 }
 
 .put_chunk_nbt_value <- function(value, x, z, dimension, db, tag) {
     key <- .process_chunk_key_args(x, z, dimension, tag = tag,
         assert_validity = TRUE, assert_scalar = TRUE)
-    put_nbt_value(value=value, key = key, db = db)
+    put_nbt_value(value = value, key = key, db = db)
 }

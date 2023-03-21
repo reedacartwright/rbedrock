@@ -3,8 +3,8 @@
 \name{bedrockdb}
 \alias{bedrockdb}
 \alias{close.rbedrock_db}
-\alias{is_bedrockdb}
 \alias{close_all_bedrockdb}
+\alias{is_bedrockdb}
 \title{Open a Bedrock Edition world for reading and writing.}
 \usage{
 bedrockdb(
@@ -22,9 +22,9 @@ bedrockdb(
 
 \method{close}{rbedrock_db}(con, compact = FALSE, ...)
 
-is_bedrockdb(x)
-
 close_all_bedrockdb(x)
+
+is_bedrockdb(x)
 }
 \arguments{
 \item{path}{The path to a world folder. If the path does not exist, it is
@@ -78,12 +78,12 @@ close(db)
 \dontrun{
 
 # open a world in the minecraftWorlds folder using a world id.
-db <- bedrockdb("lrkkYFpUABA=") 
+db <- bedrockdb("lrkkYFpUABA=")
 # do something with db ...
 close(db)
 
 # open a world using absolute path
-db <- bedrockdb("C:\\\\\\\\minecraftWorlds\\\\\\\\my_world") 
+db <- bedrockdb("C:\\\\\\\\minecraftWorlds\\\\\\\\my_world")
 # do something with db ...
 close(db)
 }

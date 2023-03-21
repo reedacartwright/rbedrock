@@ -41,8 +41,9 @@ should be a list a \code{list()} with both "height_map" and "biome_map" elements
 \item{rawdata}{A raw vector.}
 }
 \value{
-\code{get_data2d_value()} returns a list with components "height_map" and "biome_map".
-\code{get_data2d_data()} returns a list of the of the values returned by  \code{get_data2d_value()}.
+\code{get_data2d_value()} returns a list with components "height_map" and
+"biome_map". \code{get_data2d_data()} returns a list of the of the values
+returned by  \code{get_data2d_value()}.
 }
 \description{
 Data2D data (tag 45) stores information about surface heights and biomes in a
