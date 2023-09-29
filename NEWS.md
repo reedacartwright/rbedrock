@@ -1,3 +1,6 @@
+## RBedrock 0.3.1
+ * Remove hardcoded C++17 requirement when calling CMake.
+
 ## RBedrock 0.3.0
  * Added support for reading and writing 1.18.30+ actor digests.
  * Chunk data functions have been expanded.

@@ -1,11 +1,6 @@
 ## Submission
 
-- RBedrock has been updated to support Minecraft Bedrock 1.19.
-
-- CRAN warnings identified on 2023-03-20 have been fixed.
-
-- This resubmission fixes the NOTE identified on the first submission.
-  - References to compiling with CXX11 have been removed.
+- CRAN errors identified on 2023-09-27 have been fixed.
 
 ## Test environments
 
