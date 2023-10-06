@@ -80,7 +80,7 @@ endif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 # Test whether -Wthread-safety is available. See
 # https://clang.llvm.org/docs/ThreadSafetyAnalysis.html
 include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag(-Wthread-safety HAVE_CLANG_THREAD_SAFETY)
+#check_cxx_compiler_flag(-Wthread-safety HAVE_CLANG_THREAD_SAFETY)
 
 # Used by googletest.
 check_cxx_compiler_flag(-Wno-missing-field-initializers
@@ -269,11 +269,11 @@ if(BUILD_SHARED_LIBS)
   )
 endif(BUILD_SHARED_LIBS)
 
-if(HAVE_CLANG_THREAD_SAFETY)
-  target_compile_options(leveldb
-    PUBLIC
-      -Wthread-safety)
-endif(HAVE_CLANG_THREAD_SAFETY)
+# if(HAVE_CLANG_THREAD_SAFETY)
+#   target_compile_options(leveldb
+#     PUBLIC
+#       -Wthread-safety)
+# endif(HAVE_CLANG_THREAD_SAFETY)
 
 if(HAVE_CRC32C)
   target_link_libraries(leveldb crc32c)
