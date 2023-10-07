@@ -1,11 +1,8 @@
 ## Submission
 
-- RBedrock has been updated to support Minecraft Bedrock 1.19.
-
-- CRAN warnings identified on 2023-03-20 have been fixed.
-
-- This resubmission fixes the NOTE identified on the first submission.
-  - References to compiling with CXX11 have been removed.
+- CRAN errors identified on 2023-09-27 have been fixed.
+- Resubmission
+  * False-positive messages about -Wthread-safety have been removed.
 
 ## Test environments
 
@@ -33,3 +30,6 @@ There were NOTEs.
  - installed size is [big]
   * The package contains a dependent library (Mojang's fork of leveldb) and on
     some systems (linux) this library is large when compiled.
+ 
+ - Compilation used the following non-portable flag(s): '-Wthread-safety'
+  * CMake checks whether this flag is supported before using it to compile a sub-project.

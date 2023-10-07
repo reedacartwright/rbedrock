@@ -1,6 +1,11 @@
 # RBedrock (development)
 
+# RBedrock 0.3.1
+
+ * Remove hardcoded C++17 requirement when calling CMake.
+
 # RBedrock 0.3.0
+
  * Added support for reading and writing 1.18.30+ actor digests.
  * Chunk data functions have been expanded.
  * [Breaking Change] Biome functions now return CNC biomes data (CnC biome functions have been renamed.) Accessing legacy biome data can be done with legacy biome functions.
@@ -18,6 +23,7 @@
  * Add utility functions for working with unique ids.
 
 # RBedrock 0.2.0
+
  * Support subchunk version 9 introduced for Caves and Cliffs.
  * Support Caves and Cliffs' 3DMaps.
  * Change tag format to `@x:z:d:t:s`. This change was made because subtags can now be negative.
