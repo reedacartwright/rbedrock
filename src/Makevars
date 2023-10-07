@@ -1,7 +1,7 @@
 PKG_CFLAGS = $(C_VISIBILITY)
 PKG_CXXFLAGS = $(CXX_VISIBILITY)
 PKG_CPPFLAGS = -pthread -I./leveldb-mcpe/include -I./leveldb-mcpe/build/include
-PKG_LIBS = -L./leveldb-mcpe/build -pthread -lleveldb -lz
+PKG_LIBS = -L./leveldb-mcpe/build -pthread leveldb-mcpe/build/libleveldb.a -lz
 
 all: $(SHLIB)
 
