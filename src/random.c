@@ -116,7 +116,7 @@ SEXP mcpe_random_state(SEXP r_state) {
     memcpy(RAW(ret), &g_state, sizeof(g_state));
     if(!Rf_isNull(r_state)) {
         if((TYPEOF(r_state) != RAWSXP) || XLENGTH(r_state) != sizeof(g_state)) {
-            Rf_error("mcpe_random_state: value 'state' is not a raw vector of length %d.", sizeof(g_state));
+            Rf_error("mcpe_random_state: value 'state' is not a raw vector of length %zd.", sizeof(g_state));
             return R_NilValue;
         }
         memcpy(&g_state, RAW(r_state), sizeof(g_state));

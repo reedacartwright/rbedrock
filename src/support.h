@@ -29,15 +29,15 @@
 #include <Rinternals.h>
 #include <stdbool.h>
 
-size_t get_key(SEXP key, const char **key_data);
-size_t get_key_maybe_nil(SEXP key, const char **key_data);
-size_t get_value(SEXP value, const char **value_data);
-size_t get_keys(SEXP keys, const char ***key_data, size_t **key_len);
-size_t get_starts_with(SEXP starts_with, const char **starts_with_data);
+R_len_t get_key(SEXP key, const char **key_data);
+R_len_t get_key_maybe_nil(SEXP key, const char **key_data);
+R_len_t get_value(SEXP value, const char **value_data);
+R_len_t get_keys(SEXP keys, const char ***key_data, R_len_t **key_len);
+R_len_t get_starts_with(SEXP starts_with, const char **starts_with_data);
 
-SEXP raw_string_to_sexp(const char *str, size_t len);
+SEXP raw_string_to_sexp(const char *str, R_len_t len);
 bool scalar_logical(SEXP x);
-size_t scalar_size(SEXP x);
+R_len_t scalar_size(SEXP x);
 int scalar_int(SEXP x);
 const char *scalar_character(SEXP x);
 

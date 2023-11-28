@@ -27,15 +27,15 @@
 
 #include "support.h"
 
-size_t get_data(SEXP data, const char **data_contents, const char *name);
-size_t get_keys_len(SEXP keys);
-void get_keys_data(size_t len, SEXP keys, const char **data, size_t *data_len);
+R_len_t get_data(SEXP data, const char **data_contents, const char *name);
+R_len_t get_keys_len(SEXP keys);
+void get_keys_data(R_len_t len, SEXP keys, const char **data, R_len_t *data_len);
 
-size_t get_key(SEXP key, const char **key_data) {
+R_len_t get_key(SEXP key, const char **key_data) {
     return get_data(key, key_data, "key");
 }
 
-size_t get_key_maybe_nil(SEXP key, const char **key_data) {
+R_len_t get_key_maybe_nil(SEXP key, const char **key_data) {
     if(TYPEOF(key) == NILSXP) {
         *key_data = NULL;
         return 0;
@@ -43,19 +43,19 @@ size_t get_key_maybe_nil(SEXP key, const char **key_data) {
     return get_key(key, key_data);
 }
 
-size_t get_value(SEXP value, const char **value_data) {
+R_len_t get_value(SEXP value, const char **value_data) {
     return get_data(value, value_data, "data");
 }
 
-size_t get_keys(SEXP keys, const char ***key_data, size_t **key_len) {
-    size_t len = get_keys_len(keys);
+R_len_t get_keys(SEXP keys, const char ***key_data, R_len_t **key_len) {
+    R_len_t len = get_keys_len(keys);
     *key_data = (const char **)R_alloc(len, sizeof(const char *));
-    *key_len = (size_t *)R_alloc(len, sizeof(size_t));
+    *key_len = (R_len_t *)R_alloc(len, sizeof(R_len_t));
     get_keys_data(len, keys, *key_data, *key_len);
     return len;
 }
 
-size_t get_starts_with(SEXP starts_with, const char **starts_with_data) {
+R_len_t get_starts_with(SEXP starts_with, const char **starts_with_data) {
     if(Rf_isNull(starts_with)) {
         *starts_with_data = NULL;
         return 0;
@@ -64,7 +64,7 @@ size_t get_starts_with(SEXP starts_with, const char **starts_with_data) {
     }
 }
 
-size_t get_data(SEXP data, const char **data_contents, const char *name) {
+R_len_t get_data(SEXP data, const char **data_contents, const char *name) {
     if(TYPEOF(data) != RAWSXP) {
         Rf_error("Invalid data type for %s; expected raw", name);        
     }
@@ -72,16 +72,16 @@ size_t get_data(SEXP data, const char **data_contents, const char *name) {
     return length(data);
 }
 
-size_t get_keys_len(SEXP keys) {
-    return TYPEOF(keys) == RAWSXP ? 1 : (size_t)length(keys);
+R_len_t get_keys_len(SEXP keys) {
+    return TYPEOF(keys) == RAWSXP ? 1 : length(keys);
 }
 
-void get_keys_data(size_t len, SEXP keys, const char **data, size_t *data_len) {
+void get_keys_data(R_len_t len, SEXP keys, const char **data, R_len_t *data_len) {
     if(TYPEOF(keys) == RAWSXP) {
         data[0] = (char *)RAW(keys);
         data_len[0] = length(keys);
     } else if(TYPEOF(keys) == VECSXP) {
-        for(size_t i = 0; i < len; ++i) {
+        for(R_len_t i = 0; i < len; ++i) {
             data_len[i] = get_key(VECTOR_ELT(keys, i), data + i);
         }
     } else {
@@ -90,7 +90,7 @@ void get_keys_data(size_t len, SEXP keys, const char **data, size_t *data_len) {
 }
 
 // This is the same strategy as redux.
-SEXP raw_string_to_sexp(const char *str, size_t len) {
+SEXP raw_string_to_sexp(const char *str, R_len_t len) {
     SEXP ret;
     ret = PROTECT(allocVector(RAWSXP, len));
     memcpy(RAW(ret), str, len);
@@ -112,10 +112,9 @@ bool scalar_logical(SEXP x) {
     }
 }
 
-size_t scalar_size(SEXP x) {
-    int len = LENGTH(x);
-    int value = 0;
-    if(len == 1) {
+R_len_t scalar_size(SEXP x) {
+    R_len_t value = 0;
+    if(LENGTH(x) == 1) {
         if(TYPEOF(x) == INTSXP) {
             value = INTEGER(x)[0];
             if(value == NA_INTEGER) {
@@ -136,7 +135,7 @@ size_t scalar_size(SEXP x) {
     } else {
         Rf_error("Expected a scalar size");
     }
-    return (size_t)value;
+    return value;
 }
 
 const char *scalar_character(SEXP x) {
