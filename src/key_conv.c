@@ -107,7 +107,7 @@ static size_t str_to_int(const char *str, size_t len, int *out) {
     return ret;
 }
 
-static bool has_prefix(const char *key, size_t key_len, char *prefix) {
+static bool has_prefix(const char *key, size_t key_len, const char *prefix) {
     size_t prefix_len = strlen(prefix);
     if(key_len < prefix_len) {
         return false;
@@ -192,7 +192,7 @@ static size_t percent_decode(const char *key, size_t key_len, unsigned char *buf
         if(ch == '%' && i+2 < key_len) {
             unsigned char a = decode_hex_digit(key[i+1]);
             unsigned char b = decode_hex_digit(key[i+2]);
-            if( 0 <= a && a < 16  && 0 <= b && b < 16) {
+            if(a < 16  && b < 16) {
                 ch = (unsigned char)(a*16+b);
                 i += 2;
             }
@@ -343,7 +343,7 @@ size_t digkey_decode(const char *key, size_t key_len, unsigned char *buffer, siz
     // dimension
     if(dimension > 0) {
         memcpy(buffer+i,&dimension,4);
-        i += 4;
+        /* i += 4; */
     }
 
     return decode_len;
@@ -361,7 +361,7 @@ size_t actorkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
     }
     for(int i=0;i<16;++i) {
         unsigned char a = decode_hex_digit(key[i]);
-        if(!(0 <= a && a < 16)) {
+        if(a >= 16) {
             return 0;
         }
     }
@@ -393,7 +393,6 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
     signed char tag = 0;
     signed char subtag = 0;
     bool has_subtag = false;
-    size_t ret_val = 0;
 
     enum KEY_TYPE key_type;
 

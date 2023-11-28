@@ -75,13 +75,13 @@ static void mcpe_random_update_state(void) {
     }
 
     // Temper all numbers in a batch
-    for (size_t i = 0; i < SIZE; ++i) {
-        y = g_state.mt[i];
+    for (size_t j = 0; j < SIZE; ++j) {
+        y = g_state.mt[j];
         y ^= y >> 11;
         y ^= y << 7  & 0x9d2c5680;
         y ^= y << 15 & 0xefc60000;
         y ^= y >> 18;
-        g_state.mt_tempered[i] = y;
+        g_state.mt_tempered[j] = y;
     }
 
     g_state.index = 0;

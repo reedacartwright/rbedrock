@@ -83,8 +83,8 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
 }
 
 static int calc_bits_per_block(int sz) {
-    int p[8] = {1,2,3,4,5,6,8,16};
-    int z[8] = {2,4,8,16,32,64,256,65536};
+    const int p[8] = {1,2,3,4,5,6,8,16};
+    const int z[8] = {2,4,8,16,32,64,256,65536};
 
     int i;
     for(i = 0; i < 7 && z[i] < sz; ++i) {
@@ -134,7 +134,7 @@ SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t pale
 
     // write palette ids
     unsigned int u = 0;
-    int *v = INTEGER(r_values);
+    const int *v = INTEGER(r_values);
 
     for(int j = 0; j < word_count; ++j) {
         // read current word and parse
@@ -202,7 +202,7 @@ SEXP read_subchunk_blocks(SEXP r_value) {
         SEXP r_palette = PROTECT(Rf_allocVector(VECSXP, palette_size));
         SEXP r_val;
 
-        for(int i = 0; i < palette_size; ++i) {
+        for(int j = 0; j < palette_size; ++j) {
             if(p >= end) {
                 return_subchunk_error();
             }
@@ -211,7 +211,7 @@ SEXP read_subchunk_blocks(SEXP r_value) {
                 // We should not encounter a 0 tag in this context
                 return_nbt_error_tag(0);
             }
-            SET_VECTOR_ELT(r_palette, i, r_val);
+            SET_VECTOR_ELT(r_palette, j, r_val);
             UNPROTECT(1);
         }      
         // construct a list to hold this layer

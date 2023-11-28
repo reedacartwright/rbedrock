@@ -29,8 +29,8 @@ SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end);
 SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end);
 
 SEXP write_nbt(SEXP r_value);
-R_xlen_t write_nbt_value(SEXP r_value, unsigned char** ptr, unsigned char* end);
-R_xlen_t write_nbt_values(SEXP r_value, unsigned char** ptr, unsigned char* end);
+R_xlen_t write_nbt_value(SEXP r_value, unsigned char** ptr, const unsigned char* end);
+R_xlen_t write_nbt_values(SEXP r_value, unsigned char** ptr, const unsigned char* end);
 
 #define return_nbt_error() { Rf_error("Malformed NBT data: at %s, line %d.",  __FILE__, __LINE__ ); return R_NilValue; }
 #define return_nbt_error0() { Rf_error("Malformed NBT data: at %s, line %d.",  __FILE__, __LINE__ ); return 0; }
