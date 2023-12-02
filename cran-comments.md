@@ -1,6 +1,6 @@
 ## Submission
 
-- CRAN errors identified on 2023-12-01 have been fixed.
+- CRAN errors identified as of 2023-12-01 have been fixed.
 
 ## Test environments
 
