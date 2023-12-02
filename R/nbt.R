@@ -298,7 +298,8 @@ new_nbt_compound <- function(x) {
         abort("an nbt_compound can only hold nbt data")
     }
     new_vctr(x, class = c("rbedrock_nbt_compound",
-        "rbedrock_nbt", "rbedrock_nbt_container"))
+                          "rbedrock_nbt",
+                          "rbedrock_nbt_container"))
 }
 #' @keywords internal
 #' @rdname new_nbt
@@ -623,12 +624,12 @@ write_rnbt <- function(object) {
 
 #' @export
 print.rbedrock_nbt <- function(x, ...) {
-  obj_print(x, ...)
-  invisible(x)
+    obj_print(x, ...)
+    invisible(x)
 }
 #' @export
 str.rbedrock_nbt <- function(object, ...) {
-  obj_str(object, ...)
+    obj_str(object, ...)
 }
 #' @export
 format.rbedrock_nbt <- function(x, ...) {
@@ -675,6 +676,8 @@ vec_ptype_abbr.rbedrock_nbt <- function(x, ...) {
 }
 
 # coercion and casting ---------------------------------------------------------
+
+# nolint start: object_length_linter
 
 #' @export
 vec_ptype2.rbedrock_nbt_byte.rbedrock_nbt_byte <- function(x, y, ...) x
@@ -1044,3 +1047,4 @@ vec_cast.rbedrock_nbt_list.integer64 <- function(x, to, ...) {
     x <- as_list_of(as.list(x), .ptype = attr(to, "ptype"))
     structure(x, class = class(to))
 }
+# nolint end

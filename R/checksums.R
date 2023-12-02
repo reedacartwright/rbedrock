@@ -130,7 +130,7 @@ write_checksums_value <- function(object) {
     ret <- writeBin(length(object), raw(), size = 4L, endian = "little")
     retp <- purrr::map(seq_along(object), function(i) {
         c(writeBin(tag[i], raw(), size = 2L, endian = "little"),
-            as.raw(subtag[i]), hash[[i]])
+          as.raw(subtag[i]), hash[[i]])
     })
     c(ret, purrr::list_c(retp))
 }

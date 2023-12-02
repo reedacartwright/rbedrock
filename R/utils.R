@@ -34,7 +34,7 @@ spawning_area <- function(sim_distance, x = 0, z = 0) {
     dat <- dplyr::filter(dat, abs(z) + abs(x) < sim_distance)
     dat <- dplyr::mutate(dat, x = x + !!x, z = z + !!z)
     dat <- dplyr::mutate(dat, xx = as.integer(16 * x + 7.5) - 16 * !!x,
-        zz = as.integer(16 * z + 7.5) - 16 * !!z)
+                         zz = as.integer(16 * z + 7.5) - 16 * !!z)
     dat <- dplyr::filter(dat, .data$xx * .data$xx + .data$zz * .data$zz <
                              9216.0)
     dplyr::select(dat, x, z)

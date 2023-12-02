@@ -70,13 +70,13 @@ get_hsa_value <- function(db, x, z, dimension) {
     hsa
 }
 
-.HSA_LIST <- c(
-   "NetherFortress",
-   "SwampHut",
-   "OceanMonument",
-   "4",  # removed cat HSA
-   "PillagerOutpost",
-   "6" # removed cat HSA
+.HSA_LIST <- c( # nolint: object_name_linter
+    "NetherFortress",
+    "SwampHut",
+    "OceanMonument",
+    "4",  # removed cat HSA
+    "PillagerOutpost",
+    "6" # removed cat HSA
 )
 
 #' @description
@@ -109,10 +109,13 @@ read_hsa_value <- function(rawdata) {
         rawdata <- rawdata[-c(1:25)]
     }
     # store results in a tibble
-    hsa <- tibble::tibble(
-        tag = .HSA_LIST[mat[, 1]],
-        x1 = mat[, 2], y1 = mat[, 3], z1 = mat[, 4],
-        x2 = mat[, 5], y2 = mat[, 6], z2 = mat[, 7])
+    hsa <- tibble::tibble(tag = .HSA_LIST[mat[, 1]],
+                          x1 = mat[, 2],
+                          y1 = mat[, 3],
+                          z1 = mat[, 4],
+                          x2 = mat[, 5],
+                          y2 = mat[, 6],
+                          z2 = mat[, 7])
     # include HSS information.
     hsa$xspot <- (hsa$x1 + hsa$x2 + 1L) %/% 2L
     hsa$yspot <- pmax.int(hsa$y1, hsa$y2) -
@@ -161,12 +164,14 @@ put_hsa_data <- function(db, data, merge = TRUE) {
         a2 <- pmin(chunks$x * 16L + 15L, x2[i])
         b2 <- pmin(chunks$z * 16L + 15L, z2[i])
         # construct table of hsa
-        dati <- tibble::tibble(
-            tag = tag[i],
-            x1 = a1, y1 = y1[i], z1 = b1,
-            x2 = a2, y2 = y2[i], z2 = b2,
-            key = chunks$key
-            )
+        dati <- tibble::tibble(tag = tag[i],
+                               x1 = a1,
+                               y1 = y1[i],
+                               z1 = b1,
+                               x2 = a2,
+                               y2 = y2[i],
+                               z2 = b2,
+                               key = chunks$key)
         dat <- dplyr::bind_rows(dat, dati)
     }
     if (is.null(dat)) {

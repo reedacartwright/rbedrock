@@ -20,16 +20,17 @@
 #' returned by `read_chunk_blocks_value()`.
 #' @export
 get_chunk_blocks_data <- function(db, x, z, dimension,
-        names_only = FALSE, extra_block = FALSE) {
+                                  names_only = FALSE,
+                                  extra_block = FALSE) {
     starts_with <- .process_key_args_prefix(x, z, dimension)
     starts_with <- vec_unique(starts_with)
     starts_with <- str_c(starts_with, ":47")
 
-    dat <- purrr::map(starts_with, ~.get_chunk_blocks_value_impl(db,
-        starts_with = .,
-        names_only = names_only,
-        extra_block = extra_block
-    ))
+    dat <- purrr::map(starts_with,
+                      ~.get_chunk_blocks_value_impl(db,
+                                                    starts_with = .,
+                                                    names_only = names_only,
+                                                    extra_block = extra_block))
 
     set_names(dat, starts_with)
 }
@@ -52,7 +53,8 @@ get_chunk_blocks_values <- get_chunk_blocks_data
 #' @rdname get_chunk_blocks_data
 #' @export
 get_chunk_blocks_value <- function(db, x, z, dimension,
-        names_only = FALSE, extra_block = FALSE) {
+                                   names_only = FALSE,
+                                   extra_block = FALSE) {
     starts_with <- .process_key_args_prefix(x, z, dimension)
     starts_with <- vec_unique(starts_with)
     vec_assert(starts_with, character(), 1L)
@@ -112,7 +114,7 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, version = 9L) {
     # and chunk version
     bottom <- min(pos)
     if (bottom < 0) {
-       bottom <- min(bottom, -4)
+        bottom <- min(bottom, -4)
     } else if (bottom != 0) {
         bottom <- 0
     }
@@ -179,8 +181,10 @@ chunk_origin <- function(x) {
             next
         }
         # extract and encode subchunk data
-        data[[new_keys[s]]] <- write_subchunk_blocks_value(subchunk,
-            version = version, missing_offset = subtags[s])
+        data[[new_keys[s]]] <-
+            write_subchunk_blocks_value(subchunk,
+                                        version = version,
+                                        missing_offset = subtags[s])
     }
     put_keys <- names(data)
     del_keys <- old_keys[!(old_keys %in% put_keys)]
@@ -218,8 +222,9 @@ locate_blocks <- function(blocks, pattern, negate = FALSE) {
         dim(coords) <- c(3, 0)
     }
     ret <- tibble::tibble(x = coords[1, ],
-        y = coords[2, ], z = coords[3, ],
-        block = as.character(blocks[ind]))
+                          y = coords[2, ],
+                          z = coords[3, ],
+                          block = as.character(blocks[ind]))
     dplyr::arrange(ret, .data$y, .data$x, .data$z)
 }
 
@@ -267,11 +272,13 @@ NULL
 #' @rdname SubchunkBlocks
 #' @export
 get_subchunk_blocks_data <- function(db, x, z, dimension, subchunk,
-        names_only = FALSE, extra_block = FALSE) {
+                                     names_only = FALSE,
+                                     extra_block = FALSE) {
     keys <- .process_key_args(x, z, dimension, tag = 47L, subtag = subchunk)
 
     .get_subchunk_blocks_data_impl(db, keys,
-        names_only = names_only, extra_block = extra_block)
+                                   names_only = names_only,
+                                   extra_block = extra_block)
 }
 
 #' @rdname SubchunkBlocks
@@ -300,7 +307,8 @@ get_subchunk_blocks_values <- get_subchunk_blocks_data
 #' @rdname SubchunkBlocks
 #' @export
 get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
-        names_only = FALSE, extra_block = FALSE) {
+                                      names_only = FALSE,
+                                      extra_block = FALSE) {
     key <- .process_key_args(x, z, dimension, tag = 47L, subtag = subchunk)
     vec_assert(key, character(), 1L)
 
@@ -308,7 +316,7 @@ get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
     offset <- .get_subtag_from_chunk_key(key)
 
     read_subchunk_blocks_value(dat, offset, names_only = names_only,
-        extra_block = extra_block)
+                               extra_block = extra_block)
 }
 
 #' @description
@@ -322,14 +330,16 @@ get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
 #' @rdname SubchunkBlocks
 #' @export
 get_subchunk_blocks_from_chunk <- function(db, x, z, dimension,
-    names_only = FALSE, extra_block = FALSE) {
+                                           names_only = FALSE,
+                                           extra_block = FALSE) {
 
     starts_with <- .process_key_args_prefix(x, z, dimension)
     vec_assert(starts_with, character(), 1L)
     starts_with <- str_c(starts_with, ":47")
 
     .get_subchunk_blocks_data_impl(db, starts_with = starts_with,
-        names_only = names_only, extra_block = extra_block)
+                                   names_only = names_only,
+                                   extra_block = extra_block)
 }
 
 #' @description
@@ -357,7 +367,8 @@ put_subchunk_blocks_values <- function(db, x, z, dimension, subchunk, values,
     values <- vec_recycle(values, length(keys), x_arg = "values")
     offsets <- .get_subtag_from_chunk_key(keys)
     values <- purrr::map2(values, offsets,
-      ~write_subchunk_blocks_value(.x, version = version, missing_offset = .y))
+                          ~write_subchunk_blocks_value(.x, version = version,
+                                                       missing_offset = .y))
     put_values(db, keys, values)
 }
 
@@ -589,7 +600,7 @@ write_subchunk_layers_value <- function(object, version = 9L,
     })
     palette <- purrr::map(object, function(x) {
         if (!has_name(x, "palette") ||
-            any(purrr::map_lgl(x[["palette"]], is_nbt) == FALSE)) {
+                any(purrr::map_lgl(x[["palette"]], is_nbt) == FALSE)) {
             abort("an element of `object` is malformed")
         }
         to_rnbt(x[["palette"]])
@@ -622,10 +633,11 @@ write_subchunk_layers_value <- function(object, version = 9L,
         }
     })
     states <- str_c(names(states), states,
-        sep = "=", collapse = "@")
+                    sep = "=", collapse = "@")
     str_c(block_name, states, sep = "@")
 }
 
+# nolint start: object_name_linter
 .BIT_STATES <- c(
     "age_bit", "allow_underwater_bit", "attached_bit",
     "brewing_stand_slot_a_bit", "brewing_stand_slot_b_bit",
@@ -662,6 +674,7 @@ write_subchunk_layers_value <- function(object, version = 9L,
     "structure_block_type", "structure_void_type", "tall_grass_type",
     "torch_facing_direction", "turtle_egg_count", "wall_block_type", "wood_type"
 )
+# nolint end
 
 .as_bit <- function(x, strict = FALSE) {
     true_values <- c("true", "TRUE", "1", "T", "t")
@@ -687,7 +700,7 @@ write_subchunk_layers_value <- function(object, version = 9L,
         p <- as.integer(state)
         if (is.na(p)) {
             msg <- str_glue("Block State '{name}={state}' could not ",
-                "be converted to an integer.")
+                            "be converted to an integer.")
             rlang::warn(msg)
         }
         return(nbt_int(p))
@@ -695,13 +708,13 @@ write_subchunk_layers_value <- function(object, version = 9L,
         p <- .as_bit(state)
         if (is.na(p)) {
             msg <- str_glue("Block State '{name}={state}' could not ",
-                "be converted to a boolean bit.")
+                            "be converted to a boolean bit.")
             rlang::warn(msg)
         }
         return(nbt_byte(p))
     }
     msg <- str_glue("Unknown Block State '{name}={state}' ",
-        "converted to an ")
+                    "converted to an ")
 
     p <- suppressWarnings(as.integer(state))
     if (!is.na(p)) {
@@ -736,8 +749,8 @@ write_subchunk_layers_value <- function(object, version = 9L,
     }
 
     nbt_compound(name = nbt_string(name),
-        states = states,
-        version = nbt_int(0x1100010)) # 1.16.0.16 ??
+                 states = states,
+                 version = nbt_int(0x1100010)) # 1.16.0.16 ??
 }
 
 #' @description
