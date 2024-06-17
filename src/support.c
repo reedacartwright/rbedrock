@@ -84,7 +84,7 @@ void get_keys_data(R_len_t len, SEXP keys, const char **data, R_len_t *data_len)
         for(R_len_t i = 0; i < len; ++i) {
             data_len[i] = get_key(VECTOR_ELT(keys, i), data + i);
         }
-    } else {
+    } else if(len > 0) {
         Rf_error("Invalid type; expected a raw vector");
     }
 }

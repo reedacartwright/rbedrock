@@ -15,7 +15,7 @@ get_chunk_blocks_data(
   z,
   dimension,
   names_only = FALSE,
-  extra_block = FALSE
+  extra_block = !names_only
 )
 
 get_chunk_blocks_values(
@@ -24,7 +24,7 @@ get_chunk_blocks_values(
   z,
   dimension,
   names_only = FALSE,
-  extra_block = FALSE
+  extra_block = !names_only
 )
 
 get_chunk_blocks_value(
@@ -33,7 +33,7 @@ get_chunk_blocks_value(
   z,
   dimension,
   names_only = FALSE,
-  extra_block = FALSE
+  extra_block = !names_only
 )
 
 put_chunk_blocks_data(db, data, version = 9L)

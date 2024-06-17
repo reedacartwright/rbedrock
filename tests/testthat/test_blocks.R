@@ -132,6 +132,13 @@ test_that("put_chunk_blocks_value() overwrites chunk data.", {
 
     dat <- get_keys(db, starts_with = "chunk:31:4:0:47")
     expect_equal(dat, c("chunk:31:4:0:47:0", "chunk:31:4:0:47:1"))
+
+    # Using empty chunks just deletes block data
+    val <- array("minecraft:air", c(16, 16, 16))
+    chunk_origin(val) <- c(31, 0, 4) * 16L
+    put_chunk_blocks_value(db, 31, 4, 0, val, version = 9L)
+    dat <- get_keys(db, starts_with = "chunk:31:4:0:47")
+    expect_length(dat, 0)
 })
 
 test_that("put_chunk_blocks_values() writes chunk data.", {

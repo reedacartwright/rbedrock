@@ -22,7 +22,7 @@ get_subchunk_blocks_data(
   dimension,
   subchunk,
   names_only = FALSE,
-  extra_block = FALSE
+  extra_block = !names_only
 )
 
 get_subchunk_blocks_values(
@@ -32,7 +32,7 @@ get_subchunk_blocks_values(
   dimension,
   subchunk,
   names_only = FALSE,
-  extra_block = FALSE
+  extra_block = !names_only
 )
 
 get_subchunk_blocks_value(
@@ -42,7 +42,7 @@ get_subchunk_blocks_value(
   dimension,
   subchunk,
   names_only = FALSE,
-  extra_block = FALSE
+  extra_block = !names_only
 )
 
 get_subchunk_blocks_from_chunk(
@@ -51,7 +51,7 @@ get_subchunk_blocks_from_chunk(
   z,
   dimension,
   names_only = FALSE,
-  extra_block = FALSE
+  extra_block = !names_only
 )
 
 put_subchunk_blocks_data(db, data, version = 9L)
@@ -64,7 +64,7 @@ read_subchunk_blocks_value(
   rawdata,
   missing_offset = NA,
   names_only = FALSE,
-  extra_block = FALSE
+  extra_block = !names_only
 )
 
 write_subchunk_blocks_value(object, version = 9L, missing_offset = NA_integer_)
