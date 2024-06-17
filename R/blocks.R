@@ -20,7 +20,7 @@
 #' returned by `read_chunk_blocks_value()`.
 #' @export
 get_chunk_blocks_data <- function(db, x, z, dimension,
-        names_only = FALSE, extra_block = FALSE) {
+        names_only = FALSE, extra_block = !names_only) {
     starts_with <- .process_key_args_prefix(x, z, dimension)
     starts_with <- vec_unique(starts_with)
     starts_with <- str_c(starts_with, ":47")
@@ -52,7 +52,7 @@ get_chunk_blocks_values <- get_chunk_blocks_data
 #' @rdname get_chunk_blocks_data
 #' @export
 get_chunk_blocks_value <- function(db, x, z, dimension,
-        names_only = FALSE, extra_block = FALSE) {
+        names_only = FALSE, extra_block = !names_only) {
     starts_with <- .process_key_args_prefix(x, z, dimension)
     starts_with <- vec_unique(starts_with)
     vec_assert(starts_with, character(), 1L)
@@ -267,7 +267,7 @@ NULL
 #' @rdname SubchunkBlocks
 #' @export
 get_subchunk_blocks_data <- function(db, x, z, dimension, subchunk,
-        names_only = FALSE, extra_block = FALSE) {
+        names_only = FALSE, extra_block = !names_only) {
     keys <- .process_key_args(x, z, dimension, tag = 47L, subtag = subchunk)
 
     .get_subchunk_blocks_data_impl(db, keys,
@@ -281,7 +281,7 @@ get_subchunk_blocks_values <- get_subchunk_blocks_data
 .get_subchunk_blocks_data_impl <- function(db, keys, starts_with,
                                            readoptions = NULL,
                                            names_only = FALSE,
-                                           extra_block = FALSE) {
+                                           extra_block = !names_only) {
     dat <- get_values(db, keys, starts_with, readoptions)
     offsets <- .get_subtag_from_chunk_key(names(dat))
     ret <- purrr::map2(dat, offsets, read_subchunk_blocks_value,
@@ -300,7 +300,7 @@ get_subchunk_blocks_values <- get_subchunk_blocks_data
 #' @rdname SubchunkBlocks
 #' @export
 get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
-        names_only = FALSE, extra_block = FALSE) {
+        names_only = FALSE, extra_block = !names_only) {
     key <- .process_key_args(x, z, dimension, tag = 47L, subtag = subchunk)
     vec_assert(key, character(), 1L)
 
@@ -322,7 +322,7 @@ get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
 #' @rdname SubchunkBlocks
 #' @export
 get_subchunk_blocks_from_chunk <- function(db, x, z, dimension,
-    names_only = FALSE, extra_block = FALSE) {
+    names_only = FALSE, extra_block = !names_only) {
 
     starts_with <- .process_key_args_prefix(x, z, dimension)
     vec_assert(starts_with, character(), 1L)
@@ -388,7 +388,7 @@ put_subchunk_blocks_value <- function(db, x, z, dimension, subchunk, value,
 #' @export
 read_subchunk_blocks_value <- function(rawdata, missing_offset = NA,
                                        names_only = FALSE,
-                                       extra_block = FALSE) {
+                                       extra_block = !names_only) {
     if (is.null(rawdata)) {
         return(NULL)
     }
