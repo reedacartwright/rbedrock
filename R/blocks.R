@@ -810,31 +810,62 @@ subchunk_coords <- function(ind, origins = subchunk_origins(names(ind))) {
     }
 }
 
+.chunk_blocks_apply_offsets <- function(args, dims, origin) {
+    if(length(args) == length(dims)) {
+        for(i in seq_along(args)) {
+            if(is.numeric(args[[i]])) {
+                ii <- args[[i]] - origin[i] + 1L
+                if(any(ii < 1L, na.rm = TRUE)) {
+                    rlang::abort("subscript out of bounds")
+                }
+                args[[i]] <- ii
+            }
+        }
+    } else if(length(args) == 1L) {
+        if(is.matrix(args[[1]]) && is.numeric(args[[1]])) {
+            # adjust indices
+            args[[1]] <- sweep(args[[1]], 2, origin) + 1L
+        }
+    } else if(length(args) != 0L) {
+        rlang::abort("incorrect number of dimensions")
+    }
+
+    args
+}
+
+#' Extract or replace chunk blocks from an array
+#'
+#' Convenience wrappers around `[` to extract or replace blocks from an array
+#' based on block coordinates. 
+#'
+#' @param x Abject from which to extract element(s) or in which to replace
+#' element(s). 
+#' @param drop if `TRUE` the result is coerced to the lowest possible dimension.
+#' @param origin the origin of the chunk array, used for mapping coordinates to
+#' indices
+#' @param ... block coordinates specifying elements to extract or replace. Can
+#' be numeric, logical, or missing. If numeric, the coordinates will be mapped
+#' to indices unless there is a single, non-matrix argument.
+#' @param value An array-like R object of similar class as x
+#'
+#' @export
 chunk_blocks <- function(x, ..., drop = TRUE, origin = chunk_origin(x)) {
     args <- rlang::dots_list(..., .named = NULL,
         .preserve_empty = TRUE,
         .ignore_empty = "none")
-    if(length(args) == 0L) {
-        return(x)
-    }
-    offset <- -origin + 1L
-    if(length(args) == 1L) {
-        i <- args[[1]]
-        if(is.matrix(i)) {
-            # adjust indices
-            return(x[sweep(i, 2, offset)])
-        }
-    } else if(length(args) != length(dim(x))) {
-        rlang::abort("incorrect number of dimensions")
-    } else {
-        # adjust indices
-        for(i in seq_along(args)) {
-            if(is.numeric(args[[i]])) {
-                args[[i]] <- args[[i]] + offset[i]
-            }
-        }
-    }
+    args <- .chunk_blocks_apply_offsets(args, dim(x), origin)
 
     # if this fails the error message is gnarly, see rlang::exec docs
     rlang::exec(`[`, x, !!!args, drop = drop)
+}
+
+#' @rdname chunk_blocks
+#' @export
+`chunk_blocks<-` <- function(x, ..., origin = chunk_origin(x), value) {
+    args <- rlang::dots_list(..., .named = NULL,
+        .preserve_empty = TRUE,
+        .ignore_empty = "none")
+    args <- .chunk_blocks_apply_offsets(args, dim(x), origin)
+
+    rlang::exec(`[<-`, x, !!!args, value = value)
 }

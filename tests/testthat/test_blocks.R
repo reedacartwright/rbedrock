@@ -400,6 +400,57 @@ test_that("get_subchunk_layers_from_chunk returns all block data in a chunk", {
     }
 })
 
+test_that("chunk_blocks() subsets blocks", {
+    blocks <- array("minecraft:air", c(16, 16, 16))
+    blocks[4,4,4] <- "minecraft:stone"
+    blocks[5,4,4] <- "minecraft:dirt"
+    chunk_origin(blocks) <- c(32, 0, -32)
+    bool_index <- rep(FALSE, length=length(blocks))
+    bool_index[820] <- TRUE
+    mat_index <- matrix(c(35, 3, -29), 1, 3)
+
+    expect_equal(chunk_blocks(blocks), blocks)
+
+    expect_equal(chunk_blocks(blocks, 35, 3, -29), "minecraft:stone")
+    expect_equal(chunk_blocks(blocks, 820), "minecraft:stone")
+    expect_equal(chunk_blocks(blocks, bool_index), "minecraft:stone")
+    expect_equal(chunk_blocks(blocks, mat_index), "minecraft:stone")
+
+    expect_equal(chunk_blocks(blocks, 35, 3, -29, drop = FALSE),
+        array("minecraft:stone", c(1,1,1)))
+
+    expect_equal(chunk_blocks(blocks, 35:37, 3, -29),
+        c("minecraft:stone", "minecraft:dirt", "minecraft:air"))
+
+})
+
+test_that("chunk_blocks()<- replaces blocks", {
+    blocks <- array("minecraft:air", c(16, 16, 16))
+    chunk_origin(blocks) <- c(32, 0, -32)
+
+    expected_blocks <- blocks
+    expected_blocks[] <- "minecraft:stone"
+    chunk_blocks(blocks) <- "minecraft:stone"
+    expect_equal(blocks, expected_blocks)
+
+    chunk_blocks(blocks, 32, 0, -32) <- "minecraft:air"
+    expected_blocks[1, 1, 1] <- "minecraft:air"
+    expect_equal(blocks, expected_blocks)
+
+    chunk_blocks(blocks, 32, 0, -32 + 0:15) <- "minecraft:air"
+    expected_blocks[1, 1, 1:16] <- "minecraft:air"
+    expect_equal(blocks, expected_blocks)
+
+    chunk_blocks(blocks, 32, TRUE, ) <- "minecraft:dirt"
+    expected_blocks[1, TRUE, ] <- "minecraft:dirt"
+    expect_equal(blocks, expected_blocks)
+
+    mat_index <- matrix(c(35, 3, -29), 1, 3)
+    chunk_blocks(blocks, mat_index) <- "miencraft:smooth_stone"
+    expected_blocks[4,4,4] <- "miencraft:smooth_stone"
+    expect_equal(blocks, expected_blocks)
+})
+
 # clean up
 close(db)
 fs::dir_delete(dbpath)
