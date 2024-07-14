@@ -15,21 +15,27 @@
 #' @param extra_block A logical scalar. Append the extra block layer to the
 #' output (separated by ";"). This is mostly useful if you have waterlogged
 #' blocks. If the extra block is air, it will not be appended.
+#' @param min_subchunk,max_subchunk The minimum and maximum subchunks of the
+#' returned array. Set to `TRUE` to use dimension defaults. Set to `FALSE` to
+#' use the values from chunk data.
 #'
 #' @return `get_chunk_blocks_data()` returns a list of the of the values
 #' returned by `read_chunk_blocks_value()`.
 #' @export
 get_chunk_blocks_data <- function(db, x, z, dimension,
-        names_only = FALSE, extra_block = !names_only) {
+        names_only = FALSE, extra_block = !names_only,
+        min_subchunk = TRUE, max_subchunk = !names_only) {
     starts_with <- .process_key_args_prefix(x, z, dimension)
     starts_with <- vec_unique(starts_with)
-    starts_with <- str_c(starts_with, ":47")
 
-    dat <- purrr::map(starts_with, ~.get_chunk_blocks_value_impl(db,
-        starts_with = .,
-        names_only = names_only,
-        extra_block = extra_block
-    ))
+    dat <- purrr::map(starts_with, function(x) {
+        .get_chunk_blocks_value_impl(db,
+            starts_with = x,
+            names_only = names_only,
+            extra_block = extra_block,
+            min_subchunk = min_subchunk,
+            max_subchunk = max_subchunk)
+    })
 
     set_names(dat, starts_with)
 }
@@ -52,15 +58,16 @@ get_chunk_blocks_values <- get_chunk_blocks_data
 #' @rdname get_chunk_blocks_data
 #' @export
 get_chunk_blocks_value <- function(db, x, z, dimension,
-        names_only = FALSE, extra_block = !names_only) {
+        names_only = FALSE, extra_block = !names_only,
+        min_subchunk = TRUE, max_subchunk = !names_only) {
     starts_with <- .process_key_args_prefix(x, z, dimension)
     starts_with <- vec_unique(starts_with)
-    vec_assert(starts_with, character(), 1L)
-    starts_with <- str_c(starts_with, ":47")
 
     .get_chunk_blocks_value_impl(db, starts_with,
         names_only = names_only,
-        extra_block = extra_block
+        extra_block = extra_block,
+        min_subchunk = min_subchunk,
+        max_subchunk = max_subchunk
     )
 }
 
@@ -87,7 +94,7 @@ put_chunk_blocks_values <- function(db, x, z, dimension, values,
                               stop_if_filtered = TRUE)
     values <- vec_recycle(values, length(keys), x_arg = "values")
     purrr::walk2(keys, values,
-                 ~.put_chunk_blocks_value_impl(db, .x, .y, version = version))
+        function(x, y) .put_chunk_blocks_value_impl(db, x, y, version = version))
 }
 
 #' @param value A 16xNx16 character array
@@ -100,29 +107,51 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, version = 9L) {
     .put_chunk_blocks_value_impl(db, key, value, version = version)
 }
 
-.get_chunk_blocks_value_impl <- function(db, starts_with, ...) {
-    dat <- .get_subchunk_blocks_data_impl(db, starts_with = starts_with, ...)
-    if (length(dat) == 0L) {
+.get_chunk_blocks_value_impl <- function(db, starts_with,
+    names_only, extra_block, min_subchunk, max_subchunk) {
+
+    p <- .split_chunk_stems(starts_with)
+    dimension <- p[3]
+
+    starts_with <- paste0(starts_with, ":47")
+    dat <- .get_subchunk_blocks_data_impl(db, starts_with = starts_with,
+        names_only = names_only, extra_block = extra_block)
+
+    # calculate lowest and highest subchunks
+    pos <- purrr::map_int(dat, attr, "offset")
+    if(is.numeric(min_subchunk)) {
+        bottom <- as.integer(min_subchunk)
+    } else if(isTRUE(min_subchunk)) {
+        bottom <- if(dimension == 0) -4 else 0
+    } else if(length(pos) > 0L) {
+        bottom <- min(pos)
+    } else {
+        bottom <- NA
+    }
+    if(is.numeric(max_subchunk)) {
+        top <- as.integer(max_subchunk)
+    } else if(isTRUE(max_subchunk)) {
+        top <- if(dimension == 0) 19 else if(dimension == 1) 7 else 15
+    } else  if(length(pos) > 0L) {
+        top <- max(pos)
+    } else {
+        top <- NA
+    }
+    if(is.na(top) || is.na(bottom)) {
         return(NULL)
     }
 
-    pos <- purrr::map_int(dat, attr, "offset")
-    # calculate the lowest subchunk and adjust as necessary
-    # ideally calculation should be based on dimension
-    # and chunk version
-    bottom <- min(pos)
-    if (bottom < 0) {
-       bottom <- min(bottom, -4)
-    } else if (bottom != 0) {
-        bottom <- 0
-    }
-    max_y <- 16 * (max(pos) - bottom) + 16
-    mat <- array("minecraft:air", c(16, max_y, 16))
+    # Allocate array
+    height <- 16 * (top - bottom + 1)
+    mat <- array("minecraft:air", c(16, height, 16))
+
+    # Copy Data
     for (i in seq_along(pos)) {
-        mat[, ((pos[i] - bottom) * 16) + 1:16, ] <- dat[[i]]
+        if(pos[i] >= bottom && pos[i] <= top) {
+            mat[, ((pos[i] - bottom) * 16) + 1:16, ] <- dat[[i]]
+        }
     }
-    o <- as.integer(.split_chunk_stems(starts_with)[1:2])
-    attr(mat, "origin") <- c(o[1], bottom, o[2]) * 16L
+    attr(mat, "origin") <- c(p[1], bottom, p[2]) * 16L
     mat
 }
 

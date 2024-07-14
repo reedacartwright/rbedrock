@@ -99,21 +99,30 @@ test_that("put_chunk_blocks_value() writes chunk data.", {
     val[, 22, ] <- "minecraft:stone@stone_type=andesite"
     val[, 23, ] <- "minecraft:iron_ore"
     val[, 24, ] <- "minecraft:snow_layer@height=5@covered_bit=true"
-    chunk_origin(val) <- c(10, 0, 12) * 16L
+    chunk_origin(val) <- c(10, -4, 12) * 16L
 
-    put_chunk_blocks_value(db, "chunk:10:12:0:47", value = val, version = 8L)
-    dat <- get_chunk_blocks_value(db, "chunk:10:12:0:47")
+    # Standard Behavior
+    expected_dat <- array("minecraft:air", c(16, 384, 16))
+    expected_dat[,1:32,] <- val
+    chunk_origin(expected_dat) <- c(10, -4, 12) * 16L
 
-    expect_equal(dat, val)
+    put_chunk_blocks_value(db, "chunk:10:12:0:47", value = val)
 
+    dat <- get_chunk_blocks_value(db, "chunk:10:12:0")
+    expect_equal(dat, expected_dat)
     dat <- get_keys(db, starts_with = "chunk:10:12:0:47")
-    expect_equal(dat, "chunk:10:12:0:47:1")
+    expect_equal(dat, "chunk:10:12:0:47:-3")
 
+    # Alternative chunk_origin
     chunk_origin(val) <- c(10, 0, 13) * 16L
     put_chunk_blocks_value(db, "chunk:10:13:0:47", value = val)
     dat <- get_chunk_blocks_value(db, "chunk:10:13:0:47")
 
-    expect_equal(dat, val)
+    expected_dat <- array("minecraft:air", c(16, 384, 16))
+    expected_dat[,65:96,] <- val
+    chunk_origin(expected_dat) <- c(10, -4, 13) * 16L
+
+    expect_equal(dat, expected_dat)
 
     dat <- get_keys(db, starts_with = "chunk:10:13:0:47")
     expect_equal(dat, "chunk:10:13:0:47:1")
@@ -121,17 +130,20 @@ test_that("put_chunk_blocks_value() writes chunk data.", {
 
 test_that("put_chunk_blocks_value() overwrites chunk data.", {
     dat <- get_chunk_blocks_value(db, 31, 4, 0)
-    val <- dat[, 1:32 + 5, ]
-    chunk_origin(val) <- c(31, 0, 4) * 16L
+    val <- dat[, 1:32 + 5 + 65, ]
+    chunk_origin(val) <- c(31, -4, 4) * 16L
 
-    put_chunk_blocks_value(db, 31, 4, 0, val, version = 8L)
+    # Standard Behavior
+    expected_dat <- array("minecraft:air", c(16, 384, 16))
+    expected_dat[,1:32,] <- val
+    chunk_origin(expected_dat) <- c(31, -4, 4) * 16L
 
+    put_chunk_blocks_value(db, 31, 4, 0, val)
     dat <- get_chunk_blocks_value(db, 31, 4, 0)
-
-    expect_equal(dat, val)
+    expect_equal(dat, expected_dat)
 
     dat <- get_keys(db, starts_with = "chunk:31:4:0:47")
-    expect_equal(dat, c("chunk:31:4:0:47:0", "chunk:31:4:0:47:1"))
+    expect_equal(dat, c("chunk:31:4:0:47:-4", "chunk:31:4:0:47:-3"))
 
     # Using empty chunks just deletes block data
     val <- array("minecraft:air", c(16, 16, 16))
@@ -147,50 +159,63 @@ test_that("put_chunk_blocks_values() writes chunk data.", {
     val[, 22, ] <- "minecraft:stone@stone_type=andesite"
     val[, 23, ] <- "minecraft:iron_ore"
     val[, 24, ] <- "minecraft:snow_layer@height=5@covered_bit=true"
-    chunk_origin(val) <- c(11, 0, 12) * 16L
+    chunk_origin(val) <- c(11, -4, 12) * 16L
 
-    put_chunk_blocks_values(db, 11:12, 12, 0, value = list(val), version = 8L)
+    # Standard Behavior
+    expected_dat <- array("minecraft:air", c(16, 384, 16))
+    expected_dat[,1:32,] <- val
+    chunk_origin(expected_dat) <- c(11, -4, 12) * 16L
+
+    put_chunk_blocks_values(db, 11:12, 12, 0, value = list(val))
     dat <- get_chunk_blocks_values(db, 11:12, 12, 0)
 
-    expect_equal(dat[[1]], val)
+    expect_equal(dat[[1]], expected_dat)
 
-    chunk_origin(val) <- c(12, 0, 12) * 16L
-    expect_equal(dat[[2]], val)
+    chunk_origin(expected_dat) <- c(12, -4, 12) * 16L
+    expect_equal(dat[[2]], expected_dat)
 
     dat <- get_keys(db, starts_with = "chunk:11:12:0:47")
-    expect_equal(dat, "chunk:11:12:0:47:1")
+    expect_equal(dat, "chunk:11:12:0:47:-3")
     dat <- get_keys(db, starts_with = "chunk:12:12:0:47")
-    expect_equal(dat, "chunk:12:12:0:47:1")
+    expect_equal(dat, "chunk:12:12:0:47:-3")
 })
 
 test_that("put_chunk_blocks_data() writes chunk data.", {
     val <- list()
     val[["chunk:13:12:0:47"]] <- array("minecraft:air", c(16, 32, 16))
     val[["chunk:14:12:0:47"]] <- array("minecraft:air", c(16, 32, 16))
-    chunk_origin(val[[1]]) <- c(13, 0, 12) * 16L
-    chunk_origin(val[[2]]) <- c(14, 0, 12) * 16L
+    chunk_origin(val[[1]]) <- c(13, -4, 12) * 16L
+    chunk_origin(val[[2]]) <- c(14, -4, 12) * 16L
 
     val[["chunk:13:12:0:47"]][, 21, ] <-
         "minecraft:bedrock@infiniburn_bit=false"
     val[["chunk:14:12:0:47"]][, 1, ] <-
         "minecraft:bedrock@infiniburn_bit=false"
 
-    put_chunk_blocks_data(db, val, version = 8L)
+    put_chunk_blocks_data(db, val)
 
-    val[["chunk:14:12:0:47"]] <- val[["chunk:14:12:0:47"]][, 1:16, ]
-    chunk_origin(val[[2]]) <- c(14, 0, 12) * 16L
+    expected_dat <- array("minecraft:air", c(16, 384, 16))
+    expected_dat <- list(
+        "chunk:13:12:0" = expected_dat,
+        "chunk:14:12:0" = expected_dat
+    )
+    expected_dat[[1]][, 21, ] <- "minecraft:bedrock@infiniburn_bit=false"
+    expected_dat[[2]][, 1, ] <- "minecraft:bedrock@infiniburn_bit=false"
+
+    chunk_origin(expected_dat[[1]]) <- c(13, -4, 12) * 16L
+    chunk_origin(expected_dat[[2]]) <- c(14, -4, 12) * 16L
 
     dat <- get_chunk_blocks_values(db, c(
-        "chunk:13:12:0:47",
-        "chunk:14:12:0:47"
+        "chunk:13:12:0",
+        "chunk:14:12:0"
     ))
 
-    expect_equal(dat, val)
+    expect_equal(dat, expected_dat)
 
     dat <- get_keys(db, starts_with = "chunk:13:12:0:47")
-    expect_equal(dat, "chunk:13:12:0:47:1")
+    expect_equal(dat, "chunk:13:12:0:47:-3")
     dat <- get_keys(db, starts_with = "chunk:14:12:0:47")
-    expect_equal(dat, "chunk:14:12:0:47:0")
+    expect_equal(dat, "chunk:14:12:0:47:-4")
 })
 
 test_that("read_subchunk_layers_value() decodes subchunk data", {

@@ -15,7 +15,9 @@ get_chunk_blocks_data(
   z,
   dimension,
   names_only = FALSE,
-  extra_block = !names_only
+  extra_block = !names_only,
+  min_subchunk = TRUE,
+  max_subchunk = !names_only
 )
 
 get_chunk_blocks_values(
@@ -24,7 +26,9 @@ get_chunk_blocks_values(
   z,
   dimension,
   names_only = FALSE,
-  extra_block = !names_only
+  extra_block = !names_only,
+  min_subchunk = TRUE,
+  max_subchunk = !names_only
 )
 
 get_chunk_blocks_value(
@@ -33,7 +37,9 @@ get_chunk_blocks_value(
   z,
   dimension,
   names_only = FALSE,
-  extra_block = !names_only
+  extra_block = !names_only,
+  min_subchunk = TRUE,
+  max_subchunk = !names_only
 )
 
 put_chunk_blocks_data(db, data, version = 9L)
@@ -54,6 +60,10 @@ ignoring block states.}
 \item{extra_block}{A logical scalar. Append the extra block layer to the
 output (separated by ";"). This is mostly useful if you have waterlogged
 blocks. If the extra block is air, it will not be appended.}
+
+\item{min_subchunk, max_subchunk}{The minimum and maximum subchunks of the
+returned array. Set to \code{TRUE} to use dimension defaults. Set to \code{FALSE} to
+use the values from chunk data.}
 
 \item{data}{A named list of 16xNx16 character() arrays}
 
