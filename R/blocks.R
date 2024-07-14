@@ -669,9 +669,9 @@ write_subchunk_layers_value <- function(object, version = 9L,
     "top_slot_bit", "triggered_bit", "update_bit", "upper_block_bit",
     "upside_down_bit", "wall_post_bit")
 
-.INTEGER_STATES <- c("age", "bite_counter", "block_light_level", "books_stored", 
-    "brushed_progress", "candles", "cluster_count", "composter_fill_level", 
-    "coral_direction", "coral_fan_direction", "deprecated", "direction", 
+.INTEGER_STATES <- c("age", "bite_counter", "block_light_level", "books_stored",
+    "brushed_progress", "candles", "cluster_count", "composter_fill_level",
+    "coral_direction", "coral_fan_direction", "deprecated", "direction",
     "facing_direction", "fill_level", "ground_sign_direction",
     "growing_plant_age", "growth", "height", "honey_level",
     "huge_mushroom_bits", "kelp_age", "liquid_depth", "moisturized_amount",
@@ -681,10 +681,10 @@ write_subchunk_layers_value <- function(object, version = 9L,
     "twisting_vines_age", "vine_direction_bits", "weeping_vines_age",
     "weirdo_direction")
 
-.STRING_STATES <- c("attachment", "bamboo_leaf_size", "bamboo_stalk_thickness", 
-    "big_dripleaf_tilt", "cauldron_liquid", "chemistry_table_type", 
-    "chisel_type", "color", "coral_color", "cracked_state", "damage", 
-    "dirt_type", "double_plant_type", "dripstone_thickness", "flower_type", 
+.STRING_STATES <- c("attachment", "bamboo_leaf_size", "bamboo_stalk_thickness",
+    "big_dripleaf_tilt", "cauldron_liquid", "chemistry_table_type",
+    "chisel_type", "color", "coral_color", "cracked_state", "damage",
+    "dirt_type", "double_plant_type", "dripstone_thickness", "flower_type",
     "lever_direction", "block_face", "cardinal_direction", "facing_direction",
     "vertical_half", "monster_egg_stone_type", "new_leaf_type", "new_log_type",
     "old_leaf_type", "old_log_type", "orientation", "pillar_axis",
@@ -808,4 +808,33 @@ subchunk_coords <- function(ind, origins = subchunk_origins(names(ind))) {
     } else {
         f(ind, as.vector(origins))
     }
+}
+
+chunk_blocks <- function(x, ..., drop = TRUE, origin = chunk_origin(x)) {
+    args <- rlang::dots_list(..., .named = NULL,
+        .preserve_empty = TRUE,
+        .ignore_empty = "none")
+    if(length(args) == 0L) {
+        return(x)
+    }
+    offset <- -origin + 1L
+    if(length(args) == 1L) {
+        i <- args[[1]]
+        if(is.matrix(i)) {
+            # adjust indices
+            return(x[sweep(i, 2, offset)])
+        }
+    } else if(length(args) != length(dim(x))) {
+        rlang::abort("incorrect number of dimensions")
+    } else {
+        # adjust indices
+        for(i in seq_along(args)) {
+            if(is.numeric(args[[i]])) {
+                args[[i]] <- args[[i]] + offset[i]
+            }
+        }
+    }
+
+    # if this fails the error message is gnarly, see rlang::exec docs
+    rlang::exec(`[`, x, !!!args, drop = drop)
 }
