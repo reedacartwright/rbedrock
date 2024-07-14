@@ -655,42 +655,47 @@ write_subchunk_layers_value <- function(object, version = 9L,
     str_c(block_name, states, sep = "@")
 }
 
-.BIT_STATES <- c(
-    "age_bit", "allow_underwater_bit", "attached_bit",
-    "brewing_stand_slot_a_bit", "brewing_stand_slot_b_bit",
-    "brewing_stand_slot_c_bit", "button_pressed_bit", "color_bit",
-    "conditional_bit", "coral_hang_type_bit", "covered_bit", "dead_bit",
-    "deprecated", "disarmed_bit", "door_hinge_bit", "drag_down",
-    "end_portal_eye_bit", "explode_bit", "extinguished", "hanging",
-    "head_piece_bit", "in_wall_bit", "infiniburn_bit", "item_frame_map_bit",
-    "no_drop_bit", "occupied_bit", "open_bit", "output_lit_bit",
+.BIT_STATES <- c("active", "age_bit", "allow_underwater_bit", "attached_bit",
+    "big_dripleaf_head", "bloom", "brewing_stand_slot_a_bit",
+    "brewing_stand_slot_b_bit", "brewing_stand_slot_c_bit",
+    "button_pressed_bit", "can_summon", "color_bit", "conditional_bit",
+    "coral_hang_type_bit", "covered_bit", "crafting", "dead_bit",
+    "disarmed_bit", "door_hinge_bit", "drag_down", "end_portal_eye_bit",
+    "explode_bit", "extinguished", "hanging", "head_piece_bit", "in_wall_bit",
+    "infiniburn_bit", "item_frame_map_bit", "item_frame_photo_bit", "lit",
+    "no_drop_bit", "occupied_bit", "ominous", "open_bit", "output_lit_bit",
     "output_subtract_bit", "persistent_bit", "powered_bit", "rail_data_bit",
     "stability_check", "stripped_bit", "suspended_bit", "toggle_bit",
     "top_slot_bit", "triggered_bit", "update_bit", "upper_block_bit",
-    "upside_down_bit"
-)
+    "upside_down_bit", "wall_post_bit")
 
-.INTEGER_STATES <- c(
-    "age", "bite_counter", "cluster_count", "composter_fill_level",
-    "coral_direction", "direction", "facing_direction", "fill_level",
-    "ground_sign_direction", "growth", "height", "honey_level",
-    "huge_mushroom_bits", "liquid_depth", "moisturized_amount",
-    "rail_direction", "redstone_signal", "repeater_delay", "stability",
-    "vine_direction_bits", "weirdo_direction"
-)
+.INTEGER_STATES <- c("age", "bite_counter", "block_light_level", "books_stored", 
+    "brushed_progress", "candles", "cluster_count", "composter_fill_level", 
+    "coral_direction", "coral_fan_direction", "deprecated", "direction", 
+    "facing_direction", "fill_level", "ground_sign_direction",
+    "growing_plant_age", "growth", "height", "honey_level",
+    "huge_mushroom_bits", "kelp_age", "liquid_depth", "moisturized_amount",
+    "multi_face_direction_bits", "propagule_stage", "rail_direction",
+    "redstone_signal", "repeater_delay", "respawn_anchor_charge", "rotation",
+    "sculk_sensor_phase", "stability", "trial_spawner_state",
+    "twisting_vines_age", "vine_direction_bits", "weeping_vines_age",
+    "weirdo_direction")
 
-.STRING_STATES <- c(
-    "attachment", "bamboo_leaf_size", "bamboo_stalk_thickness",
-    "cauldron_liquid", "chemistry_table_type", "chisel_type", "color",
-    "coral_color", "cracked_state", "damage", "dirt_type", "double_plant_type",
-    "flower_type", "monster_egg_stone_type", "new_leaf_type", "new_log_type",
-    "old_leaf_type", "old_log_type", "pillar_axis", "portal_axis",
-    "prismarine_block_type", "sand_stone_type", "sand_type", "sapling_type",
-    "sea_grass_type", "sponge_type", "stone_brick_type", "stone_slab_type_2",
-    "stone_slab_type_3", "stone_slab_type_4", "stone_slab_type", "stone_type",
-    "structure_block_type", "structure_void_type", "tall_grass_type",
-    "torch_facing_direction", "turtle_egg_count", "wall_block_type", "wood_type"
-)
+.STRING_STATES <- c("attachment", "bamboo_leaf_size", "bamboo_stalk_thickness", 
+    "big_dripleaf_tilt", "cauldron_liquid", "chemistry_table_type", 
+    "chisel_type", "color", "coral_color", "cracked_state", "damage", 
+    "dirt_type", "double_plant_type", "dripstone_thickness", "flower_type", 
+    "lever_direction", "block_face", "cardinal_direction", "facing_direction",
+    "vertical_half", "monster_egg_stone_type", "new_leaf_type", "new_log_type",
+    "old_leaf_type", "old_log_type", "orientation", "pillar_axis",
+    "portal_axis", "prismarine_block_type", "sand_stone_type", "sand_type",
+    "sapling_type", "sea_grass_type", "sponge_type", "stone_brick_type",
+    "stone_slab_type", "stone_slab_type_2", "stone_slab_type_3",
+    "stone_slab_type_4", "stone_type", "structure_block_type",
+    "structure_void_type", "tall_grass_type", "torch_facing_direction",
+    "turtle_egg_count", "vault_state", "wall_block_type",
+    "wall_connection_type_east", "wall_connection_type_north",
+    "wall_connection_type_south", "wall_connection_type_west", "wood_type")
 
 .as_bit <- function(x, strict = FALSE) {
     true_values <- c("true", "TRUE", "1", "T", "t")
