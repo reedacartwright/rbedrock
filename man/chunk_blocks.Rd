@@ -10,7 +10,7 @@ chunk_blocks(x, ..., drop = TRUE, origin = chunk_origin(x))
 chunk_blocks(x, ..., origin = chunk_origin(x)) <- value
 }
 \arguments{
-\item{x}{Abject from which to extract element(s) or in which to replace
+\item{x}{Object from which to extract element(s) or in which to replace
 element(s).}
 
 \item{...}{block coordinates specifying elements to extract or replace. Can

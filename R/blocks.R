@@ -685,8 +685,9 @@ write_subchunk_layers_value <- function(object, version = 9L,
     "big_dripleaf_tilt", "cauldron_liquid", "chemistry_table_type",
     "chisel_type", "color", "coral_color", "cracked_state", "damage",
     "dirt_type", "double_plant_type", "dripstone_thickness", "flower_type",
-    "lever_direction", "block_face", "cardinal_direction", "facing_direction",
-    "vertical_half", "monster_egg_stone_type", "new_leaf_type", "new_log_type",
+    "lever_direction", "minecraft:block_face", "minecraft:cardinal_direction",
+    "minecraft:facing_direction", "minecraft:vertical_half",
+    "monster_egg_stone_type", "new_leaf_type", "new_log_type",
     "old_leaf_type", "old_log_type", "orientation", "pillar_axis",
     "portal_axis", "prismarine_block_type", "sand_stone_type", "sand_type",
     "sapling_type", "sea_grass_type", "sponge_type", "stone_brick_type",
@@ -838,7 +839,7 @@ subchunk_coords <- function(ind, origins = subchunk_origins(names(ind))) {
 #' Convenience wrappers around `[` to extract or replace blocks from an array
 #' based on block coordinates. 
 #'
-#' @param x Abject from which to extract element(s) or in which to replace
+#' @param x Object from which to extract element(s) or in which to replace
 #' element(s). 
 #' @param drop if `TRUE` the result is coerced to the lowest possible dimension.
 #' @param origin the origin of the chunk array, used for mapping coordinates to
