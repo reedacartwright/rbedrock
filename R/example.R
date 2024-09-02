@@ -12,12 +12,12 @@
 #' rbedrock_example_world("example1.mcworld")
 
 rbedrock_example <- function(path = NULL) {
-  if (is.null(path)) {
-    extdata <- fs::path_package("rbedrock", "extdata")
-    fs::path_file(fs::dir_ls(extdata))
-  } else {
-    fs::path_package("rbedrock", "extdata", path)
-  }
+    if (is.null(path)) {
+        extdata <- fs::path_package("rbedrock", "extdata")
+        fs::path_file(fs::dir_ls(extdata))
+    } else {
+        fs::path_package("rbedrock", "extdata", path)
+    }
 }
 
 #' @export

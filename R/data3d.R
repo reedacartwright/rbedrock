@@ -135,7 +135,7 @@ read_data3d_value <- function(rawdata) {
         return(array(value, c(16L, 16L * 24L, 16L)))
     } else if (length(value) == 256L) {
         return(aperm(array(value, c(16L, 16L, 16L * 24L)),
-                           c(1L, 3L, 2L)))
+                     c(1L, 3L, 2L)))
     } else if (length(value) %% 4096 != 0) {
         abort("Invalid biome_map dimensions.")
     }

@@ -61,7 +61,7 @@ put_biomes_data <- function(db, data, missing_height = -64L) {
 #' @rdname Biomes
 #' @export
 put_biomes_values <- function(db, x, z, dimension, values,
-    missing_height = -64L) {
+                              missing_height = -64L) {
     keys <- .process_key_args(x, z, dimension, tag = 43L,
                               stop_if_filtered = TRUE)
     values <- vctrs::vec_recycle(values, length(keys), x_arg = "values")
@@ -86,7 +86,7 @@ put_biomes_values <- function(db, x, z, dimension, values,
 #' @rdname Biomes
 #' @export
 put_biomes_value <- function(db, x, z, dimension, value,
-    missing_height = -64L) {
+                             missing_height = -64L) {
     key <- .process_key_args(x, z, dimension, tag = 43L)
     vec_assert(key, character(), 1L)
 
@@ -134,7 +134,7 @@ put_legacy_biomes_data <- function(db, data, missing_height = 0L) {
 #' @rdname Biomes
 #' @export
 put_legacy_biomes_values <- function(db, x, z, dimension, values,
-    missing_height = 0L) {
+                                     missing_height = 0L) {
     keys <- .process_key_args(x, z, dimension, tag = 45L,
                               stop_if_filtered = TRUE)
     values <- vctrs::vec_recycle(values, length(keys), x_arg = "values")
@@ -159,7 +159,7 @@ put_legacy_biomes_values <- function(db, x, z, dimension, values,
 #' @rdname Biomes
 #' @export
 put_legacy_biomes_value <- function(db, x, z, dimension, value,
-    missing_height = 0L) {
+                                    missing_height = 0L) {
     key <- .process_key_args(x, z, dimension, tag = 45L)
     vec_assert(key, character(), 1L)
 
@@ -177,7 +177,7 @@ put_legacy_biomes_value <- function(db, x, z, dimension, value,
 
 # these lists was generated from a running instance of
 # bedrock dedicated server 1.16.100.04
-.BIOME_LIST <- c(
+.BIOME_LIST <- c( # nolint: object_name_linter
     plains = 1L,
     desert = 2L,
     extreme_hills = 3L,
@@ -267,7 +267,7 @@ put_legacy_biomes_value <- function(db, x, z, dimension, value,
 # Java/Amidst. Ocean colors in BDS are very similar or identical, and their
 # colors were copied as well.
 # Amidst Colors: https://git.io/JYD2c
-.BIOME_COLORS <- c(
+.BIOME_COLORS <- c( # nolint: object_name_linter
     plains = "#8db360",
     desert = "#fa9418",
     extreme_hills = "#606060",
@@ -354,8 +354,8 @@ put_legacy_biomes_value <- function(db, x, z, dimension, value,
 )
 
 # invert the list
-.BIOME_LIST_INV <- character()
-.BIOME_LIST_INV[.BIOME_LIST + 1] <- names(.BIOME_LIST)
+.BIOME_LIST_INV <- character() # nolint: object_name_linter
+.BIOME_LIST_INV[.BIOME_LIST + 1] <- names(.BIOME_LIST) # nolint: object_name_linter
 
 #' List Minecraft Bedrock Edition biomes.
 #'

@@ -1,12 +1,10 @@
 ## Submission
 
-- CRAN errors identified on 2023-09-27 have been fixed.
-- Resubmission
-  * False-positive messages about -Wthread-safety have been removed.
+- CRAN errors identified as of 2023-12-01 have been fixed.
 
 ## Test environments
 
-* Arch Linux - R 4.2.2 (Local Install)
+* Arch Linux - R 4.3.2 (Local Install)
 * Windows-Latest - Release (GitHub Actions)
 * MacOS-Latest - Release (GitHub Actions)
 * Ubuntu-Latest - Release (GitHub Actions)
@@ -31,5 +29,3 @@ There were NOTEs.
   * The package contains a dependent library (Mojang's fork of leveldb) and on
     some systems (linux) this library is large when compiled.
  
- - Compilation used the following non-portable flag(s): '-Wthread-safety'
-  * CMake checks whether this flag is supported before using it to compile a sub-project.

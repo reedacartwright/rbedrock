@@ -22,7 +22,7 @@ worlds_dir_path <- function(force_default = FALSE) {
     if (is_null(opt) || isTRUE(force_default)) {
         if (.Platform$OS.type == "windows") {
             datadir <- rappdirs::user_data_dir(
-                "Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\LocalState",
+                "Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\LocalState", # nolint: indentation_linter
                 "")
         } else {
             datadir <- rappdirs::user_data_dir("mcpelauncher")
@@ -50,7 +50,7 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
         dat <- read_leveldat(f)
         levelname <- payload(dat$LevelName)
         lastplayed <- as.POSIXct(as.numeric(payload(dat$LastPlayed)),
-            origin = "1970-01-01 00:00:00")
+                                 origin = "1970-01-01 00:00:00")
         id <- fs::path_file(f)
         list(id = id, levelname = levelname, last_opened = lastplayed)
     }, type = "directory")
@@ -131,7 +131,7 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
 #' @rdname minecraft_worlds
 #' @export
 export_world <- function(id, file, worlds_dir = worlds_dir_path(),
-    replace = FALSE) {
+                         replace = FALSE) {
     vec_assert(file, character(), 1L)
     file <- fs::path_abs(file)
     dirpath <- .fixup_path(id, worlds_dir, verify = TRUE)
@@ -229,9 +229,10 @@ get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
 }
 
 .base58 <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D",
-    "E", "F", "G", "H", "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "U",
-    "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
-    "k", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z")
+             "E", "F", "G", "H", "J", "K", "L", "M", "N", "P", "Q", "R", "S",
+             "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f",
+             "g", "h", "i", "j", "k", "m", "n", "o", "p", "q", "r", "s", "t",
+             "u", "v", "w", "x", "y", "z")
 
 .rand_world_id <- function() {
     opt <- getOption("rbedrock.rand_world_id")
@@ -251,7 +252,7 @@ get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
 .rand_world_id_mcpe <- function() {
     if (!is_installed("jsonlite")) {
         abort(str_c("Creating MCPE-like random world id requires the jsonlite",
-        " package. Please install it and try again."))
+                    " package. Please install it and try again."))
     }
     y <- as.raw(sample.int(256L, 8L, replace = TRUE) - 1L)
     y <- jsonlite::base64_enc(y)

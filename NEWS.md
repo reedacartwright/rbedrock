@@ -1,5 +1,10 @@
 # RBedrock (development)
 
+# RBedrock 0.3.2
+
+ * Fixed errors in usage of `Rf_error()`.
+ * Use `R_len_t` in more locations.
+
 # RBedrock 0.3.1
 
  * Remove hardcoded C++17 requirement when calling CMake.

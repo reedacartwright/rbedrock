@@ -49,7 +49,7 @@ get_chunk_version_value <- function(db, x, z, dimension) {
     read_chunk_version_value(val)
 }
 
-.process_chunk_version_key_args <- function(x, z, dimension) {
+.process_chunk_version_key_args <- function(x, z, dimension) { # nolint: object_length_linter
     if (missing(z) && is.character(x)) {
         # replace legacy tags with new
         x <- str_replace(x, ":118$", ":44")

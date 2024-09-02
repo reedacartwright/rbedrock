@@ -121,6 +121,7 @@ chunk_origins <- function(keys) {
 # https://docs.microsoft.com/en-us/minecraft/creator/documents/actorstorage#non-actor-data-chunk-key-ids
 # nolint end
 
+# nolint start: object_name_linter
 .CHUNK_TAGS_CHR <- c(
     "Data3D" = 43L, # introduced in 1.18
     "Version" = 44L,
@@ -149,9 +150,10 @@ chunk_origins <- function(keys) {
     "ActorDigestVersion" = 65L,
     "LegacyVersion" = 118L # replaced by 44
 )
-.CHUNK_TAGS_INV <- as.character(1:128)
+.CHUNK_TAGS_INV <- as.character(1:128)  # nolint: object_name_linter
 .CHUNK_TAGS_INV[.CHUNK_TAGS_CHR] <- names(.CHUNK_TAGS_CHR)
 .CHUNK_TAGS <- setNames(1:128, .CHUNK_TAGS_INV)
+# nolint end
 
 #' @description
 #' `chunk_tag_str()` and `chunk_tag_int()` convert between integer and character
@@ -176,7 +178,7 @@ chunk_tag_int <- function(tags) {
 }
 
 .subset_chunk_keys <- function(keys, negate = FALSE) {
-   str_subset(keys, "^chunk:", negate = negate)
+    str_subset(keys, "^chunk:", negate = negate)
 }
 
 .extract_chunk_key_components <- function(keys, which = 1:5) {
@@ -239,7 +241,7 @@ chunk_tag_int <- function(tags) {
 }
 
 .process_key_args <- function(x, z, d, tag, subtag,
-    stop_if_filtered = FALSE) {
+                              stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
     if (missing(z) && is.character(x)) {
         # if tag exists, we are going to filter on data type

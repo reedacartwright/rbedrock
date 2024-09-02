@@ -63,7 +63,7 @@ get_acdig_value <- function(x, z, dimension, db) {
 #' @export
 put_acdig_data <- function(values, x, z, dimension, db) {
     keys <- .process_acdig_key_args(x, z, dimension, values = values,
-        assert_validity = TRUE)
+                                    assert_validity = TRUE)
     values <- purrr::map(values, write_acdig_value)
     put_values(db, keys, values)
 }
@@ -72,7 +72,8 @@ put_acdig_data <- function(values, x, z, dimension, db) {
 #' @export
 put_acdig_value <- function(value, x, z, dimension, db) {
     key <- .process_acdig_key_args(x, z, dimension,
-        assert_scalar = TRUE, assert_validity = TRUE)
+                                   assert_scalar = TRUE,
+                                   assert_validity = TRUE)
     value <- write_acdig_value(value)
     put_value(db, key, value)
 }
@@ -171,7 +172,8 @@ get_actors_value <- function(x, z, dimension, db) {
 #' @export
 put_actors_data <- function(values, x, z, dimension, db) {
     dig_keys <- .process_acdig_key_args(x, z, dimension,
-        values = values, assert_validity = TRUE)
+                                        values = values,
+                                        assert_validity = TRUE)
     purrr::map2(values, dig_keys, .put_actors_value_impl, db = db)
 }
 
@@ -179,7 +181,8 @@ put_actors_data <- function(values, x, z, dimension, db) {
 #' @export
 put_actors_value <- function(value, x, z, dimension, db) {
     dig_key <- .process_acdig_key_args(x, z, dimension,
-        assert_scalar = TRUE, assert_validity = TRUE)
+                                       assert_scalar = TRUE,
+                                       assert_validity = TRUE)
     .put_actors_value_impl(value, dig_key, db)
 }
 

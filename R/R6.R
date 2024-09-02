@@ -113,7 +113,7 @@ is_bedrockdb <- function(x) {
 }
 
 #' @importFrom R6 R6Class
-R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(
+R6_bedrockdb <- R6::R6Class("bedrockdb", public = list( # nolint: object_name_linter
     db = NULL,
     path = NULL,
     levelname = NULL,
@@ -166,7 +166,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(
     delete = function(keys, report = FALSE, readoptions = NULL,
                       writeoptions = NULL) {
         bedrock_leveldb_delete(self$db, keys, report, readoptions,
-            writeoptions)
+                               writeoptions)
     },
     exists = function(key, readoptions = NULL) {
         bedrock_leveldb_exists(self$db, key, readoptions)
@@ -206,7 +206,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list(
     }
 ))
 
-R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(
+R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(  # nolint: object_name_linter
     it = NULL,
     initialize = function(db, readoptions) {
         self$it <- bedrock_leveldb_iter_create(db, readoptions)
@@ -246,7 +246,7 @@ R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(
     }
 ))
 
-R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(
+R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(  # nolint: object_name_linter
     ptr = NULL,
     db = NULL,
     initialize = function(db) {

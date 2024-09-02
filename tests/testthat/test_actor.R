@@ -24,17 +24,17 @@ test_that("get_acdig_value() returns a vector of actor keys.", {
 
 test_that("get_acdig_data() returns a list of vectors of actor keys.", {
     dat <- get_acdig_data(c(0, -7, 1, 1), c(0, -2, 0, 0), c(0, 0, 0, 1),
-        db = db)
+                          db = db)
     expected <- list(
         "acdig:0:0:0" = c("actor:000000010000000A", "actor:000000010000000B",
-                        "actor:000000010000000C"),
+                          "actor:000000010000000C"),
         "acdig:-7:-2:0" = c("actor:000000010000000F", "actor:0000000100000010"),
         "acdig:1:0:0" = character(0L),
         "acdig:1:0:1" = NULL
     )
     expect_equal(dat, expected)
     dat <- get_acdig_data(c("acdig:0:0:0", "acdig:-7:-2:0",
-        "acdig:1:0:0", "acdig:1:0:1"), db = db)
+                            "acdig:1:0:0", "acdig:1:0:1"), db = db)
     expect_equal(dat, expected)
 })
 
@@ -47,7 +47,7 @@ test_that("put_acdig_value() writes actor digest data to db.", {
     expect_null(write_acdig_value(NULL))
 
     expect_error(write_acdig_value(c("actor:000000020000000A",
-        "actor:000000020000000")))
+                                     "actor:000000020000000")))
     expect_error(write_acdig_value("error"))
 })
 
@@ -62,9 +62,9 @@ test_that("put_acdig_data() writes actor digest data to db.", {
     dat <- get_data(names(actors), db = db)
     expected <- list(
         "acdig:0:1:1" = as_raw(0, 0, 0, 2, 0, 0, 0, 10,
-            0, 0, 0, 2, 0, 0, 0, 11),
+                               0, 0, 0, 2, 0, 0, 0, 11),
         "acdig:0:2:1" = as_raw(0, 0, 0, 2, 0, 0, 0, 12,
-            0, 0, 0, 2, 0, 0, 0, 13)
+                               0, 0, 0, 2, 0, 0, 0, 13)
     )
     expect_equal(dat, expected)
 
@@ -102,12 +102,12 @@ test_that("get_actors_value() returns a list of NBT data.", {
 
     expect_null(get_actors_value("acdig:1:0:1", db = db))
     expect_equal(get_actors_value("acdig:1:0:0", db = db),
-        setNames(list(), character(0L)))
+                 setNames(list(), character(0L)))
 })
 
 test_that("get_actors_data() returns a list of lists of NBT data.", {
     dat <- get_actors_data(c(0, -7, 1, 1), c(0, -2, 0, 0), c(0, 0, 0, 1),
-        db = db)
+                           db = db)
     expect_named(dat, c(
         "acdig:0:0:0", "acdig:-7:-2:0", "acdig:1:0:0", "acdig:1:0:1"
     ))
@@ -118,16 +118,16 @@ test_that("get_actors_data() returns a list of lists of NBT data.", {
     expect_null(dat[[4]])
 
     expect_named(dat[[1]], c("actor:000000010000000A", "actor:000000010000000B",
-                         "actor:000000010000000C"))
+                             "actor:000000010000000C"))
     expect_named(dat[[2]], c("actor:000000010000000F",
-        "actor:0000000100000010"))
+                             "actor:0000000100000010"))
     expect_length(dat[[3]], 0L)
 
     expect_true(all(sapply(dat[[1]], is_nbt)))
     expect_true(all(sapply(dat[[2]], is_nbt)))
 
     dat2 <- get_actors_data(c("acdig:0:0:0", "acdig:-7:-2:0",
-        "acdig:1:0:0", "acdig:1:0:1"), db = db)
+                              "acdig:1:0:0", "acdig:1:0:1"), db = db)
     expect_equal(dat, dat2)
 })
 
@@ -146,7 +146,7 @@ test_that("put_actors_value() writes actors data.", {
     actor_b <- update_storage_key(actor_value, 101L)
 
     actors_data <- list("actor:0000000000000064" = actor_a,
-        "actor:0000000000000065" = actor_b)
+                        "actor:0000000000000065" = actor_b)
     put_actors_value(actors_data, "acdig:100:0:0", db = db)
     dat <- get_actors_value("acdig:100:0:0", db = db)
     expect_equal(dat, actors_data)
