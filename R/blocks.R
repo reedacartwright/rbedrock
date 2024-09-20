@@ -90,8 +90,7 @@ put_chunk_blocks_data <- function(db, data, version = 9L) {
 #' @export
 put_chunk_blocks_values <- function(db, x, z, dimension, values,
                                     version = 9L) {
-    keys <- .process_key_args(x, z, dimension, tag = 47L,
-                              stop_if_filtered = TRUE)
+    keys <- .process_key_args_prefix(x, z, dimension)
     values <- vec_recycle(values, length(keys), x_arg = "values")
     purrr::walk2(keys, values,
         function(x, y) .put_chunk_blocks_value_impl(db, x, y, version = version))
@@ -102,7 +101,7 @@ put_chunk_blocks_values <- function(db, x, z, dimension, values,
 #' @rdname get_chunk_blocks_data
 #' @export
 put_chunk_blocks_value <- function(db, x, z, dimension, value, version = 9L) {
-    key <- .process_key_args(x, z, dimension, tag = 47L)
+    key <- .process_key_args_prefix(x, z, dimension)
     vec_assert(key, character(), 1L)
     .put_chunk_blocks_value_impl(db, key, value, version = version)
 }
@@ -182,9 +181,21 @@ chunk_origin <- function(x) {
     return(TRUE)
 }
 
+.is_blocks_prefix <- function(x) {
+    grepl("^chunk:-?[0-9]+:-?[0-9]+:[0-9]+:47$", x)
+}
+
 .put_chunk_blocks_value_impl <- function(db, prefix, value, version = 9L) {
     if (!.valid_blocks_value(value)) {
         abort("`value` must be a 16 x 16*N x 16 character array.")
+    }
+    if(!.is_blocks_prefix(prefix)) {
+        prefix_ <- paste0(prefix, ":47")
+        if(!.is_blocks_prefix(prefix_)) {
+            msg <- sprintf("`%s` is not a valid blocks prefix", prefix)
+            abort(msg)
+        }
+        prefix <- prefix_
     }
 
     origin <- chunk_origin(value)
