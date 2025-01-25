@@ -25,17 +25,21 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
     int flags = p[0];
     ++p;
 
-    // Check for special flag that signals an empty subchunk
-    if(flags == 255) {
+    *is_persistent = ((flags & 1) == 0);
+    int bits_per_block = flags >> 1;
+
+    // Check for special flag that signals a palette copy
+    // TODO: Implement this
+    if(bits_per_block == 127) {
         *palette_size = 0;
         *buffer = p;
         return R_NilValue;
     }
-    *is_persistent = ((flags & 1) == 0);
+
 
     SEXP r_blocks = PROTECT(Rf_alloc3DArray(INTSXP, 16,16,16));
     // calculate storage structure.
-    int bits_per_block = flags >> 1;
+    
     if(bits_per_block > 0) {
         int blocks_per_word = 32 / bits_per_block; // floor using integer math
         int word_count = (4095 / blocks_per_word)+1; // ceiling using integer math
@@ -178,7 +182,7 @@ SEXP read_subchunk_blocks(SEXP r_value) {
     int version = p[0];
     if(version < 8 || version > 9) {
         Rf_error("Subchunk data version '%d' is not supported.", version);
-        return R_NilValue;        
+        return R_NilValue;
     }
     int num_layers = p[1];
     p += 2;
@@ -195,6 +199,9 @@ SEXP read_subchunk_blocks(SEXP r_value) {
         bool is_persistent;
         int palette_size;
         SEXP r_blocks = PROTECT(read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
+        if(Rf_isNull(r_blocks)) {
+            error_return("Subchunk has an empty block palette.")
+        }
         if(is_persistent == false) {
             // Chunk storage is runtime
             error_return("Subchunk does not have Persistent IDs.");
@@ -289,19 +296,20 @@ SEXP read_chunk_biomes(SEXP r_value) {
     const unsigned char *buffer = RAW(r_value);
     const unsigned char *p = buffer;
     const unsigned char *end = buffer+len;
+    
+    SEXP r_val = R_NilValue;
     while(p < end) {
         bool is_persistent;
         int palette_size;
-        // construct a list to hold this subchunk
-        const char *names[] = {"values", "palette", ""};
-        SEXP r_val = PROTECT(Rf_mkNamed(VECSXP, names));
         SEXP r_values = PROTECT(read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
-        SET_VECTOR_ELT(r_val, 0, r_values);
-        UNPROTECT(1);
-        if(palette_size > 0) {
+        if(!Rf_isNull(r_values)) {
+            // construct a list to hold this biome palette
+            const char *names[] = {"values", "palette", ""};
+            r_val = PROTECT(Rf_mkNamed(VECSXP, names));
+            SET_VECTOR_ELT(r_val, 0, r_values);
             if(is_persistent == true) {
-                // Biomes are stored as runtime IDs. Toss error if they aren't.
-                error_return("Subchunk has Persistent IDs.");
+                // Biomes are stored as runtime IDs. Toss error otherwise.
+                error_return("Biome palette does not have runtime ids.");
             }
             if(end - p < palette_size*sizeof(int)) {
                 return_subchunk_error();
@@ -310,15 +318,20 @@ SEXP read_chunk_biomes(SEXP r_value) {
             memcpy(INTEGER(r_palette), p, palette_size*sizeof(int));
             p += palette_size*sizeof(int);
             SET_VECTOR_ELT(r_val, 1, r_palette);
-            UNPROTECT(1);
+            // add to stretchy list
+            grow_stretchy_list(r_ret, r_val);
+
+            UNPROTECT(2); /* r_val and r_palette */
+
+        } else if(Rf_isNull(r_val)) {
+            error_return("First biome palette cannot point to its previous palette.")
         } else {
-            SET_VECTOR_ELT(r_val, 1, R_NilValue);
+            // add to stretchy list previous r_val which is already protected by r_ret
+            grow_stretchy_list(r_ret, r_val);
         }
-        // add to stretchy list
-        grow_stretchy_list(r_ret, r_val);
-        UNPROTECT(1);
+        UNPROTECT(1); /* r_values */
     }
-    UNPROTECT(1);
+    UNPROTECT(1); /* r_ret */
     return Rf_PairToVectorList(CDR(r_ret));
 }
 

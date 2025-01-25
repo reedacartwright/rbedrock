@@ -18,6 +18,7 @@ test_that("Reading and Writing Data3D data works", {
     expect_type(val$height_map, "integer")
     expect_type(val$biome_map, "integer")
 
+    # TODO: Use attributes to fix roundtip of read/write
     expect_equal(dat, write_data3d_value(val))
 
     expect_equal(dat, write_data3d_value(val$height_map, val$biome_map))
