@@ -54,15 +54,12 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
             memcpy(&temp, p, 4);
             p += 4;
             for(int k = 0; k < blocks_per_word && u < 4096; ++k) {
-                // OLD: calculate position as if we did aperm(v, c(3,1,2))
-                // unsigned int x = (u >> 8) & 0xf;
-                // unsigned int y = u & 0xf;
-                // unsigned int z = (u >> 4) & 0xf;
-                // unsigned int pos = x + 16*y + 256*z;
-
-                // NEW: calculate position without permuting
-                // Storage order is y,z,x
-                unsigned int pos = u;
+                // Current order is y,z,x
+                // Reshape to order x,z,y
+                unsigned int x = (u >> 8) & 0xf;
+                unsigned int z = (u >> 4) & 0xf;
+                unsigned int y = u & 0xf;
+                unsigned int pos = x + 16*z + 256*y;
                 // store block id
                 v[pos] = (temp & mask) + 1;
                 temp = temp >> bits_per_block;
@@ -146,12 +143,11 @@ SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t pale
         // read current word and parse
         unsigned int temp = 0;
         for(int k = 0; k < blocks_per_word && u < 4096; ++k) {
-            // calculate position as if we did aperm(v, c(3,1,2))
-            // unsigned int x = (u >> 8) & 0xf;
-            // unsigned int y = u & 0xf;
-            // unsigned int z = (u >> 4) & 0xf;
-            // unsigned int pos = x + 16*y + 256*z;
-            unsigned int pos = u;
+            // translate x,z,y order to y,z,x order
+            unsigned int x = (u >> 8) & 0xf;
+            unsigned int y = u & 0xf;
+            unsigned int z = (u >> 4) & 0xf;
+            unsigned int pos = x + 16*z + 256*y;
             // store block id
             unsigned int id = v[pos]-1;
             temp |= (id & mask) << k*bits_per_block;
