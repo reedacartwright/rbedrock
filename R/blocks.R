@@ -593,10 +593,10 @@ read_subchunk_layers_value <- function(rawdata) {
     }
     vec_assert(rawdata, raw())
     x <- .Call(Cread_subchunk_blocks, rawdata)
-    x <- purrr::modify(x, function(y) {
-        y$palette <- from_rnbt(y$palette)
-        y
-    })
+    for(i in seq_along(x)) {
+        x[[i]]$values <- aperm(x[[i]]$values, c(3,1,2))
+        x[[i]]$palette <- from_rnbt(x[[i]]$palette)
+    }
     x
 }
 
@@ -628,10 +628,12 @@ write_subchunk_layers_value <- function(object, version = 9L,
         }
     }
     values <- purrr::map(object, function(x) {
-        if (length(x[["values"]]) != 16 * 16 * 16) {
+        x <- as.integer(x[["values"]])
+        if (length(x) != 16 * 16 * 16) {
             abort("an element of `object` is malformed")
         }
-        as.integer(x[["values"]])
+        dim(x) <- c(16,16,16)
+        aperm(x, c(2, 3, 1))
     })
     palette <- purrr::map(object, function(x) {
         if (!has_name(x, "palette") ||
