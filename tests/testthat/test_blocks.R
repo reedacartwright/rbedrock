@@ -103,7 +103,7 @@ test_that("put_chunk_blocks_value() writes chunk data.", {
 
     # Standard Behavior
     expected_dat <- array("minecraft:air", c(16, 384, 16))
-    expected_dat[,1:32,] <- val
+    expected_dat[, 1:32, ] <- val
     chunk_origin(expected_dat) <- c(10, -4, 12) * 16L
 
     put_chunk_blocks_value(db, "chunk:10:12:0:47", value = val)
@@ -119,7 +119,7 @@ test_that("put_chunk_blocks_value() writes chunk data.", {
     dat <- get_chunk_blocks_value(db, "chunk:10:13:0:47")
 
     expected_dat <- array("minecraft:air", c(16, 384, 16))
-    expected_dat[,65:96,] <- val
+    expected_dat[, 65:96, ] <- val
     chunk_origin(expected_dat) <- c(10, -4, 13) * 16L
 
     expect_equal(dat, expected_dat)
@@ -135,7 +135,7 @@ test_that("put_chunk_blocks_value() overwrites chunk data.", {
 
     # Standard Behavior
     expected_dat <- array("minecraft:air", c(16, 384, 16))
-    expected_dat[,1:32,] <- val
+    expected_dat[, 1:32, ] <- val
     chunk_origin(expected_dat) <- c(31, -4, 4) * 16L
 
     put_chunk_blocks_value(db, 31, 4, 0, val)
@@ -163,7 +163,7 @@ test_that("put_chunk_blocks_values() writes chunk data.", {
 
     # Standard Behavior
     expected_dat <- array("minecraft:air", c(16, 384, 16))
-    expected_dat[,1:32,] <- val
+    expected_dat[, 1:32, ] <- val
     chunk_origin(expected_dat) <- c(11, -4, 12) * 16L
 
     put_chunk_blocks_values(db, 11:12, 12, 0, value = list(val))
@@ -402,10 +402,10 @@ test_that("get_subchunk_layers_from_chunk returns all block data in a chunk", {
 
 test_that("chunk_blocks() subsets blocks", {
     blocks <- array("minecraft:air", c(16, 16, 16))
-    blocks[4,4,4] <- "minecraft:stone"
-    blocks[5,4,4] <- "minecraft:dirt"
+    blocks[4, 4, 4] <- "minecraft:stone"
+    blocks[5, 4, 4] <- "minecraft:dirt"
     chunk_origin(blocks) <- c(32, 0, -32)
-    bool_index <- rep(FALSE, length=length(blocks))
+    bool_index <- rep(FALSE, length = length(blocks))
     bool_index[820] <- TRUE
     mat_index <- matrix(c(35, 3, -29), 1, 3)
 
@@ -417,10 +417,10 @@ test_that("chunk_blocks() subsets blocks", {
     expect_equal(chunk_blocks(blocks, mat_index), "minecraft:stone")
 
     expect_equal(chunk_blocks(blocks, 35, 3, -29, drop = FALSE),
-        array("minecraft:stone", c(1,1,1)))
+                 array("minecraft:stone", c(1, 1, 1)))
 
     expect_equal(chunk_blocks(blocks, 35:37, 3, -29),
-        c("minecraft:stone", "minecraft:dirt", "minecraft:air"))
+                 c("minecraft:stone", "minecraft:dirt", "minecraft:air"))
 
 })
 
@@ -447,7 +447,7 @@ test_that("chunk_blocks()<- replaces blocks", {
 
     mat_index <- matrix(c(35, 3, -29), 1, 3)
     chunk_blocks(blocks, mat_index) <- "miencraft:smooth_stone"
-    expected_blocks[4,4,4] <- "miencraft:smooth_stone"
+    expected_blocks[4, 4, 4] <- "miencraft:smooth_stone"
     expect_equal(blocks, expected_blocks)
 })
 

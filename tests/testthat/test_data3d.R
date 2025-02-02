@@ -22,7 +22,7 @@ test_that("Reading and Writing Data3D data works", {
     # Rbedrock will compress biomes as much as possible when
     # writing. Update expected value.
     dat2 <- dat[1:517]
-    dat2 <- c(dat2, as_raw(rep(0xff,23)))
+    dat2 <- c(dat2, as_raw(rep(0xff, 23)))
     expect_equal(dat2, write_data3d_value(val))
 
     expect_equal(dat2, write_data3d_value(val$height_map, val$biome_map))

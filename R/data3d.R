@@ -110,23 +110,24 @@ read_data3d_value <- function(rawdata) {
 
     b <- .Call(Cread_chunk_biomes, rawdata[-(1:512)])
     # Validate Biome Data
-    if(length(b) == 0 || is.null(b[[1]])) {
+    if (length(b) == 0 || is.null(b[[1]])) {
         abort("Value does not contain at least one subchunk of biome data.")
     }
     # Enlarge list to length 24 if necessary.
-    if(length(b) < 24) {
+    if (length(b) < 24) {
         b[24] <- list(NULL)
     }
     # Validate Biome Data
     hasdata <- !sapply(b, is.null)
     n <- length(hasdata)
-    if(sum(hasdata[-1] != hasdata[-n]) > 1) {
-        abort("Value contains empty subchunk of biome data between valid subchunks.")
+    if (sum(hasdata[-1] != hasdata[-n]) > 1) {
+        abort("Value contains empty biome data between valid subchunks.")
     }
     # Trim biome data
-    if(n > 24) {
-        if(any(hasdata[25:n])) {
-            msg <- sprintf("Trimming biome data from %d to 24 subchunks.", length(b))
+    if (n > 24) {
+        if (any(hasdata[25:n])) {
+            msg <- sprintf("Trimming biome data from %d to 24 subchunks.",
+                           length(b))
             warn(msg)
         }
         b <- b[1:24]
@@ -134,23 +135,23 @@ read_data3d_value <- function(rawdata) {
     }
 
     # Fill biome array
-    biome_map <- array(NA_integer_, c(16, 16, 24*16))
+    biome_map <- array(NA_integer_, c(16, 16, 24 * 16))
 
     # Subchunks with data
     ii <- which(hasdata)
-    for(i in ii) {
+    for (i in ii) {
         bb <- b[[i]]
         biome_map[, , 16 * (i - 1) + (1:16)] <- bb$palette[bb$values]
     }
     # Subchunks without data copy from the highest y level of
     # subchunks with data
     i <- max(ii)
-    if(i < 24) {
+    if (i < 24) {
         y <- 16 * i
-        biome_map[, , (y+1):(16*24)] <- biome_map[, , y]
+        biome_map[, , (y + 1):(16 * 24)] <- biome_map[, , y]
     }
     # reshape from x,z,y to x,y,z
-    biome_map <- aperm(biome_map, c(1,3,2))
+    biome_map <- aperm(biome_map, c(1, 3, 2))
     list(height_map = height_map, biome_map = biome_map)
 }
 
@@ -159,18 +160,18 @@ reshape_biome_map <- function(value) {
     n <- length(value)
     if (n == 1 || n == 256) {
         array(value, c(16, 16, 16 * 24))
-    } else if(n > 0 && n %% 256 == 0) {
+    } else if (n > 0 && n %% 256 == 0) {
         ny <- length(value) %/% 256
-        if(ny == 16 * 24) {
+        if (ny == 16 * 24) {
             value <- array(value, c(16, ny, 16))
             aperm(value, c(1, 3, 2))
-        } else if(ny > 16 * 24) {
+        } else if (ny > 16 * 24) {
             value <- array(value, c(16, ny, 16))
-            aperm(value[, , 1:(16*24)], c(1, 3, 2))
+            aperm(value[, , 1:(16 * 24)], c(1, 3, 2))
         } else {
-            v <- array(NA_integer_, c(16, 16, 16*24))
+            v <- array(NA_integer_, c(16, 16, 16 * 24))
             v[, , 1:ny] <- aperm(value, c(1, 3, 2))
-            v[, , (ny+1):(16*24)] <- v[, , ny]
+            v[, , (ny + 1):(16 * 24)] <- v[, , ny]
             v
         }
     } else {
@@ -207,14 +208,14 @@ write_data3d_value <- function(height_map, biome_map) {
     # reshape biome_map
     biome_map <- reshape_biome_map(biome_map)
 
-    # identify y levels with repetitive biomes 
-    y <- (16*24):2
-    o <- sapply(y, function(x) {any(biome_map[,,x] != biome_map[, , x-1])})
+    # identify y levels with repetitive biomes
+    y <- (16 * 24):2
+    o <- sapply(y, function(x) any(biome_map[, , x] != biome_map[, , x - 1]))
     m <- match(TRUE, o)
-    m <- if(is.na(m)) 1 else y[m]
+    m <- if (is.na(m)) 1 else y[m]
     # y levels m to 384 are identical.
     # chunks 1:mm need to be written
-    mm <- ((m-1) %/% 16) + 1
+    mm <- ((m - 1) %/% 16) + 1
 
     values_list <- rep(list(integer(0L)), 24)
     palette_list <- rep(list(integer(0L)), 24)
