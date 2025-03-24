@@ -1,14 +1,14 @@
 PKG_CFLAGS = $(C_VISIBILITY)
 PKG_CXXFLAGS = $(CXX_VISIBILITY)
-PKG_CPPFLAGS = -pthread -I./leveldb-mcpe/include -I./leveldb-mcpe/build/include
-PKG_LIBS = -L./leveldb-mcpe/build -pthread leveldb-mcpe/build/libleveldb.a -lz
+PKG_CPPFLAGS = -pthread -Ivendor/leveldb-mcpe/include -Ivendor/leveldb-mcpe/build/include
+PKG_LIBS = -pthread vendor/leveldb-mcpe/build/libleveldb.a -lz
 
 all: $(SHLIB)
 
-$(SHLIB): leveldb-mcpe/build/libleveldb.a
+$(SHLIB): vendor/leveldb-mcpe/build/libleveldb.a
 
-leveldb-mcpe/build/libleveldb.a: leveldb-mcpe/build/Makefile
-	$(MAKE) --directory=leveldb-mcpe/build
+vendor/leveldb-mcpe/build/libleveldb.a: vendor/leveldb-mcpe/build/Makefile
+	$(MAKE) --directory=vendor/leveldb-mcpe/build
 
 clean:
-	$(MAKE) --directory=leveldb-mcpe/build clean
+	$(MAKE) --directory=vendor/leveldb-mcpe/build clean
