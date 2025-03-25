@@ -122,6 +122,10 @@ struct LEVELDB_EXPORT Options {
   // efficiently detect that and will switch to uncompressed mode.
   Compressor* compressors[256];
 
+  // Compression level for zstd.
+  // Currently only the range [-5,22] is supported. Default is 1.
+  // int zstd_compression_level = 1;
+
   // EXPERIMENTAL: If true, append to existing MANIFEST and log files
   // when a database is opened.  This can significantly speed up open.
   //
@@ -136,8 +140,6 @@ struct LEVELDB_EXPORT Options {
 
 // Options that control read operations
 struct LEVELDB_EXPORT ReadOptions {
-  ReadOptions() = default;
-
   // If true, all data read from underlying storage will be
   // verified against corresponding checksums.
   bool verify_checksums = false;

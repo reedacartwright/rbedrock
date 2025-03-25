@@ -69,6 +69,7 @@ typedef struct leveldb_writablefile_t leveldb_writablefile_t;
 typedef struct leveldb_writebatch_t leveldb_writebatch_t;
 typedef struct leveldb_writeoptions_t leveldb_writeoptions_t;
 typedef struct leveldb_compressor_t leveldb_compressor_t;
+typedef struct leveldb_decompress_allocator_t leveldb_decompress_allocator_t;
 
 /* DB operations */
 
@@ -236,6 +237,12 @@ LEVELDB_EXPORT void leveldb_readoptions_set_fill_cache(leveldb_readoptions_t*,
                                                        uint8_t);
 LEVELDB_EXPORT void leveldb_readoptions_set_snapshot(leveldb_readoptions_t*,
                                                      const leveldb_snapshot_t*);
+
+LEVELDB_EXPORT void leveldb_readoptions_set_decompress_allocator(leveldb_readoptions_t*,
+                                                     leveldb_decompress_allocator_t*);
+
+LEVELDB_EXPORT leveldb_decompress_allocator_t* leveldb_decompress_allocator_create(void);
+LEVELDB_EXPORT void leveldb_decompress_allocator_destroy(leveldb_decompress_allocator_t*);
 
 /* Write options */
 

@@ -66,6 +66,10 @@ void Footer::EncodeTo(std::string* dst) const {
 }
 
 Status Footer::DecodeFrom(Slice* input) {
+  if (input->size() < kEncodedLength) {
+    return Status::Corruption("not an sstable (footer too short)");
+  }
+
   const char* magic_ptr = input->data() + kEncodedLength - 8;
   const uint32_t magic_lo = DecodeFixed32(magic_ptr);
   const uint32_t magic_hi = DecodeFixed32(magic_ptr + 4);
@@ -119,7 +123,6 @@ Status ReadBlock(RandomAccessFile* file, const Options& dbOptions, const ReadOpt
       return s;
     }
   }
-
 		unsigned char compressionID = data[n];
 
 		if (compressionID == 0) {
@@ -139,7 +142,6 @@ Status ReadBlock(RandomAccessFile* file, const Options& dbOptions, const ReadOpt
 			}
 		}
 		else {
-
 			//find the required compressor
 			Compressor* compressor = nullptr;
 			for (auto& c : dbOptions.compressors) {
