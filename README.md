@@ -4,7 +4,7 @@
 ![Downloads per Month](https://cranlogs.r-pkg.org/badges/rbedrock)
 ![Total Downloads](https://cranlogs.r-pkg.org/badges/grand-total/rbedrock)
 [![R-CMD-check](https://github.com/reedacartwright/rbedrock/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/reedacartwright/rbedrock/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/reedacartwright/rbedrock/branch/master/graph/badge.svg)](https://app.codecov.io/gh/reedacartwright/rbedrock?branch=master)
+[![Codecov test coverage](https://codecov.io/gh/reedacartwright/rbedrock/graph/badge.svg)](https://app.codecov.io/gh/reedacartwright/rbedrock)
 <!-- badges: end -->
 
 ## Overview
