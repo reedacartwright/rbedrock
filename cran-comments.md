@@ -1,10 +1,10 @@
 ## Submission
 
-- CRAN errors identified as of 2023-12-01 have been fixed.
+- CRAN errors identified as of 2025-03-25 have been fixed.
 
 ## Test environments
 
-* Arch Linux - R 4.3.2 (Local Install)
+* Arch Linux - R 4.4.2 (Local Install)
 * Windows-Latest - Release (GitHub Actions)
 * MacOS-Latest - Release (GitHub Actions)
 * Ubuntu-Latest - Release (GitHub Actions)
