@@ -1,1 +1,1 @@
-rm -r src/leveldb-mcpe/build/*
+rm -r src/vendor/leveldb-mcpe/build/*
