@@ -180,7 +180,7 @@ is_nbt_compound <- function(x) {
         msg <- paste0("invalid tag `", tag, "`")
         abort(msg)
     }
-    return()
+    invisible()
 }
 
 #' Create an NBT value

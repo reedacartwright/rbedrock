@@ -175,7 +175,7 @@ chunk_origin <- function(x) {
 #' @rdname chunk_origin
 `chunk_origin<-` <- function(x, value) {
     attr(x, "origin") <- value
-    return(x)
+    x
 }
 
 .valid_blocks_value <- function(value) {
@@ -186,7 +186,7 @@ chunk_origin <- function(x) {
     if (length(d) != 3L || d[1] != 16L || d[3] != 16L) {
         return(FALSE)
     }
-    return(TRUE)
+    TRUE
 }
 
 .is_blocks_prefix <- function(x) {
