@@ -698,18 +698,18 @@ class VersionSet::Builder {
 
 #ifndef NDEBUG
       // Make sure there is no overlap in levels > 0
-      // if (level > 0) {
-      //   for (uint32_t i = 1; i < v->files_[level].size(); i++) {
-      //     const InternalKey& prev_end = v->files_[level][i - 1]->largest;
-      //     const InternalKey& this_begin = v->files_[level][i]->smallest;
-      //     if (vset_->icmp_.Compare(prev_end, this_begin) >= 0) {
-      //       std::fprintf(stderr, "overlapping ranges in same level %s vs. %s\n",
-      //                    prev_end.DebugString().c_str(),
-      //                    this_begin.DebugString().c_str());
-      //       std::abort();
-      //     }
-      //   }
-      // }
+      if (level > 0) {
+        for (uint32_t i = 1; i < v->files_[level].size(); i++) {
+          const InternalKey& prev_end = v->files_[level][i - 1]->largest;
+          const InternalKey& this_begin = v->files_[level][i]->smallest;
+          if (vset_->icmp_.Compare(prev_end, this_begin) >= 0) {
+            std::fprintf(stderr, "overlapping ranges in same level %s vs. %s\n",
+                         prev_end.DebugString().c_str(),
+                         this_begin.DebugString().c_str());
+            std::abort();
+          }
+        }
+      }
 #endif
     }
   }
