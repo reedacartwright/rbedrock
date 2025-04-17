@@ -179,7 +179,10 @@ void MergingIterator::FindLargest() {
 Iterator* NewMergingIterator(const Comparator* comparator, Iterator** children,
                              int n) {
   assert(n >= 0);
-  if (n == 0) {
+  // Disable `exceeds maximum object size` warning by returning NewEmptyIterator()
+  // on negative values of n; although, those should never happen. If they do
+  // the behavior is undefined.
+  if (n <= 0) {
     return NewEmptyIterator();
   } else if (n == 1) {
     return children[0];
