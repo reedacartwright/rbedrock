@@ -214,7 +214,7 @@ chunk_origin <- function(x) {
     bottom <- origin[2] %/% 16L
 
     # identify existing chunk data.
-    old_keys <- get_keys(db, starts_with = prefix)
+    old_keys <- get_keys(prefix, db = db)
 
     # construct new chunk data
     data <- list()

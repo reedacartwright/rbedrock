@@ -10,7 +10,7 @@
 #' If `starts_with` is specified, this vector will be filtered for
 #' based on the specified prefix.
 #' @export
-get_keys <- function(db, starts_with = NULL, readoptions = NULL) {
+get_keys <- function(starts_with = NULL, readoptions = NULL, db = default_db()) {
     starts_with_raw <- .create_rawkey_prefix(starts_with)
     rawkeys <- db$keys(starts_with_raw, readoptions)
     res <- rawkeys_to_chrkeys(rawkeys)

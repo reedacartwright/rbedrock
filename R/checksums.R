@@ -138,7 +138,7 @@ write_checksums_value <- function(object) {
 .update_checksums_value_impl <- function(db, key) {
     # 45, 47, 49, 50 all need to be updated if they exist
     stem <- stringr::str_replace(key, ":59$", "")
-    chunk_keys <- get_keys(db, starts_with = stem)
+    chunk_keys <- get_keys(stem, db = db)
     chunk_keys <- stringr::str_subset(chunk_keys, ":(?:47:[^:]+|45|49|50)$")
 
     dat <- get_values(db, chunk_keys)

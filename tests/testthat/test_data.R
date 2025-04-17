@@ -2,15 +2,15 @@ dbpath <- rbedrock_example_world("example1.mcworld")
 db <- bedrockdb(dbpath)
 
 test_that("get_keys returns all keys", {
-    keys <- get_keys(db)
+    keys <- get_keys(db = db)
     expect_equal(length(keys), 1136L)
 })
 
 test_that("get_keys returns all keys with a prefix", {
-    keys <- get_keys(db)
-    pre_str <- get_keys(db, "plain:VILLAGE")
+    keys <- get_keys(db = db)
+    pre_str <- get_keys("plain:VILLAGE", db = db)
     expect_equal(pre_str, grep("^plain:VILLAGE", keys, value = TRUE))
-    pre_chunk <- get_keys(db, "chunk:37:6:0")
+    pre_chunk <- get_keys("chunk:37:6:0", db = db)
     expect_equal(pre_chunk, grep("^chunk:37:6:0", keys, value = TRUE))
 })
 
@@ -52,7 +52,7 @@ test_that("get_values returns a list of raw values", {
 })
 
 test_that("get_values returns all keys with a prefix", {
-    keys <- get_keys(db)
+    keys <- get_keys(db = db)
     pre_str <- get_values(db, starts_with = "plain:VILLAGE")
     expect_equal(names(pre_str), grep("^plain:VILLAGE", keys, value = TRUE))
     pre_chunk <- get_values(db, starts_with = "chunk:37:6:0")

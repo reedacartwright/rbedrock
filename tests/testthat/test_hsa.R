@@ -2,7 +2,7 @@ dbpath <- rbedrock_example_world("example1.mcworld")
 db <- bedrockdb(dbpath)
 
 test_that("get_hsa_data() can read HSA data.", {
-    hsa <- get_hsa_data(db, x = get_keys(db))
+    hsa <- get_hsa_data(db, x = get_keys(db = db))
     expected_hsa <- tibble::tibble(
         tag = "PillagerOutpost",
         x1 = c(577, 577, 592, 592), y1 = 65, z1 = c(241, 256, 241, 256),

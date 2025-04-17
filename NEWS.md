@@ -1,5 +1,9 @@
 # RBedrock (development)
 
+* Add `default_db()` to get/set a default db connection.
+* BREAKING: Updated API to multiple functions to use `default_db()`.
+  - `get_keys()`
+
 # RBedrock 0.3.3
 
 * Fix notes identified by CRAN. (Unused calls to stderr and abort.)

@@ -110,7 +110,7 @@ test_that("put_chunk_blocks_value() writes chunk data.", {
 
     dat <- get_chunk_blocks_value(db, "chunk:10:12:0")
     expect_equal(dat, expected_dat)
-    dat <- get_keys(db, starts_with = "chunk:10:12:0:47")
+    dat <- get_keys("chunk:10:12:0:47", db = db)
     expect_equal(dat, "chunk:10:12:0:47:-3")
 
     # Alternative chunk_origin
@@ -124,7 +124,7 @@ test_that("put_chunk_blocks_value() writes chunk data.", {
 
     expect_equal(dat, expected_dat)
 
-    dat <- get_keys(db, starts_with = "chunk:10:13:0:47")
+    dat <- get_keys("chunk:10:13:0:47", db = db)
     expect_equal(dat, "chunk:10:13:0:47:1")
 })
 
@@ -142,14 +142,14 @@ test_that("put_chunk_blocks_value() overwrites chunk data.", {
     dat <- get_chunk_blocks_value(db, 31, 4, 0)
     expect_equal(dat, expected_dat)
 
-    dat <- get_keys(db, starts_with = "chunk:31:4:0:47")
+    dat <- get_keys("chunk:31:4:0:47", db = db)
     expect_equal(dat, c("chunk:31:4:0:47:-4", "chunk:31:4:0:47:-3"))
 
     # Using empty chunks just deletes block data
     val <- array("minecraft:air", c(16, 16, 16))
     chunk_origin(val) <- c(31, 0, 4) * 16L
     put_chunk_blocks_value(db, 31, 4, 0, val, version = 9L)
-    dat <- get_keys(db, starts_with = "chunk:31:4:0:47")
+    dat <- get_keys("chunk:31:4:0:47", db = db)
     expect_length(dat, 0)
 })
 
@@ -174,9 +174,9 @@ test_that("put_chunk_blocks_values() writes chunk data.", {
     chunk_origin(expected_dat) <- c(12, -4, 12) * 16L
     expect_equal(dat[[2]], expected_dat)
 
-    dat <- get_keys(db, starts_with = "chunk:11:12:0:47")
+    dat <- get_keys("chunk:11:12:0:47", db = db)
     expect_equal(dat, "chunk:11:12:0:47:-3")
-    dat <- get_keys(db, starts_with = "chunk:12:12:0:47")
+    dat <- get_keys("chunk:12:12:0:47", db = db)
     expect_equal(dat, "chunk:12:12:0:47:-3")
 })
 
@@ -212,9 +212,9 @@ test_that("put_chunk_blocks_data() writes chunk data.", {
 
     expect_equal(dat, expected_dat)
 
-    dat <- get_keys(db, starts_with = "chunk:13:12:0:47")
+    dat <- get_keys("chunk:13:12:0:47", db = db)
     expect_equal(dat, "chunk:13:12:0:47:-3")
-    dat <- get_keys(db, starts_with = "chunk:14:12:0:47")
+    dat <- get_keys("chunk:14:12:0:47", db = db)
     expect_equal(dat, "chunk:14:12:0:47:-4")
 })
 
@@ -380,7 +380,7 @@ test_that("read_subchunk_layers_value() decodes subchunk data", {
 })
 
 test_that("get_subchunk_blocks_from_chunk returns all block data in a chunk", {
-    keys <- get_keys(db)
+    keys <- get_keys(db = db)
     dat <- get_subchunk_blocks_from_chunk(db, 37, 6, 0)
     expect_equal(names(dat), grep("^chunk:37:6:0:47", keys, value = TRUE))
     for (elt in dat) {
@@ -389,7 +389,7 @@ test_that("get_subchunk_blocks_from_chunk returns all block data in a chunk", {
 })
 
 test_that("get_subchunk_layers_from_chunk returns all block data in a chunk", {
-    keys <- get_keys(db)
+    keys <- get_keys(db = db)
     dat <- get_subchunk_layers_from_chunk(db, 37, 6, 0)
     expect_equal(names(dat), grep("^chunk:37:6:0:47", keys, value = TRUE))
     for (elt in dat) {

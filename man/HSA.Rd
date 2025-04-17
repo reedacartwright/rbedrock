@@ -84,7 +84,7 @@ into a \code{bedrockdb}.
 dbpath <- rbedrock_example_world("example1.mcworld")
 db <- bedrockdb(dbpath)
 # view all HSA in a world
-hsa <- get_hsa_data(db, get_keys(db))
+hsa <- get_hsa_data(db, get_keys(db = db))
 hsa
 # add an HSA to a world
 dat <- data.frame(x1 = 0, x2 = 15, z1 = 0, z2 = 15,

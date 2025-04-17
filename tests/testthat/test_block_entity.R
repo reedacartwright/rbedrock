@@ -48,7 +48,7 @@ test_that("get_block_entity_value() accepts returns one BlockEntity data", {
 })
 
 test_that("MobSpawners can be identified and placed in a table", {
-    dat <- purrr::flatten(get_block_entity_data(db, get_keys(db)))
+    dat <- purrr::flatten(get_block_entity_data(db, get_keys(db = db)))
     dat <- purrr::keep(dat, ~ .$id == "MobSpawner")
     dat <- purrr::map_dfr(unnbt(dat), tibble::as_tibble)
 

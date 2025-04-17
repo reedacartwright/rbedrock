@@ -69,7 +69,7 @@ by passing it to \code{close}.
 # open an example works and get all keys
 dbpath <- rbedrock_example_world("example1.mcworld")
 db <- bedrockdb(dbpath)
-keys <- get_keys(db)
+keys <- get_keys()
 close(db)
 
 \dontrun{

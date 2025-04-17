@@ -11,7 +11,7 @@ test_that("FinalizedState is chunk tag 54", {
 })
 
 test_that("get_finalized_state_data() returns all Finalization data", {
-    dat <- get_finalized_state_data(db, get_keys(db))
+    dat <- get_finalized_state_data(db, get_keys(db = db))
     expect_vector(dat, integer(), 105L)
     expect_named(dat)
     expect_true(all(grepl(":54$", names(dat))))
