@@ -84,16 +84,18 @@ bedrockdb <- function(path,
                       cache_capacity = 83886080L,
                       bloom_filter_bits_per_key = 10L,
                       compression_level = -1L) {
-    R6_bedrockdb$new(path,
-                     create_if_missing,
-                     error_if_exists,
-                     paranoid_checks,
-                     write_buffer_size,
-                     max_open_files,
-                     block_size,
-                     cache_capacity,
-                     bloom_filter_bits_per_key,
-                     compression_level)
+    db <- R6_bedrockdb$new(path,
+                           create_if_missing,
+                           error_if_exists,
+                           paranoid_checks,
+                           write_buffer_size,
+                           max_open_files,
+                           block_size,
+                           cache_capacity,
+                           bloom_filter_bits_per_key,
+                           compression_level)
+    the$last_opened_db <- db
+    invisible(db)
 }
 
 #' @export
@@ -103,6 +105,14 @@ close.bedrockdb <- function(con, compact = FALSE, ...) {
         inform("Compacting database...")
         con$compact_range()
     }
+    # clear global connections on close
+    if (identical(the$db, con)) {
+        the$db <- NULL
+    }
+    if (identical(the$last_opened_db, con)) {
+        the$last_opened_db <- NULL
+    }
+
     con$close(...)
 }
 
