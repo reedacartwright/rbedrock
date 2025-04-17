@@ -22,7 +22,7 @@ NULL
 #' @export
 get_data3d_data <- function(db, x, z, dimension) {
     keys <- .process_key_args(x, z, dimension, tag = 43L)
-    dat <- get_values(db, keys)
+    dat <- get_data(keys, db = db)
     purrr::map(dat, read_data3d_value)
 }
 
@@ -41,7 +41,7 @@ get_data3d_values <- get_data3d_data
 get_data3d_value <- function(db, x, z, dimension) {
     key <- .process_key_args(x, z, dimension, tag = 43L)
     vec_assert(key, character(), 1L)
-    dat <- get_value(db, key)
+    dat <- get_value(key, db = db)
     read_data3d_value(dat)
 }
 

@@ -11,11 +11,19 @@
 #'
 #'         `rawkeys_to_chrkeys()` returns a character vector.
 #'
+#'         `chrkeys_to_rawkeys_1()` returns a raw vector.
+#'
 #' @keywords internal
 #' @export
 chrkeys_to_rawkeys <- function(keys) {
     keys <- vec_cast(keys, character())
     .Call(Cchrkeys_to_rawkeys, keys)
+}
+
+#' @rdname chrkeys_to_rawkeys
+#' @export
+chrkeys_to_rawkeys_1 <- function(keys) {
+    chrkeys_to_rawkeys(keys)[[1]]
 }
 
 #' @rdname chrkeys_to_rawkeys

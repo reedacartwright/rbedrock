@@ -22,7 +22,7 @@ NULL
 #' @export
 get_checksums_data <- function(db, x, z, dimension) {
     keys <- .process_key_args(x, z, dimension, tag = 59L)
-    dat <- get_values(db, keys)
+    dat <- get_data(keys, db = db)
     purrr::map(dat, read_checksums_value)
 }
 
@@ -44,7 +44,7 @@ get_checksums_value <- function(db, x, z, dimension) {
     key <- .process_key_args(x, z, dimension, tag = 59L)
     vec_assert(key, character(), 1)
 
-    dat <- get_value(db, key)
+    dat <- get_value(key, db = db)
     read_checksums_value(dat)
 }
 
@@ -141,7 +141,7 @@ write_checksums_value <- function(object) {
     chunk_keys <- get_keys(stem, db = db)
     chunk_keys <- stringr::str_subset(chunk_keys, ":(?:47:[^:]+|45|49|50)$")
 
-    dat <- get_values(db, chunk_keys)
+    dat <- get_data(chunk_keys, db = db)
     obj <- purrr::map(dat, .checksum_impl)
 
     val <- write_checksums_value(obj)

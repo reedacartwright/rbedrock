@@ -31,7 +31,7 @@ NULL
 #' @export
 get_finalized_state_data <- function(db, x, z, dimension) {
     keys <- .process_key_args(x, z, dimension, tag = 54L)
-    dat <- get_values(db, keys)
+    dat <- get_data(keys, db = db)
     purrr::map_int(dat, read_finalized_state_value)
 }
 
@@ -44,7 +44,7 @@ get_finalized_state_values <- get_finalized_state_data
 get_finalized_state_value <- function(db, x, z, dimension) {
     key <- .process_key_args(x, z, dimension, tag = 54L)
     vec_assert(key, character(), 1L)
-    dat <- get_value(db, key)
+    dat <- get_value(key, db = db)
     read_finalized_state_value(dat)
 }
 

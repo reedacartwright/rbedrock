@@ -2,10 +2,13 @@
 % Please edit documentation in R/keys.R
 \name{chrkeys_to_rawkeys}
 \alias{chrkeys_to_rawkeys}
+\alias{chrkeys_to_rawkeys_1}
 \alias{rawkeys_to_chrkeys}
 \title{Convert between key types.}
 \usage{
 chrkeys_to_rawkeys(keys)
+
+chrkeys_to_rawkeys_1(keys)
 
 rawkeys_to_chrkeys(keys)
 }
@@ -16,6 +19,8 @@ rawkeys_to_chrkeys(keys)
 \code{chrkeys_to_rawkeys()} returns a list of raw vectors.
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{    `rawkeys_to_chrkeys()` returns a character vector.
+
+    `chrkeys_to_rawkeys_1()` returns a raw vector.
 }\if{html}{\out{</div>}}
 }
 \description{

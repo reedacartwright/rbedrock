@@ -43,7 +43,7 @@ get_acdig_data <- function(x, z, dimension, db) {
     good_key <- .is_valid_acdig_key(keys)
     ret <- rep(list(NULL), length(keys))
     names(ret) <- keys
-    dat <- get_data(db, keys[good_key])
+    dat <- get_data(keys[good_key], db = db)
     ret[names(dat)] <- purrr::map(dat, read_acdig_value)
     ret
 }
@@ -55,7 +55,7 @@ get_acdig_value <- function(x, z, dimension, db) {
     if (!.is_valid_acdig_key(key)) {
         return(NULL)
     }
-    dat <- get_value(db, key)
+    dat <- get_value(key, db = db)
     read_acdig_value(dat)
 }
 

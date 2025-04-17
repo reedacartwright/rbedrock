@@ -7,7 +7,7 @@ test_that("SubChunkBlocks is chunk tag 47.", {
 })
 
 test_that("write_subchunk_layers_value() encodes subchunk data.", {
-    raw1_orig <- get_value(db, "chunk:31:2:0:47:0")
+    raw1_orig <- get_value("chunk:31:2:0:47:0", db = db)
     layer1 <- read_subchunk_layers_value(raw1_orig)
     raw1_test <- write_subchunk_layers_value(layer1, version = 8L)
 

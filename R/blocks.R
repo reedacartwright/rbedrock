@@ -32,7 +32,7 @@ get_chunk_blocks_data <- function(db, x, z, dimension,
 
     dat <- purrr::map(starts_with, function(x) {
         .get_chunk_blocks_value_impl(db,
-                                     starts_with = x,
+                                     prefix = x,
                                      names_only = names_only,
                                      extra_block = extra_block,
                                      min_subchunk = min_subchunk,
@@ -67,7 +67,7 @@ get_chunk_blocks_value <- function(db, x, z, dimension,
     starts_with <- .process_key_args_prefix(x, z, dimension)
     starts_with <- vec_unique(starts_with)
 
-    .get_chunk_blocks_value_impl(db, starts_with,
+    .get_chunk_blocks_value_impl(db, prefix = starts_with,
         names_only = names_only,
         extra_block = extra_block,
         min_subchunk = min_subchunk,
@@ -112,15 +112,14 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, version = 9L) {
     .put_chunk_blocks_value_impl(db, key, value, version = version)
 }
 
-.get_chunk_blocks_value_impl <- function(db, starts_with, names_only,
+.get_chunk_blocks_value_impl <- function(db, prefix, names_only,
                                          extra_block, min_subchunk,
                                          max_subchunk) {
-
-    p <- .split_chunk_stems(starts_with)
+    p <- .split_chunk_stems(prefix)
     dimension <- p[3]
 
-    starts_with <- paste0(starts_with, ":47")
-    dat <- .get_subchunk_blocks_data_impl(db, starts_with = starts_with,
+    prefix <- paste0(prefix, ":47")
+    dat <- .get_subchunk_blocks_data_impl(db, prefix = prefix,
                                           names_only = names_only,
                                           extra_block = extra_block)
 
@@ -331,11 +330,14 @@ get_subchunk_blocks_data <- function(db, x, z, dimension, subchunk,
 #' @export
 get_subchunk_blocks_values <- get_subchunk_blocks_data
 
-.get_subchunk_blocks_data_impl <- function(db, keys, starts_with,
+.get_subchunk_blocks_data_impl <- function(db, keys, prefix = NULL,
                                            readoptions = NULL,
                                            names_only = FALSE,
                                            extra_block = !names_only) {
-    dat <- get_values(db, keys, starts_with, readoptions)
+    if(missing(keys) && !is.null(prefix)) {
+        keys <- key_prefix(prefix)
+    }
+    dat <- get_data(keys, db = db, readoptions = readoptions)
     offsets <- .get_subtag_from_chunk_key(names(dat))
     ret <- purrr::map2(dat, offsets, read_subchunk_blocks_value,
                        names_only = names_only, extra_block = extra_block)
@@ -358,7 +360,7 @@ get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
     key <- .process_key_args(x, z, dimension, tag = 47L, subtag = subchunk)
     vec_assert(key, character(), 1L)
 
-    dat <- get_value(db, key)
+    dat <- get_value(key, db = db)
     offset <- .get_subtag_from_chunk_key(key)
 
     read_subchunk_blocks_value(dat, offset, names_only = names_only,
@@ -382,7 +384,7 @@ get_subchunk_blocks_from_chunk <- function(db, x, z, dimension,
     vec_assert(starts_with, character(), 1L)
     starts_with <- str_c(starts_with, ":47")
 
-    .get_subchunk_blocks_data_impl(db, starts_with = starts_with,
+    .get_subchunk_blocks_data_impl(db, prefix = starts_with,
                                    names_only = names_only,
                                    extra_block = extra_block)
 }
@@ -507,7 +509,7 @@ write_subchunk_blocks_value <- function(object, version = 9L,
 #' @export
 get_subchunk_layers_data <- function(db, x, z, dimension, subchunk) {
     keys <- .process_key_args(x, z, dimension, tag = 47L, subtag = subchunk)
-    dat <- get_values(db, keys)
+    dat <- get_data(keys, db = db)
     purrr::map(dat, read_subchunk_layers_value)
 }
 
@@ -530,7 +532,7 @@ get_subchunk_layers_value <- function(db, x, z, dimension, subchunk) {
     key <- .process_key_args(x, z, dimension, tag = 47L, subtag = subchunk)
     vec_assert(key, character(), 1L)
 
-    dat <- get_value(db, key)
+    dat <- get_value(key, db = db)
     read_subchunk_layers_value(dat)
 }
 
@@ -544,11 +546,11 @@ get_subchunk_layers_value <- function(db, x, z, dimension, subchunk) {
 #' @rdname get_subchunk_layers_data
 #' @export
 get_subchunk_layers_from_chunk <- function(db, x, z, dimension) {
-    starts_with <- .process_key_args_prefix(x, z, dimension)
-    vec_assert(starts_with, character(), 1L)
-    starts_with <- str_c(starts_with, ":47")
+    prefix <- .process_key_args_prefix(x, z, dimension)
+    vec_assert(prefix, character(), 1L)
+    prefix <- paste0(prefix, ":47")
 
-    dat <- get_values(db, starts_with = starts_with)
+    dat <- get_data(key_prefix(prefix), db = db)
     purrr::map(dat, read_subchunk_layers_value)
 }
 

@@ -36,7 +36,7 @@ NULL
 #' @export
 get_hsa_data <- function(db, x, z, dimension) {
     keys <- .process_key_args(x, z, dimension, tag = 57L)
-    dat <- get_values(db, keys)
+    dat <- get_data(keys, db = db)
     hsa <- purrr::map_dfr(dat, read_hsa_value, .id = "key")
 
     hsa$dimension <- .get_dimension_from_chunk_key(hsa$key)
@@ -63,7 +63,7 @@ get_hsa_values <- get_hsa_data
 get_hsa_value <- function(db, x, z, dimension) {
     key <- .process_key_args(x, z, dimension, tag = 57L)
     vec_assert(key, character(), 1L)
-    dat <- get_value(db, key)
+    dat <- get_value(key, db = db)
     hsa <- read_hsa_value(dat)
     hsa$dimension <- .get_dimension_from_chunk_key(key)
     hsa$key <- key

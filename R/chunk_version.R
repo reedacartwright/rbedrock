@@ -22,11 +22,11 @@ NULL
 #' @export
 get_chunk_version_data <- function(db, x, z, dimension) {
     keys <- .process_chunk_version_key_args(x, z, dimension)
-    dat <- get_values(db, keys)
+    dat <- get_data(keys, db = db)
     # if any results are null, fallback to reading legacy key
     null_val <- purrr::map_lgl(dat, is.null)
     legkeys <- keys[null_val] %>% str_replace(":44$", ":118")
-    dat[null_val] <- get_values(db, legkeys)
+    dat[null_val] <- get_data(legkeys, db = db)
 
     # read versions
     purrr::map_int(dat, read_chunk_version_value)
@@ -41,7 +41,7 @@ get_chunk_version_values <- get_chunk_version_data
 get_chunk_version_value <- function(db, x, z, dimension) {
     key <- .process_chunk_version_key_args(x, z, dimension)
     vec_assert(key, character(), 1L)
-    val <- get_value(db, key)
+    val <- get_value(key, db = db)
     if (is.null(val)) {
         key <- str_replace(key, ":44$", ":118")
         val <- get_value(db, key)

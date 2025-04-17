@@ -4,14 +4,14 @@
 \alias{get_keys}
 \title{Get a list of keys stored in a bedrockdb.}
 \usage{
-get_keys(prefix = NULL, readoptions = NULL, db = default_db())
+get_keys(prefix = NULL, db = default_db(), readoptions = NULL)
 }
 \arguments{
 \item{prefix}{A string specifying chunk prefix or string prefix.}
 
-\item{readoptions}{A \code{bedrock_leveldb_readoptions} object}
-
 \item{db}{A \code{bedrockdb} object}
+
+\item{readoptions}{A \code{bedrock_leveldb_readoptions} object}
 }
 \value{
 A vector containing all the keys found in the bedrockdb.

@@ -410,7 +410,7 @@ is.na.rbedrock_nbt_long_array <- function(x, ...) vec_data(NextMethod())
 #'        `nbtnode`.
 #' @export
 get_nbt_data <- function(db, keys, readoptions = NULL, simplify = TRUE) {
-    dat <- get_values(db, keys, readoptions = readoptions)
+    dat <- get_data(keys, db = db, readoptions = readoptions)
     read_nbt_data(dat, simplify = simplify)
 }
 
@@ -418,7 +418,7 @@ get_nbt_data <- function(db, keys, readoptions = NULL, simplify = TRUE) {
 #' @rdname get_nbt_data
 #' @export
 get_nbt_value <- function(db, key, readoptions = NULL, simplify = TRUE) {
-    dat <- get_value(db, key, readoptions = readoptions)
+    dat <- get_value(key, db = db, readoptions = readoptions)
     read_nbt(dat, simplify = simplify)
 }
 

@@ -33,7 +33,7 @@ NULL
 #' @export
 get_data2d_data <- function(db, x, z, dimension) {
     keys <- .process_key_args(x, z, dimension, tag = 45L)
-    dat <- get_values(db, keys)
+    dat <- get_data(keys, db = db)
     purrr::map(dat, read_data2d_value)
 }
 
@@ -53,7 +53,7 @@ get_data2d_values <- get_data2d_data
 get_data2d_value <- function(db, x, z, dimension) {
     key <- .process_key_args(x, z, dimension, tag = 45L)
     vec_assert(key, character(), 1L)
-    dat <- get_value(db, key)
+    dat <- get_value(key, db = db)
     read_data2d_value(dat)
 }
 

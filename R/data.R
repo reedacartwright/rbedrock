@@ -10,7 +10,7 @@
 #' If `prefix` is specified, this vector will be filtered for
 #' based on the specified prefix.
 #' @export
-get_keys <- function(prefix = NULL, readoptions = NULL, db = default_db()) {
+get_keys <- function(prefix = NULL, db = default_db(), readoptions = NULL) {
     # support db being passed via the prefix arg
     if (missing(db) && is_bedrockdb(prefix)) {
         db <- prefix
@@ -29,50 +29,63 @@ get_keys <- function(prefix = NULL, readoptions = NULL, db = default_db()) {
     res
 }
 
-#' Read values stored in a bedrockdb.
-#'
-#' `get_values()` and `get_data()` are synonyms.
-#'
-#' @param db A `bedrockdb` object
-#' @param keys A character vector of keys.
-#' @param starts_with A string specifying chunk prefix or string prefix.
-#' @param key  A single key.
-#' @param readoptions A `bedrock_leveldb_readoptions` object
-#'
-#' @return `get_values()` returns a named-list of raw vectors.
+#' @rdname get_data
 #' @export
-get_values <- function(db, keys, starts_with, readoptions = NULL) {
-    if (missing(keys)) {
-        starts_with <- .create_rawkey_prefix(starts_with)
-        dat <- db$mget_prefix(starts_with, readoptions)
-        dat <- rlang::set_names(dat$values, rawkeys_to_chrkeys(dat$keys))
-        return(dat)
+key_prefix <- function(prefix) {
+    if(!is.character(prefix) || is.object(prefix)) {
+        prefix <- as.character(prefix)
     }
-    rawkeys <- chrkeys_to_rawkeys(keys)
-    dat <- db$mget(rawkeys, readoptions)
-    rlang::set_names(dat, keys)
+    structure(prefix, class = c("rbedrock_key_prefix", "character"))
 }
 
-#' @rdname get_values
+#' @rdname get_data
 #' @export
-get_data <- get_values
+starts_with <- key_prefix
 
-#' @returns `get_value()` returns a raw vector.
-#' @rdname get_values
+is_key_prefix <- function(x) {
+    inherits(x, "rbedrock_key_prefix")
+}
+
+#' Read values stored in a bedrockdb.
+#'
+#' @param db A `bedrockdb` object
+#' @param keys A character vector of keys
+#' @param prefix A string specifying key prefix
+#' @param key  A single key
+#' @param readoptions A `bedrock_leveldb_readoptions` object
+#'
+#' @return get_data()` returns a named-list of raw vectors.
+#' `get_value()` returns a raw vector.
 #' @export
-get_value <- function(db, key, readoptions = NULL) {
-    vec_assert(key, character(), 1L)
-    rawkey <- chrkeys_to_rawkeys(key)[[1]]
+get_data <- function(keys, db = default_db(), readoptions = NULL) {
+    if(is_key_prefix(keys)) {
+        rawprefix <- create_rawkey_prefix(as.character(keys))
+        dat <- db$mget_prefix(rawprefix, readoptions)
+        ret <- dat$values
+        names(ret) <- rawkeys_to_chrkeys(dat$keys)
+        return(ret)
+    }
+    rawkeys <- chrkeys_to_rawkeys(keys)
+    ret <- db$mget(rawkeys, readoptions)
+    names(ret) <- keys
+    ret
+}
+
+#' @rdname get_data
+#' @export
+get_value <- function(key, db = default_db(), readoptions = NULL) {
+    rawkey <- chrkeys_to_rawkeys_1(key)
     db$get(rawkey, readoptions)
 }
 
 #' @returns `has_values()` returns a logical vector.
-#' @rdname get_values
+#' @rdname get_data
 #' @export
-has_values <- function(db, keys, readoptions = NULL) {
+has_values <- function(keys, db = default_db(), readoptions = NULL) {
     rawkeys <- chrkeys_to_rawkeys(keys)
     dat <- db$exists(rawkeys, readoptions)
-    rlang::set_names(dat, keys)
+    names(dat) <- keys
+    dat
 }
 
 #' Write values to a bedrockdb.
