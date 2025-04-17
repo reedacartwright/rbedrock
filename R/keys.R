@@ -294,3 +294,6 @@ chunk_tag_int <- function(tags) {
     }
     chrkeys_to_rawkeys(starts_with)[[1]]
 }
+
+# TODO: retire .create_rawkey_prefix
+create_rawkey_prefix <- .create_rawkey_prefix

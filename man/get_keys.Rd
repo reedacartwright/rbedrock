@@ -4,10 +4,10 @@
 \alias{get_keys}
 \title{Get a list of keys stored in a bedrockdb.}
 \usage{
-get_keys(starts_with = NULL, readoptions = NULL, db = default_db())
+get_keys(prefix = NULL, readoptions = NULL, db = default_db())
 }
 \arguments{
-\item{starts_with}{A string specifying chunk prefix or string prefix.}
+\item{prefix}{A string specifying chunk prefix or string prefix.}
 
 \item{readoptions}{A \code{bedrock_leveldb_readoptions} object}
 
@@ -16,7 +16,7 @@ get_keys(starts_with = NULL, readoptions = NULL, db = default_db())
 \value{
 A vector containing all the keys found in the bedrockdb.
 
-If \code{starts_with} is specified, this vector will be filtered for
+If \code{prefix} is specified, this vector will be filtered for
 based on the specified prefix.
 }
 \description{

@@ -4,6 +4,16 @@ db <- bedrockdb(dbpath)
 test_that("get_keys returns all keys", {
     keys <- get_keys(db = db)
     expect_equal(length(keys), 1136L)
+
+    # db can be passed as the first argument
+    keys <- get_keys(db)
+    expect_equal(length(keys), 1136L)
+
+    # db defaults to default_db()
+    keys <- get_keys()
+    expect_equal(length(keys), 1136L)
+
+    expect_error(get_keys(db, db = db))
 })
 
 test_that("get_keys returns all keys with a prefix", {
@@ -12,6 +22,10 @@ test_that("get_keys returns all keys with a prefix", {
     expect_equal(pre_str, grep("^plain:VILLAGE", keys, value = TRUE))
     pre_chunk <- get_keys("chunk:37:6:0", db = db)
     expect_equal(pre_chunk, grep("^chunk:37:6:0", keys, value = TRUE))
+
+    # works with default_db() too
+    pre_str <- get_keys("plain:VILLAGE")
+    expect_equal(pre_str, grep("^plain:VILLAGE", keys, value = TRUE))
 })
 
 test_that("get_value returns a single, raw value", {

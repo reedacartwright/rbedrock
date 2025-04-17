@@ -1,22 +1,30 @@
 #' Get a list of keys stored in a bedrockdb.
 #'
 #' @param db A `bedrockdb` object
-#' @param starts_with A string specifying chunk prefix or string prefix.
+#' @param prefix A string specifying chunk prefix or string prefix.
 #' @param readoptions A `bedrock_leveldb_readoptions` object
 #'
 #' @return
 #' A vector containing all the keys found in the bedrockdb.
 #'
-#' If `starts_with` is specified, this vector will be filtered for
+#' If `prefix` is specified, this vector will be filtered for
 #' based on the specified prefix.
 #' @export
-get_keys <- function(starts_with = NULL, readoptions = NULL, db = default_db()) {
-    starts_with_raw <- .create_rawkey_prefix(starts_with)
-    rawkeys <- db$keys(starts_with_raw, readoptions)
+get_keys <- function(prefix = NULL, readoptions = NULL, db = default_db()) {
+    # support db being passed via the prefix arg
+    if (missing(db) && is_bedrockdb(prefix)) {
+        db <- prefix
+        prefix <- NULL
+    }
+    if (!is.null(prefix)) {
+        prefix <- as.character(prefix)
+    }
+    prefix_raw <- create_rawkey_prefix(prefix)
+    rawkeys <- db$keys(prefix_raw, readoptions)
     res <- rawkeys_to_chrkeys(rawkeys)
-    if (!is.null(starts_with)) {
+    if (!is.null(prefix)) {
         # filter out keys from the wrong dimension
-        res <- str_subset(res, fixed(starts_with))
+        res <- grep(prefix, res, fixed = TRUE, value = TRUE)
     }
     res
 }
