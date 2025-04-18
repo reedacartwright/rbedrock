@@ -38,21 +38,21 @@ NULL
 
 #' @rdname ActorDigest
 #' @export
-get_acdig_data <- function(x, z, dimension, db) {
-    keys <- .process_acdig_key_args(x, z, dimension)
-    good_key <- .is_valid_acdig_key(keys)
+get_acdig_data <- function(x, z, dimension, db = default_db()) {
+    keys <- process_acdig_key_args(x, z, dimension)
+    good_key <- is_valid_acdig_key(keys)
     ret <- rep(list(NULL), length(keys))
     names(ret) <- keys
     dat <- get_data(keys[good_key], db = db)
-    ret[names(dat)] <- purrr::map(dat, read_acdig_value)
+    ret[names(dat)] <- lapply(dat, read_acdig_value)
     ret
 }
 
 #' @rdname ActorDigest
 #' @export
-get_acdig_value <- function(x, z, dimension, db) {
-    key <- .process_acdig_key_args(x, z, dimension, assert_scalar = TRUE)
-    if (!.is_valid_acdig_key(key)) {
+get_acdig_value <- function(x, z, dimension, db = default_db()) {
+    key <- process_acdig_key_args(x, z, dimension, assert_scalar = TRUE)
+    if (!is_valid_acdig_key(key)) {
         return(NULL)
     }
     dat <- get_value(key, db = db)
@@ -61,19 +61,19 @@ get_acdig_value <- function(x, z, dimension, db) {
 
 #' @rdname ActorDigest
 #' @export
-put_acdig_data <- function(values, x, z, dimension, db) {
-    keys <- .process_acdig_key_args(x, z, dimension, values = values,
-                                    assert_validity = TRUE)
-    values <- purrr::map(values, write_acdig_value)
+put_acdig_data <- function(values, x, z, dimension, db = default_db()) {
+    keys <- process_acdig_key_args(x, z, dimension, values = values,
+                                   assert_validity = TRUE)
+    values <- lapply(values, write_acdig_value)
     put_data(values, keys, db = db)
 }
 
 #' @rdname ActorDigest
 #' @export
-put_acdig_value <- function(value, x, z, dimension, db) {
-    key <- .process_acdig_key_args(x, z, dimension,
-                                   assert_scalar = TRUE,
-                                   assert_validity = TRUE)
+put_acdig_value <- function(value, x, z, dimension, db = default_db()) {
+    key <- process_acdig_key_args(x, z, dimension,
+                                  assert_scalar = TRUE,
+                                  assert_validity = TRUE)
     value <- write_acdig_value(value)
     put_value(value, key, db = db)
 }
@@ -86,14 +86,14 @@ read_acdig_value <- function(rawdata) {
     }
     vec_assert(rawdata, raw())
     if ((length(rawdata) %% 8) != 0) {
-        abort(str_c("Invalid actor digest data. ",
-                    "Length of rawdata must be a multiple of 8."))
+        abort(paste0("Invalid actor digest data. ",
+                     "Length of rawdata must be a multiple of 8."))
     }
     m <- matrix(rawdata, nrow = 8)
     if (ncol(m) == 0) {
         character()
     } else {
-        str_c("actor:", toupper(apply(m, 2, str_c, collapse = "")))
+        paste0("actor:", toupper(apply(m, 2, paste0, collapse = "")))
     }
 }
 
@@ -104,21 +104,23 @@ write_acdig_value <- function(value) {
         return(NULL)
     }
     vec_assert(value, character())
-    b <- .is_valid_actor_key(value)
+    b <- is_valid_actor_key(value)
     if (!isTRUE(all(b))) {
         abort("Invalid actor key.")
     }
-    dat <- str_remove(value, "^actor:")
-    dat <- str_extract_all(dat, "..")
-    dat <- purrr::map(dat, strtoi, base = 16L)
-    as.raw(purrr::as_vector(dat))
+    val <- substr(value, 7, nchar(value))
+    val <- strsplit(val, character(0L))
+    val <- unlist(val)
+    val <- paste0(val[c(TRUE, FALSE)], val[c(FALSE, TRUE)])
+    val <- strtoi(val, base = 16L)
+    as.raw(val)
 }
 
 #' @rdname ActorDigest
 #' @export
 create_acdig_keys <- function(x, z, dimension) {
     args <- vec_recycle_common(x, z, dimension)
-    str_c("acdig", args[[1]], args[[2]], args[[3]], sep = ":")
+    paste("acdig", args[[1]], args[[2]], args[[3]], sep = ":")
 }
 
 #' Read and write Actor data
@@ -151,16 +153,16 @@ NULL
 
 #' @rdname Actors
 #' @export
-get_actors_data <- function(x, z, dimension, db) {
+get_actors_data <- function(x, z, dimension, db = default_db()) {
     keys <- get_acdig_data(x, z, dimension, db)
-    purrr::map(keys, function(x) {
+    lapply(keys, function(x) {
         if (is.null(x)) NULL else get_nbt_data(x, db = db)
     })
 }
 
 #' @rdname Actors
 #' @export
-get_actors_value <- function(x, z, dimension, db) {
+get_actors_value <- function(x, z, dimension, db = default_db()) {
     keys <- get_acdig_value(x, z, dimension, db)
     if (is.null(keys)) {
         return(NULL)
@@ -170,26 +172,27 @@ get_actors_value <- function(x, z, dimension, db) {
 
 #' @rdname Actors
 #' @export
-put_actors_data <- function(values, x, z, dimension, db) {
-    dig_keys <- .process_acdig_key_args(x, z, dimension,
-                                        values = values,
-                                        assert_validity = TRUE)
-    purrr::map2(values, dig_keys, .put_actors_value_impl, db = db)
+put_actors_data <- function(values, x, z, dimension, db = default_db()) {
+    dig_keys <- process_acdig_key_args(x, z, dimension,
+                                       values = values,
+                                       assert_validity = TRUE)
+    mapply(put_actors_value_impl, values, dig_keys,
+           MoreArgs = list(db = db), SIMPLIFY = FALSE)
 }
 
 #' @rdname Actors
 #' @export
-put_actors_value <- function(value, x, z, dimension, db) {
-    dig_key <- .process_acdig_key_args(x, z, dimension,
-                                       assert_scalar = TRUE,
-                                       assert_validity = TRUE)
-    .put_actors_value_impl(value, dig_key, db)
+put_actors_value <- function(value, x, z, dimension, db = default_db()) {
+    dig_key <- process_acdig_key_args(x, z, dimension,
+                                      assert_scalar = TRUE,
+                                      assert_validity = TRUE)
+    put_actors_value_impl(value, dig_key, db)
 }
 
-.put_actors_value_impl <- function(value, dig_key, db) {
-    ids <- purrr::map_dbl(value, "UniqueID")
+put_actors_value_impl <- function(value, dig_key, db) {
+    ids <- vapply(value, `[[`, double(1L), "UniqueID", USE.NAMES = FALSE)
     class(ids) <- "integer64"
-    storage_keys <- .make_storagekeys(ids)
+    storage_keys <- make_storagekeys(ids)
     actor_keys <- read_acdig_value(unlist(storage_keys))
 
     # update storage keys
@@ -200,8 +203,8 @@ put_actors_value <- function(value, x, z, dimension, db) {
         obj <- nbt_compound(internalComponents = obj)
         obj
     }
-    nbt_dat <- purrr::map(storage_keys, nbt_storage_key)
-    value <- purrr::list_modify(value, !!!nbt_dat)
+    nbt_dat <- lapply(storage_keys, nbt_storage_key)
+    value <- modifyList(value, nbt_dat)
 
     dat <- write_nbt_data(value)
     names(dat) <- actor_keys
@@ -209,33 +212,32 @@ put_actors_value <- function(value, x, z, dimension, db) {
     dat[[dig_key]] <- write_acdig_value(actor_keys)
 
     put_data(dat, db = db)
-
 }
 
-.make_storagekeys <- function(ids) {
+make_storagekeys <- function(ids) {
     vec_assert(ids, bit64::integer64())
     .Call(rbedrock_actor_make_storagekeys, ids)
 }
 
-.is_acdig_key <- function(keys) {
-    str_starts(keys, pattern = fixed("acdig:"))
+is_acdig_key <- function(keys) {
+    startsWith(keys, "acdig:")
 }
 
-.is_valid_acdig_key <- function(keys) {
-    str_detect(keys, pattern = "^acdig:-?[0-9]+:-?[0-9]+:[0-2]$")
+is_valid_acdig_key <- function(keys) {
+    grepl(keys, pattern = "^acdig:-?[0-9]+:-?[0-9]+:[0-2]$")
 }
 
-.is_actor_key <- function(keys) {
-    str_starts(keys, pattern = fixed("actor:"))
+is_actor_key <- function(keys) {
+    startsWith(keys, "actor:")
 }
 
-.is_valid_actor_key <- function(keys) {
-    str_detect(keys, pattern = "^actor:[0-9a-fA-F]{16}$")
+is_valid_actor_key <- function(keys) {
+    grepl(keys, pattern = "^actor:[0-9a-fA-F]{16}$")
 }
 
-.process_acdig_key_args <- function(x, z, d, values = NULL,
-                                    assert_scalar = FALSE,
-                                    assert_validity = FALSE) {
+process_acdig_key_args <- function(x, z, d, values = NULL,
+                                   assert_scalar = FALSE,
+                                   assert_validity = FALSE) {
     if (missing(x) && is_named(values)) {
         # if x is missing use names from values
         x <- names(values)
@@ -244,7 +246,7 @@ put_actors_value <- function(value, x, z, dimension, db) {
         x <- create_acdig_keys(x, z, d)
     }
     vec_assert(x, character(), size = if (isTRUE(assert_scalar)) 1L else NULL)
-    if (isTRUE(assert_validity) && !isTRUE(all(.is_valid_acdig_key(x)))) {
+    if (isTRUE(assert_validity) && !isTRUE(all(is_valid_acdig_key(x)))) {
         abort("Invalid acdig key.")
     }
     x
