@@ -91,7 +91,7 @@ read_data2d_value <- function(rawdata) {
 put_data2d_data <- function(db, data) {
     stopifnot(all(.get_tag_from_chunk_key(names(data)) == 45L))
     dat <- purrr::map(data, write_data2d_value)
-    put_data(db, dat)
+    put_data(dat, db = db)
 }
 
 #' @param height_maps,biome_maps Lists of height and biome data.
@@ -112,7 +112,7 @@ put_data2d_values <- function(db, x, z, dimension, height_maps, biome_maps) {
         b <- vec_recycle(biome_maps, length(keys), x_arg = "biome_maps")
         values <- purrr::map2(h, b, write_data2d_value)
     }
-    put_values(db, keys, values)
+    put_data(values, keys, db = db)
 }
 
 #' @param height_map,biome_map 16x16 arrays containing height and biome data.
@@ -125,7 +125,7 @@ put_data2d_value <- function(db, x, z, dimension, height_map, biome_map) {
     key <- .process_key_args(x, z, dimension, tag = 45L)
     vec_assert(key, character(), 1L)
     value <- write_data2d_value(height_map, biome_map)
-    put_value(db, key, value)
+    put_value(value, key, db = db)
 }
 
 #' @description

@@ -65,7 +65,7 @@ put_acdig_data <- function(values, x, z, dimension, db) {
     keys <- .process_acdig_key_args(x, z, dimension, values = values,
                                     assert_validity = TRUE)
     values <- purrr::map(values, write_acdig_value)
-    put_values(db, keys, values)
+    put_data(values, keys, db = db)
 }
 
 #' @rdname ActorDigest
@@ -75,7 +75,7 @@ put_acdig_value <- function(value, x, z, dimension, db) {
                                    assert_scalar = TRUE,
                                    assert_validity = TRUE)
     value <- write_acdig_value(value)
-    put_value(db, key, value)
+    put_value(value, key, db = db)
 }
 
 #' @rdname ActorDigest

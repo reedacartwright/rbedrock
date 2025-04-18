@@ -69,7 +69,7 @@ get_chunk_version_value <- function(db, x, z, dimension) {
 put_chunk_version_data <- function(db, data) {
     .check_chunk_key_tag(names(data), 44L)
     dat <- purrr::map(data, write_chunk_version_value)
-    put_data(db, dat)
+    put_data(dat, db = db)
 }
 
 #' @param values An integer vector
@@ -81,7 +81,7 @@ put_chunk_version_values <- function(db, x, z, dimension, values) {
                               stop_if_filtered = TRUE)
     values <- vec_recycle(values, length(keys), x_arg = "values")
     values <- purrr::map(values, write_chunk_version_value)
-    put_values(db, keys, values)
+    put_data(values, keys, db = db)
 }
 
 #' @param value A scalar integer vector
@@ -92,7 +92,7 @@ put_chunk_version_value <- function(db, x, z, dimension, value) {
     key <- .process_key_args(x, z, dimension, tag = 44L)
     vec_assert(key, character(), 1L)
     value <- write_chunk_version_value(value)
-    put_value(db, key, value)
+    put_value(value, key, db = db)
 }
 
 #' @description

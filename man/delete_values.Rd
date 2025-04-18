@@ -5,17 +5,17 @@
 \title{Remove values from a bedrockdb.}
 \usage{
 delete_values(
-  db,
   keys,
+  db = default_db(),
   report = FALSE,
   readoptions = NULL,
   writeoptions = NULL
 )
 }
 \arguments{
-\item{db}{A \code{bedrockdb} object}
-
 \item{keys}{A character vector of keys.}
+
+\item{db}{A \code{bedrockdb} object}
 
 \item{report}{A logical indicating whether to generate a report on deleted
 keys}

@@ -334,7 +334,7 @@ get_subchunk_blocks_values <- get_subchunk_blocks_data
                                            readoptions = NULL,
                                            names_only = FALSE,
                                            extra_block = !names_only) {
-    if(missing(keys) && !is.null(prefix)) {
+    if (missing(keys) && !is.null(prefix)) {
         keys <- key_prefix(prefix)
     }
     dat <- get_data(keys, db = db, readoptions = readoptions)
@@ -416,7 +416,7 @@ put_subchunk_blocks_values <- function(db, x, z, dimension, subchunk, values,
     values <- purrr::map2(values, offsets,
                           ~write_subchunk_blocks_value(.x, version = version,
                                                        missing_offset = .y))
-    put_values(db, keys, values)
+    put_data(values, keys, db = db)
 }
 
 #' @param value A 16x16x16 character array
@@ -430,7 +430,7 @@ put_subchunk_blocks_value <- function(db, x, z, dimension, subchunk, value,
     vec_assert(key, character(), 1L)
     value <- write_subchunk_blocks_value(value, version = version,
                                          missing_offset = offset)
-    put_value(db, key, value)
+    put_value(value, key, db = db)
 }
 
 #' @description
@@ -577,7 +577,7 @@ put_subchunk_layers_values <- function(db, x, z, dimension, subchunk,
                               stop_if_filtered = TRUE)
     values <- vec_recycle(values, length(keys), x_arg = "values")
     values <- purrr::map(values, write_subchunk_layers_value, ...)
-    put_values(db, keys, values)
+    put_data(values, keys, db = db)
 }
 
 #' @param value A list of 16x16x16 integer indexes with associated

@@ -85,52 +85,47 @@ test_that("has_values returns a logical vector", {
     )
 })
 
-test_that("put_value writes data into the db", {
-    put_value(db, "plain:Test%01", charToRaw("Hello World"))
+test_that("put_value() writes data into the db", {
+    put_value(charToRaw("Hello World"), "plain:Test%01", db = db)
     put_result <- get_value("plain:Test%01", db = db)
     expect_equal(put_result, charToRaw("Hello World"))
-    put_value(db, "chunk:0:0:0:44", as.raw(15))
+
+    put_value(as.raw(15), "chunk:0:0:0:44", db = db)
     put_result <- get_value("chunk:0:0:0:44", db = db)
     expect_equal(put_result, as.raw(15))
-    put_value(db, "plain:Test%01", charToRaw("Hello New World"))
+
+    put_value(charToRaw("Hello New World"), "plain:Test%01", db = db)
     put_result <- get_value("plain:Test%01", db = db)
     expect_equal(put_result, charToRaw("Hello New World"))
 })
 
 test_that("put_value throws errors are incorrect arguments", {
-    expect_error(put_value(db, NULL, raw(1L)),
-        class = "vctrs_error_scalar_type"
+    expect_error(put_value(raw(1L), NULL, db = db))
+    expect_error(put_value(raw(1L), 1L, db = db),
+        class = "vctrs_error_cast"
     )
-    expect_error(put_value(db, 1L, raw(1L)),
-        class = "vctrs_error_assert_ptype"
+    expect_error(put_value(raw(1L), as.raw(1L), db = db),
+        class = "vctrs_error_cast"
     )
-    expect_error(put_value(db, as.raw(1L), raw(1L)),
-        class = "vctrs_error_assert_ptype"
-    )
-    expect_error(put_value(db, c("plain:hello", "plain:world"), raw(1L)),
-        class = "vctrs_error_assert_size"
-    )
-
-    expect_error(put_value(db, "plain:Test%02", "hello Error"), "expected raw")
+    expect_error(put_value("hello Error", "plain:Test%02", db = db),
+                 "expected raw")
 })
 
-test_that("put_values writes data into the db", {
-    put_values(
-        db, c("plain:Test%01", "plain:Test%02"),
-        list(as.raw(0x1), as.raw(0x2))
+test_that("put_data() writes data into the db", {
+    put_data(list(as.raw(0x1), as.raw(0x2)),
+        c("plain:Test%01", "plain:Test%02"),
+        db = db
     )
     put_result <- get_data(c("plain:Test%01", "plain:Test%02"), db = db)
     expect_equal(put_result, list(
         "plain:Test%01" = as.raw(0x1),
         "plain:Test%02" = as.raw(0x2)
     ))
-})
 
-test_that("put_data writes data into the db", {
-    put_data(db, list(
+    put_data(list(
         "plain:Test%01" = as.raw(0x1),
         "plain:Test%02" = as.raw(0x2)
-    ))
+    ), db = db)
     put_result <- get_data(c("plain:Test%01", "plain:Test%02"), db = db)
     expect_equal(put_result, list(
         "plain:Test%01" = as.raw(0x1),
@@ -139,25 +134,25 @@ test_that("put_data writes data into the db", {
 })
 
 test_that("delete_values removes data from the db", {
-    put_data(db, list(
+    put_data(list(
         "plain:Test%01" = as.raw(0x1),
         "plain:Test%02" = as.raw(0x2)
-    ))
-    delete_ret <- delete_values(db, c("plain:Test%01", "plain:Test%02"))
+    ), db = db)
+    delete_ret <- delete_values(c("plain:Test%01", "plain:Test%02"), db = db)
     expect_null(delete_ret)
     delete_result <- get_data(c("plain:Test%01", "plain:Test%02"), db = db)
     expect_equal(delete_result, list(
         "plain:Test%01" = NULL,
         "plain:Test%02" = NULL
     ))
-    put_data(db, list(
+    put_data(list(
         "plain:Test%01" = as.raw(0x1),
         "plain:Test%02" = as.raw(0x2)
-    ))
-    delete_ret <- delete_values(db, c(
+    ), db = db)
+    delete_ret <- delete_values(c(
         "plain:Test%01", "plain:Test%03",
         "plain:Test%02"
-    ), report = TRUE)
+    ), db = db, report = TRUE)
     expect_equal(delete_ret, c(TRUE, FALSE, TRUE))
 })
 

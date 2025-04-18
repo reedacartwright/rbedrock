@@ -59,7 +59,7 @@ get_finalized_state_value <- function(db, x, z, dimension) {
 put_finalized_state_data <- function(db, data) {
     .check_chunk_key_tag(names(data), 54L)
     dat <- purrr::map(data, write_finalized_state_value)
-    put_data(db, dat)
+    put_data(dat, db = db)
 }
 
 #' @param values An integer vector
@@ -71,7 +71,7 @@ put_finalized_state_values <- function(db, x, z, dimension, values) {
                               stop_if_filtered = TRUE)
     values <- vctrs::vec_recycle(values, length(keys), x_arg = "values")
     values <- purrr::map(values, write_finalized_state_value)
-    put_values(db, keys, values)
+    put_data(values, keys, db = db)
 }
 
 #' @param value A scalar integer vector
@@ -82,7 +82,7 @@ put_finalized_state_value <- function(db, x, z, dimension, value) {
     key <- .process_key_args(x, z, dimension, tag = 54L)
     vec_assert(key, character(), 1L)
     value <- write_finalized_state_value(value)
-    put_value(db, key, value)
+    put_value(value, key, db = db)
 }
 
 #' @description

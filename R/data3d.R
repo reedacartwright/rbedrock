@@ -75,7 +75,7 @@ put_data3d_values <- function(db, x, z, dimension, height_maps, biome_maps) {
         b <- vec_recycle(biome_maps, length(keys), x_arg = "biome_maps")
         values <- purrr::map2(h, b, write_data3d_value)
     }
-    put_values(db, keys, values)
+    put_data(values, keys, db = db)
 }
 
 #' @param height_map 16x16 array containing height data.

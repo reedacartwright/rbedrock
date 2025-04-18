@@ -145,7 +145,7 @@ write_checksums_value <- function(object) {
     obj <- purrr::map(dat, .checksum_impl)
 
     val <- write_checksums_value(obj)
-    put_value(db, key, val)
+    put_value(val, key, db = db)
     invisible()
 }
 

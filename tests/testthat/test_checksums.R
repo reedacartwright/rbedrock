@@ -34,7 +34,7 @@ test_that("get_checksums_value returns a single record", {
 test_that("update_checksums_data works", {
     keys <- c("chunk:36:16:0:59", "chunk:37:15:0:59")
     original_dat <- get_checksums_data(db, keys)
-    delete_values(db, keys)
+    delete_values(keys, db = db)
     expect_equal(has_values(keys, db = db), setNames(c(FALSE, FALSE), keys))
 
     update_checksums_data(db, keys)

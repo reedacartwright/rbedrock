@@ -3,7 +3,9 @@
 * Add `default_db()` to get/set a default db connection.
 * BREAKING: Updated API to multiple functions to use `default_db()`.
   - `get_keys()`, `get_data()`, `get_value()`, `has_values()`
-* BREAKING: Removed `get_values()` as an alias to `get_data()`.
+  - `put_data()`, `put_value()`, `delete_values()`
+* BREAKING: Removed several alias functions.
+  - `get_values()` and `put_values()`
 
 # RBedrock 0.3.3
 

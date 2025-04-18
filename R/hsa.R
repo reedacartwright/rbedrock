@@ -188,7 +188,7 @@ put_hsa_data <- function(db, data, merge = TRUE) {
     # split hsa by chunk and store
     dat <- split(dat, dat$key)
     dat <- purrr::map(dat, write_hsa_value)
-    put_data(db, dat)
+    put_data(dat, db = db)
     ret$tag <- .HSA_LIST[ret$tag]
     invisible(ret)
 }
@@ -206,7 +206,7 @@ put_hsa_values <- function(db, x, z, dimension, values) {
                               stop_if_filtered = TRUE)
     stopifnot(length(keys) == length(values))
     values <- purrr::map(values, write_hsa_value)
-    put_values(db, keys, values)
+    put_data(values, keys, db = db)
 }
 
 #' @param value A table containing HSA coordinates
@@ -217,7 +217,7 @@ put_hsa_value <- function(db, x, z, dimension, value) {
     key <- .process_key_args(x, z, dimension, tag = 57L)
     vec_assert(key, character(), 1L)
     value <- write_hsa_value(value)
-    put_value(db, key, value)
+    put_value(value, key, db = db)
 }
 
 #' @description

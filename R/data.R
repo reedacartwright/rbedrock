@@ -32,7 +32,7 @@ get_keys <- function(prefix = NULL, db = default_db(), readoptions = NULL) {
 #' @rdname get_data
 #' @export
 key_prefix <- function(prefix) {
-    if(!is.character(prefix) || is.object(prefix)) {
+    if (!is.character(prefix) || is.object(prefix)) {
         prefix <- as.character(prefix)
     }
     structure(prefix, class = c("rbedrock_key_prefix", "character"))
@@ -58,7 +58,7 @@ is_key_prefix <- function(x) {
 #' `get_value()` returns a raw vector.
 #' @export
 get_data <- function(keys, db = default_db(), readoptions = NULL) {
-    if(is_key_prefix(keys)) {
+    if (is_key_prefix(keys)) {
         rawprefix <- create_rawkey_prefix(as.character(keys))
         dat <- db$mget_prefix(rawprefix, readoptions)
         ret <- dat$values
@@ -97,27 +97,25 @@ has_values <- function(keys, db = default_db(), readoptions = NULL) {
 #'
 #' @return An invisible copy of `db`.
 #' @export
-put_values <- function(db, keys, values, writeoptions = NULL) {
+put_data <- function(values, keys, db = default_db(), writeoptions = NULL) {
+    if (missing(keys) && !is.null(names(values))) {
+        # if keys is missing use names from values
+        keys <- names(values)
+    }
+    # recycle values as needed
     values <- vec_recycle(values, length(keys))
+    # convert keys and call mput
     rawkeys <- chrkeys_to_rawkeys(keys)
     db$mput(rawkeys, values, writeoptions)
 }
 
 #' @param key  A key that will be used to store data.
 #' @param value A raw vector that contains the information to be written.
-#' @rdname put_values
+#' @rdname put_data
 #' @export
-put_value <- function(db, key, value, writeoptions = NULL) {
-    vec_assert(key, character(), 1L)
-    rawkey <- chrkeys_to_rawkeys(key)[[1]]
+put_value <- function(value, key, db = default_db(), writeoptions = NULL) {
+    rawkey <- chrkeys_to_rawkeys_1(key)
     db$put(rawkey, value, writeoptions)
-}
-
-#' @param data A named-list of raw values, specifying key-value pairs.
-#' @rdname put_values
-#' @export
-put_data <- function(db, data, writeoptions = NULL) {
-    put_values(db, names(data), data)
 }
 
 #' Remove values from a bedrockdb.
@@ -133,12 +131,10 @@ put_data <- function(db, data, writeoptions = NULL) {
 #' deleted.
 #'
 #' @export
-delete_values <- function(db, keys, report = FALSE, readoptions = NULL,
+delete_values <- function(keys, db = default_db(), report = FALSE,
+                          readoptions = NULL,
                           writeoptions = NULL) {
     rawkeys <- chrkeys_to_rawkeys(keys)
     ret <- db$delete(rawkeys, report, readoptions, writeoptions)
-    if (!report) {
-        return(invisible(ret))
-    }
-    ret
+    invisible(ret)
 }

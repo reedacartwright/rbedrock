@@ -436,7 +436,7 @@ get_nbt_values <- get_nbt_data
 #' @export
 put_nbt_values <- function(db, keys, values, writeoptions = NULL) {
     dat <- write_nbt_data(values)
-    put_values(db, keys, dat, writeoptions = writeoptions)
+    put_data(dat, keys, db = db, writeoptions = writeoptions)
 }
 
 #' @param value An nbt object.
@@ -444,7 +444,7 @@ put_nbt_values <- function(db, keys, values, writeoptions = NULL) {
 #' @export
 put_nbt_value <- function(db, key, value, writeoptions = NULL) {
     dat <- write_nbt(value)
-    put_value(db, key, dat, writeoptions = writeoptions)
+    put_value(dat, key, db = db, writeoptions = writeoptions)
 }
 
 #' @rdname get_nbt_data
@@ -452,7 +452,7 @@ put_nbt_value <- function(db, key, value, writeoptions = NULL) {
 #' @export
 put_nbt_data <- function(db, data, writeoptions = NULL) {
     dat <- write_nbt_data(data)
-    put_data(db, dat, writeoptions = writeoptions)
+    put_data(dat, db = db, writeoptions = writeoptions)
 }
 
 #' @description
