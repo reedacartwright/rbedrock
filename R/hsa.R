@@ -39,7 +39,7 @@ get_hsa_data <- function(db, x, z, dimension) {
     dat <- get_data(keys, db = db)
     hsa <- purrr::map_dfr(dat, read_hsa_value, .id = "key")
 
-    hsa$dimension <- .get_dimension_from_chunk_key(hsa$key)
+    hsa$dimension <- get_dimension_from_chunk_key(hsa$key)
     hsa <- dplyr::relocate(hsa, "key", .after = dplyr::last_col())
     hsa
 }
@@ -65,7 +65,7 @@ get_hsa_value <- function(db, x, z, dimension) {
     vec_assert(key, character(), 1L)
     dat <- get_value(key, db = db)
     hsa <- read_hsa_value(dat)
-    hsa$dimension <- .get_dimension_from_chunk_key(key)
+    hsa$dimension <- get_dimension_from_chunk_key(key)
     hsa$key <- key
     hsa
 }

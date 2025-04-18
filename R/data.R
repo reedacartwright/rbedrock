@@ -74,6 +74,9 @@ get_data <- function(keys, db = default_db(), readoptions = NULL) {
 #' @rdname get_data
 #' @export
 get_value <- function(key, db = default_db(), readoptions = NULL) {
+    if (length(key) == 0L) {
+        return(NULL)
+    }
     rawkey <- chrkeys_to_rawkeys_1(key)
     db$get(rawkey, readoptions)
 }
@@ -114,6 +117,9 @@ put_data <- function(values, keys, db = default_db(), writeoptions = NULL) {
 #' @rdname put_data
 #' @export
 put_value <- function(value, key, db = default_db(), writeoptions = NULL) {
+    if (length(key) == 0L) {
+        return(invisible(db))
+    }
     rawkey <- chrkeys_to_rawkeys_1(key)
     db$put(rawkey, value, writeoptions)
 }

@@ -65,6 +65,6 @@ put_pending_ticks_value <- function(db, x, z, dimension, value) {
 #' @rdname PendingTicks
 #' @export
 put_pending_ticks_data <- function(db, data) {
-    .check_chunk_key_tag(names(data), 51L)
+    check_chunk_key_tag(names(data), 51L)
     put_nbt_data(db, data)
 }

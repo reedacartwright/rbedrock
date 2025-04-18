@@ -65,6 +65,6 @@ put_random_ticks_value <- function(db, x, z, dimension, value) {
 #' @rdname RandomTicks
 #' @export
 put_random_ticks_data <- function(db, data) {
-    .check_chunk_key_tag(names(data), 59L)
+    check_chunk_key_tag(names(data), 59L)
     put_nbt_data(db, data)
 }

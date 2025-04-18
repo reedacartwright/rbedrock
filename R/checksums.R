@@ -107,8 +107,8 @@ read_checksums_value <- function(rawdata) {
 #' @export
 write_checksums_value <- function(object) {
     n <- names(object)
-    if (any(.is_chunk_key(n))) {
-        m <- .extract_chunk_key_components(n, 4:5)
+    if (any(is_chunk_key(n))) {
+        m <- extract_chunk_key_components(n, 4:5)
     } else if (length(n)) {
         m <- str_split(n, fixed(":"), simplify = TRUE)
         mode(m) <- "integer"

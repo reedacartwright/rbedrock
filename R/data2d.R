@@ -89,7 +89,7 @@ read_data2d_value <- function(rawdata) {
 #' @rdname Data2D
 #' @export
 put_data2d_data <- function(db, data) {
-    stopifnot(all(.get_tag_from_chunk_key(names(data)) == 45L))
+    stopifnot(all(get_tag_from_chunk_key(names(data)) == 45L))
     dat <- purrr::map(data, write_data2d_value)
     put_data(dat, db = db)
 }

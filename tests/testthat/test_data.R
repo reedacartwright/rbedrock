@@ -41,7 +41,7 @@ test_that("get_value returns a single, raw value", {
 })
 
 test_that("get_value requires a scalar character argument", {
-    expect_error(get_value(NULL, db = db))
+    expect_null(get_value(NULL, db = db))
     expect_error(get_value(1L, db = db), class = "vctrs_error_cast")
     expect_error(get_value(as.raw(1L), db = db), class = "vctrs_error_cast")
 })
@@ -97,10 +97,11 @@ test_that("put_value() writes data into the db", {
     put_value(charToRaw("Hello New World"), "plain:Test%01", db = db)
     put_result <- get_value("plain:Test%01", db = db)
     expect_equal(put_result, charToRaw("Hello New World"))
+
 })
 
 test_that("put_value throws errors are incorrect arguments", {
-    expect_error(put_value(raw(1L), NULL, db = db))
+    expect_silent(put_value(raw(1L), NULL, db = db))
     expect_error(put_value(raw(1L), 1L, db = db),
         class = "vctrs_error_cast"
     )

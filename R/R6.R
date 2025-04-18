@@ -122,7 +122,6 @@ is_bedrockdb <- function(x) {
     inherits(x, "bedrockdb")
 }
 
-#' @importFrom R6 R6Class
 R6_bedrockdb <- R6::R6Class("bedrockdb", public = list( # nolint: object_name_linter
     db = NULL,
     path = NULL,

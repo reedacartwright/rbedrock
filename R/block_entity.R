@@ -3,68 +3,46 @@
 #' BlockEntity data (tag 49) holds a list of NBT values for
 #' entity data associated with specific blocks.
 #'
-#' @name BlockEntity
-NULL
-
-#' @description
-#' `get_block_entity_data()` and `get_block_entity_value()` load BlockEntity
-#' data from `db`. `get_block_entity_data()` will silently drop and keys not
-#' representing BlockEntity data. `get_block_entity_value()` supports loading
-#' only a single value. `get_block_entity_values()` is a synonym for
-#' `get_block_entity_data()`.
+#' `get_block_entity_value()` and `get_block_entity_data()` load BlockEntity
+#' data from `db`. `get_block_entity_value()` loads data from a single chunk,
+#' and `get_block_entity_data()` loads data from multiple chunks.
+#'
+#' `put_block_entity_value()` and `put_block_entity_data()` store BlockEntity
+#' data into `db`.
 #'
 #' @param db A bedrockdb object.
 #' @param x,z,dimension Chunk coordinates to extract data from.
 #'    `x` can also be a character vector of db keys.
-#'
-#' @return `get_block_entity_data()` returns a named-list of nbt data.
-#' `get_block_entity_values()` returns a single nbt value.
-#'
-#' @rdname BlockEntity
-#' @export
-get_block_entity_data <- function(db, x, z, dimension) {
-    keys <- .process_key_args(x, z, dimension, tag = 49L)
-    get_nbt_values(db, keys, simplify = FALSE)
-}
-
-#' @rdname BlockEntity
-#' @export
-get_block_entity_values <- get_block_entity_data
-
-#' @rdname BlockEntity
-#' @export
-get_block_entity_value <- function(db, x, z, dimension) {
-    key <- .process_key_args(x, z, dimension, tag = 49L)
-    vec_assert(key, character(), 1L)
-    get_nbt_value(db, key, simplify = FALSE)
-}
-
-#' @description
-#' `put_block_entity_values()`, `put_block_entity_value()`, and
-#' `put_block_entity_data()` store BlockEntity data into `db`.
-#'
-#' @param values A list of nbt objects
+#' @param values A list of nbt objects. If `x` is missing, the names of
+#'    `values` will be taken as the keys.
 #' @param value An nbt object.
-#' @param data A named-list specifying key-value pairs.
+
+#' @return `get_block_entity_data()` returns a named-list of nbt data.
+#' `get_block_entity_value()` returns a single nbt value.
+#'
+#' @name BlockEntity
+NULL
+
 #' @rdname BlockEntity
 #' @export
-put_block_entity_values <- function(db, x, z, dimension, values) {
-    keys <- .process_key_args(x, z, dimension, tag = 49L,
-                              stop_if_filtered = TRUE)
-    put_nbt_values(db, keys, values)
+get_block_entity_data <- function(x, z, dimension, db = default_db()) {
+    get_chunk_nbt_data(x, z, dimension, tag = 49L, db = db)
 }
 
 #' @rdname BlockEntity
 #' @export
-put_block_entity_value <- function(db, x, z, dimension, value) {
-    key <- .process_key_args(x, z, dimension, tag = 49L)
-    vec_assert(key, character(), 1L)
-    put_nbt_value(db, key, value)
+get_block_entity_value <- function(x, z, dimension, db = default_db()) {
+    get_chunk_nbt_value(x, z, dimension, tag = 49L, db = db)
 }
 
 #' @rdname BlockEntity
 #' @export
-put_block_entity_data <- function(db, data) {
-    .check_chunk_key_tag(names(data), 49L)
-    put_nbt_data(db, data)
+put_block_entity_data <- function(values, x, z, dimension, db = default_db()) {
+    put_chunk_nbt_data(values, x, z, dimension, tag = 49L, db = db)
+}
+
+#' @rdname BlockEntity
+#' @export
+put_block_entity_value <- function(value, x, z, dimension, db = default_db()) {
+    put_chunk_nbt_value(value, x, z, dimension, tag = 49L, db = db)
 }

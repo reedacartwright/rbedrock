@@ -8,13 +8,13 @@
 \alias{put_actors_value}
 \title{Read and write Actor data}
 \usage{
-get_actors_data(x, z, dimension, db)
+get_actors_data(x, z, dimension, db = default_db())
 
-get_actors_value(x, z, dimension, db)
+get_actors_value(x, z, dimension, db = default_db())
 
-put_actors_data(values, x, z, dimension, db)
+put_actors_data(values, x, z, dimension, db = default_db())
 
-put_actors_value(value, x, z, dimension, db)
+put_actors_value(value, x, z, dimension, db = default_db())
 }
 \arguments{
 \item{x, z, dimension}{Chunk coordinates to extract data from.

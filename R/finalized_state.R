@@ -57,7 +57,7 @@ get_finalized_state_value <- function(db, x, z, dimension) {
 #' @rdname FinalizedState
 #' @export
 put_finalized_state_data <- function(db, data) {
-    .check_chunk_key_tag(names(data), 54L)
+    check_chunk_key_tag(names(data), 54L)
     dat <- purrr::map(data, write_finalized_state_value)
     put_data(dat, db = db)
 }

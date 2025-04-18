@@ -11,13 +11,13 @@
 \alias{create_acdig_keys}
 \title{Read and write Actor Digest Data}
 \usage{
-get_acdig_data(x, z, dimension, db)
+get_acdig_data(x, z, dimension, db = default_db())
 
-get_acdig_value(x, z, dimension, db)
+get_acdig_value(x, z, dimension, db = default_db())
 
-put_acdig_data(values, x, z, dimension, db)
+put_acdig_data(values, x, z, dimension, db = default_db())
 
-put_acdig_value(value, x, z, dimension, db)
+put_acdig_value(value, x, z, dimension, db = default_db())
 
 read_acdig_value(rawdata)
 

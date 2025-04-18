@@ -115,7 +115,7 @@ put_chunk_blocks_value <- function(db, x, z, dimension, value, version = 9L) {
 .get_chunk_blocks_value_impl <- function(db, prefix, names_only,
                                          extra_block, min_subchunk,
                                          max_subchunk) {
-    p <- .split_chunk_stems(prefix)
+    p <- split_chunk_stems(prefix)
     dimension <- p[3]
 
     prefix <- paste0(prefix, ":47")
@@ -338,7 +338,7 @@ get_subchunk_blocks_values <- get_subchunk_blocks_data
         keys <- key_prefix(prefix)
     }
     dat <- get_data(keys, db = db, readoptions = readoptions)
-    offsets <- .get_subtag_from_chunk_key(names(dat))
+    offsets <- get_subtag_from_chunk_key(names(dat))
     ret <- purrr::map2(dat, offsets, read_subchunk_blocks_value,
                        names_only = names_only, extra_block = extra_block)
     ret
@@ -361,7 +361,7 @@ get_subchunk_blocks_value <- function(db, x, z, dimension, subchunk,
     vec_assert(key, character(), 1L)
 
     dat <- get_value(key, db = db)
-    offset <- .get_subtag_from_chunk_key(key)
+    offset <- get_subtag_from_chunk_key(key)
 
     read_subchunk_blocks_value(dat, offset, names_only = names_only,
                                extra_block = extra_block)
@@ -412,7 +412,7 @@ put_subchunk_blocks_values <- function(db, x, z, dimension, subchunk, values,
     keys <- .process_key_args(x, z, dimension, tag = 47L, subtag = subchunk,
                               stop_if_filtered = TRUE)
     values <- vec_recycle(values, length(keys), x_arg = "values")
-    offsets <- .get_subtag_from_chunk_key(keys)
+    offsets <- get_subtag_from_chunk_key(keys)
     values <- purrr::map2(values, offsets,
                           ~write_subchunk_blocks_value(.x, version = version,
                                                        missing_offset = .y))
@@ -426,7 +426,7 @@ put_subchunk_blocks_values <- function(db, x, z, dimension, subchunk, values,
 put_subchunk_blocks_value <- function(db, x, z, dimension, subchunk, value,
                                       version = 9L) {
     key <- .process_key_args(x, z, dimension, tag = 47L, subtag = subchunk)
-    offset <- .get_subtag_from_chunk_key(key)
+    offset <- get_subtag_from_chunk_key(key)
     vec_assert(key, character(), 1L)
     value <- write_subchunk_blocks_value(value, version = version,
                                          missing_offset = offset)
@@ -815,7 +815,7 @@ write_subchunk_layers_value <- function(object, version = 9L,
 #' @export
 #' @rdname SubchunkBlocks
 subchunk_origins <- function(keys) {
-    pos <- .extract_chunk_key_components(keys, which = c(1, 5, 2))
+    pos <- extract_chunk_key_components(keys, which = c(1, 5, 2))
     pos * 16L
 }
 

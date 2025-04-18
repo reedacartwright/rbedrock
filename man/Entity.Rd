@@ -3,52 +3,44 @@
 \name{Entity}
 \alias{Entity}
 \alias{get_entity_data}
-\alias{get_entity_values}
 \alias{get_entity_value}
-\alias{put_entity_values}
-\alias{put_entity_value}
 \alias{put_entity_data}
+\alias{put_entity_value}
 \title{Load and store Entity NBT data}
 \usage{
-get_entity_data(db, x, z, dimension)
+get_entity_data(x, z, dimension, db = default_db())
 
-get_entity_values(db, x, z, dimension)
+get_entity_value(x, z, dimension, db = default_db())
 
-get_entity_value(db, x, z, dimension)
+put_entity_data(values, x, z, dimension, db = default_db())
 
-put_entity_values(db, x, z, dimension, values)
-
-put_entity_value(db, x, z, dimension, value)
-
-put_entity_data(db, data)
+put_entity_value(value, x, z, dimension, db = default_db())
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{values}{A list of nbt objects}
+\item{db}{A bedrockdb object.}
+
+\item{values}{A list of nbt objects. If \code{x} is missing, the names of
+\code{values} will be taken as the keys.}
 
 \item{value}{An nbt object.}
-
-\item{data}{A named-list specifying key-value pairs.}
 }
 \value{
 \code{get_entity_data()} returns a named-list of nbt data.
-\code{get_entity_values()} returns a single nbt value.
+\code{get_entity_value()} returns a single nbt value.
 }
 \description{
 Entity data (tag 50) holds a list of NBT values for mobs and other entities
 in the game. After 1.18.30, entity data was migrated to a new actor digest
 format and no longer saved with chunk data.
+}
+\details{
+\code{get_entity_value()} and \code{get_entity_data()} load Entity
+data from \code{db}. \code{get_entity_value()} loads data from a single chunk,
+and \code{get_entity_data()} loads data from multiple chunks.
 
-\code{get_entity_data()} and \code{get_entity_value()} load Entity
-data from \code{db}. \code{get_entity_data()} will silently drop and keys not
-representing Entity data. \code{get_entity_value()} supports loading
-only a single value. \code{get_entity_values()} is a synonym for
-\code{get_entity_data()}.
-
-\code{put_entity_values()}, \code{put_entity_value()}, and
-\code{put_entity_data()} store BlockEntity data into \code{db}.
+\code{put_entity_value()} and \code{put_entity_data()} store Entity
+data into \code{db}.
 }
