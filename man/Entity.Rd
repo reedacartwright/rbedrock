@@ -22,25 +22,26 @@ put_entity_value(value, x, z, dimension, db = default_db())
 
 \item{db}{A bedrockdb object.}
 
-\item{values}{A list of nbt objects. If \code{x} is missing, the names of
-\code{values} will be taken as the keys.}
+\item{values}{A (named) list of list of NBT objects.}
 
-\item{value}{An nbt object.}
+\item{value}{A list of NBT objects.}
 }
 \value{
-\code{get_entity_data()} returns a named-list of nbt data.
-\code{get_entity_value()} returns a single nbt value.
+\code{get_entity_value()} returns a list of NBT objects.
+\code{get_entity_data()} returns a named list of lists of NBT objects.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
 Entity data (tag 50) holds a list of NBT values for mobs and other entities
 in the game. After 1.18.30, entity data was migrated to a new actor digest
 format and no longer saved with chunk data.
+\itemize{
+\item \code{get_entity_value()} and \code{get_entity_data()} load Entity
+data from \code{db}. \code{get_entity_value()} loads data for a single chunk,
+and \code{get_entity_data()} loads data for multiple chunks.
+\item \code{put_entity_value()} and \code{put_entity_data()} store Entity
+data for one or multiple chunks into \code{db}.
 }
-\details{
-\code{get_entity_value()} and \code{get_entity_data()} load Entity
-data from \code{db}. \code{get_entity_value()} loads data from a single chunk,
-and \code{get_entity_data()} loads data from multiple chunks.
-
-\code{put_entity_value()} and \code{put_entity_data()} store Entity
-data into \code{db}.
 }
+\keyword{internal}

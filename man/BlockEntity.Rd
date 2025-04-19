@@ -22,24 +22,24 @@ put_block_entity_value(value, x, z, dimension, db = default_db())
 
 \item{db}{A bedrockdb object.}
 
-\item{values}{A list of nbt objects. If \code{x} is missing, the names of
-\code{values} will be taken as the keys.}
+\item{values}{A (named) list of list of NBT objects.}
 
-\item{value}{An nbt object.}
+\item{value}{A list of NBT objects.}
 }
 \value{
-\code{get_block_entity_data()} returns a named-list of nbt data.
-\code{get_block_entity_value()} returns a single nbt value.
+\code{get_block_entity_value()} returns a list of NBT objects.
+\code{get_block_entity_data()} returns a named list of lists of NBT objects.
 }
 \description{
 BlockEntity data (tag 49) holds a list of NBT values for
 entity data associated with specific blocks.
 }
 \details{
-\code{get_block_entity_value()} and \code{get_block_entity_data()} load BlockEntity
-data from \code{db}. \code{get_block_entity_value()} loads data from a single chunk,
-and \code{get_block_entity_data()} loads data from multiple chunks.
-
-\code{put_block_entity_value()} and \code{put_block_entity_data()} store BlockEntity
-data into \code{db}.
+\itemize{
+\item \code{get_block_entity_value()} and \code{get_block_entity_data()} load BlockEntity
+data from \code{db}. \code{get_block_entity_value()} loads data for a single chunk,
+and \code{get_block_entity_data()} loads data for multiple chunks.
+\item \code{put_block_entity_value()} and \code{put_block_entity_data()} store BlockEntity
+data for one or multiple chunks into \code{db}.
+}
 }

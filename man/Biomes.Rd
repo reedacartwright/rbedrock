@@ -8,12 +8,6 @@
 \alias{put_biomes_data}
 \alias{put_biomes_values}
 \alias{put_biomes_value}
-\alias{get_legacy_biomes_data}
-\alias{get_legacy_biomes_values}
-\alias{get_legacy_biomes_value}
-\alias{put_legacy_biomes_data}
-\alias{put_legacy_biomes_values}
-\alias{put_legacy_biomes_value}
 \title{Read and write biomes data.}
 \usage{
 get_biomes_data(db, x, z, dimension, return_names = TRUE)
@@ -27,18 +21,6 @@ put_biomes_data(db, data, missing_height = -64L)
 put_biomes_values(db, x, z, dimension, values, missing_height = -64L)
 
 put_biomes_value(db, x, z, dimension, value, missing_height = -64L)
-
-get_legacy_biomes_data(db, x, z, dimension, return_names = TRUE)
-
-get_legacy_biomes_values(db, x, z, dimension, return_names = TRUE)
-
-get_legacy_biomes_value(db, x, z, dimension, return_names = TRUE)
-
-put_legacy_biomes_data(db, data, missing_height = 0L)
-
-put_legacy_biomes_values(db, x, z, dimension, values, missing_height = 0L)
-
-put_legacy_biomes_value(db, x, z, dimension, value, missing_height = 0L)
 }
 \arguments{
 \item{db}{A bedrockdb object.}
@@ -74,7 +56,4 @@ only a single value. \code{get_biomes_values()} is a synonym for
 
 \code{put_biomes_data()} \code{put_biomes_values()}, and \code{put_biomes_value()} update
 the biome information of chunks. They preserve any existing height data.
-
-\verb{get_legacy_biomes_*()} and \verb{put_legacy_biomes_*()} behave similar to
-the equivalent non-legacy functions. They get or put 2d biome data.
 }

@@ -1,26 +1,24 @@
 #' Load and store Entity NBT data
 #'
+#' @description
+#' `r lifecycle::badge("superseded")`
+#'
 #' Entity data (tag 50) holds a list of NBT values for mobs and other entities
 #' in the game. After 1.18.30, entity data was migrated to a new actor digest
 #' format and no longer saved with chunk data.
 #'
-#' `get_entity_value()` and `get_entity_data()` load Entity
-#' data from `db`. `get_entity_value()` loads data from a single chunk,
-#' and `get_entity_data()` loads data from multiple chunks.
+#' * `get_entity_value()` and `get_entity_data()` load Entity
+#' data from `db`. `get_entity_value()` loads data for a single chunk,
+#' and `get_entity_data()` loads data for multiple chunks.
+#' * `put_entity_value()` and `put_entity_data()` store Entity
+#' data for one or multiple chunks into `db`.
 #'
-#' `put_entity_value()` and `put_entity_data()` store Entity
-#' data into `db`.
+#' @inheritParams ChunkNBTData
 #'
-#' @param db A bedrockdb object.
-#' @param x,z,dimension Chunk coordinates to extract data from.
-#'    `x` can also be a character vector of db keys.
-#' @param values A list of nbt objects. If `x` is missing, the names of
-#'    `values` will be taken as the keys.
-#' @param value An nbt object.
-
-#' @return `get_entity_data()` returns a named-list of nbt data.
-#' `get_entity_value()` returns a single nbt value.
+#' @return `get_entity_value()` returns a list of NBT objects.
+#' `get_entity_data()` returns a named list of lists of NBT objects.
 #'
+#' @keywords internal
 #' @name Entity
 NULL
 

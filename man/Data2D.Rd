@@ -3,74 +3,59 @@
 \name{Data2D}
 \alias{Data2D}
 \alias{get_data2d_data}
-\alias{get_data2d_values}
 \alias{get_data2d_value}
-\alias{read_data2d_value}
 \alias{put_data2d_data}
-\alias{put_data2d_values}
 \alias{put_data2d_value}
+\alias{read_data2d_value}
 \alias{write_data2d_value}
 \title{Read and write Data2D data}
 \usage{
-get_data2d_data(db, x, z, dimension)
+get_data2d_data(x, z, dimension, db = default_db())
 
-get_data2d_values(db, x, z, dimension)
+get_data2d_value(x, z, dimension, db = default_db())
 
-get_data2d_value(db, x, z, dimension)
+put_data2d_data(values, x, z, dimension, db = default_db())
 
-read_data2d_value(rawdata)
+put_data2d_value(value, x, z, dimension, db = default_db())
 
-put_data2d_data(db, data)
+read_data2d_value(rawvalue)
 
-put_data2d_values(db, x, z, dimension, height_maps, biome_maps)
-
-put_data2d_value(db, x, z, dimension, height_map, biome_map)
-
-write_data2d_value(height_map, biome_map)
+write_data2d_value(value)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{rawdata}{A raw vector.}
+\item{db}{A bedrockdb object.}
 
-\item{data}{A named-vector of key-value pairs for Data2D data.}
+\item{values}{A (named) list of Data2D values. If \code{x} is missing, the names
+of \code{values} will be taken as the keys.}
 
-\item{height_maps, biome_maps}{Lists of height and biome data.
-Values will be recycled if necessary to match the number of keys
-to be written to. If \code{biome_maps} is missing, \code{height_maps} should
-be in the same format as returned by \code{get_data2d_data()}.}
+\item{value}{A Data2D value.}
 
-\item{height_map, biome_map}{16x16 arrays containing height and biome data.
-Values will be recycled if necessary. If \code{biome_map} is missing, \code{height-map}
-should be a list a \code{list()} with both "height_map" and "biome_map" elements.}
+\item{rawvalue}{A raw vector.}
 }
 \value{
-\code{get_data2d_data()} returns a list of the of the values returned by
-\code{get_data2d_value()}.
-
-\code{get_data2d_value()} returns a list with components "height_map"
-and "biome_map".
+\code{get_data2d_value()} returns a Data2D value. \code{get_data2d_data()}
+returns a named list of Data2D values. Data2D values are lists containing
+two elements. The \code{height_map} element is a 16x16 matrix containing height
+data. The \code{biome_map} element is a 16x16 matrix containing biome data.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
 Data2D data (tag 45) stores information about surface heights and biomes in a
 chunk. Data2D data is 768 bytes long and consists of a 256 int16s (heights)
-followed by 256 uint8s (biomes).
-
-\code{get_data2d_data()} loads Data2D data from a \code{bedrockdb}.
-It will silently drop and keys not representing Data2D data.
-
-\code{get_data2d_value()} loads Data2D data from a \code{bedrockdb}.
-It only supports loading a single value.
-
-\code{read_data2d_value} decodes binary Data2D data.
-
-\code{put_data2d_data()}, \code{put_data2d_values()}, and
-\code{put_data2d_value()} store Data2D data into a \code{bedrockdb}.
-
-\code{write_data2d_value} encodes Data2D data into a raw vector.
+followed by 256 uint8s (biomes). The game no longer uses it after 1.18.
+\itemize{
+\item \code{get_data2d_value()} and \code{get_data2d_data()} load Data2D
+data from \code{db}. \code{get_data2d_value()} loads data from a single chunk,
+and \code{get_data2d_data()} loads data from multiple chunks.
+\item \code{put_data2d_value()} and \code{put_data2d_data()} store Data2D
+data into \code{db}.
+\item \code{write_data2d_value()} encodes Data2D data into a raw vector.
+\code{read_data2d_value()} decodes binary Data2D data.
+}
 }
 \examples{
 heights <- matrix(63,16,16)
@@ -82,4 +67,6 @@ obj <- list(height_map = heights, biome_map = biomes)
 dat <- write_data2d_value(obj)
 # Pass them as scalars
 dat <- write_data2d_value(63, 1)
+
 }
+\keyword{internal}

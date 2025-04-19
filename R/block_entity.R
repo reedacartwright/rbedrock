@@ -3,22 +3,16 @@
 #' BlockEntity data (tag 49) holds a list of NBT values for
 #' entity data associated with specific blocks.
 #'
-#' `get_block_entity_value()` and `get_block_entity_data()` load BlockEntity
-#' data from `db`. `get_block_entity_value()` loads data from a single chunk,
-#' and `get_block_entity_data()` loads data from multiple chunks.
+#' * `get_block_entity_value()` and `get_block_entity_data()` load BlockEntity
+#' data from `db`. `get_block_entity_value()` loads data for a single chunk,
+#' and `get_block_entity_data()` loads data for multiple chunks.
+#' * `put_block_entity_value()` and `put_block_entity_data()` store BlockEntity
+#' data for one or multiple chunks into `db`.
 #'
-#' `put_block_entity_value()` and `put_block_entity_data()` store BlockEntity
-#' data into `db`.
+#' @inheritParams ChunkNBTData
 #'
-#' @param db A bedrockdb object.
-#' @param x,z,dimension Chunk coordinates to extract data from.
-#'    `x` can also be a character vector of db keys.
-#' @param values A list of nbt objects. If `x` is missing, the names of
-#'    `values` will be taken as the keys.
-#' @param value An nbt object.
-
-#' @return `get_block_entity_data()` returns a named-list of nbt data.
-#' `get_block_entity_value()` returns a single nbt value.
+#' @return `get_block_entity_value()` returns a list of NBT objects.
+#' `get_block_entity_data()` returns a named list of lists of NBT objects.
 #'
 #' @name BlockEntity
 NULL

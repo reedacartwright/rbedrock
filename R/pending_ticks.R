@@ -3,68 +3,40 @@
 #' PendingTicks data (tag 51) holds a list of NBT values for
 #' pending ticks.
 #'
+#' * `get_pending_ticks_value()` and `get_pending_ticks_data()` load
+#' PendingTicks data from `db`. `get_pending_ticks_value()` loads data for a
+#' single chunk, and `get_pending_ticks_data()` loads data for multiple chunks.
+#' * `put_pending_ticks_value()` and `put_pending_ticks_data()` store
+#' PendingTicks data for one or multiple chunks into `db`.
+#'
+#' @inheritParams ChunkNBTData
+#'
+#' @return `get_pending_ticks_value()` returns a list of NBT objects.
+#' `get_pending_ticks_data()` returns a named list of lists of NBT objects.
+#'
 #' @name PendingTicks
 NULL
 
-#' @description
-#' `get_pending_ticks_data()` and `get_pending_ticks_value()` load PendingTicks
-#' data from `db`. `get_pending_ticks_data()` will silently drop and keys not
-#' representing PendingTicks data. `get_pending_ticks_value()` supports loading
-#' only a single value. `get_pending_ticks_values()` is a synonym for
-#' `get_pending_ticks_data()`.
-#'
-#' @param db A bedrockdb object.
-#' @param x,z,dimension Chunk coordinates to extract data from.
-#'    `x` can also be a character vector of db keys.
-#'
-#' @return `get_pending_ticks_data()` returns a named-list of nbt data.
-#' `get_pending_ticks_values()` returns a single nbt value.
-#'
 #' @rdname PendingTicks
 #' @export
-get_pending_ticks_data <- function(db, x, z, dimension) {
-    keys <- .process_key_args(x, z, dimension, tag = 51L)
-    get_nbt_values(db, keys, simplify = FALSE)
+get_pending_ticks_data <- function(x, z, dimension, db = default_db()) {
+    get_chunk_nbt_data(x, z, dimension, tag = 51L, db = db)
 }
 
 #' @rdname PendingTicks
 #' @export
-get_pending_ticks_values <- get_pending_ticks_data
-
-#' @rdname PendingTicks
-#' @export
-get_pending_ticks_value <- function(db, x, z, dimension) {
-    key <- .process_key_args(x, z, dimension, tag = 51L)
-    vec_assert(key, character(), 1L)
-    get_nbt_value(db, key, simplify = FALSE)
-}
-
-#' @description
-#' `put_pending_ticks_values()`, `put_pending_ticks_value()`, and
-#' `put_pending_ticks_data()` store PendingTicks data into `db`.
-#'
-#' @param values A list of nbt objects
-#' @param value An nbt object.
-#' @param data A named-list specifying key-value pairs.
-#' @rdname PendingTicks
-#' @export
-put_pending_ticks_values <- function(db, x, z, dimension, values) {
-    keys <- .process_key_args(x, z, dimension, tag = 51L,
-                              stop_if_filtered = TRUE)
-    put_nbt_values(db, keys, values)
+get_pending_ticks_value <- function(x, z, dimension, db = default_db()) {
+    get_chunk_nbt_value(x, z, dimension, tag = 51L, db = db)
 }
 
 #' @rdname PendingTicks
 #' @export
-put_pending_ticks_value <- function(db, x, z, dimension, value) {
-    key <- .process_key_args(x, z, dimension, tag = 51L)
-    vec_assert(key, character(), 1L)
-    put_nbt_value(db, key, value)
+put_pending_ticks_data <- function(values, x, z, dimension, db = default_db()) {
+    put_chunk_nbt_data(values, x, z, dimension, tag = 51L, db = db)
 }
 
 #' @rdname PendingTicks
 #' @export
-put_pending_ticks_data <- function(db, data) {
-    check_chunk_key_tag(names(data), 51L)
-    put_nbt_data(db, data)
+put_pending_ticks_value <- function(value, x, z, dimension, db = default_db()) {
+    put_chunk_nbt_value(value, x, z, dimension, tag = 51L, db = db)
 }

@@ -3,51 +3,43 @@
 \name{PendingTicks}
 \alias{PendingTicks}
 \alias{get_pending_ticks_data}
-\alias{get_pending_ticks_values}
 \alias{get_pending_ticks_value}
-\alias{put_pending_ticks_values}
-\alias{put_pending_ticks_value}
 \alias{put_pending_ticks_data}
+\alias{put_pending_ticks_value}
 \title{Load and store PendingTicks NBT data}
 \usage{
-get_pending_ticks_data(db, x, z, dimension)
+get_pending_ticks_data(x, z, dimension, db = default_db())
 
-get_pending_ticks_values(db, x, z, dimension)
+get_pending_ticks_value(x, z, dimension, db = default_db())
 
-get_pending_ticks_value(db, x, z, dimension)
+put_pending_ticks_data(values, x, z, dimension, db = default_db())
 
-put_pending_ticks_values(db, x, z, dimension, values)
-
-put_pending_ticks_value(db, x, z, dimension, value)
-
-put_pending_ticks_data(db, data)
+put_pending_ticks_value(value, x, z, dimension, db = default_db())
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{values}{A list of nbt objects}
+\item{db}{A bedrockdb object.}
 
-\item{value}{An nbt object.}
+\item{values}{A (named) list of list of NBT objects.}
 
-\item{data}{A named-list specifying key-value pairs.}
+\item{value}{A list of NBT objects.}
 }
 \value{
-\code{get_pending_ticks_data()} returns a named-list of nbt data.
-\code{get_pending_ticks_values()} returns a single nbt value.
+\code{get_pending_ticks_value()} returns a list of NBT objects.
+\code{get_pending_ticks_data()} returns a named list of lists of NBT objects.
 }
 \description{
 PendingTicks data (tag 51) holds a list of NBT values for
 pending ticks.
-
-\code{get_pending_ticks_data()} and \code{get_pending_ticks_value()} load PendingTicks
-data from \code{db}. \code{get_pending_ticks_data()} will silently drop and keys not
-representing PendingTicks data. \code{get_pending_ticks_value()} supports loading
-only a single value. \code{get_pending_ticks_values()} is a synonym for
-\code{get_pending_ticks_data()}.
-
-\code{put_pending_ticks_values()}, \code{put_pending_ticks_value()}, and
-\code{put_pending_ticks_data()} store PendingTicks data into \code{db}.
+}
+\details{
+\itemize{
+\item \code{get_pending_ticks_value()} and \code{get_pending_ticks_data()} load
+PendingTicks data from \code{db}. \code{get_pending_ticks_value()} loads data for a
+single chunk, and \code{get_pending_ticks_data()} loads data for multiple chunks.
+\item \code{put_pending_ticks_value()} and \code{put_pending_ticks_data()} store
+PendingTicks data for one or multiple chunks into \code{db}.
+}
 }
