@@ -1,11 +1,13 @@
 # RBedrock (development)
 
 * Add `default_db()` to get/set a default db connection.
-* BREAKING: Updated API to multiple functions to use `default_db()`.
+* BREAKING: Updated API of multiple functions to use `default_db()`
+  and generally put values before keys in argument order.
   - `get_keys()`, `get_data()`, `get_value()`, `has_values()`
   - `put_data()`, `put_value()`, `delete_values()`
   - `get_block_entity_*` and `put_block_entity_*`
   - `get_chunk_version_*` and `put_chunk_version_*`
+  - `get_finalized_state_*` and `put_finalized_state_*`
   - `get_entity_*` and `put_entity_*`
   - etc.
 * BREAKING: Removed multiple `*_values()` alias functions.

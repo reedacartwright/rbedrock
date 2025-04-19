@@ -1,7 +1,7 @@
 #' Load and store FinalizedState data
 #'
-#' FinalizedState data (tag 54) holds a number which
-#' indicates a chunk's state of generation.
+#' FinalizedState data (tag 54) holds a number which indicates a chunk's state
+#' of generation.
 #'
 #' FinalizedState data contains the following information.
 #'
@@ -11,100 +11,60 @@
 #' | 1     | NeedsPopulation | Chunk needs to be populated with mobs |
 #' | 2     | Done            | Chunk generation is fully complete |
 #'
+#' * `get_finalized_state_value()` and `get_finalized_state_data()`
+#' FinalizedState data from `db`. `get_finalized_state_value()`
+#' loads data for a single chunk, and `get_finalized_state_data()` loads
+#' data for multiple chunks.
+#' * `put_finalized_state_value()` and `put_finalized_state_data()`
+#' store FinalizedState data into `db`.
+#'
+#' @seealso FinalizedState
+#'
+#' @inheritParams ChunkData
+#' @param value An integer
+#' @param values A (named) vector of FinalizedState values. If `x` is
+#' missing, the names of `values` will be taken as the keys.
+#'
+#' @return `get_finalized_state_value()` returns a ChunkVersion data
+#' value. `get_finalized_state_data()` returns a named vector of
+#' FinalizedState data values. FinalizedState data values integers.
+#'
 #' @name FinalizedState
 NULL
 
-#' @description
-#' `get_finalized_state_data()` and `get_finalized_state_value()` load
-#' FinalizedState data from `db`. `get_finalized_state_data()` will silently
-#' drop and keys not representing FinalizedState data.
-#' `get_finalized_state_value()` supports loading only a single value.
-#' `get_finalized_state_values()` is a synonym for `get_finalized_state_data()`.
-#'
-#' @param db A bedrockdb object.
-#' @param x,z,dimension Chunk coordinates to extract data from.
-#'    `x` can also be a character vector of db keys.
-#'
-#' @return `get_finalized_state_data()` returns a named integer vector
-#'         of the values returned by `get_finalized_state_value()`.
+raw_na <- as.raw(c(0x00, 0x00, 0x00, 0x80))
+
 #' @rdname FinalizedState
 #' @export
-get_finalized_state_data <- function(db, x, z, dimension) {
-    keys <- .process_key_args(x, z, dimension, tag = 54L)
-    dat <- get_data(keys, db = db)
-    purrr::map_int(dat, read_finalized_state_value)
+get_finalized_state_value <- function(x, z, dimension, db = default_db()) {
+    value <- get_chunk_value(x, z, dimension, tag = 54L, db = db)
+    readBin(value %||% raw_na, integer(), n = 1L, size = 4L, endian = "little")
 }
 
 #' @rdname FinalizedState
 #' @export
-get_finalized_state_values <- get_finalized_state_data
-
-#' @rdname FinalizedState
-#' @export
-get_finalized_state_value <- function(db, x, z, dimension) {
-    key <- .process_key_args(x, z, dimension, tag = 54L)
-    vec_assert(key, character(), 1L)
-    dat <- get_value(key, db = db)
-    read_finalized_state_value(dat)
+get_finalized_state_data <- function(x, z, dimension, db = default_db()) {
+    dat <- get_chunk_data(x, z, dimension, tag = 54L, db = db)
+    vapply(dat, function(value) {
+        readBin(value %||% raw_na, integer(), n = 1L, size = 4L,
+                endian = "little")
+    }, integer(1L))
 }
 
-#' @description
-#' `put_finalized_state_data()`, `put_finalized_state_values()`, and
-#' `put_finalized_state_value()` store FinalizedState data into a `bedrockdb`.
-#'
-#' @param data A named-vector of key-value pairs for FinalizedState data.
-#'
 #' @rdname FinalizedState
 #' @export
-put_finalized_state_data <- function(db, data) {
-    check_chunk_key_tag(names(data), 54L)
-    dat <- purrr::map(data, write_finalized_state_value)
-    put_data(dat, db = db)
+put_finalized_state_value <- function(value, x, z, dimension,
+                                      db = default_db()) {
+    value <- writeBin(as.integer(value), raw(), size = 4L, endian = "little")
+    put_chunk_value(value, x, z, dimension, tag = 54L, db = db)
 }
 
-#' @param values An integer vector
-#'
 #' @rdname FinalizedState
 #' @export
-put_finalized_state_values <- function(db, x, z, dimension, values) {
-    keys <- .process_key_args(x, z, dimension, tag = 54L,
-                              stop_if_filtered = TRUE)
-    values <- vctrs::vec_recycle(values, length(keys), x_arg = "values")
-    values <- purrr::map(values, write_finalized_state_value)
-    put_data(values, keys, db = db)
-}
-
-#' @param value A scalar integer vector
-#'
-#' @rdname FinalizedState
-#' @export
-put_finalized_state_value <- function(db, x, z, dimension, value) {
-    key <- .process_key_args(x, z, dimension, tag = 54L)
-    vec_assert(key, character(), 1L)
-    value <- write_finalized_state_value(value)
-    put_value(value, key, db = db)
-}
-
-#' @description
-#' `read_finalized_state_value()` parses a binary FinalizedState record.
-#'
-#' @param rawdata a raw vector
-#'
-#' @rdname FinalizedState
-#' @export
-read_finalized_state_value <- function(rawdata) {
-    readBin(rawdata, integer(), n = 1L, size = 4L, endian = "little")
-}
-
-#' @description
-#' `write_finalized_state_value()` converts a FinalizedState value
-#' to a raw vector.
-#'
-#' @param value a scalar integer
-#'
-#' @rdname FinalizedState
-#' @export
-write_finalized_state_value <- function(value) {
-    stopifnot(rlang::is_scalar_integerish(value))
-    writeBin(as.integer(value), raw(), size = 4L, endian = "little")
+put_finalized_state_data <- function(values, x, z, dimension,
+                                     db = default_db()) {
+    values <- lapply(as.list(values), function(value) {
+        writeBin(as.integer(value), raw(), size = 4L, endian = "little")
+    })
+    put_chunk_data(values, x, z, dimension, tag = 54L, db = db)
 }

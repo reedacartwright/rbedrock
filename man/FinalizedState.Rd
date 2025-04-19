@@ -2,67 +2,39 @@
 % Please edit documentation in R/finalized_state.R
 \name{FinalizedState}
 \alias{FinalizedState}
-\alias{get_finalized_state_data}
-\alias{get_finalized_state_values}
 \alias{get_finalized_state_value}
-\alias{put_finalized_state_data}
-\alias{put_finalized_state_values}
+\alias{get_finalized_state_data}
 \alias{put_finalized_state_value}
-\alias{read_finalized_state_value}
-\alias{write_finalized_state_value}
+\alias{put_finalized_state_data}
 \title{Load and store FinalizedState data}
 \usage{
-get_finalized_state_data(db, x, z, dimension)
+get_finalized_state_value(x, z, dimension, db = default_db())
 
-get_finalized_state_values(db, x, z, dimension)
+get_finalized_state_data(x, z, dimension, db = default_db())
 
-get_finalized_state_value(db, x, z, dimension)
+put_finalized_state_value(value, x, z, dimension, db = default_db())
 
-put_finalized_state_data(db, data)
-
-put_finalized_state_values(db, x, z, dimension, values)
-
-put_finalized_state_value(db, x, z, dimension, value)
-
-read_finalized_state_value(rawdata)
-
-write_finalized_state_value(value)
+put_finalized_state_data(values, x, z, dimension, db = default_db())
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{data}{A named-vector of key-value pairs for FinalizedState data.}
+\item{db}{A bedrockdb object.}
 
-\item{values}{An integer vector}
+\item{value}{An integer}
 
-\item{value}{a scalar integer}
-
-\item{rawdata}{a raw vector}
+\item{values}{A (named) vector of FinalizedState values. If \code{x} is
+missing, the names of \code{values} will be taken as the keys.}
 }
 \value{
-\code{get_finalized_state_data()} returns a named integer vector
-of the values returned by \code{get_finalized_state_value()}.
+\code{get_finalized_state_value()} returns a ChunkVersion data
+value. \code{get_finalized_state_data()} returns a named vector of
+FinalizedState data values. FinalizedState data values integers.
 }
 \description{
-FinalizedState data (tag 54) holds a number which
-indicates a chunk's state of generation.
-
-\code{get_finalized_state_data()} and \code{get_finalized_state_value()} load
-FinalizedState data from \code{db}. \code{get_finalized_state_data()} will silently
-drop and keys not representing FinalizedState data.
-\code{get_finalized_state_value()} supports loading only a single value.
-\code{get_finalized_state_values()} is a synonym for \code{get_finalized_state_data()}.
-
-\code{put_finalized_state_data()}, \code{put_finalized_state_values()}, and
-\code{put_finalized_state_value()} store FinalizedState data into a \code{bedrockdb}.
-
-\code{read_finalized_state_value()} parses a binary FinalizedState record.
-
-\code{write_finalized_state_value()} converts a FinalizedState value
-to a raw vector.
+FinalizedState data (tag 54) holds a number which indicates a chunk's state
+of generation.
 }
 \details{
 FinalizedState data contains the following information.\tabular{lll}{
@@ -71,4 +43,16 @@ FinalizedState data contains the following information.\tabular{lll}{
    1 \tab NeedsPopulation \tab Chunk needs to be populated with mobs \cr
    2 \tab Done \tab Chunk generation is fully complete \cr
 }
+
+\itemize{
+\item \code{get_finalized_state_value()} and \code{get_finalized_state_data()}
+FinalizedState data from \code{db}. \code{get_finalized_state_value()}
+loads data for a single chunk, and \code{get_finalized_state_data()} loads
+data for multiple chunks.
+\item \code{put_finalized_state_value()} and \code{put_finalized_state_data()}
+store FinalizedState data into \code{db}.
+}
+}
+\seealso{
+FinalizedState
 }
