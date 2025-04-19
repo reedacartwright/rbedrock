@@ -8,7 +8,7 @@
 #' 118 to tag 44.
 #'
 #' * `get_legacy_chunk_version_value()` and `get_legacy_chunk_version_data()`
-#' LegacyChunkVersion data from `db`. `get_legacy_chunk_version_value()`
+#' load LegacyChunkVersion data from `db`. `get_legacy_chunk_version_value()`
 #' loads data for a single chunk, and `get_legacy_chunk_version_data()` loads
 #' data for multiple chunks.
 #' * `put_legacy_chunk_version_value()` and `put_legacy_chunk_version_data()`
@@ -23,7 +23,7 @@
 #'
 #' @return `get_legacy_chunk_version_value()` returns a LegacyChunkVersion data
 #' value. `get_legacy_chunk_version_data()` returns a named vector of
-#' LegacyChunkVersion data values. LegacyChunkVersion data values integers.
+#' LegacyChunkVersion data values.
 #'
 #' @keywords internal
 #' @name LegacyChunkVersion

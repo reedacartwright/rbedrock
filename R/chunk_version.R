@@ -2,7 +2,7 @@
 #'
 #' ChunkVersion data (tag 44) stores the chunk version number for a chunk.
 #'
-#' * `get_chunk_version_value()` and `get_chunk_version_data()`
+#' * `get_chunk_version_value()` and `get_chunk_version_data()` load
 #' ChunkVersion data from `db`. `get_chunk_version_value()`
 #' loads data for a single chunk, and `get_chunk_version_data()` loads
 #' data for multiple chunks.
@@ -18,7 +18,7 @@
 #'
 #' @return `get_chunk_version_value()` returns a ChunkVersion data
 #' value. `get_chunk_version_data()` returns a named vector of
-#' ChunkVersion data values. ChunkVersion data values integers.
+#' ChunkVersion data values.
 #'
 #' @name ChunkVersion
 NULL

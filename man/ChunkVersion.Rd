@@ -30,14 +30,14 @@ missing, the names of \code{values} will be taken as the keys.}
 \value{
 \code{get_chunk_version_value()} returns a ChunkVersion data
 value. \code{get_chunk_version_data()} returns a named vector of
-ChunkVersion data values. ChunkVersion data values integers.
+ChunkVersion data values.
 }
 \description{
 ChunkVersion data (tag 44) stores the chunk version number for a chunk.
 }
 \details{
 \itemize{
-\item \code{get_chunk_version_value()} and \code{get_chunk_version_data()}
+\item \code{get_chunk_version_value()} and \code{get_chunk_version_data()} load
 ChunkVersion data from \code{db}. \code{get_chunk_version_value()}
 loads data for a single chunk, and \code{get_chunk_version_data()} loads
 data for multiple chunks.

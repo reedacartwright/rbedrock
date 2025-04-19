@@ -12,13 +12,11 @@
 #' | 2     | Done            | Chunk generation is fully complete |
 #'
 #' * `get_finalized_state_value()` and `get_finalized_state_data()`
-#' FinalizedState data from `db`. `get_finalized_state_value()`
+#' load FinalizedState data from `db`. `get_finalized_state_value()`
 #' loads data for a single chunk, and `get_finalized_state_data()` loads
 #' data for multiple chunks.
 #' * `put_finalized_state_value()` and `put_finalized_state_data()`
 #' store FinalizedState data into `db`.
-#'
-#' @seealso FinalizedState
 #'
 #' @inheritParams ChunkData
 #' @param value An integer
@@ -27,7 +25,7 @@
 #'
 #' @return `get_finalized_state_value()` returns a ChunkVersion data
 #' value. `get_finalized_state_data()` returns a named vector of
-#' FinalizedState data values. FinalizedState data values integers.
+#' FinalizedState data values.
 #'
 #' @name FinalizedState
 NULL

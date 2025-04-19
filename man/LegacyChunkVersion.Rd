@@ -30,7 +30,7 @@ missing, the names of \code{values} will be taken as the keys.}
 \value{
 \code{get_legacy_chunk_version_value()} returns a LegacyChunkVersion data
 value. \code{get_legacy_chunk_version_data()} returns a named vector of
-LegacyChunkVersion data values. LegacyChunkVersion data values integers.
+LegacyChunkVersion data values.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
@@ -40,7 +40,7 @@ chunk. In Minecraft version 1.16.100, chunk version data was moved from tag
 118 to tag 44.
 \itemize{
 \item \code{get_legacy_chunk_version_value()} and \code{get_legacy_chunk_version_data()}
-LegacyChunkVersion data from \code{db}. \code{get_legacy_chunk_version_value()}
+load LegacyChunkVersion data from \code{db}. \code{get_legacy_chunk_version_value()}
 loads data for a single chunk, and \code{get_legacy_chunk_version_data()} loads
 data for multiple chunks.
 \item \code{put_legacy_chunk_version_value()} and \code{put_legacy_chunk_version_data()}

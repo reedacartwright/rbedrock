@@ -30,7 +30,7 @@ missing, the names of \code{values} will be taken as the keys.}
 \value{
 \code{get_finalized_state_value()} returns a ChunkVersion data
 value. \code{get_finalized_state_data()} returns a named vector of
-FinalizedState data values. FinalizedState data values integers.
+FinalizedState data values.
 }
 \description{
 FinalizedState data (tag 54) holds a number which indicates a chunk's state
@@ -46,13 +46,10 @@ FinalizedState data contains the following information.\tabular{lll}{
 
 \itemize{
 \item \code{get_finalized_state_value()} and \code{get_finalized_state_data()}
-FinalizedState data from \code{db}. \code{get_finalized_state_value()}
+load FinalizedState data from \code{db}. \code{get_finalized_state_value()}
 loads data for a single chunk, and \code{get_finalized_state_data()} loads
 data for multiple chunks.
 \item \code{put_finalized_state_value()} and \code{put_finalized_state_data()}
 store FinalizedState data into \code{db}.
 }
-}
-\seealso{
-FinalizedState
 }
