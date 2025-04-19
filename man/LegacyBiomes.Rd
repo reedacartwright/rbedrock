@@ -69,4 +69,7 @@ chunk, and \code{get_legacy_biomes_data()} loads data for multiple chunks.
 biomes data into \code{db}.
 }
 }
+\seealso{
+Biomes
+}
 \keyword{internal}

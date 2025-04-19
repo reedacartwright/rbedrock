@@ -11,6 +11,8 @@
 #' * `put_legacy_biomes_value()` and `put_legacy_biomes_data()` store legacy
 #' biomes data into `db`.
 #'
+#' @seealso Biomes
+#'
 #' @inheritParams ChunkData
 #' @param value A 16x16 matrix of biome ids.
 #' @param values A (named) list of Data2D values. If `x` is missing, the names
@@ -22,7 +24,6 @@
 #' @return `get_legacy_biomes_value()` returns a legacy biomes data value.
 #' `get_legacy_biomes_data()` returns a named list of legacy biomes data values.
 #' Legacy biomes data values are 16x16 matrices containing biome data.
-#'
 #'
 #' @keywords internal
 #' @name LegacyBiomes

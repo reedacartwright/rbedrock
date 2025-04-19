@@ -2,63 +2,49 @@
 % Please edit documentation in R/chunk_version.R
 \name{ChunkVersion}
 \alias{ChunkVersion}
-\alias{get_chunk_version_data}
-\alias{get_chunk_version_values}
 \alias{get_chunk_version_value}
-\alias{put_chunk_version_data}
-\alias{put_chunk_version_values}
+\alias{get_chunk_version_data}
 \alias{put_chunk_version_value}
-\alias{read_chunk_version_value}
-\alias{write_chunk_version_value}
+\alias{put_chunk_version_data}
 \title{Read and write chunk version data}
 \usage{
-get_chunk_version_data(db, x, z, dimension)
+get_chunk_version_value(x, z, dimension, db = default_db())
 
-get_chunk_version_values(db, x, z, dimension)
+get_chunk_version_data(x, z, dimension, db = default_db())
 
-get_chunk_version_value(db, x, z, dimension)
+put_chunk_version_value(value, x, z, dimension, db = default_db())
 
-put_chunk_version_data(db, data)
-
-put_chunk_version_values(db, x, z, dimension, values)
-
-put_chunk_version_value(db, x, z, dimension, value)
-
-read_chunk_version_value(rawdata)
-
-write_chunk_version_value(num)
+put_chunk_version_data(values, x, z, dimension, db = default_db())
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
-\item{x, z, dimension}{Chunk coordinates to extract version data from.
+\item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{data}{A named-vector of key-value pairs for Version data.}
+\item{db}{A bedrockdb object.}
 
-\item{values}{An integer vector}
+\item{value}{An integer}
 
-\item{value}{A scalar integer vector}
-
-\item{rawdata}{A scalar raw.}
-
-\item{num}{A scalar integer.}
+\item{values}{A (named) vector of ChunkVersion values. If \code{x} is
+missing, the names of \code{values} will be taken as the keys.}
+}
+\value{
+\code{get_chunk_version_value()} returns a ChunkVersion data
+value. \code{get_chunk_version_data()} returns a named vector of
+ChunkVersion data values. ChunkVersion data values integers.
 }
 \description{
-Version data (tag 44) and LegacyVersion data (tag 118)
-store the version number of a chunk. In Minecraft version 1.16.100,
-chunk version data was moved from tag 118 to tag 44.
-
-\code{get_chunk_version_data()} and \code{get_chunk_version_value()} load Version
-data from \code{db}. \code{get_chunk_version_data()} will silently drop and keys not
-representing Version data. \code{get_chunk_version_value()} supports loading
-only a single value. \code{get_chunk_version_values()} is a synonym for
-\code{get_chunk_version_data()}.
-
-\code{put_chunk_version_data()}, \code{put_chunk_version_values()}, and
-\code{put_chunk_version_value()} store Version data into a \code{bedrockdb}.
-
-\code{read_chunk_version_value()} decodes Version data.
-
-\code{write_chunk_version_value()} encodes Version data.
+ChunkVersion data (tag 44) stores the chunk version number for a chunk.
+}
+\details{
+\itemize{
+\item \code{get_chunk_version_value()} and \code{get_chunk_version_data()}
+ChunkVersion data from \code{db}. \code{get_chunk_version_value()}
+loads data for a single chunk, and \code{get_chunk_version_data()} loads
+data for multiple chunks.
+\item \code{put_chunk_version_value()} and \code{put_chunk_version_data()}
+store ChunkVersion data into \code{db}.
+}
+}
+\seealso{
+ChunkVersion
 }

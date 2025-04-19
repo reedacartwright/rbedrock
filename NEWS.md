@@ -5,9 +5,10 @@
   - `get_keys()`, `get_data()`, `get_value()`, `has_values()`
   - `put_data()`, `put_value()`, `delete_values()`
   - `get_block_entity_*` and `put_block_entity_*`
-  - `get_entity_*` and `put_entity_*`  
-* BREAKING: Removed several alias functions.
-  - `get_values()` and `put_values()`
+  - `get_chunk_version_*` and `put_chunk_version_*`
+  - `get_entity_*` and `put_entity_*`
+  - etc.
+* BREAKING: Removed multiple `*_values()` alias functions.
 
 # RBedrock 0.3.3
 
