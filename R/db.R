@@ -1,4 +1,3 @@
-the <- new.env(parent = emptyenv())
 the$db <- NULL
 the$last_opened_db <- NULL
 

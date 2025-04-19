@@ -458,8 +458,8 @@ read_subchunk_blocks_value <- function(rawdata, missing_offset = NA,
         array(pal[x[["values"]]], dim = dim(x[["values"]]))
     })
     if (isTRUE(extra_block) && length(blocks) >= 2) {
-        ret <- str_c(blocks[[1]], blocks[[2]], sep = ";") %>%
-            str_replace(";minecraft:air$", "")
+        ret <- str_c(blocks[[1]], blocks[[2]], sep = ";")
+        ret <- str_replace(ret, ";minecraft:air$", "")
         dim(ret) <- dim(blocks[[1]])
     } else {
         ret <- blocks[[1]]

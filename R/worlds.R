@@ -54,10 +54,9 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
         id <- fs::path_file(f)
         list(id = id, levelname = levelname, last_opened = lastplayed)
     }, type = "directory")
-
-    out %>%
-        dplyr::bind_rows() %>%
-        dplyr::arrange(dplyr::desc(.data$last_opened))
+    out <- dplyr::bind_rows(out)
+    out <- dplyr::arrange(out, dplyr::desc(.data$last_opened))
+    out
 }
 
 #' @description

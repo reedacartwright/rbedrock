@@ -18,7 +18,7 @@ Encoding: UTF-8
 Language: en-US
 LazyData: true
 RoxygenNote: 7.3.2
-SystemRequirements: cmake, zlib, GNU make, Solaris: g++ is a requirement
+SystemRequirements: cmake, zlib, GNU make
 NeedsCompilation: yes
 Roxygen: list(markdown = TRUE)
 Depends:
@@ -32,7 +32,6 @@ Imports:
     rlang,
     dplyr,
     purrr,
-    magrittr,
     readr,
     utils,
     digest,
