@@ -6,8 +6,8 @@
 #' Legacy Biomes data is stored as the second map in the [Data2D] data (tag 45).
 #'
 #' * `get_legacy_biomes_value()` and `get_legacy_biomes_data()` load legacy
-#' biomes data from `db`. `get_legacy_biomes_value()` loads data from a single
-#' chunk, and `get_legacy_biomes_data()` loads data from multiple chunks.
+#' biomes data from `db`. `get_legacy_biomes_value()` loads data for a single
+#' chunk, and `get_legacy_biomes_data()` loads data for multiple chunks.
 #' * `put_legacy_biomes_value()` and `put_legacy_biomes_data()` store legacy
 #' biomes data into `db`.
 #'

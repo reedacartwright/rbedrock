@@ -8,8 +8,8 @@
 #' followed by 256 uint8s (biomes). The game no longer uses it after 1.18.
 #'
 #' * `get_data2d_value()` and `get_data2d_data()` load Data2D
-#' data from `db`. `get_data2d_value()` loads data from a single chunk,
-#' and `get_data2d_data()` loads data from multiple chunks.
+#' data from `db`. `get_data2d_value()` loads data for a single chunk,
+#' and `get_data2d_data()` loads data for multiple chunks.
 #' * `put_data2d_value()` and `put_data2d_data()` store Data2D
 #' data into `db`.
 #' * `write_data2d_value()` encodes Data2D data into a raw vector.
@@ -25,17 +25,6 @@
 #' returns a named list of Data2D values. Data2D values are lists containing
 #' two elements. The `height_map` element is a 16x16 matrix containing height
 #' data. The `biome_map` element is a 16x16 matrix containing biome data.
-#'
-#' @examples
-#' heights <- matrix(63,16,16)
-#' biomes <- matrix(1,16,16)
-#' # Pass heights and biomes as separate parameters
-#' dat <- write_data2d_value(heights, biomes)
-#' # Pass them as a list.
-#' obj <- list(height_map = heights, biome_map = biomes)
-#' dat <- write_data2d_value(obj)
-#' # Pass them as scalars
-#' dat <- write_data2d_value(63, 1)
 #'
 #' @keywords internal
 #' @name Data2D

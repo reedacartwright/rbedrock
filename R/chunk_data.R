@@ -283,6 +283,7 @@ get_chunk_data <- function(x, z, dimension, tag, subtag, db) {
 get_chunk_value <- function(x, z, dimension, tag, subtag, db) {
     key <- process_chunk_key_args(x, z, dimension, tag, subtag)
     b <- check_chunk_key_args(key, tag)
+    b[-1] <- FALSE
     get_value(key[b], db = db)
 }
 
