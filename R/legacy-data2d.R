@@ -15,6 +15,8 @@
 #' * `write_data2d_value()` encodes Data2D data into a raw vector.
 #' `read_data2d_value()` decodes binary Data2D data.
 #'
+#' @seealso Data3D
+#'
 #' @inheritParams ChunkData
 #' @param value A Data2D value.
 #' @param values A (named) list of Data2D values. If `x` is missing, the names

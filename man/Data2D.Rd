@@ -57,4 +57,7 @@ data into \code{db}.
 \code{read_data2d_value()} decodes binary Data2D data.
 }
 }
+\seealso{
+Data3D
+}
 \keyword{internal}

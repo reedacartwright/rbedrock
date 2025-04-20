@@ -15,8 +15,8 @@
 #'
 #' @inheritParams ChunkData
 #' @param value A 16x16 matrix of biome ids.
-#' @param values A (named) list of Data2D values. If `x` is missing, the names
-#'    of `values` will be taken as the keys.
+#' @param values A (named) list of LegacyBiomes values. If `x` is missing, the
+#'    names of `values` will be taken as the keys.
 #' @param return_names return biome names instead of biome ids.
 #' @param missing_height if there is no existing height data, use this value
 #'    for the chunk.
@@ -34,7 +34,7 @@ NULL
 get_legacy_biomes_value <- function(x, z, dimension, db = default_db(),
                                     return_names = TRUE) {
     val <- get_data2d_value(x, z, dimension, db = db)
-    get_legacy_biomes_impl(val, return_names = return_names)
+    get_biomes_impl(val, return_names = return_names)
 }
 
 #' @rdname LegacyBiomes
@@ -42,7 +42,7 @@ get_legacy_biomes_value <- function(x, z, dimension, db = default_db(),
 get_legacy_biomes_data <- function(x, z, dimension, db = default_db(),
                                    return_names = TRUE) {
     dat <- get_data2d_data(x, z, dimension, db = db)
-    lapply(dat, get_legacy_biomes_impl, return_names = return_names)
+    lapply(dat, get_biomes_impl, return_names = return_names)
 }
 
 #' @rdname LegacyBiomes
@@ -76,12 +76,4 @@ put_legacy_biomes_data <- function(values, x, z, dimension, db = default_db(),
         new_data[[i]]$biome_map <- value
     }
     put_data2d_data(new_data, x, z, dimension, db = db)
-}
-
-get_legacy_biomes_impl <- function(x, return_names) {
-    biome_map <- x[["biome_map", exact = TRUE]]
-    if (!is.null(biome_map) && isTRUE(return_names)) {
-        biome_map[] <- .BIOME_LIST_INV[biome_map + 1]
-    }
-    biome_map
 }

@@ -57,16 +57,6 @@ put_nbt_value <- function(value, key, db = default_db(), writeoptions = NULL) {
     put_value(dat, key, db = db, writeoptions = writeoptions)
 }
 
-
-#TODO: Remove these functions when they are no longer needed
-get_nbt_values <- function(db, keys, simplify = TRUE) {
-    get_nbt_data(keys, db = db, simplify = simplify)
-}
-
-put_nbt_values <- function(db, keys, values) {
-    put_nbt_data(values, keys, db = db)
-}
-
 #' @rdname get_nbt_data
 #' @export
 read_nbt <- function(rawvalue, simplify = TRUE) {

@@ -49,7 +49,7 @@ specifies the type:\tabular{ll}{
 }
 
 
-In version 1.21.10, HSA data is no longer saved to the world db.
+As of version 1.21.10, HSA data is no longer saved to the world db.
 \itemize{
 \item \code{get_hsa_value()} and \code{get_hsa_data()} load HardcodedSpawnArea data from
 \code{db}. \code{get_hsa_value()} loads data for a single chunk, and \code{get_hsa_data()}

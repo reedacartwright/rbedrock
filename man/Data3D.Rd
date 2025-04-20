@@ -2,74 +2,61 @@
 % Please edit documentation in R/data3d.R
 \name{Data3D}
 \alias{Data3D}
-\alias{get_data3d_data}
-\alias{get_data3d_values}
 \alias{get_data3d_value}
-\alias{put_data3d_data}
-\alias{put_data3d_values}
+\alias{get_data3d_data}
 \alias{put_data3d_value}
+\alias{put_data3d_data}
 \alias{read_data3d_value}
 \alias{write_data3d_value}
 \title{Read and write Data3D data}
 \usage{
-get_data3d_data(db, x, z, dimension)
+get_data3d_value(x, z, dimension, db = default_db())
 
-get_data3d_values(db, x, z, dimension)
+get_data3d_data(x, z, dimension, db = default_db())
 
-get_data3d_value(db, x, z, dimension)
+put_data3d_value(value, x, z, dimension, db = default_db())
 
-put_data3d_data(db, data)
+put_data3d_data(values, x, z, dimension, db = default_db())
 
-put_data3d_values(db, x, z, dimension, height_maps, biome_maps)
+read_data3d_value(rawvalue)
 
-put_data3d_value(db, x, z, dimension, height_map, biome_map)
-
-read_data3d_value(rawdata)
-
-write_data3d_value(height_map, biome_map)
+write_data3d_value(value)
 }
 \arguments{
-\item{db}{A bedrockdb object.}
-
 \item{x, z, dimension}{Chunk coordinates to extract data from.
 \code{x} can also be a character vector of db keys.}
 
-\item{data}{A named-vector of key-value pairs for Data3D data.}
+\item{db}{A bedrockdb object.}
 
-\item{height_maps, biome_maps}{Lists of height and biome data.
-Values will be recycled if necessary to match the number of keys
-to be written to. If \code{biome_maps} is missing, \code{height_maps} should
-be in the same format as returned by \code{get_data3d_data()}.}
+\item{value}{A Data3D value.}
 
-\item{height_map}{16x16 array containing height data.
-Values will be recycled if necessary. If \code{biome_map} is missing, \code{height-map}
-should be a list a \code{list()} with both "height_map" and "biome_map" elements.}
+\item{values}{A (named) list of Data3D values. If \code{x} is missing, the names
+of \code{values} will be taken as the keys.}
 
-\item{biome_map}{16xNx16 array containing biome data.}
-
-\item{rawdata}{A raw vector.}
+\item{rawvalue}{A raw vector.}
 }
 \value{
-\code{get_data3d_data()} returns a list of the of the values returned by
-\code{get_data3d_value()}.
-
-\code{get_data3d_value()} returns a list with components "height_map"
-and "biome_map".
+\code{get_data3d_value()} returns a Data3D value. \code{get_data3d_data()}
+returns a named list of Data3D values. Data3D values are lists containing
+two elements. The \code{height_map} element is a 16x16 matrix containing height
+data. The \code{biome_map} element is a 16x320x16 matrix containing biome data.
 }
 \description{
 Data3D data (tag 43) stores information about surface heights and biomes in a
 chunk.
-
-\code{get_data3d_data()} loads Data3D data from \code{db}.
-It will silently drop keys not representing Data3D data.
-
-\code{get_data3d_value()} loads Data3D data from \code{db}.
-It only supports loading a single value.
-
-\code{put_data3d_data()}, \code{put_data3d_values()}, and
-\code{put_data3d_value()} store Data3D data into \code{db}.
-
-\code{read_data3d_value()} decodes binary Data3D data.
-
-\code{write_data3d_value} encodes Data3D data into a raw vector.
 }
+\details{
+\itemize{
+\item \code{get_data3d_value()} and \code{get_data3d_data()} load Data3D
+data from \code{db}. \code{get_data3d_value()} loads data for a single chunk,
+and \code{get_data3d_data()} loads data for multiple chunks.
+\item \code{put_data3d_value()} and \code{put_data3d_data()} store Data3D
+data into \code{db}.
+\item \code{write_data3d_value()} encodes Data3D data into a raw vector.
+\code{read_data3d_value()} decodes binary Data3D data.
+}
+}
+\seealso{
+Data3D
+}
+\keyword{internal}

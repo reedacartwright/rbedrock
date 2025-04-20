@@ -24,18 +24,16 @@ test_that("Reading and Writing Data3D data works", {
     dat2 <- dat[1:517]
     dat2 <- c(dat2, as_raw(rep(0xff, 23)))
     expect_equal(dat2, write_data3d_value(val))
-
-    expect_equal(dat2, write_data3d_value(val$height_map, val$biome_map))
 })
 
 test_that("Writing Data3D recycles values", {
-    r <- write_data3d_value(0, 10)
+    r <- write_data3d_value(list(height_map = 0, biome_map = 10))
     val <- read_data3d_value(r)
 
     expect_equal(val$height_map, array(0, c(16, 16)))
     expect_equal(val$biome_map, array(10, c(16, 16 * 24, 16)))
 
-    r <- write_data3d_value(0, 1:256)
+    r <- write_data3d_value(list(height_map = 0, biome_map = 1:256))
     val <- read_data3d_value(r)
     expect_equal(val$biome_map[1, , 1], rep(1, 384))
     expect_equal(val$biome_map[16, , 16], rep(256, 384))
