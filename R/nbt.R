@@ -98,6 +98,10 @@ is_nbt <- function(x) {
     inherits(x, "rbedrock_nbt")
 }
 
+all_nbt <- function(x) {
+    all(vapply(x, is_nbt, logical(1L)))
+}
+
 #' @description
 #' `payload()` reads an nbt value's payload.
 #'

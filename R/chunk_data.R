@@ -270,6 +270,14 @@ check_chunk_key_args <- function(keys, tag) {
 NULL
 
 #' @rdname ChunkData
+get_chunk_value <- function(x, z, dimension, tag, subtag, db) {
+    key <- process_chunk_key_args(x, z, dimension, tag, subtag)
+    b <- check_chunk_key_args(key, tag)
+    b[-1] <- FALSE
+    get_value(key[b], db = db)
+}
+
+#' @rdname ChunkData
 get_chunk_data <- function(x, z, dimension, tag, subtag, db) {
     keys <- process_chunk_key_args(x, z, dimension, tag, subtag)
     b <- check_chunk_key_args(keys, tag)
@@ -280,11 +288,12 @@ get_chunk_data <- function(x, z, dimension, tag, subtag, db) {
 }
 
 #' @rdname ChunkData
-get_chunk_value <- function(x, z, dimension, tag, subtag, db) {
+put_chunk_value <- function(value, x, z, dimension, tag, subtag, db) {
     key <- process_chunk_key_args(x, z, dimension, tag, subtag)
     b <- check_chunk_key_args(key, tag)
     b[-1] <- FALSE
-    get_value(key[b], db = db)
+    put_value(value[b], key[b], db = db)
+    invisible(b)
 }
 
 #' @rdname ChunkData
@@ -293,15 +302,6 @@ put_chunk_data <- function(values, x, z, dimension, tag, subtag, db) {
                                    values = values)
     b <- check_chunk_key_args(keys, tag)
     put_data(values[b], keys[b], db = db)
-    invisible(b)
-}
-
-#' @rdname ChunkData
-put_chunk_value <- function(value, x, z, dimension, tag, subtag, db) {
-    key <- process_chunk_key_args(x, z, dimension, tag, subtag)
-    b <- check_chunk_key_args(key, tag)
-    b[-1] <- FALSE
-    put_value(value[b], key[b], db = db)
     invisible(b)
 }
 
