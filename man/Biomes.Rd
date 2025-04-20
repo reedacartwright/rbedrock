@@ -3,13 +3,16 @@
 \name{Biomes}
 \alias{Biomes}
 \alias{get_biomes_value}
+\alias{get_biomes_data}
 \alias{put_biomes_value}
 \alias{put_biomes_data}
 \alias{biome_id}
 \alias{biome_name}
-\title{Read and write biomes data}
+\title{Read and write Biomes data}
 \usage{
 get_biomes_value(x, z, dimension, db = default_db(), return_names = TRUE)
+
+get_biomes_data(x, z, dimension, db = default_db(), return_names = TRUE)
 
 put_biomes_value(
   value,
@@ -50,20 +53,19 @@ for the chunk.}
 names of \code{values} will be taken as the keys.}
 }
 \value{
-\code{get_legacy_biomes_value()} returns a legacy biomes data value.
-\code{get_legacy_biomes_data()} returns a named list of legacy biomes data values.
-Biomes data values are 16xNx16 matrices containing biome data.
+\code{get_biomes_value()} returns a Biomes data value.
+\code{get_biomes_data()} returns a named list of Biomes data values.
+Biomes data values are 16x384x16 arrays containing biome data.
 }
 \description{
 Biomes data is stored as the second map in the \link{Data3D} data (tag 43).
 }
 \details{
 \itemize{
-\item \code{get_biomes_value()} and \code{get_biomes_data()} load legacy
-biomes data from \code{db}. \code{get_biomes_value()} loads data for a single
-chunk, and \code{get_biomes_data()} loads data for multiple chunks.
-\item \code{put_biomes_value()} and \code{put_biomes_data()} store legacy
-biomes data into \code{db}.
+\item \code{get_biomes_value()} and \code{get_biomes_data()} load Biomes data from \code{db}.
+\code{get_biomes_value()} loads data for a single chunk, and \code{get_biomes_data()}
+loads data for multiple chunks.
+\item \code{put_biomes_value()} and \code{put_biomes_data()} store biomes data into \code{db}.
 }
 }
 \seealso{

@@ -22,9 +22,8 @@
 #' @return `get_data3d_value()` returns a Data3D value. `get_data3d_data()`
 #' returns a named list of Data3D values. Data3D values are lists containing
 #' two elements. The `height_map` element is a 16x16 matrix containing height
-#' data. The `biome_map` element is a 16x320x16 matrix containing biome data.
+#' data. The `biome_map` element is a 16x384x16 array containing biome data.
 #'
-#' @keywords internal
 #' @name Data3D
 NULL
 

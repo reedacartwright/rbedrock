@@ -1,12 +1,11 @@
-#' Read and write biomes data
+#' Read and write Biomes data
 #'
 #' Biomes data is stored as the second map in the [Data3D] data (tag 43).
 #'
-#' * `get_biomes_value()` and `get_biomes_data()` load legacy
-#' biomes data from `db`. `get_biomes_value()` loads data for a single
-#' chunk, and `get_biomes_data()` loads data for multiple chunks.
-#' * `put_biomes_value()` and `put_biomes_data()` store legacy
-#' biomes data into `db`.
+#' * `get_biomes_value()` and `get_biomes_data()` load Biomes data from `db`.
+#' `get_biomes_value()` loads data for a single chunk, and `get_biomes_data()`
+#' loads data for multiple chunks.
+#' * `put_biomes_value()` and `put_biomes_data()` store biomes data into `db`.
 #'
 #' @seealso LegacyBiomes
 #'
@@ -18,9 +17,9 @@
 #' @param missing_height if there is no existing height data, use this value
 #'    for the chunk.
 #'
-#' @return `get_legacy_biomes_value()` returns a legacy biomes data value.
-#' `get_legacy_biomes_data()` returns a named list of legacy biomes data values.
-#' Biomes data values are 16xNx16 matrices containing biome data.
+#' @return `get_biomes_value()` returns a Biomes data value.
+#' `get_biomes_data()` returns a named list of Biomes data values.
+#' Biomes data values are 16x384x16 arrays containing biome data.
 #'
 #' @name Biomes
 NULL
@@ -33,7 +32,7 @@ get_biomes_value <- function(x, z, dimension, db = default_db(),
     get_biomes_impl(val, return_names = return_names)
 }
 
-#' @rdname LegacyBiomes
+#' @rdname Biomes
 #' @export
 get_biomes_data <- function(x, z, dimension, db = default_db(),
                             return_names = TRUE) {

@@ -39,7 +39,7 @@ of \code{values} will be taken as the keys.}
 \code{get_data3d_value()} returns a Data3D value. \code{get_data3d_data()}
 returns a named list of Data3D values. Data3D values are lists containing
 two elements. The \code{height_map} element is a 16x16 matrix containing height
-data. The \code{biome_map} element is a 16x320x16 matrix containing biome data.
+data. The \code{biome_map} element is a 16x384x16 array containing biome data.
 }
 \description{
 Data3D data (tag 43) stores information about surface heights and biomes in a
@@ -59,4 +59,3 @@ data into \code{db}.
 \seealso{
 Data3D
 }
-\keyword{internal}
