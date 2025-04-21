@@ -9,7 +9,7 @@ test_that("bedrockdb can open and close a database", {
 })
 
 test_that("create_unique_ids works", {
-    epoch <- bit64::as.integer64(-2)
+    epoch <- bit64::as.integer64(-3)
 
     dbpath <- rbedrock_example_world("example2.mcworld")
     db <- bedrockdb(dbpath)
@@ -30,5 +30,5 @@ test_that("create_unique_ids works", {
     close(db)
 
     # clean up
-    fs::dir_delete(dbpath)
+    unlink(dbpath, recursive = TRUE)
 })

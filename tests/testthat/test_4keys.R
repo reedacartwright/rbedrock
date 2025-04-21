@@ -66,8 +66,8 @@ test_that("chrkeys_to_rawkeys supports chunk keys", {
 })
 
 test_that("chrkeys_to_rawkeys treats invalid chunk keys as strings", {
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:100"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0:100")))
+    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:128"))
+    expect_equal(val, list(charToRaw("chunk:0:0:0:128")))
     expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:-1:44"))
     expect_equal(val, list(charToRaw("chunk:0:0:-1:44")))
     expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:3:44"))
