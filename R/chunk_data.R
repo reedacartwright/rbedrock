@@ -84,6 +84,7 @@ chunk_origins <- function(keys) {
 # List of Tags that identify the contents of a chunk key.
 # Most names are consistent with Creator Documentation
 # https://docs.microsoft.com/en-us/minecraft/creator/documents/actorstorage#non-actor-data-chunk-key-ids
+# Also see https://github.com/LiteLDev/LeviLamina/blob/main/src/mc/world/level/chunk/LevelChunkTag.h
 # nolint end
 
 # nolint start: object_name_linter
@@ -92,7 +93,7 @@ chunk_origins <- function(keys) {
     "Version" = 44L,
     "Data2D" = 45L,
     "Data2DLegacy" = 46L,
-    "SubChunkBlocks" = 47L,
+    "SubChunkBlocks" = 47L, # aka "SubChunkPrefix"
     "LegacyTerrain" = 48L, # removed
     "BlockEntity" = 49L,
     "Entity" = 50L,
@@ -104,7 +105,7 @@ chunk_origins <- function(keys) {
     "BorderBlocks" = 56L, # Education edition
     "HardcodedSpawners" = 57L,
     "RandomTicks" = 58L,
-    "Checksums" = 59L, # introduced in 1.16
+    "CheckSums" = 59L, # introduced in 1.16
     "GenerationSeed" = 60L, # introduced in 1.18
     # introduced in 1.18, not used any more (?)
     "GeneratedPreCavesAndCliffsBlending" = 61L,
@@ -114,7 +115,7 @@ chunk_origins <- function(keys) {
     "BlendingData" = 64L,
     "ActorDigestVersion" = 65L,
     "LegacyVersion" = 118L, # replaced by 44
-    "Unknown119" = 119L
+    "AabbVolumes" = 119L
 )
 .CHUNK_TAGS_INV <- as.character(1:128)  # nolint: object_name_linter
 .CHUNK_TAGS_INV[.CHUNK_TAGS_CHR] <- names(.CHUNK_TAGS_CHR)
