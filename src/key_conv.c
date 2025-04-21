@@ -36,7 +36,8 @@
 #define RAWKEY_PREFIX_ACTOR_DIGEST_KEYS "digp"
 
 #define CHUNK_KEY_TAG_MIN 33
-#define CHUNK_KEY_TAG_MAX 126
+#define CHUNK_KEY_TAG_MAX 96
+#define CHUNK_KEY_TAG_EXTRA 118
 #define CHUNK_KEY_DIM_MAX 2
 #define CHUNK_KEY_SUBCHUNK_MIN -32
 #define CHUNK_KEY_SUBCHUNK_MAX 31
@@ -283,7 +284,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
     // Validate values
     if(tag < CHUNK_KEY_TAG_MIN) {
         return 0;
-    } else if(tag > CHUNK_KEY_TAG_MAX) {
+    } else if(tag > CHUNK_KEY_TAG_MAX && tag < CHUNK_KEY_TAG_EXTRA) {
         return 0;
     } else if(subtag < CHUNK_KEY_SUBCHUNK_MIN || subtag > CHUNK_KEY_SUBCHUNK_MAX) {
         return 0;
@@ -427,7 +428,7 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
     if(key_type == CHUNK) {
         if(tag < CHUNK_KEY_TAG_MIN) {
             key_type = PLAIN;
-        } else if(tag > CHUNK_KEY_TAG_MAX) {
+        } else if(tag > CHUNK_KEY_TAG_MAX && tag < CHUNK_KEY_TAG_EXTRA) {
             key_type = PLAIN;
         } else if(subtag < CHUNK_KEY_SUBCHUNK_MIN || subtag > CHUNK_KEY_SUBCHUNK_MAX) {
             key_type = PLAIN;

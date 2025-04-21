@@ -113,7 +113,8 @@ chunk_origins <- function(keys) {
     "MetaDataHash" = 63L,
     "BlendingData" = 64L,
     "ActorDigestVersion" = 65L,
-    "LegacyVersion" = 118L # replaced by 44
+    "LegacyVersion" = 118L, # replaced by 44
+    "Unknown119" = 119L
 )
 .CHUNK_TAGS_INV <- as.character(1:128)  # nolint: object_name_linter
 .CHUNK_TAGS_INV[.CHUNK_TAGS_CHR] <- names(.CHUNK_TAGS_CHR)
