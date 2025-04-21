@@ -11,7 +11,7 @@
 #' * `write_data3d_value()` encodes Data3D data into a raw vector.
 #' `read_data3d_value()` decodes binary Data3D data.
 #'
-#' @seealso Data3D
+#' @seealso Data2D
 #'
 #' @inheritParams ChunkData
 #' @param value A Data3D value.

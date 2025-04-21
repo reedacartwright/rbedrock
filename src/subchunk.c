@@ -4,11 +4,11 @@
 #include "support.h"
 
 static SEXP g_palette_symbol = NULL;
-static SEXP g_offset_symbol = NULL;
+static SEXP g_position_symbol = NULL;
 
 void rbedrock_init_blocks(void) {
     g_palette_symbol = Rf_install("palette");
-    g_offset_symbol = Rf_install("offset");
+    g_position_symbol = Rf_install("subchunk_position");
 }
 
 #define return_subchunk_error() error_return("Malformed subchunk data.")
@@ -185,14 +185,14 @@ SEXP read_subchunk_blocks(SEXP r_value) {
     }
     int num_layers = p[1];
     p += 2;
-    int subchunk_offset = NA_INTEGER;
+    int subchunk_pos = NA_INTEGER;
     if(version >= 9) {
-        subchunk_offset = (signed char)p[0];
+        subchunk_pos = (signed char)p[0];
         p += 1;
     }
     SEXP r_ret = PROTECT(Rf_allocVector(VECSXP, num_layers));
     // store offset as an attribute
-    Rf_setAttrib(r_ret, g_offset_symbol, Rf_ScalarInteger(subchunk_offset));
+    Rf_setAttrib(r_ret, g_position_symbol, Rf_ScalarInteger(subchunk_pos));
     // read each layer of subchunk block storage
     for(int i = 0; i < num_layers; ++i) {
         bool is_persistent;

@@ -10,7 +10,6 @@
 \alias{write_subchunk_blocks_value}
 \alias{subchunk_blocks_value_as_array}
 \alias{subchunk_blocks_array_as_value}
-\alias{get_subchunk_blocks_from_chunk}
 \alias{subchunk_origins}
 \alias{subchunk_coords}
 \title{Load and store SubChunkBlocks data}
@@ -39,9 +38,9 @@ put_subchunk_blocks_data(
   version = 9L
 )
 
-read_subchunk_blocks_value(rawvalue)
+read_subchunk_blocks_value(rawvalue, subchunk_position = NA_integer_)
 
-write_subchunk_blocks_value(value, version = 9L, offset)
+write_subchunk_blocks_value(value, subchunk_position, version = 9L)
 
 subchunk_blocks_value_as_array(
   value,
@@ -50,15 +49,6 @@ subchunk_blocks_value_as_array(
 )
 
 subchunk_blocks_array_as_value(r)
-
-get_subchunk_blocks_from_chunk(
-  db,
-  x,
-  z,
-  dimension,
-  names_only = FALSE,
-  extra_block = !names_only
-)
 
 subchunk_origins(keys)
 
@@ -79,6 +69,12 @@ subchunk_coords(ind, origins = subchunk_origins(names(ind)))
 \item{values}{A (named) list of SubChunkBlocks data values. If \code{x} is
 missing, the names of \code{values} will be taken as the keys.}
 
+\item{rawvalue}{A raw vector}
+
+\item{subchunk_position}{Optional, an integer. When reading a value, it will
+be used if the value's position attribute is missing. When writing a value,
+it will be used in place of the value's position attribute.}
+
 \item{names_only}{A logical scalar. Return only the names of the blocks,
 ignoring block states.}
 
@@ -94,15 +90,10 @@ blocks. If the extra block is air, it will not be appended.}
 indexes for blocks in a subchunk.}
 
 \item{origins}{A matrix of subchunk origins.}
-
-\item{missing_offset}{Subchunk offset to use if one is not found in \code{value}}
 }
 \value{
 \code{get_subchunk_blocks_value()} returns a SubChunkBlocks data value.
 \code{get_biomes_data()} returns a named list of SubChunkBlocks data values.
-
-\code{get_subchunk_blocks_from_chunk()} returns a list of the of the
-values returned by \code{read_subchunk_blocks_value()}.
 
 \code{subchunk_coords()} returns a 3-column matrix of block coordinates.
 }
@@ -114,10 +105,6 @@ palette-based format. Block storage is separated into multiple layers where
 each layer has its own block palette and block ids. In practices subchunks
 have either one or two layers, and the extra layer is most-often used to
 store water for water-logged blocks.
-
-\code{get_subchunk_blocks_from_chunk()} loads SubchunkBlocks data from a
-\code{bedrockdb}. It supports efficiently loading subchunk block data from a
-single chunk.
 
 \code{subchunk_origins()} returns a matrix containing the block coordinate of the
 lower NW corner of subchunk keys
@@ -131,8 +118,8 @@ The format description can be found at
 \itemize{
 \item \code{get_subchunk_blocks_value()} and \code{get_subchunk_blocks_data()} load
 SubChunkBlocks data from \code{db}. \code{get_subchunk_blocks_value()} loads data
-for a single chunk, and \code{get_subchunk_blocks_data()} loads data for
-multiple chunks.
+for a single subchunk, and \code{get_subchunk_blocks_data()} loads data for
+multiple subchunks.
 \item \code{put_subchunk_blocks_value()} and \code{put_subchunk_blocks_data()} store
 SubChunkBlocks data into \code{db}.
 \item \code{write_subchunk_blocks_value()} encodes SubChunkBlocks data into a raw

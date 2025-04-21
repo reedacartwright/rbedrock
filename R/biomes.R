@@ -102,7 +102,7 @@ get_biomes_impl <- function(x, return_names) {
 #' * <https://github.com/Cubitect/cubiomes/>
 "biome_df"
 
-globalVariables("biome_df") 
+globalVariables("biome_df")
 
 #' @rdname Biomes
 #' @export

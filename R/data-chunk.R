@@ -105,7 +105,7 @@ chunk_origins <- function(keys) {
     "BorderBlocks" = 56L, # Education edition
     "HardcodedSpawners" = 57L,
     "RandomTicks" = 58L,
-    "CheckSums" = 59L, # introduced in 1.16
+    "Checksums" = 59L, # aka CheckSums; introduced in 1.16; later removed
     "GenerationSeed" = 60L, # introduced in 1.18
     # introduced in 1.18, not used any more (?)
     "GeneratedPreCavesAndCliffsBlending" = 61L,
@@ -294,7 +294,14 @@ put_chunk_value <- function(value, x, z, dimension, tag, subtag, db) {
     key <- process_chunk_key_args(x, z, dimension, tag, subtag)
     b <- check_chunk_key_args(key, tag)
     b[-1] <- FALSE
-    put_value(value[b], key[b], db = db)
+    if (length(b) > 0 && b[1]) {
+        # if multiple keys were passed, assume multiple values were passed too
+        if (length(b) > 1) {
+            value <- value[[1]]
+            key <- key[[1]]
+        }
+        put_value(value, key, db = db)
+    }
     invisible(b)
 }
 

@@ -13,8 +13,8 @@
 #'
 #' * `get_subchunk_blocks_value()` and `get_subchunk_blocks_data()` load
 #'   SubChunkBlocks data from `db`. `get_subchunk_blocks_value()` loads data
-#'   for a single chunk, and `get_subchunk_blocks_data()` loads data for
-#'   multiple chunks.
+#'   for a single subchunk, and `get_subchunk_blocks_data()` loads data for
+#'   multiple subchunks.
 #' * `put_subchunk_blocks_value()` and `put_subchunk_blocks_data()` store
 #'   SubChunkBlocks data into `db`.
 #' * `write_subchunk_blocks_value()` encodes SubChunkBlocks data into a raw
@@ -27,7 +27,6 @@
 #' @param value A SubChunkBlocks data value
 #' @param values A (named) list of SubChunkBlocks data values. If `x` is
 #'   missing, the names of `values` will be taken as the keys.
-#' @param missing_offset Subchunk offset to use if one is not found in `value`
 #' @param version Which format of subchunk data to use
 #' @param names_only  A logical scalar. Return only the names of the blocks,
 #' ignoring block states.
@@ -35,6 +34,10 @@
 #' output (separated by ";"). This is mostly useful if you have waterlogged
 #' blocks. If the extra block is air, it will not be appended.
 #' @param r A character array
+#' @param rawvalue A raw vector
+#' @param subchunk_position Optional, an integer. When reading a value, it will
+#' be used if the value's position attribute is missing. When writing a value,
+#' it will be used in place of the value's position attribute.
 #'
 #' @return `get_subchunk_blocks_value()` returns a SubChunkBlocks data value.
 #' `get_biomes_data()` returns a named list of SubChunkBlocks data values.
@@ -44,18 +47,29 @@ NULL
 
 #' @rdname SubChunkBlocks
 #' @export
-get_subchunk_blocks_value <- function(x, z, dimension, subchunk, db = default_db()) {
-    value <- get_chunk_value(x, z, dimension, tag = 47L, subtag = subchunk,
-                             db = db)
-    read_subchunk_blocks_value(value)
+get_subchunk_blocks_value <- function(x, z, dimension, subchunk,
+                                      db = default_db()) {
+    key <- process_chunk_key_args(x, z, dimension, 47L, subchunk)
+    subtag <- get_subtag_from_chunk_key(key)
+    b <- check_chunk_key_args(key, 47L)
+    b[-1] <- FALSE
+    value <- get_value(key[b], db = db)
+    read_subchunk_blocks_value(value[b], subtag[b])
 }
 
 #' @rdname SubChunkBlocks
 #' @export
-get_subchunk_blocks_data <- function(x, z, dimension, subchunk, db = default_db()) {
-    dat <- get_chunk_data(x, z, dimension, tag = 47L, subtag = subchunk,
-                          db = db)
-    lapply(dat, read_subchunk_blocks_value)
+get_subchunk_blocks_data <- function(x, z, dimension, subchunk,
+                                     db = default_db()) {
+    keys <- process_chunk_key_args(x, z, dimension, 47L, subchunk)
+    subtags <- get_subtag_from_chunk_key(keys)
+    b <- check_chunk_key_args(keys, 47L)
+    ret <- vector("list", length(keys))
+    names(ret) <- keys
+    values <- get_data(keys[b], db = db)
+    ret[b] <- mapply(read_subchunk_blocks_value, values, subtags[b],
+                     SIMPLIFY = FALSE)
+    ret
 }
 
 #' @rdname SubChunkBlocks
@@ -63,13 +77,21 @@ get_subchunk_blocks_data <- function(x, z, dimension, subchunk, db = default_db(
 put_subchunk_blocks_value <- function(value, x, z, dimension, subchunk,
                                       db = default_db(),
                                       version = 9L) {
-    key <- process_chunk_key_args(x, z, dimension, tag, subchunk)
+    key <- process_chunk_key_args(x, z, dimension, 47L, subchunk)
     subtag <- get_subtag_from_chunk_key(key)
-    b <- check_chunk_key_args(key, tag)
+    b <- check_chunk_key_args(key, 47L)
     b[-1] <- FALSE
-    value <- write_subchunk_blocks_value(value[b], version = version,
-                                         offset = subtag[b])
-    put_value(value, key[b], db = db)
+    if (length(b) > 0 && b[1]) {
+        # if multiple keys were passed, assume multiple values were passed too
+        if (length(b) > 1) {
+            value <- value[[1]]
+            key <- key[[1]]
+            subtag <- subtag[[1]]
+        }
+        value <- write_subchunk_blocks_value(value, subchunk_position = subtag,
+                                             version = version)
+        put_value(value, key, db = db)
+    }
     invisible(b)
 }
 
@@ -80,12 +102,12 @@ put_subchunk_blocks_data <- function(values, x, z, dimension, subchunk,
                                      version = 9L) {
     version <- rep(version, length.out = length(values))
 
-    keys <- process_chunk_key_args(x, z, dimension, tag, subtag,
+    keys <- process_chunk_key_args(x, z, dimension, 47L, subchunk,
                                    values = values)
     subtags <- get_subtag_from_chunk_key(keys)
-    b <- check_chunk_key_args(keys, tag)
-    values <- mapply(write_subchunk_blocks_value, values[b], version[b],
-        subtags[b], SIMPLIFY = FALSE)
+    b <- check_chunk_key_args(keys, 47L)
+    values <- mapply(write_subchunk_blocks_value, values[b], subtags[b],
+                     version[b], SIMPLIFY = FALSE)
 
     put_data(values, keys[b], db = db)
     invisible(b)
@@ -93,7 +115,8 @@ put_subchunk_blocks_data <- function(values, x, z, dimension, subchunk,
 
 #' @rdname SubChunkBlocks
 #' @export
-read_subchunk_blocks_value <- function(rawvalue) {
+read_subchunk_blocks_value <- function(rawvalue,
+                                       subchunk_position = NA_integer_) {
     if (is.null(rawvalue)) {
         return(NULL)
     }
@@ -103,13 +126,17 @@ read_subchunk_blocks_value <- function(rawvalue) {
         x[[i]]$values <- aperm(x[[i]]$values, c(1, 3, 2))
         x[[i]]$palette <- from_rnbt(x[[i]]$palette)
     }
+    o <- attr(x, "subchunk_position", exact = TRUE)
+    if (is.null(o) || is.na(o)) {
+        attr(x, "subchunk_position") <- subchunk_position
+    }
     x
 }
 
 #' @rdname SubChunkBlocks
 #' @export
-write_subchunk_blocks_value <- function(value, version = 9L,
-                                        offset) {
+write_subchunk_blocks_value <- function(value, subchunk_position,
+                                        version = 9L) {
     if (is_null(value)) {
         return(NULL)
     }
@@ -121,13 +148,13 @@ write_subchunk_blocks_value <- function(value, version = 9L,
         stop(sprintf("subchunk blocks `version` = %d not supported.", version))
     }
     if (version >= 9L) {
-        # identify offset
-        if(missing(offset)) {
-            offset <- attr(value, "offset")
+        # identify subchunk
+        if (missing(subchunk_position)) {
+            subchunk_position <- attr(value, "subchunk_position")
         }
-        offset <- as.integer(offset)
-        if (length(offset) != 1 || is.na(offset)) {
-            stop("subchunk block format 9 requires a valid subchunk offset.")
+        subchunk_position <- as.integer(subchunk_position)
+        if (length(subchunk_position) != 1 || is.na(subchunk_position)) {
+            stop("subchunk block format 9 requires a valid subchunk position.")
         }
     }
     values <- lapply(value, function(x) {
@@ -138,37 +165,38 @@ write_subchunk_blocks_value <- function(value, version = 9L,
         dim(x) <- c(16, 16, 16)
         aperm(x, c(1, 3, 2))
     })
-    palettes <- lapply(values, function(x) {
-        x <- values[["palette", exact = TRUE]]
-        if(is.null(x) || !all_nbt(x)) {
+    palettes <- lapply(value, function(x) {
+        x <- x[["palette", exact = TRUE]]
+        if (is.null(x) || !all_nbt(x)) {
             stop("subchunk block value is malformed.")
         }
         to_rnbt(x)
     })
 
-    .Call(Cwrite_subchunk_blocks, values, palettes, version, offset)
+    .Call(Cwrite_subchunk_blocks, values, palettes, version, subchunk_position)
 }
 
 #' @rdname SubChunkBlocks
 #' @export
 subchunk_blocks_value_as_array <- function(value, names_only = FALSE,
-                                  extra_block = !names_only) {
+                                           extra_block = !names_only) {
     if (is.null(value)) {
         return(array("minecraft:air", c(16L, 16L, 16L)))
     }
     pal_str <- lapply(value, function(x) {
-        block_str(x[["palette", exact = TRUE]], names_only = names_only)
+        blocks_str(x[["palette", exact = TRUE]], names_only = names_only)
     })
     val1 <- value[[1]][["values", exact = TRUE]]
     blocks <- pal_str[[1]][val1]
     dim(blocks) <- dim(val1)
-    if (isTRUE(extra_block) && length(blocks) >= 2) {
+    if (isTRUE(extra_block) && length(value) >= 2) {
         val2 <- value[[2]][["values", exact = TRUE]]
         blocks2 <- paste0(";", pal_str[[2]][val2])
         blocks2[blocks2 == ";minecraft:air"] <- ""
         blocks[] <- paste0(blocks, blocks2)
     }
-    attr(blocks, "offset") <- attr(value, "offset", exact = TRUE)    
+    attr(blocks, "subchunk_position") <- attr(value, "subchunk_position",
+                                              exact = TRUE)
     blocks
 }
 
@@ -187,13 +215,13 @@ subchunk_blocks_array_as_value <- function(r) {
     v1 <- match(a, u1)
     dim(v1) <- c(16L, 16L, 16L)
     ret <- list()
-    ret[[1]] <- list(values = v1, palette = block_nbt(u1))
+    ret[[1]] <- list(values = v1, palette = blocks_nbt(u1))
     if (any(b != "minecraft:air")) {
         u2 <- unique(b)
         v2 <- match(b, u2)
         dim(v2) <- c(16L, 16L, 16L)
-        ret[[2]] <- list(values = v2, palette = block_nbt(u2))
+        ret[[2]] <- list(values = v2, palette = blocks_nbt(u2))
     }
-    attr(ret, "offset") <- attr(r, "offset", exact = TRUE)
+    attr(ret, "subchunk_position") <- attr(r, "subchunk_position", exact = TRUE)
     ret
 }

@@ -1,164 +1,185 @@
-#' Load block data from one or more chunks
+#' Read and write Blocks data
 #'
-#' @description
-#' These functions return block data as strings containing the
-#' block name and block states. The strings' format is
-#' `blockname@@state1=value1@@state2=value2` etc.
-#' Blocks may have 0 or more states.
+#' Blocks data stores information about blocks in a world and their properties.
+#' Blocks data is stored per-subchunk as [SubChunkBlocks] data. These functions
+#' are wrappers around a SubChunkBlocks functions to make it easy to save and
+#' load blocks for an entire chunk.
 #'
-#' @param db A bedrockdb object.
-#' @param x,z,dimension Chunk coordinates to extract data from.
-#'    `x` can also be a character vector of db keys.
+#' * `get_blocks_value()` and `get_blocks_data()` load Blocks
+#' data from `db`. `get_blocks_value()` loads data for a single chunk,
+#' and `get_blocks_data()` loads data for multiple chunks.
+#' * `put_blocks_value()` and `put_blocks_data()` store Blocks
+#' data into `db`.
 #'
+#' @seealso SubChunkBlocks
+#'
+#' @inheritParams ChunkData
+#' @param value A 16x384x16 character array.
+#' @param values A (named) list of Blocks values. If `x` is missing, the names
+#' of `values` will be taken as the keys.
 #' @param names_only  A logical scalar. Return only the names of the blocks,
 #' ignoring block states.
 #' @param extra_block A logical scalar. Append the extra block layer to the
 #' output (separated by ";"). This is mostly useful if you have waterlogged
 #' blocks. If the extra block is air, it will not be appended.
-#' @param min_subchunk,max_subchunk The minimum and maximum subchunks of the
-#' returned array. Set to `TRUE` to use dimension defaults. Set to `FALSE` to
-#' use the values from chunk data.
 #'
-#' @return `get_chunk_blocks_data()` returns a list of the of the values
-#' returned by `read_chunk_blocks_value()`.
+#' @return `get_blocks_value()` returns a Blocks value. `get_blocks_data()`
+#' returns a named list of Blocks values.
+#'
+#' @name Blocks
+NULL
+
+#' @rdname Blocks
 #' @export
-get_chunk_blocks_data <- function(db, x, z, dimension,
-                                  names_only = FALSE,
-                                  extra_block = !names_only,
-                                  min_subchunk = TRUE,
-                                  max_subchunk = !names_only) {
-    starts_with <- .process_key_args_prefix(x, z, dimension)
-    starts_with <- vec_unique(starts_with)
-
-    dat <- purrr::map(starts_with, function(x) {
-        .get_chunk_blocks_value_impl(db,
-                                     prefix = x,
-                                     names_only = names_only,
-                                     extra_block = extra_block,
-                                     min_subchunk = min_subchunk,
-                                     max_subchunk = max_subchunk)
-    })
-
-    set_names(dat, starts_with)
+get_blocks_value <- function(x, z, dimension, db = default_db(),
+                             names_only = FALSE,
+                             extra_block = !names_only) {
+    key <- process_chunk_key_args(x, z, dimension, 47L)
+    b <- check_chunk_key_args(key, 47L)
+    b[-1] <- FALSE
+    get_blocks_value_impl(key[b], db = db, names_only = names_only,
+                          extra_block = extra_block)
 }
 
-#' @description
-#' `get_chunk_blocks_value()` is an alias for `get_chunk_blocks_data()`
+#' @rdname Blocks
 #' @export
-#' @rdname get_chunk_blocks_data
-get_chunk_blocks_values <- get_chunk_blocks_data
-
-#' @description
-#' `get_chunk_blocks_value()` loads block data from a `bedrockdb`.
-#' It only supports loading a single value.
-#'
-#' @return `get_chunk_blocks_value()`
-#' return a 16xNx16 character array. The axes represent the `x`, `y`, and `z`
-#' dimensions in that order. The size of the y-axis is based on the highest
-#' subchunk in the coordinate. Missing subchunks are considered air.
-#'
-#' @rdname get_chunk_blocks_data
-#' @export
-get_chunk_blocks_value <- function(db, x, z, dimension,
-                                   names_only = FALSE,
-                                   extra_block = !names_only,
-                                   min_subchunk = TRUE,
-                                   max_subchunk = !names_only) {
-    starts_with <- .process_key_args_prefix(x, z, dimension)
-    starts_with <- vec_unique(starts_with)
-
-    .get_chunk_blocks_value_impl(db, prefix = starts_with,
-        names_only = names_only,
-        extra_block = extra_block,
-        min_subchunk = min_subchunk,
-        max_subchunk = max_subchunk
-    )
+get_blocks_data <- function(x, z, dimension, db = default_db(),
+                            names_only = FALSE,
+                            extra_block = !names_only) {
+    keys <- process_chunk_key_args(x, z, dimension, 47L)
+    b <- check_chunk_key_args(keys, 47L)
+    ret <- vector("list", length(keys))
+    names(ret) <- keys
+    ret[b] <- lapply(keys[b], get_blocks_value_impl, db = db,
+                     names_only = names_only,
+                     extra_block = extra_block)
+    ret
 }
 
-#' @description
-#' `put_chunk_blocks_data()`, `put_chunk_blocks_values()`, and
-#' `put_chunk_blocks_value()` stores block data into a `bedrockdb`.
-#'
-#' @param data A named list of 16xNx16 character() arrays
-#' @param version Which format of subchunk data to use
-#'
-#' @rdname get_chunk_blocks_data
+#' @rdname Blocks
 #' @export
-put_chunk_blocks_data <- function(db, data, version = 9L) {
-    put_chunk_blocks_values(db, names(data), values =  data, version = version)
-}
-
-#' @param values A list of 16xNx16 character() arrays
-#'
-#' @rdname get_chunk_blocks_data
-#' @export
-put_chunk_blocks_values <- function(db, x, z, dimension, values,
-                                    version = 9L) {
-    keys <- .process_key_args_prefix(x, z, dimension)
-    values <- vec_recycle(values, length(keys), x_arg = "values")
-    f <- function(x, y) {
-        .put_chunk_blocks_value_impl(db, x, y, version = version)
+put_blocks_value <- function(value, x, z, dimension, db = default_db()) {
+    key <- process_chunk_key_args(x, z, dimension, 47L)
+    b <- check_chunk_key_args(key, 47L)
+    b[-1] <- FALSE
+    if (length(b) > 0 && b[1]) {
+        # if multiple keys were passed, assume multiple values were passed too
+        if (length(b) > 1) {
+            value <- value[[1]]
+            key <- key[[1]]
+        }
+        put_blocks_value_impl(value, key, db = db)
     }
-    purrr::walk2(keys, values, f)
+    invisible(b)
 }
 
-#' @param value A 16xNx16 character array
-#'
-#' @rdname get_chunk_blocks_data
+#' @rdname Blocks
 #' @export
-put_chunk_blocks_value <- function(db, x, z, dimension, value, version = 9L) {
-    key <- .process_key_args_prefix(x, z, dimension)
-    vec_assert(key, character(), 1L)
-    .put_chunk_blocks_value_impl(db, key, value, version = version)
+put_blocks_data <- function(values, x, z, dimension, db = default_db()) {
+    keys <- process_chunk_key_args(x, z, dimension, 47L,
+                                   values = values)
+    b <- check_chunk_key_args(keys, 47L)
+    mapply(values[b], keys[b], FUN = put_blocks_value_impl,
+           MoreArgs = list(db = db), SIMPLIFY = FALSE)
+    invisible(b)
 }
 
-.get_chunk_blocks_value_impl <- function(db, prefix, names_only,
-                                         extra_block, min_subchunk,
-                                         max_subchunk) {
+get_blocks_value_impl <- function(prefix, db, names_only, extra_block) {
+    if (length(prefix) != 1L) {
+        return(NULL)
+    }
+    prefix <- get_stem_from_chunk_key(prefix)
+    prefix <- paste0(prefix, ":47")
     p <- split_chunk_stems(prefix)
     dimension <- p[3]
 
-    prefix <- paste0(prefix, ":47")
-    dat <- .get_subchunk_blocks_data_impl(db, prefix = prefix,
-                                          names_only = names_only,
-                                          extra_block = extra_block)
-
-    # calculate lowest and highest subchunks
-    pos <- purrr::map_int(dat, attr, "offset")
-    if (is.numeric(min_subchunk)) {
-        bottom <- as.integer(min_subchunk)
-    } else if (isTRUE(min_subchunk)) {
-        bottom <- if (dimension == 0) -4 else 0
-    } else if (length(pos) > 0L) {
-        bottom <- min(pos)
-    } else {
-        bottom <- NA
-    }
-    if (is.numeric(max_subchunk)) {
-        top <- as.integer(max_subchunk)
-    } else if (isTRUE(max_subchunk)) {
-        top <- if (dimension == 0) 19 else if (dimension == 1) 7 else 15
-    } else  if (length(pos) > 0L) {
-        top <- max(pos)
-    } else {
-        top <- NA
-    }
-    if (is.na(top) || is.na(bottom)) {
+    dat <- get_data(key_prefix(prefix), db = db)
+    if (length(dat) == 0) {
         return(NULL)
     }
+    dat <- lapply(dat, read_subchunk_blocks_value)
+    dat <- lapply(dat, subchunk_blocks_value_as_array,
+                  names_only = names_only, extra_block = extra_block)
+
+    # adjust subtag
+    pos <- get_subtag_from_chunk_key(names(dat)) + 4 * (dimension == 0)
 
     # Allocate array
-    height <- 16 * (top - bottom + 1)
-    mat <- array("minecraft:air", c(16, height, 16))
+    mat <- array("minecraft:air", c(16, 384, 16))
 
     # Copy Data
-    for (i in seq_along(pos)) {
-        if (pos[i] >= bottom && pos[i] <= top) {
-            mat[, ((pos[i] - bottom) * 16) + 1:16, ] <- dat[[i]]
+    for (i in seq_along(dat)) {
+        if (pos[i] >= 0 && pos[i] < 24) {
+            mat[, 16 * pos[i] + 1:16, ] <- dat[[i]]
         }
     }
-    attr(mat, "origin") <- c(p[1], bottom, p[2]) * 16L
+    attr(mat, "origin") <- c(p[1], -4 * (dimension == 0), p[2]) * 16L
     mat
+}
+
+put_blocks_value_impl <- function(value, prefix, db) {
+    if (length(prefix) != 1L) {
+        return(FALSE)
+    }
+    prefix <- get_stem_from_chunk_key(prefix)
+    prefix <- paste0(prefix, ":47")
+    p <- split_chunk_stems(prefix)
+    dimension <- p[3]
+
+    # identify bottom location of value
+    ymin <- chunk_origin(value)[2] %||% (-64L * (dimension == 0))
+
+    if (ymin %% 16L != 0 || length(value) %% 4096 != 0) {
+        stop("Invalid Blocks value. Value must be evenly divisible into subchunks.") # nolint
+    }
+
+    # identify subchunk positions and filter based on dimension
+    # y ranges
+    # - overworld: [-64, 320)
+    # - nether: [0, 128)
+    # - the end: [0, 256)
+    offset <- ymin %/% 16
+    pos <- seq(offset, length.out = length(value) / 4096)
+    if (dimension == 0) {
+        pos <- pos[pos >= -4 & pos < 20]
+    } else if (dimension == 1) {
+        pos <- pos[pos >= 0 & pos < 8]
+    } else if (dimension == 2) {
+        pos <- pos[pos >= 0 & pos < 16]
+    }
+
+    # union of old keys and new keys for this chunk
+    old_keys <- get_keys(key_prefix(prefix), db = db)
+    new_keys <- paste(prefix, pos, sep = ":")
+    keys <- union(new_keys, old_keys)
+    # build new data
+    data <- vector("list", length(keys))
+    names(data) <- keys
+    for (i in seq_along(pos)) {
+        y <- pos[[i]] - offset
+        subchunk <- value[, y * 16L + (1:16), ]
+        # skip empty chunks
+        if (all(subchunk == "minecraft:air")) {
+            next
+        }
+        data[[new_keys[i]]] <- subchunk_blocks_array_as_value(subchunk)
+    }
+    # identify NULL blocks to delete
+    empty <- vapply(data, is.null, logical(1L))
+    empty_keys <- names(empty)[empty]
+
+    # encode data
+    values <- mapply(write_subchunk_blocks_value, data[!empty], pos[!empty],
+                     SIMPLIFY = FALSE)
+
+    batch <- db$writebatch()
+    batch$mdelete(chrkeys_to_rawkeys(empty_keys))
+    batch$mput(chrkeys_to_rawkeys(names(values)), values)
+    batch$write()
+    # clean up
+    batch$destroy()
+
+    invisible(TRUE)
 }
 
 #' Get or set the coordinates of the origin of a chunk
@@ -177,73 +198,6 @@ chunk_origin <- function(x) {
     x
 }
 
-.valid_blocks_value <- function(value) {
-    if (!is.character(value) || length(value) %% 16L != 0L) {
-        return(FALSE)
-    }
-    d <- dim(value)
-    if (length(d) != 3L || d[1] != 16L || d[3] != 16L) {
-        return(FALSE)
-    }
-    TRUE
-}
-
-.is_blocks_prefix <- function(x) {
-    grepl("^chunk:-?[0-9]+:-?[0-9]+:[0-9]+:47$", x)
-}
-
-.put_chunk_blocks_value_impl <- function(db, prefix, value, version = 9L) {
-    if (!.valid_blocks_value(value)) {
-        abort("`value` must be a 16 x 16*N x 16 character array.")
-    }
-    if (!.is_blocks_prefix(prefix)) {
-        prefix_ <- paste0(prefix, ":47")
-        if (!.is_blocks_prefix(prefix_)) {
-            msg <- sprintf("`%s` is not a valid blocks prefix", prefix)
-            abort(msg)
-        }
-        prefix <- prefix_
-    }
-
-    origin <- chunk_origin(value)
-    if (is.null(origin)) {
-        abort("`value` must have an origin.")
-    }
-
-    bottom <- origin[2] %/% 16L
-
-    # identify existing chunk data.
-    old_keys <- get_keys(prefix, db = db)
-
-    # construct new chunk data
-    data <- list()
-    subtags <- seq.int(bottom, length.out = (dim(value)[2] %/% 16L))
-    new_keys <- str_c(prefix, ":", subtags)
-    for (s in seq_along(subtags)) {
-        subchunk <- value[, (s - 1L) * 16L + (1:16), ]
-        # skip empty chunks
-        if (all(subchunk == "minecraft:air")) {
-            next
-        }
-        # extract and encode subchunk data
-        data[[new_keys[s]]] <-
-            write_subchunk_blocks_value(subchunk,
-                                        version = version,
-                                        missing_offset = subtags[s])
-    }
-    put_keys <- names(data)
-    del_keys <- old_keys[!(old_keys %in% put_keys)]
-    # write a batch
-    batch <- db$writebatch()
-    batch$mdelete(chrkeys_to_rawkeys(del_keys))
-    batch$mput(chrkeys_to_rawkeys(put_keys), data)
-    batch$write()
-    # clean up
-    batch$destroy()
-
-    invisible()
-}
-
 #' Locate the coordinates of blocks in a chunk
 #'
 #' @param blocks A character array containing block data.
@@ -253,7 +207,7 @@ chunk_origin <- function(x) {
 #' @examples
 #' dbpath <- rbedrock_example_world("example1.mcworld")
 #' db <- bedrockdb(dbpath)
-#' blocks <- get_chunk_blocks_value(db, x=37, z=10, dimension=0)
+#' blocks <- get_blocks_value(db, x=37, z=10, dimension=0)
 #' locate_blocks(blocks, "ore")
 #' close(db)
 #'
@@ -271,28 +225,6 @@ locate_blocks <- function(blocks, pattern, negate = FALSE) {
                           z = coords[3, ],
                           block = as.character(blocks[ind]))
     dplyr::arrange(ret, .data$y, .data$x, .data$z)
-}
-
-#' @description
-#' `get_subchunk_blocks_from_chunk()` loads SubchunkBlocks data from a
-#' `bedrockdb`. It supports efficiently loading subchunk block data from a
-#' single chunk.
-#'
-#' @return `get_subchunk_blocks_from_chunk()` returns a list of the of the
-#' values returned by `read_subchunk_blocks_value()`.
-
-#' @rdname SubChunkBlocks
-#' @export
-get_subchunk_blocks_from_chunk <- function(db, x, z, dimension,
-                                           names_only = FALSE,
-                                           extra_block = !names_only) {
-    starts_with <- .process_key_args_prefix(x, z, dimension)
-    vec_assert(starts_with, character(), 1L)
-    starts_with <- str_c(starts_with, ":47")
-
-    .get_subchunk_blocks_data_impl(db, prefix = starts_with,
-                                   names_only = names_only,
-                                   extra_block = extra_block)
 }
 
 #' @description
@@ -331,29 +263,6 @@ subchunk_coords <- function(ind, origins = subchunk_origins(names(ind))) {
     }
 }
 
-.chunk_blocks_apply_offsets <- function(args, dims, origin) {
-    if (length(args) == length(dims)) {
-        for (i in seq_along(args)) {
-            if (is.numeric(args[[i]])) {
-                ii <- args[[i]] - origin[i] + 1L
-                if (any(ii < 1L, na.rm = TRUE)) {
-                    rlang::abort("subscript out of bounds")
-                }
-                args[[i]] <- ii
-            }
-        }
-    } else if (length(args) == 1L) {
-        if (is.matrix(args[[1]]) && is.numeric(args[[1]])) {
-            # adjust indices
-            args[[1]] <- sweep(args[[1]], 2, origin) + 1L
-        }
-    } else if (length(args) != 0L) {
-        rlang::abort("incorrect number of dimensions")
-    }
-
-    args
-}
-
 #' Extract or replace chunk blocks from an array
 #'
 #' Convenience wrappers around `[` to extract or replace blocks from an array
@@ -374,7 +283,7 @@ chunk_blocks <- function(x, ..., drop = TRUE, origin = chunk_origin(x)) {
     args <- rlang::dots_list(..., .named = NULL,
                              .preserve_empty = TRUE,
                              .ignore_empty = "none")
-    args <- .chunk_blocks_apply_offsets(args, dim(x), origin)
+    args <- chunk_blocks_apply_offsets(args, dim(x), origin)
 
     # if this fails the error message is gnarly, see rlang::exec docs
     rlang::exec(`[`, x, !!!args, drop = drop)
@@ -386,7 +295,30 @@ chunk_blocks <- function(x, ..., drop = TRUE, origin = chunk_origin(x)) {
     args <- rlang::dots_list(..., .named = NULL,
                              .preserve_empty = TRUE,
                              .ignore_empty = "none")
-    args <- .chunk_blocks_apply_offsets(args, dim(x), origin)
+    args <- chunk_blocks_apply_offsets(args, dim(x), origin)
 
     rlang::exec(`[<-`, x, !!!args, value = value)
+}
+
+chunk_blocks_apply_offsets <- function(args, dims, origin) {
+    if (length(args) == length(dims)) {
+        for (i in seq_along(args)) {
+            if (is.numeric(args[[i]])) {
+                ii <- args[[i]] - origin[i] + 1L
+                if (any(ii < 1L, na.rm = TRUE)) {
+                    rlang::abort("subscript out of bounds")
+                }
+                args[[i]] <- ii
+            }
+        }
+    } else if (length(args) == 1L) {
+        if (is.matrix(args[[1]]) && is.numeric(args[[1]])) {
+            # adjust indices
+            args[[1]] <- sweep(args[[1]], 2, origin) + 1L
+        }
+    } else if (length(args) != 0L) {
+        rlang::abort("incorrect number of dimensions")
+    }
+
+    args
 }

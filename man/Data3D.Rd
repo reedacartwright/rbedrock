@@ -57,5 +57,5 @@ data into \code{db}.
 }
 }
 \seealso{
-Data3D
+Data2D
 }
