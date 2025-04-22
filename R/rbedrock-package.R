@@ -3,7 +3,6 @@
 #' @keywords internal
 #' @import vctrs
 #' @import rlang
-#' @import stringr
 "_PACKAGE"
 
 # The following block is used by usethis to automatically manage

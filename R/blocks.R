@@ -201,7 +201,7 @@ chunk_origin <- function(x) {
 #' Locate the coordinates of blocks in a chunk
 #'
 #' @param blocks A character array containing block data.
-#' @param pattern The pattern to look for. Passed to `stringr::str_detect`.
+#' @param pattern The pattern to look for. Passed to [base::grep].
 #' @param negate  If `TRUE`, return non-matching elements.
 #'
 #' @examples
@@ -213,7 +213,7 @@ chunk_origin <- function(x) {
 #'
 #' @export
 locate_blocks <- function(blocks, pattern, negate = FALSE) {
-    ind <- which(str_detect(blocks, pattern, negate))
+    ind <- grep(pattern, blocks, invert = negate)
 
     aind <- arrayInd(ind, dim(blocks))
     coords <- chunk_origin(blocks) + t(aind) - 1

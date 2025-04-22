@@ -9,7 +9,7 @@ locate_blocks(blocks, pattern, negate = FALSE)
 \arguments{
 \item{blocks}{A character array containing block data.}
 
-\item{pattern}{The pattern to look for. Passed to \code{stringr::str_detect}.}
+\item{pattern}{The pattern to look for. Passed to \link[base:grep]{base::grep}.}
 
 \item{negate}{If \code{TRUE}, return non-matching elements.}
 }

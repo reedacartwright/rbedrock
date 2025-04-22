@@ -26,7 +26,6 @@ Depends:
 Imports:
     tibble,
     R6,
-    stringr,
     bit64,
     rappdirs,
     rlang,

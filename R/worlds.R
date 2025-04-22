@@ -83,7 +83,7 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
     params$LastPlayed <- .nbt_now()
 
     if (fs::file_exists(dirpath)) {
-        abort(str_glue("Cannot create '{path}': it already exists."))
+        stop(paste0("Cannot create '", dirpath, "': it already exists."))
     }
 
     # create world directory and db directory
@@ -105,7 +105,8 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
     levelname <- vec_cast(dat$LevelName, character())
     readr::write_file(levelname, fs::path(dirpath, "levelname.txt"))
 
-    inform(str_glue("Success: Minecraft world created at '{dirpath}'."))
+    msg <- paste0("Success: Minecraft world created at '", dirpath, "'.")
+    message(msg)
     invisible(dirpath)
 }
 #### RULES FOR CREATING DEFAULT LEVEL DAT ####
@@ -139,7 +140,8 @@ export_world <- function(id, file, worlds_dir = worlds_dir_path(),
         if (isTRUE(replace) && fs::is_file(file)) {
             fs::file_delete(file)
         } else {
-            abort(str_glue("Cannot create '{file}': it already exists."))
+            msg <- paste0("Cannot create '", file, "': it already exists.")
+            stop(msg)
         }
     }
 
@@ -153,7 +155,8 @@ export_world <- function(id, file, worlds_dir = worlds_dir_path(),
         ret <- utils::zip(file, f, flags = "-r9Xq")
     }
 
-    inform(str_glue("Success: World '{dirpath}' exported to '{file}'."))
+    msg <- paste0("Success: World '", dirpath, "' exported to '", file, "'.")
+    message(msg)
     invisible(ret)
 }
 
@@ -184,7 +187,8 @@ import_world <- function(file, id = NULL, ..., worlds_dir = worlds_dir_path()) {
     levelname <- vec_cast(dat$LevelName, character())
     readr::write_file(levelname, fs::path(dirpath, "levelname.txt"))
 
-    inform(str_glue("Success: '{file}' imported to '{dirpath}'."))
+    msg <- paste0("Success: '", file, "' imported to '", dirpath, "'.")
+    message(msg)
     invisible(dirpath)
 }
 
@@ -206,7 +210,9 @@ get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
     if (verify && fs::is_dir(path)) {
         f <- c("db", "level.dat", "levelname.txt")
         if (!all(fs::file_exists(fs::path(path, f)))) {
-            abort(str_glue("Folder '{path}' does not contain Minecraft data."))
+            msg <- paste0("Folder '", path,
+                          "' does not contain Minecraft data.")
+            stop(msg)
         }
     }
     path
@@ -240,22 +246,23 @@ get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
     } else if (opt == "mcpe") {
         return(.rand_world_id_mcpe())
     }
-    abort(str_glue("Option rand_world_id = '{opt}' is not recognized."))
+    msg <- paste0("Option rand_world_id = '", opt, "' is not recognized.")
+    stop(msg)
 }
 
 .rand_world_id_pretty <- function() {
     y <- sample(.base58, 10L, replace = TRUE)
-    str_c(y, collapse = "")
+    paste0(y, collapse = "")
 }
 
 .rand_world_id_mcpe <- function() {
     if (!is_installed("jsonlite")) {
-        abort(str_c("Creating MCPE-like random world id requires the jsonlite",
-                    " package. Please install it and try again."))
+        msg <- "Creating MCPE-like random world id requires the jsonlite package. Please install it and try again." # nolint
+        stop(msg)
     }
     y <- as.raw(sample.int(256L, 8L, replace = TRUE) - 1L)
     y <- jsonlite::base64_enc(y)
-    str_replace(y, "/", "-")
+    gsub("/", "-", y)
 }
 
 .nbt_now <- function() {
