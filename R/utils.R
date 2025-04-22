@@ -37,3 +37,7 @@ spawning_area <- function(sim_distance, x = 0, z = 0) {
     dat$z <- dat$z + z
     tibble::as_tibble(dat)
 }
+
+read_file_raw <- function(file, ...) {
+    readBin(file, "raw", file.info(file)$size, ...)
+}

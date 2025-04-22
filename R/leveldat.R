@@ -29,7 +29,7 @@ read_leveldat <- function(path, old = FALSE) {
         path <- fs::path(path,
                          if (isFALSE(old)) "level.dat" else "level.dat_old")
     }
-    rawval <- readr::read_file_raw(path)
+    rawval <- read_file_raw(path)
 
     # remove the first 8 bytes
     rawval <- rawval[-(1:8)]
@@ -55,5 +55,5 @@ write_leveldat <- function(object, path, old = FALSE, version = 8L) {
     rawval <- writeBin(c(version, len), raw(), size = 4L, endian = "little")
     rawval <- c(rawval, dat)
 
-    readr::write_file(rawval, path)
+    writeBin(rawval, path)
 }
