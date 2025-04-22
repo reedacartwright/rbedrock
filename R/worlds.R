@@ -52,10 +52,10 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
         lastplayed <- as.POSIXct(as.numeric(payload(dat$LastPlayed)),
                                  origin = "1970-01-01 00:00:00")
         id <- fs::path_file(f)
-        list(id = id, levelname = levelname, last_opened = lastplayed)
+        data.frame(id = id, levelname = levelname, last_opened = lastplayed)
     }, type = "directory")
-    out <- dplyr::bind_rows(out)
-    out <- dplyr::arrange(out, dplyr::desc(.data$last_opened))
+    out <- do.call(rbind, out)
+    out <- out[order(out$last_opened, decreasing = TRUE), , drop = FALSE]
     out
 }
 

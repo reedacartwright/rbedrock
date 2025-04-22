@@ -29,13 +29,11 @@ Imports:
     bit64,
     rappdirs,
     rlang,
-    dplyr,
     purrr,
     readr,
     utils,
     digest,
     vctrs,
-    tidyr,
     fs
 Suggests:
     zip,

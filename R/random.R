@@ -131,7 +131,7 @@ bedrock_random_get_double <- function(n) {
 #'
 #' @examples
 #' # identify slime chunks
-#' g <- tidyr::expand_grid(x=1:10, z=1:10)
+#' g <- expand.grid(x=1:10, z=1:10)
 #' is_slime_chunk <- purrr::pmap_lgl(g, function(x,z) {
 #'   seed <- bedrock_random_create_seed(x,z,0x1f1f1f1f,1,0,type=1)
 #'   bedrock_random_seed(seed)

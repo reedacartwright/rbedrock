@@ -224,7 +224,7 @@ locate_blocks <- function(blocks, pattern, negate = FALSE) {
                           y = coords[2, ],
                           z = coords[3, ],
                           block = as.character(blocks[ind]))
-    dplyr::arrange(ret, .data$y, .data$x, .data$z)
+    ret[order(ret$y, ret$x, ret$z), , drop = FALSE]
 }
 
 #' @description
