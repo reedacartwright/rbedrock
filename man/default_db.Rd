@@ -2,18 +2,34 @@
 % Please edit documentation in R/db.R
 \name{default_db}
 \alias{default_db}
+\alias{with_db}
+\alias{local_db}
 \title{Get/set the default db connection.}
 \usage{
 default_db(db, check = TRUE)
+
+with_db(db, code, close = is.character(db))
+
+local_db(db, .local_envir = parent.frame(), close = is.character(db))
 }
 \arguments{
-\item{db}{A \code{bedrockdb} object.}
+\item{db}{For \code{default_db()}, a \code{bedrockdb} object. For \code{with_db()} and
+\code{local_db()}, a path to the world db to open or an existing \code{bedrockdb}
+object.}
 
-\item{check}{A \code{logical} specifying whether to check validity.}
+\item{check}{Check the validity of \code{db}? Set to \code{FALSE} to skip the check.}
+
+\item{code}{Code to execute in the temporary environment.}
+
+\item{close}{Close \code{db} when done? Set to \code{TRUE} to close db automatically.}
+
+\item{.local_envir}{The environment to use for scoping.}
 }
 \value{
 For \code{default_db()}, the calculated value of the default db.
 For \code{default_db(db)}, the previously manually set value of \code{default_db()}.
+For \code{with_db(db, code)}, the result of evaluating \code{code} with \code{db} as the
+default \code{db}. For \code{local_db(db)}, the value of \code{db}.
 }
 \description{
 The default db is the db connection that rbedrock uses by default. It
@@ -23,7 +39,10 @@ defaults to the most recently opened db, but can also be set by the user.
 Invoking \code{default_db()} returns the current default connection or the most
 recently opened one. Invoking \code{default_db(db)} updates the current default
 and returns the previous set value. \code{default_db(NULL)} can be used to unset
-the default db and revert to the last opened one.
+the default db and revert to the last opened one. Closing \code{db} will unset
+it as the default db as well.
+
+\code{with_db()} and \code{local_db()} temporarily change the default db.
 }
 \examples{
 dbpath <- rbedrock_example_world("example1.mcworld")
@@ -33,6 +52,13 @@ default_db() # returns dbz
 default_db(NULL) # unset default
 #cleanup
 close(dbz)
+with_db(dbpath, length(get_keys))
+db <- local_db(dbpath)
+length(get_keys())
+close(db)
 unlink(dbpath, recursive = TRUE)
 
+}
+\seealso{
+\link[withr:with_connection]{withr::with_connection}
 }

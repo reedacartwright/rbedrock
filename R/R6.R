@@ -94,7 +94,9 @@ bedrockdb <- function(path,
                            cache_capacity,
                            bloom_filter_bits_per_key,
                            compression_level)
-    the$last_opened_db <- db
+    if (!the$db_is_user_set) {
+        the$db <- db
+    }
     invisible(db)
 }
 
@@ -105,14 +107,11 @@ close.bedrockdb <- function(con, compact = FALSE, ...) {
         inform("Compacting database...")
         con$compact_range()
     }
-    # clear global connections on close
+    # clear default connection on close
     if (identical(the$db, con)) {
+        the$db_is_user_set <- FALSE
         the$db <- NULL
     }
-    if (identical(the$last_opened_db, con)) {
-        the$last_opened_db <- NULL
-    }
-
     con$close(...)
 }
 
