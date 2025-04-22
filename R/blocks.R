@@ -227,42 +227,6 @@ locate_blocks <- function(blocks, pattern, negate = FALSE) {
     ret[order(ret$y, ret$x, ret$z), , drop = FALSE]
 }
 
-#' @description
-#' `subchunk_origins()` returns a matrix containing the block coordinate of the
-#' lower NW corner of subchunk keys
-#' @param keys A character vector of database keys.
-#' @export
-#' @rdname SubChunkBlocks
-subchunk_origins <- function(keys) {
-    pos <- extract_chunk_key_components(keys, which = c(1, 5, 2))
-    pos * 16L
-}
-
-#' @description
-#' `subchunk_coords()` determines the block coordinates of blocks based on their
-#' array indexes and their subchunk origins.
-#'
-#' @param ind Numeric vector or a named list of numeric vectors containing
-#'            indexes for blocks in a subchunk.
-#' @param origins A matrix of subchunk origins.
-#'
-#' @return `subchunk_coords()` returns a 3-column matrix of block coordinates.
-#' @export
-#' @rdname SubChunkBlocks
-subchunk_coords <- function(ind, origins = subchunk_origins(names(ind))) {
-    if (is.character(origins)) {
-        origins <- subchunk_origins(origins)
-    }
-
-    f <- function(x, y) t(y - 1L + t(arrayInd(x, c(16, 16, 16))))
-    if (is.list(ind)) {
-        o <- purrr::array_tree(origins, 1)
-        purrr::map2(ind, o, f)
-    } else {
-        f(ind, as.vector(origins))
-    }
-}
-
 #' Extract or replace chunk blocks from an array
 #'
 #' Convenience wrappers around `[` to extract or replace blocks from an array

@@ -16,20 +16,21 @@ bedrock_random_create_seed(x, z, a, b, salt, type)
 \item{type}{which seed type to use}
 }
 \description{
+Minecraft uses several different kind of seeds during world generation and
+gameplay.
+}
+\details{
 \code{bedrock_random_create_seed()} constructs a seed using the formulas
 type 1: \code{x*a ^ z*b ^ salt}, type 2: \code{x*a + z*b + salt}, and type 3:
 \code{x*a + z*b ^ salt}.
 }
-\details{
-Minecraft uses several different kind of seeds during world generation and
-gameplay.
-}
 \examples{
 # identify slime chunks
 g <- expand.grid(x=1:10, z=1:10)
-is_slime_chunk <- purrr::pmap_lgl(g, function(x,z) {
+is_slime_chunk <- mapply(g$x, g$z, FUN = function(x,z) {
   seed <- bedrock_random_create_seed(x,z,0x1f1f1f1f,1,0,type=1)
   bedrock_random_seed(seed)
   bedrock_random_get_uint(1,10) == 0
 })
+
 }

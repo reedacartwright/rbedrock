@@ -29,7 +29,6 @@ Imports:
     bit64,
     rappdirs,
     rlang,
-    purrr,
     readr,
     utils,
     digest,

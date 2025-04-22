@@ -18,15 +18,20 @@
 #' * `put_subchunk_blocks_value()` and `put_subchunk_blocks_data()` store
 #'   SubChunkBlocks data into `db`.
 #' * `write_subchunk_blocks_value()` encodes SubChunkBlocks data into a raw
-#'    vector. `read_subchunk_blocks_value()` decodes binary SubChunkBlocks data.
+#'   vector. `read_subchunk_blocks_value()` decodes binary SubChunkBlocks data.
 #' * `subchunk_blocks_value_as_array()` converts SubChunkBlocks data into a
-#'    character array.
+#'   character array.
+#' * `subchunk_origins()` returns a matrix containing the block coordinate of
+#'   the lower NW corner of subchunk keys.
+#' * `subchunk_coords()` determines the block coordinates of blocks based on
+#'   their array indexes and their subchunk origins.
 #'
 #' @inheritParams ChunkData
 #' @param subchunk Subchunk indexes
 #' @param value A SubChunkBlocks data value
 #' @param values A (named) list of SubChunkBlocks data values. If `x` is
 #'   missing, the names of `values` will be taken as the keys.
+#' @param keys A character vector of keys.
 #' @param version Which format of subchunk data to use
 #' @param names_only  A logical scalar. Return only the names of the blocks,
 #' ignoring block states.
@@ -38,6 +43,9 @@
 #' @param subchunk_position Optional, an integer. When reading a value, it will
 #' be used if the value's position attribute is missing. When writing a value,
 #' it will be used in place of the value's position attribute.
+#' @param ind Numeric vector or a named list of numeric vectors containing
+#'            indexes for blocks in a subchunk.
+#' @param origins A matrix of subchunk origins.
 #'
 #' @return `get_subchunk_blocks_value()` returns a SubChunkBlocks data value.
 #' `get_biomes_data()` returns a named list of SubChunkBlocks data values.
@@ -224,4 +232,26 @@ subchunk_blocks_array_as_value <- function(r) {
     }
     attr(ret, "subchunk_position") <- attr(r, "subchunk_position", exact = TRUE)
     ret
+}
+
+#' @rdname SubChunkBlocks
+#' @export
+subchunk_origins <- function(keys) {
+    pos <- extract_chunk_key_components(keys, which = c(1, 5, 2))
+    pos * 16L
+}
+
+#' @rdname SubChunkBlocks
+#' @export
+subchunk_coords <- function(ind, origins = subchunk_origins(names(ind))) {
+    f <- function(x, y) {
+        t(as.vector(y) - 1L + t(arrayInd(x, c(16, 16, 16))))
+    }
+    if (is.list(ind)) {
+        lapply(seq_along(ind), function(j) {
+            f(ind[[j]], origins[j, , drop = FALSE])
+        })
+    } else {
+        f(ind, origins)
+    }
 }

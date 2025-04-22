@@ -298,7 +298,7 @@ new_nbt_long_array <- function(x) {
 #' @export
 new_nbt_compound <- function(x) {
     vec_assert(x, ptype = list())
-    if (!all(purrr::map_lgl(x, is_nbt))) {
+    if (!all(sapply(x, is_nbt))) {
         abort("an nbt_compound can only hold nbt data")
     }
     new_vctr(x, class = c("rbedrock_nbt_compound",
@@ -423,9 +423,9 @@ from_rnbt <- function(x) {
         return(x)
     }
     # extract names
-    n <- purrr::map_chr(x, .extract_rnbt_name)
+    n <- sapply(x, .extract_rnbt_name)
     # extract values
-    v <- purrr::map(x, function(y) {
+    v <- lapply(x, function(y) {
         from_rnbt_payload(y[["payload"]], y[["tag"]])
     })
     # Set names if any exist
@@ -459,9 +459,11 @@ from_rnbt <- function(x) {
 to_rnbt <- function(x) {
     n <- names(x) %||% rep("", length(x))
     names(x) <- NULL
-    purrr::map2(x, n, function(y, z) {
-        vec_c(list(name = z), to_rnbt_payload(y), .ptype = list())
-    })
+    ret <- vector("list", length(x))
+    for (i in seq_along(ret)) {
+        ret[[i]] <- c(list(name = n[[i]]), to_rnbt_payload(x[[i]]))
+    }
+    ret
 }
 
 #' @rdname rnbt
@@ -469,7 +471,7 @@ to_rnbt <- function(x) {
 #' @export
 from_rnbt_payload <- function(x, tag) {
     if (tag == 9L) {
-        v <- purrr::map(x, function(y) {
+        v <- lapply(x, function(y) {
             from_rnbt_payload(y[["payload"]], y[["tag"]])
         })
         new_nbt_list(v)
@@ -502,7 +504,7 @@ to_rnbt_payload.rbedrock_nbt_compound <- function(x) {
 
 #' @export
 to_rnbt_payload.rbedrock_nbt_list <- function(x) {
-    list(tag = 9L, payload = purrr::map(x, to_rnbt_payload))
+    list(tag = 9L, payload = lapply(x, to_rnbt_payload))
 }
 
 #' @rdname rnbt
