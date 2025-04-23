@@ -9,7 +9,6 @@
 # roxygen namespace tags. Modify with care!
 ## usethis namespace: start
 #' @importFrom utils modifyList
-#' @importFrom utils head
 #' @importFrom R6 R6Class
 ## usethis namespace: end
 NULL
