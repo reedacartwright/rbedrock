@@ -17,19 +17,19 @@
 #' @rdname nbt
 #' @export
 nbt_byte <- function(x) {
-    new_nbt_byte(vec_cast(x, integer()))
+    new_nbt_byte(trunc(vec_cast(x, double())))
 }
 
 #' @rdname nbt
 #' @export
 nbt_short <- function(x) {
-    new_nbt_short(vec_cast(x, integer()))
+    new_nbt_short(trunc(vec_cast(x, double())))
 }
 
 #' @rdname nbt
 #' @export
 nbt_int <- function(x) {
-    new_nbt_int(vec_cast(x, integer()))
+    new_nbt_int(trunc(vec_cast(x, double())))
 }
 
 #' @rdname nbt
@@ -53,7 +53,7 @@ nbt_double <- function(x) {
 #' @rdname nbt
 #' @export
 nbt_byte_array <- function(x) {
-    new_nbt_byte_array(vec_cast(x, integer()))
+    new_nbt_byte_array(trunc(vec_cast(x, double())))
 }
 
 #' @rdname nbt
@@ -71,7 +71,7 @@ nbt_raw_string <- function(x) {
 #' @rdname nbt
 #' @export
 nbt_int_array <- function(x) {
-    new_nbt_int_array(vec_cast(x, integer()))
+    new_nbt_int_array(trunc(vec_cast(x, double())))
 }
 
 #' @rdname nbt
@@ -228,19 +228,19 @@ new_rbedrock_nbt_scalar <- function(x, class, ptype = NULL, size = NULL) {
 #' @rdname new_nbt
 #' @export
 new_nbt_byte <- function(x) {
-    new_rbedrock_nbt_scalar(x, "byte", integer(), 1)
+    new_rbedrock_nbt_scalar(x, "byte", double(), 1)
 }
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
 new_nbt_short <- function(x) {
-    new_rbedrock_nbt_scalar(x, "short", integer(), 1)
+    new_rbedrock_nbt_scalar(x, "short", double(), 1)
 }
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
 new_nbt_int <- function(x) {
-    new_rbedrock_nbt_scalar(x, "int", integer(), 1)
+    new_rbedrock_nbt_scalar(x, "int", double(), 1)
 }
 #' @keywords internal
 #' @rdname new_nbt
@@ -265,7 +265,7 @@ new_nbt_double <- function(x) {
 #' @rdname new_nbt
 #' @export
 new_nbt_byte_array <- function(x) {
-    new_rbedrock_nbt_scalar(x, "byte_array", integer())
+    new_rbedrock_nbt_scalar(x, "byte_array", double())
 }
 #' @keywords internal
 #' @rdname new_nbt
@@ -284,7 +284,7 @@ new_nbt_raw_string <- function(x) {
 #' @rdname new_nbt
 #' @export
 new_nbt_int_array <- function(x) {
-    new_rbedrock_nbt_scalar(x, "int_array", integer())
+    new_rbedrock_nbt_scalar(x, "int_array", double())
 }
 #' @keywords internal
 #' @rdname new_nbt

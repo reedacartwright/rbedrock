@@ -24,8 +24,8 @@ Roxygen: list(markdown = TRUE)
 Depends:
     R (>= 3.6.0)
 Imports:
-    tibble,
     R6,
+    tibble,
     bit64,
     rappdirs,
     rlang,

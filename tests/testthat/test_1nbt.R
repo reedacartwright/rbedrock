@@ -60,6 +60,14 @@ test_that("read_nbt can read ints", {
         payload = -100L
     )))
     expect_equal(read_nbt(neg_dat), list(test = nbt_int(-100L)))
+
+    # Check that INT_MIN isn't read as NA
+    neg_dat <- as_raw(tags$int, rawstr("test"), 0, 0, 0, 128)
+    expect_equal(read_rnbt(neg_dat), list(list(
+        name = "test", tag = 3L,
+        payload = -2147483648
+    )))
+    expect_equal(read_nbt(neg_dat), list(test = nbt_int(-2147483648)))
 })
 
 test_that("read_nbt can read longs", {

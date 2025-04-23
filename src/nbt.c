@@ -92,19 +92,22 @@ static SEXP read_nbt_payload_integer(const unsigned char** ptr, const unsigned c
     if(end-p < size*n) {
         return R_NilValue;
     }
-    SEXP res = PROTECT(Rf_allocVector(INTSXP, n));
-    int *x = INTEGER(res);
+    // Store integers as doubles and avoid loss of information from NAs
+    SEXP res = PROTECT(Rf_allocVector(REALSXP, n));
+    double *x = REAL(res);
     for(int i=0; i < n; ++i) {
         if(size == 1) {
             signed char y;
             memcpy(&y, p, 1);
-            x[i] = y;
+            x[i] = (double)y;
         } else if(size == 2) {
             short y;
             memcpy(&y, p, 2);
-            x[i] = y;            
+            x[i] = (double)y;
         } else {
-            memcpy(x+i, p, 4);
+            int y;
+            memcpy(&y, p, 4);
+            x[i] = (double)y;
         }
         p += size;
     }
@@ -316,17 +319,17 @@ static R_xlen_t write_nbt_integer_payload(SEXP r_value, unsigned char** ptr,
     const unsigned char* end, int size, bool is_array) {
     // validate data
     if(is_array) {
-        if(!Rf_isInteger(r_value)) {
+        if(!Rf_isReal(r_value)) {
             return_nbt_error0();
         }
     } else {
-        if(!IS_SCALAR(r_value, INTSXP)) {
+        if(!IS_SCALAR(r_value, REALSXP)) {
             return_nbt_error0();
         }
     }
     unsigned char *p = *ptr;
     R_xlen_t len = XLENGTH(r_value);
-    int *data = INTEGER(r_value);
+    double *data = REAL(r_value);
     R_xlen_t retsz = len*size + is_array * 4;
     if(end-p < retsz) {
         // do nothing except return size if there is no buffer space
@@ -353,8 +356,11 @@ static R_xlen_t write_nbt_integer_payload(SEXP r_value, unsigned char** ptr,
         }
         break;
      case 4:
-        memcpy(p, data, 4*len);
-        p += 4*len;
+        for(R_xlen_t i=0; i < len; ++i) {
+            int y = (int)data[i];
+            memcpy(p, &y, sizeof(y));
+            p += sizeof(y);
+        }
         break;
      default:
         return_nbt_error0();
