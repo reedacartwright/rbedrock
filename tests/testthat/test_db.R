@@ -78,7 +78,7 @@ test_that("with_db() sets the default db temporarily", {
     # With a character string
     expect_null(default_db(check = FALSE))
     db <- with_db(dbpath1, default_db())
-    expect_equal(db$path, file.path(dbpath1, "db"))
+    expect_equal(db$path, file_path(dbpath1, "db"))
     expect_false(db$is_open())
     expect_null(default_db(check = FALSE))
 
@@ -87,7 +87,7 @@ test_that("with_db() sets the default db temporarily", {
     expect_identical(default_db()$db, db2$db)
     db <- with_db(bedrockdb(dbpath1), default_db())
     expect_identical(default_db()$db, db2$db)
-    expect_equal(db$path, file.path(dbpath1, "db"))
+    expect_equal(db$path, file_path(dbpath1, "db"))
     expect_true(db$is_open())
     close(db)
     close(db2)
@@ -96,7 +96,7 @@ test_that("with_db() sets the default db temporarily", {
     expect_null(default_db(check = FALSE))
     db <- with_db(bedrockdb(dbpath1), default_db(), close = TRUE)
     expect_null(default_db(check = FALSE))
-    expect_equal(db$path, file.path(dbpath1, "db"))
+    expect_equal(db$path, file_path(dbpath1, "db"))
     expect_false(db$is_open())
 
     # Acts just like default_db() was manually called
