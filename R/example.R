@@ -26,5 +26,5 @@ rbedrock_example_world <- function(path) {
     path <- rbedrock_example(path)
     destdir <- tempfile("world")
     path <- suppressMessages(import_world(path, destdir))
-    normalizePath(path)
+    normalize_path(path)
 }

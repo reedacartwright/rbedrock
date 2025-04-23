@@ -204,7 +204,6 @@ fixup_path <- function(id, worlds_dir = worlds_dir_path(), verify = FALSE) {
     if (!(fs::is_absolute_path(path) || fs::file_exists(path))) {
         path <- file_path(worlds_dir, path)
     }
-    path <- normalize_path(path)
     if (verify && fs::is_dir(path)) {
         f <- c("db", "level.dat", "levelname.txt")
         if (!all(fs::file_exists(file_path(path, f)))) {
@@ -213,15 +212,14 @@ fixup_path <- function(id, worlds_dir = worlds_dir_path(), verify = FALSE) {
             stop(msg)
         }
     }
-    path
+    normalize_path(path)
 }
 
 fixup_or_create_path <- function(id = NULL, worlds_dir = worlds_dir_path()) {
     if (is.null(id)) {
         # create a random world directory
         repeat {
-            path <- rand_world_id()
-            path <- normalize_path(worlds_dir, path)
+            path <- fixup_path(rand_world_id(), worlds_dir)
             # check for collisions
             if (!fs::file_exists(path)) {
                 return(path)
