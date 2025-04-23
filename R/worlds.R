@@ -73,7 +73,6 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
 #' @rdname minecraft_worlds
 #' @export
 create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
-
     dirpath <- fixup_or_create_path(id, worlds_dir)
     params <- list2(...)
 
@@ -85,7 +84,8 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
     }
 
     # create world directory and db directory
-    dbpath <- normalize_path(fs::dir_create(file_path(dirpath, "db")))
+    dbpath <- normalize_path(dirpath, "db")
+    fs::dir_create(dbpath)
 
     # create db and close
     db <- bedrock_leveldb_open(dbpath, create_if_missing = TRUE)
