@@ -221,7 +221,7 @@ fixup_or_create_path <- function(id = NULL, worlds_dir = worlds_dir_path()) {
         # create a random world directory
         repeat {
             path <- rand_world_id()
-            path <- file_path(worlds_dir, path)
+            path <- normalize_path(worlds_dir, path)
             # check for collisions
             if (!fs::file_exists(path)) {
                 return(path)

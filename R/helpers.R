@@ -11,5 +11,5 @@ file_path <- function(...) {
 }
 
 normalize_path <- function(...) {
-    normalizePath(file.path(...), winslash = "/", mustWork = FALSE)
+    normalizePath(file_path(...), winslash = "/", mustWork = FALSE)
 }
