@@ -201,8 +201,10 @@ fixup_path <- function(id, worlds_dir = worlds_dir_path(), verify = FALSE) {
     path <- vec_cast(id, character())
 
     # if path is absolute, or it already exists don't append it to worlds_dir
-    if (!(fs::is_absolute_path(path) || fs::file_exists(path))) {
-        path <- file_path(worlds_dir, path)
+    if(fs::is_absolute_path(path) || fs::file_exists(path)) {
+        path <- normalize_path(path)
+    } else {
+        path <- file_path(normalize_path(worlds_dir), path)
     }
     if (verify && fs::is_dir(path)) {
         f <- c("db", "level.dat", "levelname.txt")
@@ -212,7 +214,7 @@ fixup_path <- function(id, worlds_dir = worlds_dir_path(), verify = FALSE) {
             stop(msg)
         }
     }
-    normalize_path(path)
+    path
 }
 
 fixup_or_create_path <- function(id = NULL, worlds_dir = worlds_dir_path()) {
