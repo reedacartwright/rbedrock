@@ -3,7 +3,6 @@
 #' @name minecraft_worlds
 #' @examples
 #' \dontrun{
-#'
 #' create_world(LevelName = "My World", RandomSeed = 10)
 #' }
 NULL
@@ -27,8 +26,7 @@ worlds_dir_path <- function(force_default = FALSE) {
         } else {
             datadir <- rappdirs::user_data_dir("mcpelauncher")
         }
-        opt <- fs::path_abs(fs::path(datadir,
-                                     "games/com.mojang/minecraftWorlds"))
+        opt <- normalize_path(datadir, "games/com.mojang/minecraftWorlds")
     }
     opt
 }
@@ -44,14 +42,14 @@ worlds_dir_path <- function(force_default = FALSE) {
 list_worlds <- function(worlds_dir = worlds_dir_path()) {
     out <- fs::dir_map(worlds_dir, function(f) {
         #skip directories that do not contain a level.dat
-        if (!fs::file_exists(fs::path(f, "level.dat"))) {
+        if (!fs::file_exists(normalize_path(f, "level.dat"))) {
             return(NULL)
         }
         dat <- read_leveldat(f)
         levelname <- payload(dat$LevelName)
         lastplayed <- as.POSIXct(as.numeric(payload(dat$LastPlayed)),
                                  origin = "1970-01-01 00:00:00")
-        id <- fs::path_file(f)
+        id <- file_path(f)
         data.frame(id = id, levelname = levelname, last_opened = lastplayed)
     }, type = "directory")
     out <- do.call(rbind, out)
@@ -76,18 +74,18 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
 #' @export
 create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
 
-    dirpath <- .fixup_or_create_path(id, worlds_dir)
+    dirpath <- fixup_or_create_path(id, worlds_dir)
     params <- list2(...)
 
-    params$RandomSeed <- params$RandomSeed %||% .nbt_random_seed()
-    params$LastPlayed <- .nbt_now()
+    params$RandomSeed <- params$RandomSeed %||% nbt_random_seed()
+    params$LastPlayed <- nbt_now()
 
     if (fs::file_exists(dirpath)) {
         stop(paste0("Cannot create '", dirpath, "': it already exists."))
     }
 
     # create world directory and db directory
-    dbpath <- fs::path_real(fs::dir_create(fs::path(dirpath, "db")))
+    dbpath <- normalize_path(fs::dir_create(file_path(dirpath, "db")))
 
     # create db and close
     db <- bedrock_leveldb_open(dbpath, create_if_missing = TRUE)
@@ -103,8 +101,8 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
     write_leveldat(dat, dirpath)
 
     levelname <- vec_cast(dat$LevelName, character())
-    writeLines(levelname, fs::path(dirpath, "levelname.txt"))
-    
+    writeLines(levelname, file_path(dirpath, "levelname.txt"))
+
     msg <- paste0("Success: Minecraft world created at '", dirpath, "'.")
     message(msg)
     invisible(dirpath)
@@ -133,8 +131,8 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
 export_world <- function(id, file, worlds_dir = worlds_dir_path(),
                          replace = FALSE) {
     vec_assert(file, character(), 1L)
-    file <- fs::path_abs(file)
-    dirpath <- .fixup_path(id, worlds_dir, verify = TRUE)
+    file <- normalize_path(file)
+    dirpath <- fixup_path(id, worlds_dir, verify = TRUE)
 
     if (fs::file_exists(file)) {
         if (isTRUE(replace) && fs::is_file(file)) {
@@ -163,11 +161,11 @@ export_world <- function(id, file, worlds_dir = worlds_dir_path(),
 #' @rdname minecraft_worlds
 #' @export
 import_world <- function(file, id = NULL, ..., worlds_dir = worlds_dir_path()) {
-    file <- fs::path_real(file)
-    dirpath <- .fixup_or_create_path(id, worlds_dir)
+    file <- normalize_path(file)
+    dirpath <- fixup_or_create_path(id, worlds_dir)
 
     params <- list2(...)
-    params$LastPlayed <- .nbt_now()
+    params$LastPlayed <- nbt_now()
 
     if (is_installed("zip")) {
         zip::unzip(file, exdir = dirpath)
@@ -185,7 +183,7 @@ import_world <- function(file, id = NULL, ..., worlds_dir = worlds_dir_path()) {
     write_leveldat(dat, dirpath)
 
     levelname <- vec_cast(dat$LevelName, character())
-    writeLines(levelname, fs::path(dirpath, "levelname.txt"))
+    writeLines(levelname, normalize_path(dirpath, "levelname.txt"))
 
     msg <- paste0("Success: '", file, "' imported to '", dirpath, "'.")
     message(msg)
@@ -195,21 +193,21 @@ import_world <- function(file, id = NULL, ..., worlds_dir = worlds_dir_path()) {
 #' @rdname minecraft_worlds
 #' @export
 get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
-    .fixup_path(id, worlds_dir = worlds_dir, verify = TRUE)
+    fixup_path(id, worlds_dir = worlds_dir, verify = TRUE)
 }
 
-.fixup_path <- function(id, worlds_dir = worlds_dir_path(), verify = FALSE) {
+fixup_path <- function(id, worlds_dir = worlds_dir_path(), verify = FALSE) {
     vec_assert(id, size = 1L)
     path <- vec_cast(id, character())
 
     # if path is absolute, or it already exists don't append it to worlds_dir
     if (!(fs::is_absolute_path(path) || fs::file_exists(path))) {
-        path <- fs::path(worlds_dir, path)
+        path <- file_path(worlds_dir, path)
     }
-    path <- fs::path_abs(path)
+    path <- normalize_path(path)
     if (verify && fs::is_dir(path)) {
         f <- c("db", "level.dat", "levelname.txt")
-        if (!all(fs::file_exists(fs::path(path, f)))) {
+        if (!all(fs::file_exists(file_path(path, f)))) {
             msg <- paste0("Folder '", path,
                           "' does not contain Minecraft data.")
             stop(msg)
@@ -218,19 +216,19 @@ get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
     path
 }
 
-.fixup_or_create_path <- function(id = NULL, worlds_dir = worlds_dir_path()) {
+fixup_or_create_path <- function(id = NULL, worlds_dir = worlds_dir_path()) {
     if (is.null(id)) {
         # create a random world directory
         repeat {
-            path <- .rand_world_id()
-            path <- fs::path(worlds_dir, path)
+            path <- rand_world_id()
+            path <- file_path(worlds_dir, path)
             # check for collisions
             if (!fs::file_exists(path)) {
                 return(path)
             }
         }
     }
-    .fixup_path(id, worlds_dir)
+    fixup_path(id, worlds_dir)
 }
 
 .base58 <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D",
@@ -239,23 +237,23 @@ get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
              "g", "h", "i", "j", "k", "m", "n", "o", "p", "q", "r", "s", "t",
              "u", "v", "w", "x", "y", "z")
 
-.rand_world_id <- function() {
+rand_world_id <- function() {
     opt <- getOption("rbedrock.rand_world_id")
     if (opt == "pretty") {
-        return(.rand_world_id_pretty())
+        return(rand_world_id_pretty())
     } else if (opt == "mcpe") {
-        return(.rand_world_id_mcpe())
+        return(rand_world_id_mcpe())
     }
     msg <- paste0("Option rand_world_id = '", opt, "' is not recognized.")
     stop(msg)
 }
 
-.rand_world_id_pretty <- function() {
+rand_world_id_pretty <- function() {
     y <- sample(.base58, 10L, replace = TRUE)
     paste0(y, collapse = "")
 }
 
-.rand_world_id_mcpe <- function() {
+rand_world_id_mcpe <- function() {
     if (!is_installed("jsonlite")) {
         msg <- "Creating MCPE-like random world id requires the jsonlite package. Please install it and try again." # nolint
         stop(msg)
@@ -265,11 +263,11 @@ get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
     gsub("/", "-", y)
 }
 
-.nbt_now <- function() {
+nbt_now <- function() {
     nbt_long(as.numeric(Sys.time()))
 }
 
-.nbt_random_seed <- function() {
+nbt_random_seed <- function() {
     s <- bit64::runif64(1)
     nbt_long(s)
 }
@@ -287,7 +285,7 @@ compact_world <- function(db) {
 #' @keywords internal
 #' @export
 repair_world <- function(id) {
-    path <- .fixup_path(id)
-    path <- fs::path(path, "db")
+    path <- fixup_path(id)
+    path <- file_path(path, "db")
     bedrock_leveldb_repair(path)
 }

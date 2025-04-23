@@ -23,11 +23,11 @@ read_leveldat <- function(path, old = FALSE) {
     if (is_bedrockdb(path)) {
         path <- fs::path_dir(path$path)
     }
-    path <- .fixup_path(path, verify = TRUE)
+    path <- fixup_path(path, verify = TRUE)
     # if path is a directory append filename
     if (fs::is_dir(path)) {
-        path <- fs::path(path,
-                         if (isFALSE(old)) "level.dat" else "level.dat_old")
+        path <- file_path(path,
+                          if (isFALSE(old)) "level.dat" else "level.dat_old")
     }
     rawval <- read_file_raw(path)
 
@@ -44,16 +44,16 @@ write_leveldat <- function(object, path, old = FALSE, version = 8L) {
     if (is_bedrockdb(path)) {
         path <- fs::path_dir(path$path)
     }
-    path <- .fixup_path(path)
+    path <- fixup_path(path)
     # if path is a directory append filename
     if (fs::is_dir(path)) {
-        path <- fs::path(path,
-                         if (isFALSE(old)) "level.dat" else "level.dat_old")
+        path <- file_path(path,
+                          if (isFALSE(old)) "level.dat" else "level.dat_old")
     }
     dat <- write_nbt(object)
     len <- length(dat)
     rawval <- writeBin(c(version, len), raw(), size = 4L, endian = "little")
     rawval <- c(rawval, dat)
 
-    writeBin(rawval, path)
+    write_file_raw(rawval, path)
 }

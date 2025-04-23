@@ -129,10 +129,10 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list( # nolint: object_name_li
     leveldat_is_dirty = FALSE,
     unique_id = NULL,
     initialize = function(path, ...) {
-        path <- fs::path_real(.fixup_path(path))
+        path <- normalize_path(fixup_path(path))
         dat <- read_leveldat(path)
         self$levelname <- payload(dat$LevelName)
-        self$path <- fs::path(path, "db")
+        self$path <- file_path(path, "db")
         self$db <- bedrock_leveldb_open(self$path, ...)
         self$leveldat <- dat
     },

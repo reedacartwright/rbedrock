@@ -14,7 +14,7 @@ test_that("create_world creates a world that can be loaded", {
         worlds_dir = worlds_dir
     ), "Success")
 
-    expect_equal(dbpath, fs::path(worlds_dir, "test"))
+    expect_equal(dbpath, normalize_path(worlds_dir, "test"))
 
     # test that all the values have been properly set
     dat <- read_leveldat(dbpath, old = FALSE)
