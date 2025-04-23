@@ -201,8 +201,12 @@ fixup_path <- function(id, worlds_dir = worlds_dir_path(), verify = FALSE) {
     path <- vec_cast(id, character())
 
     # if path is absolute, or it already exists don't append it to worlds_dir
-    if(fs::is_absolute_path(path) || fs::file_exists(path)) {
-        path <- normalize_path(path)
+    if (fs::is_absolute_path(path) || fs::file_exists(path)) {
+        # if path doesn't exist, normalize_path won't work right. Normalize
+        # its directory instead.
+        dir <- dirname(path)
+        path <- basename(path)
+        path <- file_path(normalize_path(dir), path)
     } else {
         path <- file_path(normalize_path(worlds_dir), path)
     }
