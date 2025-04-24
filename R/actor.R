@@ -190,8 +190,7 @@ put_actors_value <- function(value, x, z, dimension, db = default_db()) {
 }
 
 put_actors_value_impl <- function(value, dig_key, db) {
-    ids <- vapply(value, `[[`, double(1L), "UniqueID", USE.NAMES = FALSE)
-    class(ids) <- "integer64"
+    ids <- vapply(value, `[[`, character(1L), "UniqueID", USE.NAMES = FALSE)
     storage_keys <- make_storagekeys(ids)
     actor_keys <- read_acdig_value(unlist(storage_keys))
 
@@ -215,7 +214,7 @@ put_actors_value_impl <- function(value, dig_key, db) {
 }
 
 make_storagekeys <- function(ids) {
-    vec_assert(ids, bit64::integer64())
+    vec_assert(ids, character())
     .Call(rbedrock_actor_make_storagekeys, ids)
 }
 

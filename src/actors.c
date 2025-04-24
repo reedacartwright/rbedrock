@@ -47,14 +47,23 @@ SEXP rbedrock_actor_make_uniqueids(SEXP low_counter, SEXP high_counter) {
 }
 
 SEXP rbedrock_actor_make_storagekeys(SEXP ids) {
-    if(TYPEOF(ids) != REALSXP) {
-        Rf_error("argument is not an integer64");
+    if(TYPEOF(ids) != STRSXP) {
+        Rf_error("argument is not an character");
     }
     R_xlen_t len = XLENGTH(ids);
     SEXP result = PROTECT(Rf_allocVector(VECSXP, len));
+    const char *str = NULL;
+    char * strend = NULL;
     for(R_xlen_t i = 0; i < len; ++i) {
-        uint64_t u;
-        memcpy(&u, &REAL(ids)[i], 8);
+        str = Rf_translateCharUTF8(STRING_ELT(ids, i));
+        // str is in signed format. Use strtoll to convert it,
+        // then cast it to unsigned number.
+        uint64_t u = (uint64_t)strtoll(str, &strend, 10);
+        if(*strend != '\0') {
+            Rf_error("Malformed data: at %s, line %d.", 
+                __FILE__, __LINE__ );
+            return R_NilValue;
+        }
         uint64_t lo = (uint32_t)u;
         u = 2*lo - u; // negate the upper 32-bit of u while keeping the lower bits unchanged
         u = __builtin_bswap64(u); // probably not 100% portable

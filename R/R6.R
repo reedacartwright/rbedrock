@@ -204,6 +204,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list( # nolint: object_name_li
     create_unique_ids = function(n) {
         if (is_null(self$unique_id)) {
             cnt <- payload(self$leveldat$worldStartCount %||% nbt_long(0))
+            cnt <- bit64::as.integer64(cnt)
             self$leveldat$worldStartCount <- nbt_long(cnt - 1)
             self$leveldat_is_dirty <- TRUE
             self$unique_id <- (cnt - 2^32) * 2^32

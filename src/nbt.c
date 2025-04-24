@@ -169,15 +169,22 @@ static SEXP read_nbt_payload_numeric(const unsigned char** ptr, const unsigned c
 }
 
 static SEXP read_nbt_payload_integer64(const unsigned char** ptr, const unsigned char* end, int tag, int n) {
-    SEXP r_payload = PROTECT(read_nbt_payload_numeric(ptr, end, tag, n));
-    if(Rf_isNull(r_payload)) {
-        UNPROTECT(1);
-        return r_payload;
+    const unsigned char *p = *ptr;
+    if(end-p < payload_size(tag, n)) {
+        return_nbt_error();
     }
-    SEXP r_class = PROTECT(Rf_ScalarString(Rf_mkChar("integer64")));
-    Rf_setAttrib(r_payload, R_ClassSymbol, r_class);
-    UNPROTECT(2);
-    return r_payload;
+    SEXP res = PROTECT(Rf_allocVector(STRSXP, n));
+    signed long long ylong;
+    char buffer[22];
+    for(int i=0; i < n; ++i) {
+        memcpy(&ylong, p, 8);
+        p += 8;
+        snprintf(buffer, sizeof(buffer), "%lli", ylong);
+        SET_STRING_ELT(res, i, Rf_mkCharCE(buffer, CE_UTF8));
+    }
+    *ptr = p;
+    UNPROTECT(1);
+    return res;
 }
 
 static SEXP read_nbt_list_payload(const unsigned char** ptr, const unsigned char* end) {
@@ -412,6 +419,48 @@ static R_xlen_t write_nbt_numeric_payload(SEXP r_value, unsigned char** ptr,
     return retsz;
 }
 
+static R_xlen_t write_nbt_integer64_payload(SEXP r_value, unsigned char** ptr,
+    const unsigned char* end, int tag, bool is_array) {
+    // validate data
+    if(is_array) {
+        if(!Rf_isString(r_value)) {
+            return_nbt_error0();
+        }
+    } else {
+        if(!IS_SCALAR(r_value, STRSXP)) {
+            return_nbt_error0();
+        }
+    }
+    unsigned char *p = *ptr;
+    R_xlen_t len = XLENGTH(r_value);
+    R_xlen_t retsz = payload_size(tag, len) + is_array * 4;
+
+    if(end-p < retsz) {
+        // do nothing except return size if there is no buffer space
+        return retsz;
+    }
+    if(is_array) {
+        int ilen = (int)len;
+        memcpy(p, &ilen, sizeof(ilen));
+        p += sizeof(ilen);
+    }
+    signed long long ylong;
+    const char *str = NULL;
+    char * strend = NULL;
+    for(R_xlen_t i = 0; i < len; ++i) {
+        str = Rf_translateCharUTF8(STRING_ELT(r_value, i));
+        ylong = strtoll(str, &strend, 10);
+        if(*strend != '\0') {
+            return_nbt_error0();
+        }
+        memcpy(p, &ylong, 8);
+        p += 8;
+    }
+    // update start ptr and return size
+    *ptr = p;
+    return retsz;
+}
+
 static R_xlen_t write_nbt_character_payload(SEXP r_value, unsigned char** ptr,
     const unsigned char* end) {
     // validate data
@@ -508,13 +557,15 @@ static R_xlen_t write_nbt_payload(SEXP r_value, unsigned char** ptr,
      case TAG_SHORT:
      case TAG_INT:
      case TAG_FLOAT:
-     case TAG_LONG:
      case TAG_DOUBLE:
         return write_nbt_numeric_payload(r_value, ptr, end, tag, false);
+     case TAG_LONG:
+        return write_nbt_integer64_payload(r_value, ptr, end, tag, false);
      case TAG_INT_ARRAY:
      case TAG_BYTE_ARRAY:
-     case TAG_LONG_ARRAY:
         return write_nbt_numeric_payload(r_value, ptr, end, tag, true);
+     case TAG_LONG_ARRAY:
+        return write_nbt_integer64_payload(r_value, ptr, end, tag, true);
      case TAG_STRING:
         return write_nbt_character_payload(r_value, ptr, end);
      case TAG_LIST:

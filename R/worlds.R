@@ -268,12 +268,12 @@ rand_world_id_mcpe <- function() {
 }
 
 nbt_now <- function() {
-    nbt_long(as.numeric(Sys.time()))
+    nbt_long(as.character(as.integer(Sys.time())))
 }
 
 nbt_random_seed <- function() {
     s <- bit64::runif64(1)
-    nbt_long(s)
+    nbt_long(as.character(s))
 }
 
 #' Compact a world database.

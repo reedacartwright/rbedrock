@@ -75,7 +75,7 @@ test_that("read_nbt can read longs", {
         tags$long, rawstr("test"), 1, 0, 0x20, 0x3b, 0x9d, 0xb5,
         0x05, 0x6f
     )
-    val <- bit64::as.integer64("8000000000000000001")
+    val <- "8000000000000000001"
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 4L,
         payload = val
@@ -86,7 +86,7 @@ test_that("read_nbt can read longs", {
         tags$long, rawstr("test"), 0xff, 0xff, 0xdf, 0xc4, 0x62,
         0x4a, 0xfa, 0x90
     )
-    neg_val <- bit64::as.integer64("-8000000000000000001")
+    neg_val <- "-8000000000000000001"
     expect_equal(read_rnbt(neg_dat), list(list(
         name = "test", tag = 4L,
         payload = neg_val
@@ -204,7 +204,7 @@ test_that("read_nbt can read long arrays", {
         0x64, 0, 0, 0, 0, 0, 0, 0,
         0x9c, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
     )
-    val <- bit64::as.integer64(c("100", "-100"))
+    val <- c("100", "-100")
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 12L,
         payload = val
@@ -319,10 +319,7 @@ test_that("unnbt() strips metadata from nbt data", {
     nbt_3 <- nbt_compound(nbt_list(nbt_float(10), nbt_float(20), nbt_float(30)))
 
     expect_equal(unnbt(nbt_1), 10L)
-    expect_equal(unnbt(nbt_2), list(A = 10L, B = list(
-        bit64::as.integer64(10),
-        10
-    )))
+    expect_equal(unnbt(nbt_2), list(A = 10L, B = list("10", 10)))
     expect_equal(unnbt(nbt_3), list(list(10, 20, 30)))
 })
 

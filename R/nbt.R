@@ -35,7 +35,10 @@ nbt_int <- function(x) {
 #' @rdname nbt
 #' @export
 nbt_long <- function(x) {
-    new_nbt_long(vec_cast(x, bit64::integer64()))
+    if (is.numeric(x)) {
+        x <- as.character(x)
+    }
+    new_nbt_long(vec_cast(x, character()))
 }
 
 #' @rdname nbt
@@ -77,7 +80,10 @@ nbt_int_array <- function(x) {
 #' @rdname nbt
 #' @export
 nbt_long_array <- function(x) {
-    new_nbt_long_array(vec_cast(x, bit64::integer64()))
+    if (is.numeric(x)) {
+        x <- as.character(x)
+    }
+    new_nbt_long_array(vec_cast(x, character()))
 }
 
 #' @rdname nbt
@@ -120,12 +126,12 @@ payload.default <- function(x) {
 
 #' @export
 payload.rbedrock_nbt_long <- function(x) {
-    structure(vec_data(x), class = "integer64")
+    vec_data(x)
 }
 
 #' @export
 payload.rbedrock_nbt_long_array <- function(x) {
-    structure(vec_data(x), class = "integer64")
+    vec_data(x)
 }
 
 #' @rdname nbt
@@ -217,13 +223,6 @@ new_rbedrock_nbt_scalar <- function(x, class, ptype = NULL, size = NULL) {
     new_vctr(x, class = c(paste0("rbedrock_nbt_", class), "rbedrock_nbt"))
 }
 
-.fixup_long <- function(x) {
-    cls <- setdiff(class(x), "integer64")
-    pos <- which(cls == "vctrs_vctr")
-    class(x) <- append(cls, "integer64", pos - 1)
-    x
-}
-
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
@@ -246,8 +245,7 @@ new_nbt_int <- function(x) {
 #' @rdname new_nbt
 #' @export
 new_nbt_long <- function(x) {
-    x <- new_rbedrock_nbt_scalar(x, "long", bit64::integer64(), 1)
-    .fixup_long(x)
+    new_rbedrock_nbt_scalar(x, "long", character(), 1)
 }
 #' @keywords internal
 #' @rdname new_nbt
@@ -290,8 +288,7 @@ new_nbt_int_array <- function(x) {
 #' @rdname new_nbt
 #' @export
 new_nbt_long_array <- function(x) {
-    x <- new_rbedrock_nbt_scalar(x, "long_array", bit64::integer64())
-    .fixup_long(x)
+    new_rbedrock_nbt_scalar(x, "long_array", character())
 }
 #' @keywords internal
 #' @rdname new_nbt
@@ -711,9 +708,9 @@ vec_cast.double.rbedrock_nbt_int <- function(x, to, ...) {
 }
 
 #' @export
-vec_ptype2.rbedrock_nbt_long.integer64 <- function(x, y, ...) bit64::integer64()
+vec_ptype2.rbedrock_nbt_long.integer64 <- function(x, y, ...) character()
 #' @export
-vec_ptype2.integer64.rbedrock_nbt_long <- function(x, y, ...) bit64::integer64()
+vec_ptype2.integer64.rbedrock_nbt_long <- function(x, y, ...) character()
 #' @export
 vec_cast.rbedrock_nbt_long.logical <- function(x, to, ...) {
     nbt_long(x)
@@ -849,10 +846,10 @@ vec_cast.double.rbedrock_nbt_int_array <- function(x, to, ...) {
 
 #' @export
 vec_ptype2.rbedrock_nbt_long_array.integer <-
-    function(x, y, ...) bit64::integer64()
+    function(x, y, ...) character()
 #' @export
 vec_ptype2.integer.rbedrock_nbt_long_array <-
-    function(x, y, ...) bit64::integer64()
+    function(x, y, ...) character()
 #' @export
 vec_cast.rbedrock_nbt_long_array.logical <- function(x, to, ...) {
     nbt_long_array(x)
