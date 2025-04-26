@@ -13,7 +13,7 @@ from_rnbt(x)
 
 to_rnbt(x)
 
-from_rnbt_payload(x, tag)
+from_rnbt_payload(x)
 
 to_rnbt_payload(x)
 

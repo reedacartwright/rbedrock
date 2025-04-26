@@ -44,7 +44,7 @@ nbt_long_array(x)
 
 nbt_compound(...)
 
-nbt_list(...)
+nbt_list(..., .type)
 
 is_nbt(x)
 

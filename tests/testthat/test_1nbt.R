@@ -18,14 +18,14 @@ test_that("read_nbt can read bytes", {
     dat <- as_raw(tags$byte, rawstr("test"), 100)
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 1L,
-        payload = 100L
+        value = 100L
     )))
     expect_equal(read_nbt(dat), list(test = nbt_byte(100)))
 
     neg_dat <- as_raw(tags$byte, rawstr("test"), 254)
     expect_equal(read_rnbt(neg_dat), list(list(
         name = "test", tag = 1L,
-        payload = -2L
+        value = -2L
     )))
     expect_equal(read_nbt(neg_dat), list(test = nbt_byte(-2)))
 })
@@ -34,14 +34,14 @@ test_that("read_nbt can read shorts", {
     dat <- as_raw(tags$short, rawstr("test"), 100, 2)
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 2L,
-        payload = 612L
+        value = 612L
     )))
     expect_equal(read_nbt(dat), list(test = nbt_short(612)))
 
     neg_dat <- as_raw(tags$short, rawstr("test"), 156, 255)
     expect_equal(read_rnbt(neg_dat), list(list(
         name = "test", tag = 2L,
-        payload = -100L
+        value = -100L
     )))
     expect_equal(read_nbt(neg_dat), list(test = nbt_short(-100L)))
 })
@@ -50,14 +50,14 @@ test_that("read_nbt can read ints", {
     dat <- as_raw(tags$int, rawstr("test"), 100, 2, 3, 4)
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 3L,
-        payload = 67306084L
+        value = 67306084L
     )))
     expect_equal(read_nbt(dat), list(test = nbt_int(67306084L)))
 
     neg_dat <- as_raw(tags$int, rawstr("test"), 156, 255, 255, 255)
     expect_equal(read_rnbt(neg_dat), list(list(
         name = "test", tag = 3L,
-        payload = -100L
+        value = -100L
     )))
     expect_equal(read_nbt(neg_dat), list(test = nbt_int(-100L)))
 
@@ -65,7 +65,7 @@ test_that("read_nbt can read ints", {
     neg_dat <- as_raw(tags$int, rawstr("test"), 0, 0, 0, 128)
     expect_equal(read_rnbt(neg_dat), list(list(
         name = "test", tag = 3L,
-        payload = -2147483648
+        value = -2147483648
     )))
     expect_equal(read_nbt(neg_dat), list(test = nbt_int(-2147483648)))
 })
@@ -78,7 +78,7 @@ test_that("read_nbt can read longs", {
     val <- "8000000000000000001"
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 4L,
-        payload = val
+        value = val
     )))
     expect_equal(read_nbt(dat), list(test = nbt_long(val)))
 
@@ -89,7 +89,7 @@ test_that("read_nbt can read longs", {
     neg_val <- "-8000000000000000001"
     expect_equal(read_rnbt(neg_dat), list(list(
         name = "test", tag = 4L,
-        payload = neg_val
+        value = neg_val
     )))
     expect_equal(read_nbt(neg_dat), list(test = nbt_long(neg_val)))
 })
@@ -98,7 +98,7 @@ test_that("read_nbt can read floats", {
     dat <- as_raw(tags$float, rawstr("test"), 0, 0, 0x10, 0x42)
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 5L,
-        payload = 36.0
+        value = 36.0
     )))
     expect_equal(read_nbt(dat), list(test = nbt_float(36.0)))
 })
@@ -107,7 +107,7 @@ test_that("read_nbt can read doubles", {
     dat <- as_raw(tags$double, rawstr("test"), 0, 0, 0, 0, 0, 0, 0x42, 0x40)
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 6L,
-        payload = 36.0
+        value = 36.0
     )))
     expect_equal(read_nbt(dat), list(test = nbt_double(36.0)))
 })
@@ -119,7 +119,7 @@ test_that("read_nbt can read byte arrays", {
     )
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 7L,
-        payload = 10:17
+        value = 10:17
     )))
     expect_equal(read_nbt(dat), list(test = nbt_byte_array(10:17)))
 
@@ -127,7 +127,7 @@ test_that("read_nbt can read byte arrays", {
     expect_equal(read_nbt(single_dat), list(test = nbt_byte_array(20)))
     expect_equal(read_rnbt(single_dat), list(list(
         name = "test", tag = 7L,
-        payload = 20
+        value = 20
     )))
 })
 
@@ -135,14 +135,14 @@ test_that("read_nbt can read strings", {
     dat <- as_raw(tags$string, rawstr("test"), rawstr("hello world"))
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 8L,
-        payload = "hello world"
+        value = "hello world"
     )))
     expect_equal(read_nbt(dat), list(test = nbt_string("hello world")))
 
     blank_dat <- as_raw(tags$string, rawstr("test"), rawstr(""))
     expect_equal(read_rnbt(blank_dat), list(list(
         name = "test", tag = 8L,
-        payload = ""
+        value = ""
     )))
     expect_equal(read_nbt(blank_dat), list(test = nbt_string("")))
 
@@ -152,7 +152,7 @@ test_that("read_nbt can read strings", {
     )
     expect_equal(read_rnbt(greek_dat), list(list(
         name = "test", tag = 8L,
-        payload = "\u03B1\u03B2\u03B3"
+        value = "\u03B1\u03B2\u03B3"
     )))
     expect_equal(read_nbt(greek_dat), list(
         test =
@@ -167,13 +167,33 @@ test_that("read_nbt can read strings", {
     expect_equal(read_rnbt(null_dat), list(list(
         name = as_raw(charToRaw("te"), 0L, charToRaw("t")),
         tag = 8L,
-        payload = as_raw(charToRaw("hello"), 0L, charToRaw("world"))
+        value = as_raw(charToRaw("hello"), 0L, charToRaw("world"))
     )))
 
     expect_equal(read_nbt(null_dat), list(
         te =
             nbt_raw_string(as_raw(charToRaw("hello"), 0L, charToRaw("world")))
     ))
+
+    # list of strings
+    v <- c("a", "b", "c")
+    dat <- as_raw(
+        tags$list, rawstr("test"), tags$string, 3, 0, 0, 0,
+        rawstr(v[1]), rawstr(v[2]), rawstr(v[3])
+    )
+    val <- read_rnbt(dat)
+    expect_equal(val, list(list(
+        name = "test", tag = 9L,
+        value = v, type = 8L
+    )))
+
+    # replace b with null
+    dat[18] <- as.raw(0L)
+    expect_equal(read_rnbt(dat), list(list(
+        name = "test", tag = 9L,
+        value = list("a", as.raw(0L), "c"), type = 8L
+    )))
+
 })
 
 test_that("read_nbt can read int arrays", {
@@ -183,7 +203,7 @@ test_that("read_nbt can read int arrays", {
     )
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 11L,
-        payload = 10:11
+        value = 10:11
     )))
     expect_equal(read_nbt(dat), list(test = nbt_int_array(10:11)))
 
@@ -193,7 +213,7 @@ test_that("read_nbt can read int arrays", {
     )
     expect_equal(read_rnbt(single_dat), list(list(
         name = "test", tag = 11L,
-        payload = 20L
+        value = 20L
     )))
     expect_equal(read_nbt(single_dat), list(test = nbt_int_array(20)))
 })
@@ -207,7 +227,7 @@ test_that("read_nbt can read long arrays", {
     val <- c("100", "-100")
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 12L,
-        payload = val
+        value = val
     )))
     expect_equal(read_nbt(dat), list(test = nbt_long_array(val)))
 })
@@ -220,26 +240,38 @@ test_that("read_nbt can read list values", {
     )
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 9L,
-        payload = list(
-            list(tag = 5L, payload = pos[1]),
-            list(tag = 5L, payload = pos[2]),
-            list(tag = 5L, payload = pos[3])
+        value = pos, type = 5L
         )
-    )))
+    ))
     expect_equal(
         read_nbt(dat),
-        list(test = nbt_list(
-            nbt_float(pos[1]), nbt_float(pos[2]),
-            nbt_float(pos[3])
-        ))
+        list(test = nbt_list(!!!pos, .type = 5L))
     )
 
     empty_dat <- as_raw(tags$list, rawstr("test"), tags$end, 0, 0, 0, 0)
     expect_equal(read_rnbt(empty_dat), list(list(
         name = "test", tag = 9L,
-        payload = list()
+        value = list(), type = 0L
     )))
     expect_equal(read_nbt(empty_dat), list(test = nbt_list()))
+
+    # List of lists of lists
+    dat <- as_raw(
+        tags$list, rawstr("test"), tags$list, 2, 0, 0, 0,
+        tags$byte, 3, 0, 0, 0, 0, 1, 3,
+        tags$int, 1, 0, 0, 0, 10, 0, 0, 0
+    )
+    rnbt_dat <- list(list(
+        name = "test", tag = 9L,
+        value = list(
+            list(value = c(0, 1, 3), type = 1L),
+            list(value = 10, type = 3L)
+            ),
+        type = 9L
+    ))
+
+    expect_equal(read_rnbt(dat), rnbt_dat)
+    expect_equal(write_rnbt(rnbt_dat), dat)
 })
 
 test_that("read_nbt can read compound values", {
@@ -251,15 +283,32 @@ test_that("read_nbt can read compound values", {
     )
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 10L,
-        payload = list(
-            list(name = "A", tag = 1L, payload = 0L),
-            list(name = "B", tag = 2L, payload = 1L)
+        value = list(
+            list(name = "A", tag = 1L, value = 0L),
+            list(name = "B", tag = 2L, value = 1L)
         )
     )))
     expect_equal(read_nbt(dat), list(test = nbt_compound(
         A = nbt_byte(0),
         B = nbt_short(1)
     )))
+
+    # list of compounds
+    dat <- as_raw(
+        tags$list, rawstr("test"), tags$compound, 1, 0, 0, 0,
+        tags$byte, rawstr("A"), 0,
+        tags$short, rawstr("B"), 1, 0,
+        tags$end
+    )
+    expect_equal(read_rnbt(dat), list(list(
+        name = "test", tag = 9L,
+        value = list( list(
+            list(name = "A", tag = 1L, value = 0L),
+            list(name = "B", tag = 2L, value = 1L)
+            )),
+        type = 10L
+    )))
+
 })
 
 test_that("read_nbt simplifies values without names", {
@@ -316,7 +365,7 @@ test_that("unnbt() strips metadata from nbt data", {
         nbt_long(10),
         nbt_float(10)
     ))
-    nbt_3 <- nbt_compound(nbt_list(nbt_float(10), nbt_float(20), nbt_float(30)))
+    nbt_3 <- nbt_compound(nbt_list(!!!c(10, 20, 30), .type = 5L))
 
     expect_equal(unnbt(nbt_1), 10L)
     expect_equal(unnbt(nbt_2), list(A = 10L, B = list("10", 10)))
@@ -396,7 +445,7 @@ test_that("write_nbt() correctly encodes nbt data", {
     )
 
     expect_equal(
-        write_nbt(nbt_list(nbt_byte(1), nbt_byte(2))),
+        write_nbt(nbt_list(!!!c(1,2), .type = 1)),
         as_raw(tags$list, rawstr(""), tags$byte, 2, 0, 0, 0, 1, 2)
     )
 })

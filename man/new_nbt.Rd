@@ -17,7 +17,7 @@
 \alias{new_nbt_list}
 \title{Create an NBT value}
 \usage{
-new_nbt(x, tag)
+new_nbt(x, tag, type)
 
 new_nbt_byte(x)
 
@@ -43,12 +43,14 @@ new_nbt_long_array(x)
 
 new_nbt_compound(x)
 
-new_nbt_list(x)
+new_nbt_list(x, .type)
 }
 \arguments{
 \item{x}{An nbt payload.}
 
 \item{tag}{An integer specifying the tag of the data.}
+
+\item{type}{An integer specifying the type for nbt lists}
 }
 \description{
 Create an NBT value

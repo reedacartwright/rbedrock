@@ -94,8 +94,12 @@ nbt_compound <- function(...) {
 
 #' @rdname nbt
 #' @export
-nbt_list <- function(...) {
-    new_nbt_list(list2(...))
+nbt_list <- function(..., .type) {
+    lst <- list2(...)
+    if(missing(.type) && length(lst) == 0L) {
+        .type <- 0L
+    }
+    new_nbt_list(lst, .type = .type)
 }
 
 #' @rdname nbt
@@ -197,24 +201,25 @@ is_nbt_compound <- function(x) {
 #'
 #' @param x An nbt payload.
 #' @param tag An integer specifying the tag of the data.
+#' @param type An integer specifying the type for nbt lists
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
-new_nbt <- function(x, tag) {
+new_nbt <- function(x, tag, type) {
     tag <- vec_recycle(vec_cast(tag, integer()), 1L, x_arg = "tag")
     switch(tag,
-        new_nbt_byte(x),
-        new_nbt_short(x),
-        new_nbt_int(x),
-        new_nbt_long(x),
-        new_nbt_float(x),
-        new_nbt_double(x),
-        new_nbt_byte_array(x),
+        new_nbt_byte(as.double(x)),
+        new_nbt_short(as.double(x)),
+        new_nbt_int(as.double(x)),
+        new_nbt_long(as.character(x)),
+        new_nbt_float(as.double(x)),
+        new_nbt_double(as.double(x)),
+        new_nbt_byte_array(as.double(x)),
         new_nbt_string(x),
-        new_nbt_list(x),
+        new_nbt_list(as.list(x), .type = type),
         new_nbt_compound(x),
-        new_nbt_int_array(x),
-        new_nbt_long_array(x)
+        new_nbt_int_array(as.double(x)),
+        new_nbt_long_array(as.character(x))
     )
 }
 
@@ -305,15 +310,9 @@ new_nbt_compound <- function(x) {
 #' @keywords internal
 #' @rdname new_nbt
 #' @export
-new_nbt_list <- function(x) {
-    ptype <- NULL
-    if (length(x) == 0) {
-        # use a ptype of an empty list for an empty nbt_list
-        ptype <- list()
-    }
-    y <- list_of(!!!x, .ptype = ptype)
-    cls <- class(y)
-    structure(y, class = c("rbedrock_nbt_list", "rbedrock_nbt", cls))
+new_nbt_list <- function(x, .type) {
+    structure(x, type = .type,
+              class = c("rbedrock_nbt_list", "rbedrock_nbt", "list"))
 }
 
 # nolint start : commented_code_linter
@@ -422,9 +421,7 @@ from_rnbt <- function(x) {
     # extract names
     n <- sapply(x, .extract_rnbt_name)
     # extract values
-    v <- lapply(x, function(y) {
-        from_rnbt_payload(y[["payload"]], y[["tag"]])
-    })
+    v <- lapply(x, from_rnbt_payload)
     # Set names if any exist
     if (all(n == "")) {
         v
@@ -466,19 +463,25 @@ to_rnbt <- function(x) {
 #' @rdname rnbt
 #' @keywords internal
 #' @export
-from_rnbt_payload <- function(x, tag) {
+from_rnbt_payload <- function(x) {
+    tag <- x[["tag", exact = TRUE]]
+    payload <- x[["value", exact = TRUE]]
+
     if (tag == 9L) {
-        v <- lapply(x, function(y) {
-            from_rnbt_payload(y[["payload"]], y[["tag"]])
-        })
-        new_nbt_list(v)
+        type <- x[["type", exact = TRUE]]
+        if (is.recursive(payload)) {
+            payload <- lapply(payload, function(y) {
+                from_rnbt_payload(list(value = y, tag = type))
+            })
+        }
+        new_nbt_list(as.list(payload), type)
     } else if (tag == 10L) {
-        ret <- from_rnbt(x)
+        ret <- from_rnbt(payload)
         new_nbt_compound(ret)
-    } else if (tag == 8L && is.raw(x)) {
-        new_nbt_raw_string(x)
+    } else if (tag == 8L && is.raw(payload)) {
+        new_nbt_raw_string(payload)
     } else {
-        new_nbt(x, tag)
+        new_nbt(payload, tag)
     }
 }
 
@@ -491,17 +494,25 @@ to_rnbt_payload <- function(x) {
 
 #' @export
 to_rnbt_payload.rbedrock_nbt <- function(x) {
-    list(tag = get_nbt_tag(x), payload = payload(x))
+    list(tag = get_nbt_tag(x), value = payload(x))
 }
 
 #' @export
 to_rnbt_payload.rbedrock_nbt_compound <- function(x) {
-    list(tag = 10L, payload = to_rnbt(x))
+    list(tag = 10L, value = to_rnbt(x))
 }
 
 #' @export
 to_rnbt_payload.rbedrock_nbt_list <- function(x) {
-    list(tag = 9L, payload = lapply(x, to_rnbt_payload))
+    type <- attr(x, "type", exact = TRUE)
+    if (type %in% 1:6) {
+        payload <- unlist(x)
+    } else if (type == 8) {
+        payload <- simplify2array(x)
+    } else {
+        payload <- lapply(x, to_rnbt_payload)
+    }
+    list(tag = 9L, value = payload, type = type)
 }
 
 #' @rdname rnbt
