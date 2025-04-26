@@ -44,7 +44,7 @@ nbt_long_array(x)
 
 nbt_compound(...)
 
-nbt_list(..., .type)
+nbt_list(x, .type)
 
 is_nbt(x)
 
@@ -59,6 +59,8 @@ get_nbt_tag(x)
 
 \item{...}{Arguments to collect into an NBT compound or NBT list value.
 Supports dynamic dots via \code{rlang::list2()}.}
+
+\item{.type}{The type that a list holds.}
 }
 \description{
 The Named Binary Tag (NBT) format is used by Minecraft for various data

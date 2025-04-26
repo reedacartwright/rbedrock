@@ -241,11 +241,10 @@ test_that("read_nbt can read list values", {
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 9L,
         value = pos, type = 5L
-        )
-    ))
+    )))
     expect_equal(
         read_nbt(dat),
-        list(test = nbt_list(!!!pos, .type = 5L))
+        list(test = nbt_list(pos, .type = 5L))
     )
 
     empty_dat <- as_raw(tags$list, rawstr("test"), tags$end, 0, 0, 0, 0)
@@ -266,7 +265,7 @@ test_that("read_nbt can read list values", {
         value = list(
             list(value = c(0, 1, 3), type = 1L),
             list(value = 10, type = 3L)
-            ),
+        ),
         type = 9L
     ))
 
@@ -302,10 +301,10 @@ test_that("read_nbt can read compound values", {
     )
     expect_equal(read_rnbt(dat), list(list(
         name = "test", tag = 9L,
-        value = list( list(
+        value = list(list(
             list(name = "A", tag = 1L, value = 0L),
             list(name = "B", tag = 2L, value = 1L)
-            )),
+        )),
         type = 10L
     )))
 
@@ -365,11 +364,11 @@ test_that("unnbt() strips metadata from nbt data", {
         nbt_long(10),
         nbt_float(10)
     ))
-    nbt_3 <- nbt_compound(nbt_list(!!!c(10, 20, 30), .type = 5L))
+    nbt_3 <- nbt_compound(nbt_list(c(10, 20, 30), .type = 5L))
 
     expect_equal(unnbt(nbt_1), 10L)
     expect_equal(unnbt(nbt_2), list(A = 10L, B = list("10", 10)))
-    expect_equal(unnbt(nbt_3), list(list(10, 20, 30)))
+    expect_equal(unnbt(nbt_3), list(c(10, 20, 30)))
 })
 
 test_that("write_nbt() correctly encodes nbt data", {
@@ -445,7 +444,7 @@ test_that("write_nbt() correctly encodes nbt data", {
     )
 
     expect_equal(
-        write_nbt(nbt_list(!!!c(1,2), .type = 1)),
+        write_nbt(nbt_list(c(1, 2), .type = 1)),
         as_raw(tags$list, rawstr(""), tags$byte, 2, 0, 0, 0, 1, 2)
     )
 })

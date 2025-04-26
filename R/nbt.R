@@ -10,6 +10,7 @@
 #' `unnbt()` recursively strips NBT metadata from an NBT value.
 #'
 #' @param x An nbt payload.
+#' @param .type The type that a list holds.
 #' @param ... Arguments to collect into an NBT compound or NBT list value.
 #'     Supports dynamic dots via `rlang::list2()`.
 #'
@@ -94,12 +95,12 @@ nbt_compound <- function(...) {
 
 #' @rdname nbt
 #' @export
-nbt_list <- function(..., .type) {
-    lst <- list2(...)
-    if(missing(.type) && length(lst) == 0L) {
-        .type <- 0L
+nbt_list <- function(x, .type) {
+    if (missing(x)) {
+        new_nbt_list(list(), .type = 0L)
+    } else {
+        new_nbt_list(x, .type = .type)
     }
-    new_nbt_list(lst, .type = .type)
 }
 
 #' @rdname nbt
@@ -216,7 +217,7 @@ new_nbt <- function(x, tag, type) {
         new_nbt_double(as.double(x)),
         new_nbt_byte_array(as.double(x)),
         new_nbt_string(x),
-        new_nbt_list(as.list(x), .type = type),
+        new_nbt_list(x, .type = type),
         new_nbt_compound(x),
         new_nbt_int_array(as.double(x)),
         new_nbt_long_array(as.character(x))
@@ -311,8 +312,9 @@ new_nbt_compound <- function(x) {
 #' @rdname new_nbt
 #' @export
 new_nbt_list <- function(x, .type) {
+    cls <- class(x)
     structure(x, type = .type,
-              class = c("rbedrock_nbt_list", "rbedrock_nbt", "list"))
+              class = c("rbedrock_nbt_list", "rbedrock_nbt", cls))
 }
 
 # nolint start : commented_code_linter
@@ -460,21 +462,37 @@ to_rnbt <- function(x) {
     ret
 }
 
+from_rnbt_recursive_list <- function(x, tag) {
+    if (tag == 9L) {
+        payload <- lapply(x, function(y) {
+            value <- y[["value", exact = TRUE]]
+            type <- y[["type", exact = TRUE]]
+            if (is.recursive(value)) {
+                value <- from_rnbt_recursive_list(value, type)
+            }
+            new_nbt_list(value, type)
+        })
+        new_nbt_list(payload, tag)
+    } else if (tag == 10L) {
+        payload <- lapply(x, from_rnbt)
+        new_nbt_list(payload, tag)
+    } else {
+        stop("Malformed rnbt data.")
+    }
+}
+
 #' @rdname rnbt
 #' @keywords internal
 #' @export
 from_rnbt_payload <- function(x) {
     tag <- x[["tag", exact = TRUE]]
     payload <- x[["value", exact = TRUE]]
-
     if (tag == 9L) {
         type <- x[["type", exact = TRUE]]
-        if (is.recursive(payload)) {
-            payload <- lapply(payload, function(y) {
-                from_rnbt_payload(list(value = y, tag = type))
-            })
+        if (type != 0L && is.recursive(payload)) {
+            payload <- from_rnbt_recursive_list(payload, type)
         }
-        new_nbt_list(as.list(payload), type)
+        new_nbt_list(payload, type)
     } else if (tag == 10L) {
         ret <- from_rnbt(payload)
         new_nbt_compound(ret)
@@ -502,17 +520,32 @@ to_rnbt_payload.rbedrock_nbt_compound <- function(x) {
     list(tag = 10L, value = to_rnbt(x))
 }
 
+to_rnbt_list <- function(x, tag) {
+    if (tag == 9L) {
+        lapply(x, function(y) {
+            value <- payload(y)
+            type <- attr(x, "type", exact = TRUE)
+            if (is.recursive(value)) {
+                value <- to_rnbt_list(value, type)
+            }
+            list(value = value, type = type)
+        })
+
+    } else if (tag == 10L) {
+        lapply(x, to_rnbt)
+    } else {
+        stop("Malformed rnbt data.")
+    }
+}
+
 #' @export
 to_rnbt_payload.rbedrock_nbt_list <- function(x) {
     type <- attr(x, "type", exact = TRUE)
-    if (type %in% 1:6) {
-        payload <- unlist(x)
-    } else if (type == 8) {
-        payload <- simplify2array(x)
-    } else {
-        payload <- lapply(x, to_rnbt_payload)
+    value <- payload(x)
+    if (type != 0L && is.recursive(value)) {
+        value <- to_rnbt_list(x, type)
     }
-    list(tag = 9L, value = payload, type = type)
+    list(tag = 9L, value = value, type = type)
 }
 
 #' @rdname rnbt

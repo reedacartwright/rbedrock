@@ -527,8 +527,8 @@ static R_xlen_t write_nbt_character_payload(SEXP r_value, unsigned char** ptr,
         }
     } else {
         if(!(IS_SCALAR(r_value, STRSXP) ||
-             TYPEOF(r_value) == RAWSXP) ||
-             TYPEOF(r_value) == CHARSXP) {
+             TYPEOF(r_value) == RAWSXP ||
+             TYPEOF(r_value) == CHARSXP)) {
             return_nbt_error0();
         }
     }
