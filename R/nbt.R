@@ -551,8 +551,8 @@ to_rnbt_payload.rbedrock_nbt_list <- function(x) {
 #' @rdname rnbt
 #' @keywords internal
 #' @export
-read_rnbt <- function(rawdata) {
-    .Call(Cread_nbt, rawdata)
+read_rnbt <- function(rawdata, format = "little") {
+    .Call(Cread_nbt, rawdata, 0L)
 }
 
 #' @rdname rnbt

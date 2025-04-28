@@ -212,7 +212,7 @@ SEXP read_subchunk_blocks(SEXP r_value) {
             if(p >= end) {
                 return_subchunk_error();
             }
-            r_val = PROTECT(read_nbt_value(&p, end));
+            r_val = PROTECT(read_nbt_value(&p, end, FMT_LE));
             if(Rf_isNull(r_val)) {
                 // We should not encounter a 0 tag in this context
                 return_nbt_error_tag(0);

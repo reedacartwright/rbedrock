@@ -28,6 +28,8 @@
 #include "nbt.h"
 #include "support.h"
 
+// ifdef WORDS_BIGENDIAN
+
 static SEXP g_tag_symbol = NULL;
 static SEXP g_ptype_symbol = NULL;
 static SEXP g_bytes_read_symbol = NULL;
@@ -38,74 +40,83 @@ void rbedrock_init_nbt(void) {
     g_bytes_read_symbol = Rf_install("bytes_read");
 }
 
-enum NBT_TYPE {
+enum NBT_TAG {
     TAG_END = 0,
-    TAG_BYTE,
-    TAG_SHORT,
-    TAG_INT,
-    TAG_LONG,
-    TAG_FLOAT,
-    TAG_DOUBLE,
-    TAG_BYTE_ARRAY,
-    TAG_STRING,
-    TAG_LIST,
-    TAG_COMPOUND,
-    TAG_INT_ARRAY,
-    TAG_LONG_ARRAY,
+    TAG_BYTE = 1,
+    TAG_SHORT = 2,
+    TAG_INT = 3,
+    TAG_LONG = 4,
+    TAG_FLOAT = 5,
+    TAG_DOUBLE = 6,
+    TAG_BYTE_ARRAY = 7,
+    TAG_STRING = 8,
+    TAG_LIST = 9,
+    TAG_COMPOUND = 10,
+    TAG_INT_ARRAY = 11,
+    TAG_LONG_ARRAY = 12,
     TAG_CHECK
+};
+typedef enum NBT_TAG nbt_tag_t;
+
+enum NBT_TYPE {
+    TYPE_END = 0,
+    TYPE_BYTE = 1,
+    TYPE_SHORT = 2,
+    TYPE_INT = 3,
+    TYPE_LONG = 4,
+    TYPE_FLOAT = 5,
+    TYPE_DOUBLE = 6,
+    TYPE_BYTE_ARRAY = 7,
+    TYPE_STRING = 8,
+    TYPE_LIST = 9,
+    TYPE_COMPOUND = 10,
+    TYPE_INT_ARRAY = 11,
+    TYPE_LONG_ARRAY = 12,
+
+    TYPE_LIST_OF_END = 100,
+    TYPE_LIST_OF_BYTE = 101,
+    TYPE_LIST_OF_SHORT = 102,
+    TYPE_LIST_OF_INT = 103,
+    TYPE_LIST_OF_LONG = 104,
+    TYPE_LIST_OF_FLOAT = 105,
+    TYPE_LIST_OF_DOUBLE = 106,
+    TYPE_LIST_OF_BYTE_ARRAY = 107,
+    TYPE_LIST_OF_STRING = 108,
+    TYPE_LIST_OF_LIST = 109,
+    TYPE_LIST_OF_COMPOUND = 110,
+    TYPE_LIST_OF_INT_ARRAY = 111,
+    TYPE_LIST_OF_LONG_ARRAY = 112,
 };
 typedef enum NBT_TYPE nbt_type_t;
 
-static SEXP read_nbt_payload(const unsigned char** p, const unsigned char* end, nbt_type_t tag);
+static SEXP read_nbt_payload(const unsigned char** p, const unsigned char* end,
+                             nbt_type_t type, nbt_format_t fmt);
 
-static SEXP read_nbt_payload_character(const unsigned char** ptr, const unsigned char* end) {
-    const unsigned char *p = *ptr;
-    unsigned short len;
-    if(end-p < sizeof(short)) {
-        return R_NilValue;
-    }
-    memcpy(&len, p, sizeof(len));
-    p += sizeof(len);
-    if(end-p < len) {
-        return R_NilValue;
-    }
-    *ptr = p+len;
-    // Check for embedded nulls
-    bool has_null = false;
-    for(int i=0; i < len; ++i) {
-        if(p[i] == '\0') {
-            has_null = true;
-            break;
-        }
-    }
-    // If a string has embedded nulls, we will a raw vector here.
-    if(has_null) {
-        SEXP r_ret = Rf_allocVector(RAWSXP, len);
-        memcpy(RAW(r_ret), p, len);
-        return r_ret;
-    }
-    return Rf_ScalarString(Rf_mkCharLenCE((const char*)p, len, CE_UTF8));
-}
-
-static ptrdiff_t payload_size(int tag, int n) {
+static ptrdiff_t payload_size(nbt_type_t type, int n) {
     int width = 0;
-    switch(tag) {
-     case TAG_BYTE:
-     case TAG_BYTE_ARRAY:
-     case TAG_STRING:
+    switch(type) {
+     case TYPE_BYTE:
+     case TYPE_BYTE_ARRAY:
+     case TYPE_LIST_OF_BYTE:
+     case TYPE_STRING:
         width = 1;
         break;
-     case TAG_SHORT:
+     case TYPE_SHORT:
+     case TYPE_LIST_OF_SHORT:
         width = 2;
         break;
-     case TAG_INT:
-     case TAG_INT_ARRAY:
-     case TAG_FLOAT:
+     case TYPE_INT:
+     case TYPE_INT_ARRAY:
+     case TYPE_LIST_OF_INT:
+     case TYPE_FLOAT:
+     case TYPE_LIST_OF_FLOAT:
         width = 4;
         break;
-     case TAG_LONG:
-     case TAG_LONG_ARRAY:
-     case TAG_DOUBLE:
+     case TYPE_LONG:
+     case TYPE_LONG_ARRAY:
+     case TYPE_LIST_OF_LONG:
+     case TYPE_DOUBLE:
+     case TYPE_LIST_OF_DOUBLE:
         width = 8;
         break;
      default:
@@ -114,14 +125,117 @@ static ptrdiff_t payload_size(int tag, int n) {
     return n*width;
 }
 
+static bool type_has_length(nbt_type_t type) {
+    switch(type) {
+     case TYPE_BYTE_ARRAY:
+     case TYPE_INT_ARRAY:
+     case TYPE_LONG_ARRAY:
+     case TYPE_LIST_OF_BYTE:
+     case TYPE_LIST_OF_SHORT:
+     case TYPE_LIST_OF_INT:
+     case TYPE_LIST_OF_LONG:
+     case TYPE_LIST_OF_FLOAT:
+     case TYPE_LIST_OF_DOUBLE:
+        return true;
+     default:
+        break;
+    };
+    return false;
+}
+
+static int read_payload_length(const unsigned char** ptr,
+                               const unsigned char* end,
+                               nbt_type_t type, nbt_format_t fmt) {
+    if(!type_has_length(type)) {
+        return 1;
+    }
+    if(end - *ptr < 4) {
+        return -1;
+    }
+    int n;
+    memcpy(&n, *ptr, 4);
+    *ptr += 4;
+    return n;
+}
+
+static SEXP read_nbt_payload_character(const unsigned char** ptr,
+                                       const unsigned char* end,
+                                       nbt_type_t type, nbt_format_t fmt) {
+    int n = read_payload_length(ptr, end, type, fmt);
+    if(n == -1) {
+        return R_NilValue;
+    }
+    // Check for embedded nulls and valid format
+    bool has_null = false;
+    const unsigned char *p = *ptr;
+    for(int i = 0; i < n; ++i) {
+        unsigned short len;
+        if(end - p < 2) {
+            return R_NilValue;
+        }
+        memcpy(&len, p, 2);
+        p += 2;
+        if(end - p < len) {
+            return R_NilValue;
+        }
+        for(int j=0; !has_null && j < len; ++j) {
+            if(p[j] == '\0') {
+                has_null = true;
+            }
+        }
+        p += len;
+    }
+    // reset p back to *ptr
+    p = *ptr;
+    SEXP r_ret;
+    if(!has_null) {
+        // create character vector
+        r_ret = PROTECT(Rf_allocVector(STRSXP, n));
+        for(R_xlen_t i = 0; i < XLENGTH(r_ret); ++i) {
+            unsigned short len;
+            memcpy(&len, p, 2);
+            p += 2;
+            SET_STRING_ELT(r_ret, i, Rf_mkCharLenCE((const char*)p, len, CE_UTF8));
+            p += len;
+        }
+    } else if(n == 1) {
+        // create raw vector
+        unsigned short len;
+        memcpy(&len, p, 2);
+        p += 2;
+        r_ret = PROTECT(Rf_allocVector(RAWSXP, len));
+        memcpy(RAW(r_ret), p, len);
+        p += len;
+    } else {
+        // create a list of raws
+        r_ret = PROTECT(Rf_allocVector(VECSXP, n));
+        for(R_xlen_t i = 0; i < XLENGTH(r_ret); ++i) {
+            unsigned short len;
+            memcpy(&len, p, 2);
+            p += 2;
+            SEXP r = PROTECT(Rf_allocVector(RAWSXP, len));
+            memcpy(RAW(r_ret), p, len);
+            p += len;
+            SET_VECTOR_ELT(r_ret, i, r);
+            UNPROTECT(1);
+        }
+    }
+    *ptr = p;
+    UNPROTECT(1);
+    return r_ret;
+}
+
 static SEXP read_nbt_payload_numeric(const unsigned char** ptr,
                                      const unsigned char* end,
-                                     int tag, int n) {
-    const unsigned char *p = *ptr;
-    if(end-p < payload_size(tag, n)) {
-        return_nbt_error();
+                                     nbt_type_t type, nbt_format_t fmt) {
+    int n = read_payload_length(ptr, end, type, fmt);
+    if(n == -1) {
+        return R_NilValue;
     }
-    // Store numeric values as doubles and avoid loss of information from NAs
+    if(end - *ptr < payload_size(type, n)) {
+        return R_NilValue;
+    }
+    // Store numeric values as doubles to avoid loss of information from NAs
     SEXP res = PROTECT(Rf_allocVector(REALSXP, n));
     double *x = REAL(res);
     signed char ybyte;
@@ -129,40 +243,48 @@ static SEXP read_nbt_payload_numeric(const unsigned char** ptr,
     signed int yint;
     float yfloat;
     double ydouble;
+    
+    const unsigned char *p = *ptr;
     for(int i=0; i < n; ++i) {
-        switch(tag) {
-         case TAG_BYTE:
-         case TAG_BYTE_ARRAY:
+        switch(type) {
+         case TYPE_BYTE:
+         case TYPE_BYTE_ARRAY:
+         case TYPE_LIST_OF_BYTE:
             memcpy(&ybyte, p, 1);
             x[i] = (double)ybyte;
             p += 1;
             break;
-         case TAG_SHORT:
+         case TYPE_SHORT:
+         case TYPE_LIST_OF_SHORT:
             memcpy(&yshort, p, 2);
             x[i] = (double)yshort;
             p += 2;
             break;
-         case TAG_INT:
-         case TAG_INT_ARRAY:
+         case TYPE_INT:
+         case TYPE_INT_ARRAY:
+         case TYPE_LIST_OF_INT:
             memcpy(&yint, p, 4);
             x[i] = (double)yint;
             p += 4;
             break;
-         case TAG_FLOAT:
+         case TYPE_FLOAT:
+         case TYPE_LIST_OF_FLOAT:
             memcpy(&yfloat, p, 4);
             x[i] = (float)yfloat;
             p += 4;
             break;
-         case TAG_LONG:
-         case TAG_LONG_ARRAY:
+         case TYPE_LONG:
+         case TYPE_LONG_ARRAY:
+         case TYPE_LIST_OF_LONG:
             /* While longs are now recorded as strings, keep this pass through.*/;
-         case TAG_DOUBLE:
+         case TYPE_DOUBLE:
+         case TYPE_LIST_OF_DOUBLE:
             memcpy(&ydouble, p, 8);
             x[i] = ydouble;
             p += 8;
             break;
          default:
-            return_nbt_error_tag(tag);
+            return_nbt_error_tag(type);
             break;
         };
     }
@@ -171,14 +293,20 @@ static SEXP read_nbt_payload_numeric(const unsigned char** ptr,
     return res;
 }
 
-static SEXP read_nbt_payload_integer64(const unsigned char** ptr, const unsigned char* end, int tag, int n) {
-    const unsigned char *p = *ptr;
-    if(end-p < payload_size(tag, n)) {
-        return_nbt_error();
+static SEXP read_nbt_payload_integer64(const unsigned char** ptr,
+                                       const unsigned char* end,
+                                       nbt_type_t type, nbt_format_t fmt) {
+    int n = read_payload_length(ptr, end, type, fmt);
+    if(n == -1) {
+        return R_NilValue;
+    }
+    if(end - *ptr < payload_size(type, n)) {
+        return R_NilValue;
     }
     SEXP res = PROTECT(Rf_allocVector(STRSXP, n));
     signed long long ylong;
     char buffer[22];
+    const unsigned char *p = *ptr;
     for(int i=0; i < n; ++i) {
         memcpy(&ylong, p, 8);
         p += 8;
@@ -190,86 +318,67 @@ static SEXP read_nbt_payload_integer64(const unsigned char** ptr, const unsigned
     return res;
 }
 
-static SEXP create_nbt_list_payload(SEXP r_value, nbt_type_t list_type) {
-    PROTECT(r_value);
-    const char *names[] = {"value", "type", ""};
-    SEXP r_ret = PROTECT(Rf_mkNamed(VECSXP, names));
-    SET_VECTOR_ELT(r_ret, 0, r_value);
-    SET_VECTOR_ELT(r_ret, 1, Rf_ScalarInteger((int)list_type));
-    UNPROTECT(2);
+static SEXP read_nbt_payload_empty_list(const unsigned char** ptr,
+                                        const unsigned char* end,
+                                        nbt_type_t type,
+                                        nbt_format_t fmt) {
+    int n = read_payload_length(ptr, end, type, fmt);
+    if(n == -1) {
+        return R_NilValue;
+    }
+    if(n > 0) {
+        return_nbt_error_tag(TAG_END);
+    }
+    return Rf_allocVector(VECSXP, 0);
+}
+
+static SEXP read_nbt_payload_basic_list(const unsigned char** ptr,
+                                        const unsigned char* end,
+                                        nbt_type_t type, nbt_format_t fmt) {
+    int n = read_payload_length(ptr, end, type, fmt);
+    if(n == -1) {
+        return R_NilValue;
+    }
+    nbt_type_t inner_type = type % TYPE_LIST_OF_END;
+
+    SEXP r_ret = PROTECT(Rf_allocVector(VECSXP, n));
+    for(R_xlen_t i = 0; i < XLENGTH(r_ret); ++i) {
+        SET_VECTOR_ELT(r_ret, i, read_nbt_payload(ptr, end, type, fmt));
+    }
+    UNPROTECT(1);
     return r_ret;
 }
 
-static SEXP read_nbt_list_payload_numeric(const unsigned char** ptr,
-                                          const unsigned char* end,
-                                          nbt_type_t type, int n) {
-    SEXP r_value = read_nbt_payload_numeric(ptr, end, type, n);
-    return create_nbt_list_payload(r_value, type);
-}
-
-static SEXP read_nbt_list_payload_integer64(const unsigned char** ptr,
-                                          const unsigned char* end,
-                                          nbt_type_t type, int n) {
-    SEXP r_value = read_nbt_payload_integer64(ptr, end, type, n);
-    return create_nbt_list_payload(r_value, type);
-}
-
-static SEXP read_nbt_list_payload(const unsigned char** ptr,
-                                  const unsigned char* end) {
-    nbt_type_t list_type;
-    int list_len;
-    if(end - *ptr < 5) {
+static SEXP read_nbt_payload_nested_list(const unsigned char** ptr,
+                                         const unsigned char* end,
+                                         nbt_type_t type, nbt_format_t fmt) {
+    int n = read_payload_length(ptr, end, type, fmt);
+    if(n == -1) {
         return R_NilValue;
     }
-    list_type = **ptr;
-    memcpy(&list_len, *ptr + 1, 4);
-    *ptr += 5;
-    if(list_len == 0 && list_type != TAG_END) {
-        Rf_warning("Malformed NBT data. An empty LIST has list_tag of '%d' instead of 0.", list_type);
-    }
-    switch(list_type) {
-     case TAG_BYTE:
-     case TAG_SHORT:
-     case TAG_INT:
-     case TAG_FLOAT:
-     case TAG_DOUBLE:
-        return read_nbt_list_payload_numeric(ptr, end, list_type, list_len);
-     case TAG_LONG:
-        return read_nbt_list_payload_integer64(ptr, end, list_type, list_len);
-     default:
-        break;
-    };
-
-    SEXP r_payload = PROTECT(Rf_allocVector(VECSXP, list_len));
-    for(int i = 0; i < list_len; ++i) {
-        SEXP r_val = PROTECT(read_nbt_payload(ptr, end, list_type));
-        if(Rf_isNull(r_payload)) {
+    SEXP r_ret = PROTECT(Rf_allocVector(STRSXP, n));
+    for(R_xlen_t i = 0; i < XLENGTH(r_ret); ++i) {
+        const char *names[] = {"type", "value", ""};
+        SEXP r_inner = PROTECT(Rf_mkNamed(VECSXP, names));
+        nbt_type_t inner_type = TYPE_LIST_OF_END;
+        if(*ptr >= end) {
             return_nbt_error();
         }
-        SET_VECTOR_ELT(r_payload, i, r_val);
+        inner_type += **ptr;
+        *ptr += 1;
+        SET_VECTOR_ELT(r_inner, 1, Rf_ScalarInteger(inner_type));
+        SET_VECTOR_ELT(r_inner, 2, read_nbt_payload(ptr, end, type, fmt));
         UNPROTECT(1);
+        SET_VECTOR_ELT(r_ret, i, r_inner);
     }
-    if(list_type != TAG_STRING) {
-        UNPROTECT(1);
-        return create_nbt_list_payload(r_payload, list_type);
-    }
-    // Try to optimize lists of strings
-    for(int i = 0; i < list_len; ++i) {
-        if(!IS_SCALAR(VECTOR_ELT(r_payload, i), STRSXP)) {
-            UNPROTECT(1);
-            return create_nbt_list_payload(r_payload, list_type);
-        }
-    }
-    SEXP r_string = PROTECT(Rf_allocVector(STRSXP, list_len));
-    for(int i = 0; i < list_len; ++i) {
-        SEXP v = STRING_ELT(VECTOR_ELT(r_payload, i), 0);
-        SET_STRING_ELT(r_string, i, v);
-    }
-    UNPROTECT(2);
-    return create_nbt_list_payload(r_string, list_type);
+    UNPROTECT(1);
+    return r_ret;
 }
 
-static SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned char* end) {
+static SEXP read_nbt_payload_compound(const unsigned char** ptr,
+                                      const unsigned char* end,
+                                      nbt_type_t type,
+                                      nbt_format_t fmt) {
     SEXP r_ret = PROTECT(create_stretchy_list());
     SEXP r_val;
     for(;;) {
@@ -277,7 +386,7 @@ static SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned 
             // We've run out of space.
             return_nbt_error_tag(10);
         }
-        r_val = PROTECT(read_nbt_value(ptr, end));
+        r_val = PROTECT(read_nbt_value(ptr, end, fmt));
         if(Rf_isNull(r_val)) {
             UNPROTECT(1);
             break; // NULL value signals end of compound
@@ -289,55 +398,55 @@ static SEXP read_nbt_compound_payload(const unsigned char** ptr, const unsigned 
     return Rf_PairToVectorList(CDR(r_ret));
 }
 
-static SEXP read_nbt_payload(const unsigned char** ptr, const unsigned char* end, nbt_type_t tag) {
-    int array_len = 1;
-    // load length for array
-    switch(tag) {
-     case TAG_BYTE_ARRAY:
-     case TAG_INT_ARRAY:
-     case TAG_LONG_ARRAY:
-        {
-            if(end-*ptr < 4) {
-                return R_NilValue;
-            }
-            memcpy(&array_len, *ptr, 4);
-            *ptr += 4;
-            break;
-        }
-     default:
-        break;
-    }
-
+static SEXP read_nbt_payload(const unsigned char** ptr,
+                             const unsigned char* end,
+                             nbt_type_t type, nbt_format_t fmt) {
     // read payloads
-    switch(tag) {
-     case TAG_END:
+    switch(type) {
+     case TYPE_END:
         return Rf_allocVector(VECSXP, 0);
-     case TAG_BYTE:
-     case TAG_BYTE_ARRAY:
-     case TAG_SHORT:
-     case TAG_INT:
-     case TAG_INT_ARRAY:
-     case TAG_FLOAT:
-     case TAG_DOUBLE:
-        return read_nbt_payload_numeric(ptr, end, tag, array_len);
-     case TAG_LONG:
-     case TAG_LONG_ARRAY:
-        return read_nbt_payload_integer64(ptr, end, tag, array_len);
-     case TAG_STRING:
-        return read_nbt_payload_character(ptr, end);
-     case TAG_LIST:
-        return read_nbt_list_payload(ptr, end);
-     case TAG_COMPOUND:
-        return read_nbt_compound_payload(ptr, end);
+     case TYPE_BYTE:
+     case TYPE_SHORT:
+     case TYPE_INT:
+     case TYPE_FLOAT:
+     case TYPE_DOUBLE:
+     case TYPE_BYTE_ARRAY:
+     case TYPE_INT_ARRAY:
+     case TYPE_LIST_OF_BYTE:
+     case TYPE_LIST_OF_SHORT:
+     case TYPE_LIST_OF_INT:
+     case TYPE_LIST_OF_FLOAT:
+     case TYPE_LIST_OF_DOUBLE:
+        return read_nbt_payload_numeric(ptr, end, type, fmt);
+     case TYPE_LONG:
+     case TYPE_LONG_ARRAY:
+     case TYPE_LIST_OF_LONG:
+        return read_nbt_payload_integer64(ptr, end, type, fmt);
+     case TYPE_STRING:
+     case TYPE_LIST_OF_STRING:
+        return read_nbt_payload_character(ptr, end, type, fmt);
+     case TYPE_COMPOUND:
+        return read_nbt_payload_compound(ptr, end, type, fmt);
+     case TYPE_LIST:
+     case TYPE_LIST_OF_END:
+        return read_nbt_payload_empty_list(ptr, end, type, fmt);
+     case TYPE_LIST_OF_COMPOUND:
+     case TYPE_LIST_OF_BYTE_ARRAY:
+     case TYPE_LIST_OF_INT_ARRAY:
+     case TYPE_LIST_OF_LONG_ARRAY:
+        return read_nbt_payload_basic_list(ptr, end, type, fmt);
+     case TYPE_LIST_OF_LIST:
+        return read_nbt_payload_nested_list(ptr, end, type, fmt);
      default:
         break;
     }
-    return_nbt_error_tag(tag);
+    return_nbt_error_tag(type);
 }
 
-SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end) {
+SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end,
+    nbt_format_t fmt) {
     SEXP r_name, r_payload;
-    nbt_type_t tag;
+    nbt_tag_t tag;
     if(*ptr >= end) {
         return_nbt_error();
     }
@@ -346,39 +455,45 @@ SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end) {
     if(tag == TAG_END) {
         return R_NilValue;
     }
-    if( (unsigned int)tag >= TAG_CHECK ) {
+    if((unsigned int)tag >= TAG_CHECK) {
         return_nbt_error_tag(tag);
     }
-    r_name = PROTECT(read_nbt_payload_character(ptr, end));
+    r_name = PROTECT(read_nbt_payload_character(ptr, end, TYPE_STRING, fmt));
     if(Rf_isNull(r_name)) {
         return_nbt_error();
     }
-    r_payload = PROTECT(read_nbt_payload(ptr, end, tag));
+    // read list tag if needed
+    int type_offset = TYPE_END;
+    if(tag == TAG_LIST) {
+        if(*ptr >= end) {
+            return_nbt_error();
+        }
+        type_offset = TYPE_LIST_OF_END;
+        tag = **ptr;
+        *ptr += 1;
+    }
+    // calculate type
+    nbt_type_t type = tag + type_offset;
+
+    r_payload = PROTECT(read_nbt_payload(ptr, end, type, fmt));
     if(Rf_isNull(r_payload)) {
         return_nbt_error();
     }
-    SEXP r_ret;
-    if(tag == TAG_LIST) {
-        const char *names[] = {"name", "tag", "value", "type", ""};
-        r_ret = PROTECT(Rf_mkNamed(VECSXP, names));
-        SET_VECTOR_ELT(r_ret, 2, VECTOR_ELT(r_payload, 0));
-        SET_VECTOR_ELT(r_ret, 3, VECTOR_ELT(r_payload, 1));
-    } else {
-        const char *names[] = {"name", "tag", "value", ""};
-        r_ret = PROTECT(Rf_mkNamed(VECSXP, names));        
-        SET_VECTOR_ELT(r_ret, 2, r_payload);
-    }
+    const char *names[] = {"name", "type", "value", ""};
+    SEXP r_ret = PROTECT(Rf_mkNamed(VECSXP, names));        
     SET_VECTOR_ELT(r_ret, 0, r_name);
-    SET_VECTOR_ELT(r_ret, 1, Rf_ScalarInteger((int)tag));
+    SET_VECTOR_ELT(r_ret, 1, Rf_ScalarInteger(type));
+    SET_VECTOR_ELT(r_ret, 2, r_payload);
     UNPROTECT(3);
     return r_ret;
 }
 
-SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end) {
+SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end,
+                     nbt_format_t fmt) {
     SEXP r_ret = PROTECT(create_stretchy_list());
     SEXP r_val;
     while(*ptr < end) {
-        r_val = PROTECT(read_nbt_value(ptr, end));
+        r_val = PROTECT(read_nbt_value(ptr, end, fmt));
         if(Rf_isNull(r_val)) {
             // We should not encounter a 0 tag in this context
             return_nbt_error_tag(0);
@@ -390,18 +505,19 @@ SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end) {
     return Rf_PairToVectorList(CDR(r_ret));
 }
 
-SEXP read_nbt(SEXP r_value) {
+SEXP read_nbt(SEXP r_value, SEXP r_format) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
     }
     if(TYPEOF(r_value) != RAWSXP) {
-        error_return("Argument is not a raw type or NULL.");
+        error_return("Argument is not a raw type.");
     }
+    nbt_format_t fmt = Rf_asInteger(r_format);
 
     size_t len = XLENGTH(r_value);
     const unsigned char *buffer = RAW(r_value);
     const unsigned char *p = buffer;
-    return read_nbt_values(&p, buffer+len);
+    return read_nbt_values(&p, buffer+len, fmt);
 }
 
 static R_xlen_t write_nbt_numeric_payload(SEXP r_value, unsigned char** ptr,
@@ -752,3 +868,28 @@ SEXP write_nbt(SEXP r_value) {
     UNPROTECT(1);
     return ret;
 }
+
+
+/*
+
+# Payloads
+
+Every payload has a "value" element
+
+byte: {value = 1}
+short: {value = 1}
+int: {value = 1}
+long: {value = 1}
+float: {value = 1}
+double: {value = 1}
+byte_array: { value = 1,2 }
+string: { value = "a"}
+int_array : {value = 1,2 }
+long_array : {value = 1, 2}
+
+list : {value = {multiple payloads of type type}, type = type}
+compound : { value = {multiple values of any type} }
+
+
+
+*/
