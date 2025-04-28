@@ -28,8 +28,6 @@
 #include "nbt.h"
 #include "support.h"
 
-// ifdef WORDS_BIGENDIAN
-
 static SEXP g_tag_symbol = NULL;
 static SEXP g_ptype_symbol = NULL;
 static SEXP g_bytes_read_symbol = NULL;
@@ -130,12 +128,19 @@ static bool type_has_length(nbt_type_t type) {
      case TYPE_BYTE_ARRAY:
      case TYPE_INT_ARRAY:
      case TYPE_LONG_ARRAY:
+     case TYPE_LIST_OF_END:
      case TYPE_LIST_OF_BYTE:
      case TYPE_LIST_OF_SHORT:
      case TYPE_LIST_OF_INT:
      case TYPE_LIST_OF_LONG:
      case TYPE_LIST_OF_FLOAT:
      case TYPE_LIST_OF_DOUBLE:
+     case TYPE_LIST_OF_BYTE_ARRAY:
+     case TYPE_LIST_OF_STRING:
+     case TYPE_LIST_OF_LIST:
+     case TYPE_LIST_OF_COMPOUND:
+     case TYPE_LIST_OF_INT_ARRAY:
+     case TYPE_LIST_OF_LONG_ARRAY:
         return true;
      default:
         break;
@@ -236,8 +241,8 @@ static SEXP read_nbt_payload_numeric(const unsigned char** ptr,
         return R_NilValue;
     }
     // Store numeric values as doubles to avoid loss of information from NAs
-    SEXP res = PROTECT(Rf_allocVector(REALSXP, n));
-    double *x = REAL(res);
+    SEXP r_ret = PROTECT(Rf_allocVector(REALSXP, n));
+    double *x = REAL(r_ret);
     signed char ybyte;
     signed short yshort;
     signed int yint;
@@ -290,7 +295,7 @@ static SEXP read_nbt_payload_numeric(const unsigned char** ptr,
     }
     *ptr = p;
     UNPROTECT(1);
-    return res;
+    return r_ret;
 }
 
 static SEXP read_nbt_payload_integer64(const unsigned char** ptr,
@@ -303,7 +308,7 @@ static SEXP read_nbt_payload_integer64(const unsigned char** ptr,
     if(end - *ptr < payload_size(type, n)) {
         return R_NilValue;
     }
-    SEXP res = PROTECT(Rf_allocVector(STRSXP, n));
+    SEXP r_ret = PROTECT(Rf_allocVector(STRSXP, n));
     signed long long ylong;
     char buffer[22];
     const unsigned char *p = *ptr;
@@ -311,11 +316,11 @@ static SEXP read_nbt_payload_integer64(const unsigned char** ptr,
         memcpy(&ylong, p, 8);
         p += 8;
         snprintf(buffer, sizeof(buffer), "%lli", ylong);
-        SET_STRING_ELT(res, i, Rf_mkCharCE(buffer, CE_UTF8));
+        SET_STRING_ELT(r_ret, i, Rf_mkCharCE(buffer, CE_UTF8));
     }
     *ptr = p;
     UNPROTECT(1);
-    return res;
+    return r_ret;
 }
 
 static SEXP read_nbt_payload_empty_list(const unsigned char** ptr,
@@ -343,7 +348,7 @@ static SEXP read_nbt_payload_basic_list(const unsigned char** ptr,
 
     SEXP r_ret = PROTECT(Rf_allocVector(VECSXP, n));
     for(R_xlen_t i = 0; i < XLENGTH(r_ret); ++i) {
-        SET_VECTOR_ELT(r_ret, i, read_nbt_payload(ptr, end, type, fmt));
+        SET_VECTOR_ELT(r_ret, i, read_nbt_payload(ptr, end, inner_type, fmt));
     }
     UNPROTECT(1);
     return r_ret;
@@ -356,18 +361,18 @@ static SEXP read_nbt_payload_nested_list(const unsigned char** ptr,
     if(n == -1) {
         return R_NilValue;
     }
-    SEXP r_ret = PROTECT(Rf_allocVector(STRSXP, n));
+    SEXP r_ret = PROTECT(Rf_allocVector(VECSXP, n));
     for(R_xlen_t i = 0; i < XLENGTH(r_ret); ++i) {
         const char *names[] = {"type", "value", ""};
         SEXP r_inner = PROTECT(Rf_mkNamed(VECSXP, names));
-        nbt_type_t inner_type = TYPE_LIST_OF_END;
         if(*ptr >= end) {
             return_nbt_error();
         }
+        nbt_type_t inner_type = TYPE_LIST_OF_END;
         inner_type += **ptr;
         *ptr += 1;
-        SET_VECTOR_ELT(r_inner, 1, Rf_ScalarInteger(inner_type));
-        SET_VECTOR_ELT(r_inner, 2, read_nbt_payload(ptr, end, type, fmt));
+        SET_VECTOR_ELT(r_inner, 0, Rf_ScalarInteger(inner_type));
+        SET_VECTOR_ELT(r_inner, 1, read_nbt_payload(ptr, end, inner_type, fmt));
         UNPROTECT(1);
         SET_VECTOR_ELT(r_ret, i, r_inner);
     }

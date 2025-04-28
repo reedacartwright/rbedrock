@@ -1,5 +1,5 @@
 /*
-# Copyright (c) 2021 Reed A. Cartwright <reed@cartwright.ht>
+# Copyright (c) 2025 Reed A. Cartwright <reed@cartwright.ht>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,30 +19,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 */
-#ifndef FRAGMITES_NBT_H
-#define FRAGMITES_NBT_H
+
+#ifndef FRAGMITES_BINARY_H
+#define FRAGMITES_BINARY_H
 
 #include <R.h>
 #include <Rinternals.h>
-#include <stdbool.h>
+#include <stdint.h>
 
-enum NBT_FORMAT {
-    FMT_LE = 0,
-    FMT_BE = 1,
-    FMT_VA = 2
-};
-typedef enum NBT_FORMAT nbt_format_t;
+uint8_t read_ubyte(const void *src);
 
-SEXP read_nbt(SEXP r_rawval, SEXP r_format);
-SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end, nbt_format_t fmt);
-SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end, nbt_format_t fmt);
+uint16_t read_ushort_l(const void *src);
+uint32_t read_uint_l(const void *src);
+uint64_t read_ulong_l(const void *src);
 
-SEXP write_nbt(SEXP r_value);
-R_xlen_t write_nbt_value(SEXP r_value, unsigned char** ptr, const unsigned char* end);
-R_xlen_t write_nbt_values(SEXP r_value, unsigned char** ptr, const unsigned char* end);
+uint16_t read_ushort_b(const void *src);
+uint32_t read_uint_b(const void *src);
+uint64_t read_ulong_b(const void *src);
 
-#define return_nbt_error() { Rf_error("Malformed NBT data: at %s, line %d.",  __FILE__, __LINE__ ); return R_NilValue; }
-#define return_nbt_error0() { Rf_error("Malformed NBT data: at %s, line %d.",  __FILE__, __LINE__ ); return 0; }
-#define return_nbt_error_tag(x) { Rf_error("Malformed NBT data with tag `%d`: at %s, line %d.", (x), __FILE__, __LINE__ ); return R_NilValue; }
+int16_t read_short(const unsigned char* src, size_t n, unsigned char** end, char fmt);
+int32_t read_int(const unsigned char* src, size_t n, unsigned char** end, char fmt);
+int64_t read_long(const unsigned char* src, size_t n, unsigned char** end, char fmt);
+uint16_t read_ushort(const unsigned char* src, size_t n, unsigned char** end, char fmt);
+uint32_t read_uint(const unsigned char* src, size_t n, unsigned char** end, char fmt);
+uint64_t read_ulong(const unsigned char* src, size_t n, unsigned char** end, char fmt);
 
 #endif
