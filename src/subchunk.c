@@ -251,7 +251,7 @@ SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP 
         // Write the palette ids using persistent storage
         SET_VECTOR_ELT(r_retv, 2*i, write_subchunk_palette_ids(r_layer, true, XLENGTH(r_pal)));
         // write palette
-        SET_VECTOR_ELT(r_retv, 2*i+1, write_nbt(r_pal));
+        SET_VECTOR_ELT(r_retv, 2*i+1, R_write_nbt(r_pal));
     }
 
     int version = Rf_asInteger(r_version);

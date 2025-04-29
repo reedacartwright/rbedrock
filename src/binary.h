@@ -23,25 +23,20 @@
 #ifndef FRAGMITES_BINARY_H
 #define FRAGMITES_BINARY_H
 
-#include <R.h>
-#include <Rinternals.h>
+#include <stddef.h>
 #include <stdint.h>
 
-uint8_t read_ubyte(const void *src);
+const unsigned char* decode_ubyte(uint8_t* val, const unsigned char* ptr, size_t n, char fmt);
+const unsigned char* decode_ushort(uint16_t* val, const unsigned char* ptr, size_t n, char fmt);
+const unsigned char* decode_uint(uint32_t* val, const unsigned char* ptr, size_t n, char fmt);
+const unsigned char* decode_ulong(uint64_t* val, const unsigned char* ptr, size_t n, char fmt);
 
-uint16_t read_ushort_l(const void *src);
-uint32_t read_uint_l(const void *src);
-uint64_t read_ulong_l(const void *src);
+const unsigned char* decode_sbyte(int8_t* val, const unsigned char* ptr, size_t n, char fmt);
+const unsigned char* decode_sshort(int16_t* val, const unsigned char* ptr, size_t n, char fmt);
+const unsigned char* decode_sint(int32_t* val, const unsigned char* ptr, size_t n, char fmt);
+const unsigned char* decode_slong(int64_t* val, const unsigned char* ptr, size_t n, char fmt);
 
-uint16_t read_ushort_b(const void *src);
-uint32_t read_uint_b(const void *src);
-uint64_t read_ulong_b(const void *src);
-
-int16_t read_short(const unsigned char* src, size_t n, unsigned char** end, char fmt);
-int32_t read_int(const unsigned char* src, size_t n, unsigned char** end, char fmt);
-int64_t read_long(const unsigned char* src, size_t n, unsigned char** end, char fmt);
-uint16_t read_ushort(const unsigned char* src, size_t n, unsigned char** end, char fmt);
-uint32_t read_uint(const unsigned char* src, size_t n, unsigned char** end, char fmt);
-uint64_t read_ulong(const unsigned char* src, size_t n, unsigned char** end, char fmt);
+const unsigned char* decode_float(float* val, const unsigned char* ptr, size_t n, char fmt);
+const unsigned char* decode_double(double* val, const unsigned char* ptr, size_t n, char fmt);
 
 #endif

@@ -91,8 +91,8 @@
 #'   a handful to a single disk seek per `DB::Get()` call"
 #' @export
 #' @keywords internal
+#' @useDynLib rbedrock R_bedrock_leveldb_open
 #' @author Rich FitzJohn
-#' @useDynLib rbedrock, .registration = TRUE
 bedrock_leveldb_open <- function(path, create_if_missing = NULL,
                                  error_if_exists = NULL,
                                  paranoid_checks = NULL,
@@ -102,7 +102,7 @@ bedrock_leveldb_open <- function(path, create_if_missing = NULL,
                                  cache_capacity = NULL,
                                  bloom_filter_bits_per_key = NULL,
                                  compression_level = NULL) {
-    ptr <- .Call(Cbedrock_leveldb_open, path, create_if_missing,
+    ptr <- .Call(R_bedrock_leveldb_open, path, create_if_missing,
                  error_if_exists, paranoid_checks, write_buffer_size,
                  max_open_files, block_size, cache_capacity,
                  bloom_filter_bits_per_key, compression_level)
@@ -122,143 +122,176 @@ bedrock_leveldb_open <- function(path, create_if_missing = NULL,
 }
 
 #nolint start : object_length_linter
+#' @useDynLib rbedrock R_bedrock_leveldb_close
 bedrock_leveldb_close <- function(db, error_if_closed = FALSE) {
-    .Call(Cbedrock_leveldb_close, db, error_if_closed)
+    .Call(R_bedrock_leveldb_close, db, error_if_closed)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_destroy
 bedrock_leveldb_destroy <- function(path) {
-    .Call(Cbedrock_leveldb_destroy, path)
+    .Call(R_bedrock_leveldb_destroy, path)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_is_open
 bedrock_leveldb_is_open <- function(db) {
-    .Call(Cbedrock_leveldb_is_open, db)
+    .Call(R_bedrock_leveldb_is_open, db)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_repair
 bedrock_leveldb_repair <- function(path) {
-    .Call(Cbedrock_leveldb_repair, path)
+    .Call(R_bedrock_leveldb_repair, path)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_property
 bedrock_leveldb_property <- function(db, path, error_if_missing = FALSE) {
-    .Call(Cbedrock_leveldb_property, db, path, error_if_missing)
+    .Call(R_bedrock_leveldb_property, db, path, error_if_missing)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_get
 bedrock_leveldb_get <- function(db, key, readoptions = NULL) {
-    .Call(Cbedrock_leveldb_get, db, key, readoptions)
+    .Call(R_bedrock_leveldb_get, db, key, readoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_mget
 bedrock_leveldb_mget <- function(db, key, readoptions = NULL) {
-    .Call(Cbedrock_leveldb_mget, db, key, readoptions)
+    .Call(R_bedrock_leveldb_mget, db, key, readoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_mget_prefix
 bedrock_leveldb_mget_prefix <- function(db, starts_with, readoptions = NULL) {
-    .Call(Cbedrock_leveldb_mget_prefix, db, starts_with, readoptions)
+    .Call(R_bedrock_leveldb_mget_prefix, db, starts_with, readoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_put
 bedrock_leveldb_put <- function(db, key, value, writeoptions = NULL) {
-    .Call(Cbedrock_leveldb_put, db, key, value, writeoptions)
+    .Call(R_bedrock_leveldb_put, db, key, value, writeoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_mput
 bedrock_leveldb_mput <- function(db, key, value, writeoptions = NULL) {
-    .Call(Cbedrock_leveldb_mput, db, key, value, writeoptions)
+    .Call(R_bedrock_leveldb_mput, db, key, value, writeoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_delete
 bedrock_leveldb_delete <- function(db, key, report = FALSE, readoptions = NULL,
                                    writeoptions = NULL) {
-    .Call(Cbedrock_leveldb_delete, db, key, report, readoptions, writeoptions)
+    .Call(R_bedrock_leveldb_delete, db, key, report, readoptions, writeoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_iter_create
 bedrock_leveldb_iter_create <- function(db, readoptions = NULL) {
-    .Call(Cbedrock_leveldb_iter_create, db, readoptions)
+    .Call(R_bedrock_leveldb_iter_create, db, readoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_iter_destroy
 bedrock_leveldb_iter_destroy <- function(it, error_if_destroyed = FALSE) {
-    .Call(Cbedrock_leveldb_iter_destroy, it, error_if_destroyed)
+    .Call(R_bedrock_leveldb_iter_destroy, it, error_if_destroyed)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_iter_valid
 bedrock_leveldb_iter_valid <- function(it) {
-    .Call(Cbedrock_leveldb_iter_valid, it)
+    .Call(R_bedrock_leveldb_iter_valid, it)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_iter_seek_to_first
 bedrock_leveldb_iter_seek_to_first <- function(it) {
-    .Call(Cbedrock_leveldb_iter_seek_to_first, it)
+    .Call(R_bedrock_leveldb_iter_seek_to_first, it)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_iter_seek_to_last
 bedrock_leveldb_iter_seek_to_last <- function(it) {
-    .Call(Cbedrock_leveldb_iter_seek_to_last, it)
+    .Call(R_bedrock_leveldb_iter_seek_to_last, it)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_iter_seek
 bedrock_leveldb_iter_seek <- function(it, key) {
-    .Call(Cbedrock_leveldb_iter_seek, it, key)
+    .Call(R_bedrock_leveldb_iter_seek, it, key)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_iter_next
 bedrock_leveldb_iter_next <- function(it, error_if_invalid = FALSE) {
-    .Call(Cbedrock_leveldb_iter_next, it, error_if_invalid)
+    .Call(R_bedrock_leveldb_iter_next, it, error_if_invalid)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_iter_prev
 bedrock_leveldb_iter_prev <- function(it, error_if_invalid = FALSE) {
-    .Call(Cbedrock_leveldb_iter_prev, it, error_if_invalid)
+    .Call(R_bedrock_leveldb_iter_prev, it, error_if_invalid)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_iter_key
 bedrock_leveldb_iter_key <- function(it, error_if_invalid = FALSE) {
-    .Call(Cbedrock_leveldb_iter_key, it, error_if_invalid)
+    .Call(R_bedrock_leveldb_iter_key, it, error_if_invalid)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_iter_value
 bedrock_leveldb_iter_value <- function(it, error_if_invalid = FALSE) {
-    .Call(Cbedrock_leveldb_iter_value, it, error_if_invalid)
+    .Call(R_bedrock_leveldb_iter_value, it, error_if_invalid)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_snapshot_create 
 bedrock_leveldb_snapshot <- function(db) {
-    ptr <- .Call(Cbedrock_leveldb_snapshot_create, db)
+    ptr <- .Call(R_bedrock_leveldb_snapshot_create, db)
     attr(ptr, "timestamp") <- Sys.time()
     class(ptr) <- "bedrock_leveldb_snapshot"
     ptr
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_writebatch_create
 bedrock_leveldb_writebatch_create <- function() {
-    .Call(Cbedrock_leveldb_writebatch_create)
+    .Call(R_bedrock_leveldb_writebatch_create)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_writebatch_destroy
 bedrock_leveldb_writebatch_destroy <- function(writebatch,
                                                error_if_destroyed = FALSE) {
-    .Call(Cbedrock_leveldb_writebatch_destroy, writebatch, error_if_destroyed)
+    .Call(R_bedrock_leveldb_writebatch_destroy, writebatch, error_if_destroyed)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_writebatch_clear
 bedrock_leveldb_writebatch_clear <- function(writebatch) {
-    .Call(Cbedrock_leveldb_writebatch_clear, writebatch)
+    .Call(R_bedrock_leveldb_writebatch_clear, writebatch)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_writebatch_put
 bedrock_leveldb_writebatch_put <- function(writebatch, key, value) {
-    .Call(Cbedrock_leveldb_writebatch_put, writebatch, key, value)
+    .Call(R_bedrock_leveldb_writebatch_put, writebatch, key, value)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_writebatch_mput
 bedrock_leveldb_writebatch_mput <- function(writebatch, key, value) {
-    .Call(Cbedrock_leveldb_writebatch_mput, writebatch, key, value)
+    .Call(R_bedrock_leveldb_writebatch_mput, writebatch, key, value)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_writebatch_delete
 bedrock_leveldb_writebatch_delete <- function(writebatch, key) {
-    .Call(Cbedrock_leveldb_writebatch_delete, writebatch, key)
+    .Call(R_bedrock_leveldb_writebatch_delete, writebatch, key)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_writebatch_mdelete
 bedrock_leveldb_writebatch_mdelete <- function(writebatch, keys) {
-    .Call(Cbedrock_leveldb_writebatch_mdelete, writebatch, keys)
+    .Call(R_bedrock_leveldb_writebatch_mdelete, writebatch, keys)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_write
 bedrock_leveldb_write <- function(db, writebatch, writeoptions = NULL) {
-    .Call(Cbedrock_leveldb_write, db, writebatch, writeoptions)
+    .Call(R_bedrock_leveldb_write, db, writebatch, writeoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_approximate_sizes
 bedrock_leveldb_approximate_sizes <- function(db, start, limit) {
-    .Call(Cbedrock_leveldb_approximate_sizes, db, start, limit)
+    .Call(R_bedrock_leveldb_approximate_sizes, db, start, limit)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_compact_range
 bedrock_leveldb_compact_range <- function(db, start, limit) {
-    .Call(Cbedrock_leveldb_compact_range, db, start, limit)
+    .Call(R_bedrock_leveldb_compact_range, db, start, limit)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_readoptions
 bedrock_leveldb_readoptions <- function(verify_checksums = NULL,
                                         fill_cache = NULL,
                                         snapshot = NULL) {
-    ptr <- .Call(Cbedrock_leveldb_readoptions, verify_checksums, fill_cache,
+    ptr <- .Call(R_bedrock_leveldb_readoptions, verify_checksums, fill_cache,
                  snapshot)
     attr(ptr, "options") <- list(verify_checksums = verify_checksums,
                                  fill_cache = fill_cache,
@@ -267,28 +300,33 @@ bedrock_leveldb_readoptions <- function(verify_checksums = NULL,
     ptr
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_writeoptions
 bedrock_leveldb_writeoptions <- function(sync = NULL) {
-    ptr <- .Call(Cbedrock_leveldb_writeoptions, sync)
+    ptr <- .Call(R_bedrock_leveldb_writeoptions, sync)
     class(ptr) <- c("bedrock_leveldb_writeoptions", "bedrock_leveldb_options")
     attr(ptr, "options") <- list(sync = sync)
     ptr
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_keys_len
 bedrock_leveldb_keys_len <- function(db, starts_with = NULL,
                                      readoptions = NULL) {
-    .Call(Cbedrock_leveldb_keys_len, db, starts_with, readoptions)
+    .Call(R_bedrock_leveldb_keys_len, db, starts_with, readoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_keys
 bedrock_leveldb_keys <- function(db, starts_with = NULL, readoptions = NULL) {
-    .Call(Cbedrock_leveldb_keys, db, starts_with, readoptions)
+    .Call(R_bedrock_leveldb_keys, db, starts_with, readoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_exists
 bedrock_leveldb_exists <- function(db, key, readoptions = NULL) {
-    .Call(Cbedrock_leveldb_exists, db, key, readoptions)
+    .Call(R_bedrock_leveldb_exists, db, key, readoptions)
 }
 
+#' @useDynLib rbedrock R_bedrock_leveldb_version
 bedrock_leveldb_version <- function() {
-    ret <- list(.Call(Cbedrock_leveldb_version))
+    ret <- list(.Call(R_bedrock_leveldb_version))
     class(ret) <- "numeric_version"
     ret
 }

@@ -22,11 +22,14 @@
 
 #define R_NO_REMAP
 
+#include <R_ext/Visibility.h>
+
 #include <limits.h>
 #include <stdbool.h>
 
 #include "nbt.h"
 #include "support.h"
+#include "binary.h"
 
 static SEXP g_tag_symbol = NULL;
 static SEXP g_ptype_symbol = NULL;
@@ -86,6 +89,36 @@ enum NBT_TYPE {
     TYPE_LIST_OF_LONG_ARRAY = 112,
 };
 typedef enum NBT_TYPE nbt_type_t;
+
+static char get_binary_format(nbt_type_t type, nbt_format_t fmt) {
+    // FMT_LE = 0, FMT_BE = 1, FMT_LV = 2, FMT_BV = 3
+    const char integer_format[] = "lbvv";
+    const char float_format[] = "lblb";
+
+    switch(type) {
+     case TYPE_BYTE:
+     case TYPE_BYTE_ARRAY:
+     case TYPE_LIST_OF_BYTE:
+     case TYPE_STRING:
+     case TYPE_SHORT:
+     case TYPE_LIST_OF_SHORT:
+     case TYPE_INT:
+     case TYPE_INT_ARRAY:
+     case TYPE_LIST_OF_INT:
+     case TYPE_LONG:
+     case TYPE_LONG_ARRAY:
+     case TYPE_LIST_OF_LONG:
+        return integer_format[fmt];
+     case TYPE_FLOAT:
+     case TYPE_LIST_OF_FLOAT:
+     case TYPE_DOUBLE:
+     case TYPE_LIST_OF_DOUBLE:
+        return float_format[fmt];
+     default:
+        break;
+    };
+    return '0';
+}
 
 static SEXP read_nbt_payload(const unsigned char** p, const unsigned char* end,
                              nbt_type_t type, nbt_format_t fmt);
@@ -154,12 +187,13 @@ static int read_payload_length(const unsigned char** ptr,
     if(!type_has_length(type)) {
         return 1;
     }
-    if(end - *ptr < 4) {
+    int n;
+    char dfmt = get_binary_format(TYPE_INT, fmt);
+    const unsigned char * p = decode_sint(&n, *ptr, end - *ptr, dfmt);
+    if(p == NULL) {
         return -1;
     }
-    int n;
-    memcpy(&n, *ptr, 4);
-    *ptr += 4;
+    *ptr = p;
     return n;
 }
 
@@ -172,15 +206,12 @@ static SEXP read_nbt_payload_character(const unsigned char** ptr,
     }
     // Check for embedded nulls and valid format
     bool has_null = false;
+    char dfmt = get_binary_format(TYPE_STRING, fmt);
     const unsigned char *p = *ptr;
     for(int i = 0; i < n; ++i) {
         unsigned short len;
-        if(end - p < 2) {
-            return R_NilValue;
-        }
-        memcpy(&len, p, 2);
-        p += 2;
-        if(end - p < len) {
+        p = decode_ushort(&len, p, end - p, dfmt);
+        if(p == NULL || end - p < len) {
             return R_NilValue;
         }
         for(int j=0; !has_null && j < len; ++j) {
@@ -198,16 +229,14 @@ static SEXP read_nbt_payload_character(const unsigned char** ptr,
         r_ret = PROTECT(Rf_allocVector(STRSXP, n));
         for(R_xlen_t i = 0; i < XLENGTH(r_ret); ++i) {
             unsigned short len;
-            memcpy(&len, p, 2);
-            p += 2;
+            p = decode_ushort(&len, p, end - p, dfmt);
             SET_STRING_ELT(r_ret, i, Rf_mkCharLenCE((const char*)p, len, CE_UTF8));
             p += len;
         }
     } else if(n == 1) {
         // create raw vector
         unsigned short len;
-        memcpy(&len, p, 2);
-        p += 2;
+        p = decode_ushort(&len, p, end - p, dfmt);
         r_ret = PROTECT(Rf_allocVector(RAWSXP, len));
         memcpy(RAW(r_ret), p, len);
         p += len;
@@ -216,8 +245,7 @@ static SEXP read_nbt_payload_character(const unsigned char** ptr,
         r_ret = PROTECT(Rf_allocVector(VECSXP, n));
         for(R_xlen_t i = 0; i < XLENGTH(r_ret); ++i) {
             unsigned short len;
-            memcpy(&len, p, 2);
-            p += 2;
+            p = decode_ushort(&len, p, end - p, dfmt);
             SEXP r = PROTECT(Rf_allocVector(RAWSXP, len));
             memcpy(RAW(r_ret), p, len);
             p += len;
@@ -237,9 +265,6 @@ static SEXP read_nbt_payload_numeric(const unsigned char** ptr,
     if(n == -1) {
         return R_NilValue;
     }
-    if(end - *ptr < payload_size(type, n)) {
-        return R_NilValue;
-    }
     // Store numeric values as doubles to avoid loss of information from NAs
     SEXP r_ret = PROTECT(Rf_allocVector(REALSXP, n));
     double *x = REAL(r_ret);
@@ -247,51 +272,49 @@ static SEXP read_nbt_payload_numeric(const unsigned char** ptr,
     signed short yshort;
     signed int yint;
     float yfloat;
-    double ydouble;
     
+    char dfmt = get_binary_format(type, fmt);
     const unsigned char *p = *ptr;
     for(int i=0; i < n; ++i) {
         switch(type) {
          case TYPE_BYTE:
          case TYPE_BYTE_ARRAY:
          case TYPE_LIST_OF_BYTE:
-            memcpy(&ybyte, p, 1);
+            p = decode_sbyte(&ybyte, p, end - p, dfmt);
             x[i] = (double)ybyte;
-            p += 1;
             break;
          case TYPE_SHORT:
          case TYPE_LIST_OF_SHORT:
-            memcpy(&yshort, p, 2);
+            p = decode_sshort(&yshort, p, end - p, dfmt);
             x[i] = (double)yshort;
-            p += 2;
             break;
          case TYPE_INT:
          case TYPE_INT_ARRAY:
          case TYPE_LIST_OF_INT:
-            memcpy(&yint, p, 4);
+            p = decode_sint(&yint, p, end - p, dfmt);
             x[i] = (double)yint;
-            p += 4;
             break;
          case TYPE_FLOAT:
          case TYPE_LIST_OF_FLOAT:
-            memcpy(&yfloat, p, 4);
-            x[i] = (float)yfloat;
-            p += 4;
+            p = decode_float(&yfloat, p, end - p, dfmt);
+            x[i] = (double)yfloat;
             break;
+        /* While longs are now recorded as strings, keep this pass through.*/
          case TYPE_LONG:
          case TYPE_LONG_ARRAY:
          case TYPE_LIST_OF_LONG:
-            /* While longs are now recorded as strings, keep this pass through.*/;
          case TYPE_DOUBLE:
          case TYPE_LIST_OF_DOUBLE:
-            memcpy(&ydouble, p, 8);
-            x[i] = ydouble;
-            p += 8;
+            p = decode_double(x + i, p, end - p, dfmt);
             break;
          default:
             return_nbt_error_tag(type);
             break;
         };
+        if(p == NULL) {
+            UNPROTECT(1);
+            return R_NilValue;
+        }
     }
     *ptr = p;
     UNPROTECT(1);
@@ -305,18 +328,19 @@ static SEXP read_nbt_payload_integer64(const unsigned char** ptr,
     if(n == -1) {
         return R_NilValue;
     }
-    if(end - *ptr < payload_size(type, n)) {
-        return R_NilValue;
-    }
     SEXP r_ret = PROTECT(Rf_allocVector(STRSXP, n));
     signed long long ylong;
     char buffer[22];
+    char dfmt = get_binary_format(TYPE_LONG, fmt);
     const unsigned char *p = *ptr;
     for(int i=0; i < n; ++i) {
-        memcpy(&ylong, p, 8);
-        p += 8;
+        p = decode_slong((int64_t*)&ylong, p, end - p, dfmt);
         snprintf(buffer, sizeof(buffer), "%lli", ylong);
         SET_STRING_ELT(r_ret, i, Rf_mkCharCE(buffer, CE_UTF8));
+        if(p == NULL) {
+            UNPROTECT(1);
+            return R_NilValue;
+        }
     }
     *ptr = p;
     UNPROTECT(1);
@@ -508,21 +532,6 @@ SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end,
     }
     UNPROTECT(1);
     return Rf_PairToVectorList(CDR(r_ret));
-}
-
-SEXP read_nbt(SEXP r_value, SEXP r_format) {
-    if(Rf_isNull(r_value)) {
-        return R_NilValue;
-    }
-    if(TYPEOF(r_value) != RAWSXP) {
-        error_return("Argument is not a raw type.");
-    }
-    nbt_format_t fmt = Rf_asInteger(r_format);
-
-    size_t len = XLENGTH(r_value);
-    const unsigned char *buffer = RAW(r_value);
-    const unsigned char *p = buffer;
-    return read_nbt_values(&p, buffer+len, fmt);
 }
 
 static R_xlen_t write_nbt_numeric_payload(SEXP r_value, unsigned char** ptr,
@@ -847,7 +856,22 @@ R_xlen_t write_nbt_values(SEXP r_value, unsigned char** ptr, const unsigned char
     return len;
 }
 
-SEXP write_nbt(SEXP r_value) {
+SEXP attribute_visible R_read_nbt(SEXP r_value, SEXP r_format) {
+    if(Rf_isNull(r_value)) {
+        return R_NilValue;
+    }
+    if(TYPEOF(r_value) != RAWSXP) {
+        error_return("Argument is not a raw type.");
+    }
+    nbt_format_t fmt = Rf_asInteger(r_format);
+
+    size_t len = XLENGTH(r_value);
+    const unsigned char *buffer = RAW(r_value);
+    const unsigned char *p = buffer;
+    return read_nbt_values(&p, buffer+len, fmt);
+}
+
+SEXP attribute_visible R_write_nbt(SEXP r_value) {
     // stack-based buffer
     unsigned char buffer[8192];
 
@@ -873,28 +897,3 @@ SEXP write_nbt(SEXP r_value) {
     UNPROTECT(1);
     return ret;
 }
-
-
-/*
-
-# Payloads
-
-Every payload has a "value" element
-
-byte: {value = 1}
-short: {value = 1}
-int: {value = 1}
-long: {value = 1}
-float: {value = 1}
-double: {value = 1}
-byte_array: { value = 1,2 }
-string: { value = "a"}
-int_array : {value = 1,2 }
-long_array : {value = 1, 2}
-
-list : {value = {multiple payloads of type type}, type = type}
-compound : { value = {multiple values of any type} }
-
-
-
-*/

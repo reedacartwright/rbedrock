@@ -29,15 +29,17 @@
 enum NBT_FORMAT {
     FMT_LE = 0,
     FMT_BE = 1,
-    FMT_VA = 2
+    FMT_LV = 2,
+    FMT_BV = 3
 };
 typedef enum NBT_FORMAT nbt_format_t;
 
-SEXP read_nbt(SEXP r_rawval, SEXP r_format);
+SEXP R_read_nbt(SEXP r_rawval, SEXP r_format);
+SEXP R_write_nbt(SEXP r_value);
+
 SEXP read_nbt_values(const unsigned char** ptr, const unsigned char* end, nbt_format_t fmt);
 SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end, nbt_format_t fmt);
 
-SEXP write_nbt(SEXP r_value);
 R_xlen_t write_nbt_value(SEXP r_value, unsigned char** ptr, const unsigned char* end);
 R_xlen_t write_nbt_values(SEXP r_value, unsigned char** ptr, const unsigned char* end);
 

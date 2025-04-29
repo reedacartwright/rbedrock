@@ -17,7 +17,7 @@ from_rnbt_payload(x)
 
 to_rnbt_payload(x)
 
-read_rnbt(rawdata)
+read_rnbt(rawdata, format = c("little", "big", "network", "network_big"))
 
 write_rnbt(object)
 }

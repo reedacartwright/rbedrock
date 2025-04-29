@@ -551,15 +551,21 @@ to_rnbt_payload.rbedrock_nbt_list <- function(x) {
 #' @rdname rnbt
 #' @keywords internal
 #' @export
-read_rnbt <- function(rawdata, format = "little") {
-    .Call(Cread_nbt, rawdata, 0L)
+#' @useDynLib rbedrock R_read_nbt
+read_rnbt <- function(rawdata,
+                      format = c("little", "big", "network", "network_big")) {
+    format <- match.arg(format)
+    format_int <- switch(format, "little" = 0L, "big" = 1L,
+                                 "network" = 2L, "network_big" = 3L)
+    .Call(R_read_nbt, rawdata, format_int)
 }
 
 #' @rdname rnbt
 #' @keywords internal
+#' @useDynLib rbedrock R_write_nbt
 #' @export
 write_rnbt <- function(object) {
-    .Call(Cwrite_nbt, object)
+    .Call(R_write_nbt, object)
 }
 
 # printing ---------------------------------------------------------------------
