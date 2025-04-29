@@ -55,18 +55,26 @@ const unsigned char* decode_ulong_l(uint64_t* val, const unsigned char* ptr) {
 
 static
 const unsigned char* decode_float_l(float* val, const unsigned char* ptr) {
-    memcpy(val, ptr, sizeof(*val));
 #ifdef WORDS_BIGENDIAN
-    *val = __builtin_bswap32(*val);
+    uint32_t u;
+    memcpy(&u, ptr, sizeof(*val));
+    u = __builtin_bswap32(u);
+    memcpy(val, &u, sizeof(*val));
+#else
+    memcpy(val, ptr, sizeof(*val));
 #endif
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_double_l(double* val, const unsigned char* ptr) {
-    memcpy(val, ptr, sizeof(*val));
 #ifdef WORDS_BIGENDIAN
-    *val = __builtin_bswap64(*val);
+    uint64_t u;
+    memcpy(&u, ptr, sizeof(*val));
+    u = __builtin_bswap64(u);
+    memcpy(val, &u, sizeof(*val));
+#else
+    memcpy(val, ptr, sizeof(*val));
 #endif
     return ptr + sizeof(*val);
 }
@@ -100,18 +108,26 @@ const unsigned char* decode_ulong_b(uint64_t* val, const unsigned char* ptr) {
 
 static
 const unsigned char* decode_float_b(float* val, const unsigned char* ptr) {
-    memcpy(val, ptr, sizeof(*val));
 #ifndef WORDS_BIGENDIAN
-    *val = __builtin_bswap32(*val);
+    uint32_t u;
+    memcpy(&u, ptr, sizeof(*val));
+    u = __builtin_bswap32(u);
+    memcpy(val, &u, sizeof(*val));
+#else
+    memcpy(val, ptr, sizeof(*val));
 #endif
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_double_b(double* val, const unsigned char* ptr) {
-    memcpy(val, ptr, sizeof(*val));
 #ifndef WORDS_BIGENDIAN
-    *val = __builtin_bswap64(*val);
+    uint64_t u;
+    memcpy(&u, ptr, sizeof(*val));
+    u = __builtin_bswap64(u);
+    memcpy(val, &u, sizeof(*val));
+#else
+    memcpy(val, ptr, sizeof(*val));
 #endif
     return ptr + sizeof(*val);
 }

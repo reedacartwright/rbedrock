@@ -1,10 +1,6 @@
 dbpath <- rbedrock_example_world("example3.mcworld")
 db <- bedrockdb(dbpath)
 
-as_raw <- function(...) {
-    as.raw(c(...))
-}
-
 test_that("get_acdig_value() returns a vector of actor keys.", {
     dat <- get_acdig_value(0, 0, 0, db = db)
     expect_equal(dat, c("actor:000000010000000A", "actor:000000010000000B",

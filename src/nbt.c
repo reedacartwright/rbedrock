@@ -247,7 +247,7 @@ static SEXP read_nbt_payload_character(const unsigned char** ptr,
             unsigned short len;
             p = decode_ushort(&len, p, end - p, dfmt);
             SEXP r = PROTECT(Rf_allocVector(RAWSXP, len));
-            memcpy(RAW(r_ret), p, len);
+            memcpy(RAW(r), p, len);
             p += len;
             SET_VECTOR_ELT(r_ret, i, r);
             UNPROTECT(1);
