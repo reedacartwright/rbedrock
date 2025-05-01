@@ -129,3 +129,76 @@ as_raw_lv <- function(...) {
     })
     unlist(r)
 }
+
+as_double <- function(x) {
+    suppressWarnings(as.double(x))
+}
+
+is_int64 <- function(x) {
+    # TODO: test the actual value as well
+    grepl("^[-+]?[1-9][0-9]*$", x)
+}
+
+trunc_int64 <- function(x) {
+    sub("\\..*$", "", x)
+}
+
+## modified from rlang/standalone-vctrs.R
+
+rac_recycle <- function(x, size) {
+    if (is.null(x) || is.null(size)) {
+        return(NULL)
+    }
+    n_x <- length(x)
+    if (n_x == size) {
+        x
+    } else if (size == 0L) {
+        rac_slice(x, 0L)
+    } else if (n_x == 1L) {
+        rac_slice(x, rep(1L, size))
+    } else {
+        stop("Incompatible lengths: ", n_x, ", ", size, call. = FALSE)
+    }
+}
+
+rac_slice <- function(x, i) {
+    if (is.logical(i)) {
+        i <- which(i)
+    }
+    stopifnot(is.numeric(i) || is.character(i))
+
+    if (is.null(x)) {
+        return(NULL)
+    }
+
+    out <- x[i, drop = FALSE]
+    class(out) <- oldClass(x)
+    out
+}
+
+rac_assign <- function(x, i, value) {
+    if (is.null(x)) {
+        return(NULL)
+    }
+    if (is.logical(i)) {
+        i <- which(i)
+    }
+    stopifnot(is.numeric(i) || is.character(i))
+    value <- rac_recycle(value, length(i))
+    value <- rac_cast(value, to = x)
+
+    x[i] <- value
+    x
+}
+
+#' @export
+rac_cast <- function(x, to, ..., x_arg = "x") {
+    UseMethod("rac_cast", to)
+}
+
+#' @export
+rac_cast.default <- function(x, to, ..., x_arg = "x") {
+    msg <- sprintf("Unable to implicitly coerce `%s` <%s> to <%s>",
+        x_arg, class(x)[1], class(to)[1])
+    stop(msg, call. = FALSE)
+}

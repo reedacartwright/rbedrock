@@ -9,6 +9,9 @@
 \alias{nbt_double}
 \alias{nbt_byte_array}
 \alias{nbt_int_array}
+\alias{nbt_long}
+\alias{nbt_long_array}
+\alias{nbt_string}
 \title{Create an NBT value}
 \usage{
 nbt(...)
@@ -26,6 +29,12 @@ nbt_double(x)
 nbt_byte_array(x)
 
 nbt_int_array(x)
+
+nbt_long(x)
+
+nbt_long_array(x)
+
+nbt_string(x)
 }
 \arguments{
 \item{x}{An nbt payload.}
