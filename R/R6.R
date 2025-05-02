@@ -131,7 +131,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list( # nolint: object_name_li
     initialize = function(path, ...) {
         path <- normalize_path(fixup_path(path))
         dat <- read_leveldat(path)
-        self$levelname <- payload(dat$LevelName)
+        self$levelname <- unnbt(dat$LevelName)
         self$path <- file_path(path, "db")
         self$db <- bedrock_leveldb_open(self$path, ...)
         self$leveldat <- dat
@@ -203,7 +203,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list( # nolint: object_name_li
     },
     create_unique_ids = function(n) {
         if (is_null(self$unique_id)) {
-            cnt <- payload(self$leveldat$worldStartCount %||% nbt_long(0))
+            cnt <- unnbt(self$leveldat$worldStartCount) %||% 0
             cnt <- bit64::as.integer64(cnt)
             self$leveldat$worldStartCount <- nbt_long(cnt - 1)
             self$leveldat_is_dirty <- TRUE

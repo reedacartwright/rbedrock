@@ -1,8 +1,4 @@
-# tags <- list(
-#     end = 0L, byte = 1L, short = 2L, int = 3L, long = 4L,
-#     float = 5L, double = 6L, byte_array = 7L, string = 8L,
-#     list = 9L, compound = 10L, int_array = 11L, long_array = 12L
-# )
+# nolint start: indentation_linter
 
 test_that("read_rnbt() can read bytes", {
     # little endian format
@@ -204,7 +200,7 @@ test_that("read_rnbt() can read strings", {
         list(name = "test",  type = 8L, value = "hello world"),
         list(name = "empty", type = 8L, value = ""),
         list(name = "greek", type = 8L, value = "\u03B1\u03B2\u03B3"),
-        list(name = "raw", type = 8L, value = as.raw(c(97, 0, 98)))
+        list(name = "raw", type = 58L, value = as.raw(c(97, 0, 98)))
     ))
 
     # big endian format
@@ -216,7 +212,7 @@ test_that("read_rnbt() can read strings", {
         list(name = "test",  type = 8L, value = "hello world"),
         list(name = "empty", type = 8L, value = ""),
         list(name = "greek", type = 8L, value = "\u03B1\u03B2\u03B3"),
-        list(name = "raw", type = 8L, value = as.raw(c(97, 0, 98)))
+        list(name = "raw", type = 58L, value = as.raw(c(97, 0, 98)))
     ))
 
     # network format
@@ -229,7 +225,7 @@ test_that("read_rnbt() can read strings", {
         list(name = "test",  type = 8L, value = "hello world"),
         list(name = "empty", type = 8L, value = ""),
         list(name = "greek", type = 8L, value = "\u03B1\u03B2\u03B3"),
-        list(name = "raw", type = 8L, value = as.raw(c(97, 0, 98)))
+        list(name = "raw", type = 58L, value = as.raw(c(97, 0, 98)))
     ))
 })
 
@@ -543,8 +539,8 @@ test_that("read_rnbt() can read lists of strings", {
         )
     expect_equal(read_rnbt(rawval), list(
         list(name = "abc", type = 108L, value = c("a", "b", "c")),
-        list(name = "raw", type = 108L, value = as.raw(c(97, 0, 98))),
-        list(name = "lst", type = 108L, value = list(
+        list(name = "raw", type = 158L, value = list(as.raw(c(97, 0, 98)))),
+        list(name = "lst", type = 158L, value = list(
             charToRaw("abc"), as.raw(c(97, 0, 98))))
 
     ))
@@ -556,8 +552,8 @@ test_that("read_rnbt() can read lists of strings", {
         )
     expect_equal(read_rnbt(rawval, "big"), list(
         list(name = "abc", type = 108L, value = c("a", "b", "c")),
-        list(name = "raw", type = 108L, value = as.raw(c(97, 0, 98))),
-        list(name = "lst", type = 108L, value = list(
+        list(name = "raw", type = 158L, value = list(as.raw(c(97, 0, 98)))),
+        list(name = "lst", type = 158L, value = list(
             charToRaw("abc"), as.raw(c(97, 0, 98))))
 
     ))
@@ -569,8 +565,8 @@ test_that("read_rnbt() can read lists of strings", {
         )
     expect_equal(read_rnbt(rawval, "network"), list(
         list(name = "abc", type = 108L, value = c("a", "b", "c")),
-        list(name = "raw", type = 108L, value = as.raw(c(97, 0, 98))),
-        list(name = "lst", type = 108L, value = list(
+        list(name = "raw", type = 158L, value = list(as.raw(c(97, 0, 98)))),
+        list(name = "lst", type = 158L, value = list(
             charToRaw("abc"), as.raw(c(97, 0, 98))))
 
     ))
@@ -721,3 +717,5 @@ test_that("read_rnbt() throws errors on malformed values", {
         expect_error(read_rnbt(rawval[1:!!i]))
     }
 })
+
+# nolint end

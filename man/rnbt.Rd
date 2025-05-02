@@ -6,7 +6,6 @@
 \alias{write_rnbt}
 \alias{from_rnbt}
 \alias{to_rnbt}
-\alias{from_rnbt_payload}
 \alias{to_rnbt_payload}
 \title{Raw Named Binary Tag Format}
 \usage{
@@ -17,8 +16,6 @@ write_rnbt(x)
 from_rnbt(x)
 
 to_rnbt(x)
-
-from_rnbt_payload(x)
 
 to_rnbt_payload(x)
 }

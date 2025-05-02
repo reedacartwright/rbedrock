@@ -38,11 +38,12 @@ as_raw_le <- function(...) {
         } else if (n == "d") {
             writeBin(as.double(v), raw(), size = 8, endian = "little")
         } else if (n == "l") {
-            writeBin(unclass(bit64::as.integer64(v)), raw(), size = 8, endian = "little")
+            writeBin(unclass(bit64::as.integer64(v)), raw(), size = 8,
+                     endian = "little")
         } else if (is.character(v)) {
             k <- nchar(v, type = "bytes")
             k <- writeBin(k, raw(), size = 2, endian = "little")
-            c(k, charToRaw(v))        
+            c(k, charToRaw(v))
         } else {
             writeBin(as.integer(v), raw(), size = 4, endian = "little")
         }
@@ -68,7 +69,8 @@ as_raw_be <- function(...) {
         } else if (n == "d") {
             writeBin(as.double(v), raw(), size = 8, endian = "big")
         } else if (n == "l") {
-            writeBin(unclass(bit64::as.integer64(v)), raw(), size = 8, endian = "big")
+            writeBin(unclass(bit64::as.integer64(v)), raw(), size = 8,
+                     endian = "big")
         } else if (is.character(v)) {
             k <- nchar(v, type = "bytes")
             k <- writeBin(k, raw(), size = 2, endian = "big")
@@ -94,11 +96,11 @@ as_raw_varint_1 <- function(x) {
     repeat {
         b <- as.integer(x %% 128L)
         x <- x %/% 128L
-        if(x > 0) {
+        if (x > 0) {
             b <- b + 128L
         }
         r <- c(r, b)
-        if(x == 0) {
+        if (x == 0) {
             break
         }
     }
@@ -122,7 +124,7 @@ as_raw_lv <- function(...) {
         } else if (is.character(v)) {
             k <- nchar(v, type = "bytes")
             k <- as_raw_varint_1(k)
-            c(k, charToRaw(v))        
+            c(k, charToRaw(v))
         } else {
             as_raw_varint_s(v)
         }
@@ -166,11 +168,9 @@ rac_slice <- function(x, i) {
         i <- which(i)
     }
     stopifnot(is.numeric(i) || is.character(i))
-
     if (is.null(x)) {
         return(NULL)
     }
-
     out <- x[i, drop = FALSE]
     class(out) <- oldClass(x)
     out
@@ -185,7 +185,8 @@ rac_assign <- function(x, i, value) {
     }
     stopifnot(is.numeric(i) || is.character(i))
     value <- rac_recycle(value, length(i))
-    value <- rac_cast(value, to = x)
+    to <- rac_slice(x, 0L)
+    value <- rac_cast(value, to = to)
 
     x[i] <- value
     x
@@ -198,7 +199,11 @@ rac_cast <- function(x, to, ..., x_arg = "x") {
 
 #' @export
 rac_cast.default <- function(x, to, ..., x_arg = "x") {
-    msg <- sprintf("Unable to implicitly coerce `%s` <%s> to <%s>",
-        x_arg, class(x)[1], class(to)[1])
+    msg <- sprintf("Casting `%s` <%s> to <%s> not implemented.",
+                   x_arg, class(x)[1], class(to)[1])
     stop(msg, call. = FALSE)
+}
+
+rac_data <- function(x) {
+    unclass(x)
 }

@@ -45,16 +45,16 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
         if (!fs::file_exists(normalize_path(f, "level.dat"))) {
             return(NULL)
         }
-        dat <- read_leveldat(f)
-        levelname <- payload(dat$LevelName)
-        lastplayed <- as.POSIXct(as.numeric(payload(dat$LastPlayed)),
+        dat <- unnbt(read_leveldat(f))
+        levelname <- dat$LevelName
+        lastplayed <- as.POSIXct(as.numeric(dat$LastPlayed),
                                  origin = "1970-01-01 00:00:00")
-        id <- file_path(f)
+        id <- basename(f)
         data.frame(id = id, levelname = levelname, last_opened = lastplayed)
     }, type = "directory")
     out <- do.call(rbind, out)
     out <- out[order(out$last_opened, decreasing = TRUE), , drop = FALSE]
-    out
+    tibble::as_tibble(out)
 }
 
 #' @description

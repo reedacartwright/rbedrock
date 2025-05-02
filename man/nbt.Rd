@@ -2,39 +2,90 @@
 % Please edit documentation in R/nbt.R
 \name{nbt}
 \alias{nbt}
+\alias{unnbt}
+\alias{nbt_compound}
 \alias{nbt_byte}
-\alias{nbt_short}
-\alias{nbt_int}
-\alias{nbt_float}
-\alias{nbt_double}
 \alias{nbt_byte_array}
+\alias{nbt_byte_list}
+\alias{nbt_byte_array_list}
+\alias{nbt_short}
+\alias{nbt_short_list}
+\alias{nbt_int}
 \alias{nbt_int_array}
+\alias{nbt_int_list}
+\alias{nbt_int_array_list}
+\alias{nbt_float}
+\alias{nbt_float_list}
+\alias{nbt_double}
+\alias{nbt_double_list}
 \alias{nbt_long}
 \alias{nbt_long_array}
+\alias{nbt_long_list}
+\alias{nbt_long_array_list}
 \alias{nbt_string}
+\alias{nbt_raw_string}
+\alias{nbt_string_list}
+\alias{nbt_raw_string_list}
+\alias{nbt_empty_list}
+\alias{nbt_compound_list}
+\alias{nbt_nested_list}
 \title{Create an NBT value}
 \usage{
 nbt(...)
 
+unnbt(x)
+
+nbt_compound(...)
+
 nbt_byte(x)
-
-nbt_short(x)
-
-nbt_int(x)
-
-nbt_float(x)
-
-nbt_double(x)
 
 nbt_byte_array(x)
 
+nbt_byte_list(x)
+
+nbt_byte_array_list(x)
+
+nbt_short(x)
+
+nbt_short_list(x)
+
+nbt_int(x)
+
 nbt_int_array(x)
+
+nbt_int_list(x)
+
+nbt_int_array_list(x)
+
+nbt_float(x)
+
+nbt_float_list(x)
+
+nbt_double(x)
+
+nbt_double_list(x)
 
 nbt_long(x)
 
 nbt_long_array(x)
 
+nbt_long_list(x)
+
+nbt_long_array_list(x)
+
 nbt_string(x)
+
+nbt_raw_string(x)
+
+nbt_string_list(x)
+
+nbt_raw_string_list(x)
+
+nbt_empty_list(x = list())
+
+nbt_compound_list(x)
+
+nbt_nested_list(x)
 }
 \arguments{
 \item{x}{An nbt payload.}

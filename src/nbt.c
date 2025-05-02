@@ -74,6 +74,8 @@ enum NBT_TYPE {
     TYPE_INT_ARRAY = 11,
     TYPE_LONG_ARRAY = 12,
 
+    TYPE_RAW_STRING = 58,
+
     TYPE_LIST_OF_END = 100,
     TYPE_LIST_OF_BYTE = 101,
     TYPE_LIST_OF_SHORT = 102,
@@ -87,6 +89,8 @@ enum NBT_TYPE {
     TYPE_LIST_OF_COMPOUND = 110,
     TYPE_LIST_OF_INT_ARRAY = 111,
     TYPE_LIST_OF_LONG_ARRAY = 112,
+
+    TYPE_LIST_OF_RAW_STRING = 158
 };
 typedef enum NBT_TYPE nbt_type_t;
 
@@ -100,6 +104,7 @@ static char get_binary_format(nbt_type_t type, nbt_format_t fmt) {
      case TYPE_BYTE_ARRAY:
      case TYPE_LIST_OF_BYTE:
      case TYPE_STRING:
+     case TYPE_RAW_STRING:
      case TYPE_SHORT:
      case TYPE_LIST_OF_SHORT:
      case TYPE_INT:
@@ -130,6 +135,7 @@ static ptrdiff_t payload_size(nbt_type_t type, int n) {
      case TYPE_BYTE_ARRAY:
      case TYPE_LIST_OF_BYTE:
      case TYPE_STRING:
+     case TYPE_RAW_STRING:
         width = 1;
         break;
      case TYPE_SHORT:
@@ -170,6 +176,7 @@ static bool type_has_length(nbt_type_t type) {
      case TYPE_LIST_OF_DOUBLE:
      case TYPE_LIST_OF_BYTE_ARRAY:
      case TYPE_LIST_OF_STRING:
+     case TYPE_LIST_OF_RAW_STRING:
      case TYPE_LIST_OF_LIST:
      case TYPE_LIST_OF_COMPOUND:
      case TYPE_LIST_OF_INT_ARRAY:
@@ -230,10 +237,11 @@ static SEXP read_nbt_payload_character(const unsigned char** ptr,
         for(R_xlen_t i = 0; i < XLENGTH(r_ret); ++i) {
             unsigned short len;
             p = decode_ushort(&len, p, end - p, dfmt);
-            SET_STRING_ELT(r_ret, i, Rf_mkCharLenCE((const char*)p, len, CE_UTF8));
+            SET_STRING_ELT(r_ret, i,
+                Rf_mkCharLenCE((const char*)p, len, CE_UTF8));
             p += len;
         }
-    } else if(n == 1) {
+    } else if(n == 1 && (type == TYPE_STRING || type == TYPE_RAW_STRING)) {
         // create raw vector
         unsigned short len;
         p = decode_ushort(&len, p, end - p, dfmt);
@@ -453,6 +461,8 @@ static SEXP read_nbt_payload(const unsigned char** ptr,
         return read_nbt_payload_integer64(ptr, end, type, fmt);
      case TYPE_STRING:
      case TYPE_LIST_OF_STRING:
+     case TYPE_RAW_STRING:
+     case TYPE_LIST_OF_RAW_STRING:
         return read_nbt_payload_character(ptr, end, type, fmt);
      case TYPE_COMPOUND:
         return read_nbt_payload_compound(ptr, end, type, fmt);
@@ -507,6 +517,12 @@ SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end,
     r_payload = PROTECT(read_nbt_payload(ptr, end, type, fmt));
     if(Rf_isNull(r_payload)) {
         return_nbt_error();
+    }
+    // Adjust character types for raw strings
+    if(type == TYPE_STRING && TYPEOF(r_payload) == RAWSXP) {
+        type = TYPE_RAW_STRING;
+    } else if(type == TYPE_LIST_OF_STRING && TYPEOF(r_payload) == VECSXP) {
+        type = TYPE_LIST_OF_RAW_STRING;
     }
     const char *names[] = {"name", "type", "value", ""};
     SEXP r_ret = PROTECT(Rf_mkNamed(VECSXP, names));        

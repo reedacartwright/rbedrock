@@ -26,7 +26,7 @@ read_rnbt <- function(rawvalue,
                       format = c("little", "big", "network", "network_big")) {
     format <- match.arg(format)
     format_int <- switch(format, "little" = 0L, "big" = 1L,
-                                 "network" = 2L, "network_big" = 3L)
+                         "network" = 2L, "network_big" = 3L)
     .Call(R_read_nbt, rawvalue, format_int)
 }
 
@@ -41,23 +41,79 @@ write_rnbt <- function(x) {
 #' @rdname rnbt
 #' @export
 from_rnbt <- function(x) {
+    from_rnbt_impl(x)
+}
+
+from_rnbt_impl <- function(x) {
     if (is.null(x)) {
         return(x)
     }
     # extract names
-    n <- sapply(x, .extract_rnbt_name)
+    n <- sapply(x, rnbt_name)
     # extract values
-    v <- lapply(x, from_rnbt_payload)
+    v <- lapply(x, rnbt_value)
     # Set names if any exist
-    if (all(n == "")) {
-        v
+    if (any(n != "")) {
+        names(v) <- n
+    }
+    v
+}
+
+rnbt_value <- function(x) {
+    type <- x[["type", exact = TRUE]]
+    value <- x[["value", exact = TRUE]]
+
+    if (type == 109L) {
+        value <- lapply(value, rnbt_value)
+        new_nbt_nested_list(value)
+    } else if(type == 110L) {
+        value <- lapply(value, from_rnbt_impl)
+        new_nbt_compound_list(value)
+    } else if (type == 10L) {
+        new_nbt_compound(from_rnbt_impl(value))
     } else {
-        set_names(v, n)
+        new_nbt_value_impl(value, type)
     }
 }
 
-.extract_rnbt_name <- function(x) {
-    if (!is_list(x)) {
+new_nbt_value_impl <- function(x, type) {
+    ret <- switch(as.character(type),
+        "0" = NULL,
+        "1" = new_nbt_byte(x),
+        "2" = new_nbt_short(x),
+        "3" = new_nbt_int(x),
+        "4" = new_nbt_long(x),
+        "5" = new_nbt_float(x),
+        "6" = new_nbt_double(x),
+        "7" = new_nbt_byte_array(x),
+        "8" = new_nbt_string(x),
+        "9" = NULL,
+        "10" = new_nbt_compound(x),
+        "11" = new_nbt_int_array(x),
+        "12" = new_nbt_long_array(x),
+        "58" = new_nbt_raw_string(x),
+        "100" = new_nbt_empty_list(x),
+        "101" = new_nbt_byte_list(x),
+        "102" = new_nbt_short_list(x),
+        "103" = new_nbt_int_list(x),
+        "104" = new_nbt_long_list(x),
+        "105" = new_nbt_float_list(x),
+        "106" = new_nbt_double_list(x),
+        "107" = new_nbt_byte_array_list(x),
+        "108" = new_nbt_string_list(x),
+        "109" = new_nbt_nested_list(x),
+        "110" = new_nbt_compound_list(x),
+        "111" = new_nbt_int_array_list(x),
+        "112" = new_nbt_long_array_list(x),
+        "158" = new_nbt_raw_string_list(x),
+        NULL
+    )
+    stopifnot(!is.null(ret))
+    ret
+}
+
+rnbt_name <- function(x) {
+    if (!is.list(x)) {
         abort("Malformed rnbt data.")
     }
     n <- x$name %||% ""
@@ -84,51 +140,6 @@ to_rnbt <- function(x) {
         ret[[i]] <- c(list(name = n[[i]]), to_rnbt_payload(x[[i]]))
     }
     ret
-}
-
-from_rnbt_recursive_list <- function(x, type) {
-    if (type == 9L) {
-        payload <- lapply(x, function(y) {
-            value <- y[["value", exact = TRUE]]
-            type <- y[["type", exact = TRUE]]
-            type <- type %% 100L
-            if (type != 0L && is.recursive(value)) {
-                value <- from_rnbt_recursive_list(value, type)
-            }
-            new_nbt_list(value, type)
-        })
-        new_nbt_list(payload, type)
-    } else if (type == 10L) {
-        payload <- lapply(x, from_rnbt)
-        new_nbt_list(payload, type)
-    } else {
-        stop("Malformed rnbt data.")
-    }
-}
-
-#' @rdname rnbt
-#' @keywords internal
-#' @export
-from_rnbt_payload <- function(x) {
-    type <- x[["type", exact = TRUE]]
-    payload <- x[["value", exact = TRUE]]
-
-    is_nbt_list <- type >= 100
-    type <- type %% 100
-
-    if(is_nbt_list) {
-        if (type != 0L && is.recursive(payload)) {
-            payload <- from_rnbt_recursive_list(payload, type)
-        }
-        new_nbt_list(payload, type)
-    } else if (type == 10L) {
-        ret <- from_rnbt(payload)
-        new_nbt_compound(ret)
-    } else if (type == 8L && is.raw(payload)) {
-        new_nbt_raw_string(payload)
-    } else {
-        new_nbt(payload, type)
-    }
 }
 
 #' @rdname rnbt
@@ -175,5 +186,3 @@ to_rnbt_payload.rbedrock_nbt_list <- function(x) {
     }
     list(tag = 9L, value = value, type = type)
 }
-
-
