@@ -22,113 +22,86 @@
 
 #define R_NO_REMAP
 
-#include <Rconfig.h> // WORDS_BIGENDIAN
 #include <string.h>
 #include "binary.h"
+
+#include "byteswap.h"
 
 static
 const unsigned char* decode_ushort_l(uint16_t* val, const unsigned char* ptr) {
     memcpy(val, ptr, sizeof(*val));
-#ifdef WORDS_BIGENDIAN
-    *val = __builtin_bswap16(*val);
-#endif
+    *val = ltoh(*val);
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_uint_l(uint32_t* val, const unsigned char* ptr) {
     memcpy(val, ptr, sizeof(*val));
-#ifdef WORDS_BIGENDIAN
-    *val = __builtin_bswap32(*val);
-#endif
+    *val = ltoh(*val);
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_ulong_l(uint64_t* val, const unsigned char* ptr) {
     memcpy(val, ptr, sizeof(*val));
-#ifdef WORDS_BIGENDIAN
-    *val = __builtin_bswap64(*val);
-#endif
+    *val = ltoh(*val);
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_float_l(float* val, const unsigned char* ptr) {
-#ifdef WORDS_BIGENDIAN
     uint32_t u;
-    memcpy(&u, ptr, sizeof(*val));
-    u = __builtin_bswap32(u);
+    memcpy(&u, ptr, sizeof(u));
+    u = ltoh(u);
     memcpy(val, &u, sizeof(*val));
-#else
-    memcpy(val, ptr, sizeof(*val));
-#endif
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_double_l(double* val, const unsigned char* ptr) {
-#ifdef WORDS_BIGENDIAN
     uint64_t u;
-    memcpy(&u, ptr, sizeof(*val));
-    u = __builtin_bswap64(u);
+    memcpy(&u, ptr, sizeof(u));
+    u = ltoh(u);
     memcpy(val, &u, sizeof(*val));
-#else
-    memcpy(val, ptr, sizeof(*val));
-#endif
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_ushort_b(uint16_t* val, const unsigned char* ptr) {
     memcpy(val, ptr, sizeof(*val));
-#ifndef WORDS_BIGENDIAN
-    *val = __builtin_bswap16(*val);
-#endif
+    *val = btoh(*val);
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_uint_b(uint32_t* val, const unsigned char* ptr) {
     memcpy(val, ptr, sizeof(*val));
-#ifndef WORDS_BIGENDIAN
-    *val = __builtin_bswap32(*val);
-#endif
+    *val = btoh(*val);
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_ulong_b(uint64_t* val, const unsigned char* ptr) {
     memcpy(val, ptr, sizeof(*val));
-#ifndef WORDS_BIGENDIAN
-    *val = __builtin_bswap64(*val);
-#endif
+    *val = btoh(*val);
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_float_b(float* val, const unsigned char* ptr) {
-#ifndef WORDS_BIGENDIAN
     uint32_t u;
-    memcpy(&u, ptr, sizeof(*val));
-    u = __builtin_bswap32(u);
+    memcpy(&u, ptr, sizeof(u));
+    u = btoh(u);
     memcpy(val, &u, sizeof(*val));
-#else
-    memcpy(val, ptr, sizeof(*val));
-#endif
     return ptr + sizeof(*val);
 }
 
 static
 const unsigned char* decode_double_b(double* val, const unsigned char* ptr) {
-#ifndef WORDS_BIGENDIAN
     uint64_t u;
-    memcpy(&u, ptr, sizeof(*val));
-    u = __builtin_bswap64(u);
+    memcpy(&u, ptr, sizeof(u));
+    u = btoh(u);
     memcpy(val, &u, sizeof(*val));
-#else
-    memcpy(val, ptr, sizeof(*val));
-#endif
     return ptr + sizeof(*val);
 }
 
@@ -238,18 +211,6 @@ const unsigned char* decode_ushort(uint16_t* val, const unsigned char* ptr, size
 #endif
 }
 
-const unsigned char* decode_sshort(int16_t* val, const unsigned char* ptr, size_t n, char fmt) {
-    uint16_t u;
-    const unsigned char* ret = decode_ushort(&u, ptr, n, fmt);
-    if((fmt == 'v' || fmt == 'V')) {
-        // decode zig-zag encoding
-        *val = (u >> 1) ^ (-(u & 1));
-    } else {
-        *val = u;
-    }
-    return ret;
-}
-
 const unsigned char* decode_uint(uint32_t* val, const unsigned char* ptr, size_t n, char fmt) {
     if(fmt == 'v' || fmt == 'V') {
         // We have enough space to decode a varint if there are at least 5
@@ -285,18 +246,6 @@ const unsigned char* decode_uint(uint32_t* val, const unsigned char* ptr, size_t
 #endif
 }
 
-const unsigned char* decode_sint(int32_t* val, const unsigned char* ptr, size_t n, char fmt) {
-    uint32_t u;
-    const unsigned char* ret = decode_uint(&u, ptr, n, fmt);
-    if(fmt == 'v' || fmt == 'V') {
-        // decode zig-zag encoding
-        *val = (u >> 1) ^ (-(u & 1));
-    } else {
-        *val = u;
-    }
-    return ret;
-}
-
 const unsigned char* decode_ulong(uint64_t* val, const unsigned char* ptr, size_t n, char fmt) {
     if(fmt == 'v' || fmt == 'V') {
         // We have enough space to decode a varint if there are at least 10
@@ -330,18 +279,6 @@ const unsigned char* decode_ulong(uint64_t* val, const unsigned char* ptr, size_
     }
     return decode_ulong_l(val, ptr);
 #endif
-}
-
-const unsigned char* decode_slong(int64_t* val, const unsigned char* ptr, size_t n, char fmt) {
-    uint64_t u;
-    const unsigned char* ret = decode_ulong(&u, ptr, n, fmt);
-    if(fmt == 'v' || fmt == 'V') {
-        // decode zig-zag encoding
-        *val = (u >> 1) ^ (-(u & 1));
-    } else {
-        *val = u;
-    }
-    return ret;
 }
 
 const unsigned char *decode_float(float* val, const unsigned char* ptr, size_t n, char fmt) {
@@ -380,6 +317,38 @@ const unsigned char *decode_double(double* val, const unsigned char* ptr, size_t
 #endif
 }
 
-// unsigned int fast_encode(int x) {
-//     return (2*x) ^ (x >>(sizeof(x) * 8 - 1));
-// }
+const unsigned char* decode_sshort(int16_t* val, const unsigned char* ptr, size_t n, char fmt) {
+    uint16_t u;
+    const unsigned char* ret = decode_ushort(&u, ptr, n, fmt);
+    if((fmt == 'v' || fmt == 'V')) {
+        // decode zig-zag encoding
+        *val = (u >> 1) ^ (-(u & 1));
+    } else {
+        *val = u;
+    }
+    return ret;
+}
+
+const unsigned char* decode_sint(int32_t* val, const unsigned char* ptr, size_t n, char fmt) {
+    uint32_t u;
+    const unsigned char* ret = decode_uint(&u, ptr, n, fmt);
+    if(fmt == 'v' || fmt == 'V') {
+        // decode zig-zag encoding
+        *val = (u >> 1) ^ (-(u & 1));
+    } else {
+        *val = u;
+    }
+    return ret;
+}
+
+const unsigned char* decode_slong(int64_t* val, const unsigned char* ptr, size_t n, char fmt) {
+    uint64_t u;
+    const unsigned char* ret = decode_ulong(&u, ptr, n, fmt);
+    if(fmt == 'v' || fmt == 'V') {
+        // decode zig-zag encoding
+        *val = (u >> 1) ^ (-(u & 1));
+    } else {
+        *val = u;
+    }
+    return ret;
+}

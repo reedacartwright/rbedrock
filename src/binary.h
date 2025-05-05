@@ -26,17 +26,26 @@
 #include <stddef.h>
 #include <stdint.h>
 
-const unsigned char* decode_ubyte(uint8_t* val, const unsigned char* ptr, size_t n, char fmt);
 const unsigned char* decode_ushort(uint16_t* val, const unsigned char* ptr, size_t n, char fmt);
 const unsigned char* decode_uint(uint32_t* val, const unsigned char* ptr, size_t n, char fmt);
 const unsigned char* decode_ulong(uint64_t* val, const unsigned char* ptr, size_t n, char fmt);
 
-const unsigned char* decode_sbyte(int8_t* val, const unsigned char* ptr, size_t n, char fmt);
 const unsigned char* decode_sshort(int16_t* val, const unsigned char* ptr, size_t n, char fmt);
 const unsigned char* decode_sint(int32_t* val, const unsigned char* ptr, size_t n, char fmt);
 const unsigned char* decode_slong(int64_t* val, const unsigned char* ptr, size_t n, char fmt);
 
 const unsigned char* decode_float(float* val, const unsigned char* ptr, size_t n, char fmt);
 const unsigned char* decode_double(double* val, const unsigned char* ptr, size_t n, char fmt);
+
+size_t encode_sshort(int16_t val, unsigned char* ptr, size_t n, char fmt);
+size_t encode_sint(int32_t val, unsigned char* ptr, size_t n, char fmt);
+size_t encode_slong(int64_t val, unsigned char* ptr, size_t n, char fmt);
+
+size_t encode_ushort(int16_t val, unsigned char* ptr, size_t n, char fmt);
+size_t encode_uint(int32_t val, unsigned char* ptr, size_t n, char fmt);
+size_t encode_ulong(int64_t val, unsigned char* ptr, size_t n, char fmt);
+
+size_t encode_float(float val, unsigned char* ptr, size_t n, char fmt);
+size_t encode_double(double val, unsigned char* ptr, size_t n, char fmt);
 
 #endif
