@@ -26,6 +26,7 @@
 
 #include <limits.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "nbt.h"
 #include "support.h"
@@ -664,8 +665,15 @@ static R_xlen_t write_nbt_integer64_payload(SEXP r_value, unsigned char** ptr,
     return retsz;
 }
 
-static R_xlen_t write_nbt_character_payload(SEXP r_value, unsigned char** ptr,
-    const unsigned char* end, int tag, bool is_array) {
+static
+unsigned char* write_nbt_character_payload(SEXP r_value, unsigned char* ptr,
+    const unsigned char* end, int type, bool is_array, nbt_format_t fmt,
+    R_xlen_t *len) {
+    assert(ptr != NULL);
+    assert(end != NULL);
+    assert(ptr <= end);
+    assert(len != NULL);
+
     // Validate storage
     if(is_array) {
         if(!(Rf_isString(r_value) || TYPEOF(r_value) == VECSXP)) {
@@ -678,65 +686,60 @@ static R_xlen_t write_nbt_character_payload(SEXP r_value, unsigned char** ptr,
             return_nbt_error0();
         }
     }
-    R_xlen_t retsz = 0;
+    unsigned char* p = ptr;
     if(is_array) {
-        R_xlen_t len = XLENGTH(r_value);
-        int ilen = (int)len;
-        if(end - *ptr >= 4) {
-            memcpy(*ptr, &ilen, 4);
-            *ptr += 4;
-        }
-        retsz += 4;
-        for(R_xlen_t i = 0; i < len; ++i) {
+        char dfmt = get_binary_format(TYPE_INT, fmt);
+        int narray = (int)XLENGTH(r_value);
+        p = encode_sint(narray, p, end - p, dfmt, len);
+        for(R_xlen_t i = 0; i < narray; ++i) {
             SEXP r;
             if(Rf_isString(r_value)) {
                 r = STRING_ELT(r_value, i);
             } else {
                 r = VECTOR_ELT(r_value, i);
             }
-            retsz += write_nbt_character_payload(r, ptr, end, tag, false);
+            p = write_nbt_character_payload(r, p, end, type, false, fmt, len);
         }
-        return retsz;
+        return p;
     }
     const char *str = NULL;
-    unsigned short len = 0;
+    unsigned short sz = 0;
     if(TYPEOF(r_value) == CHARSXP) {
         str = Rf_translateCharUTF8(r_value);
-        len = (unsigned short)strlen(str);
+        sz = (unsigned short)strlen(str);
     } else if(IS_SCALAR(r_value, STRSXP)) {
         str = Rf_translateCharUTF8(STRING_ELT(r_value, 0));
-        len = (unsigned short)strlen(str);
+        sz = (unsigned short)strlen(str);
     } else if(TYPEOF(r_value) == RAWSXP) {
         str = (const char*)RAW(r_value);
-        len = (unsigned short)XLENGTH(r_value);
+        sz = (unsigned short)XLENGTH(r_value);
     } else if(!Rf_isNull(r_value)) {
         return_nbt_error0();
     }
-    unsigned char *p = *ptr;
-    retsz = len + sizeof(len);
-    if(end - p < retsz) {
-        // do nothing except return size if there is no buffer space
-        return retsz;
+    char dfmt = get_binary_format(TYPE_STRING, fmt);
+    p = encode_ushort(sz, p, end - p, dfmt, len);
+    *len += sz;
+    if(end - p < sz) {
+        return (unsigned char *)end;
     }
-    // write data
-    memcpy(p, &len, 2);
-    p += 2;
-    if(len > 0) {
-        memcpy(p, str, len);
-        p += len;
-    }
-    // update start ptr and return size
-    *ptr = p;
-    return retsz;
+    memcpy(p, str, sz);
+    return p + sz;
 }
 
-static R_xlen_t write_nbt_tag(int tag, unsigned char** ptr,
-    const unsigned char* end) {
-    if(end-*ptr >= 1) {
-        **ptr = (unsigned char)tag;
-        *ptr += 1;
+static
+unsigned char* write_nbt_tag(int tag, unsigned char* ptr,
+    const unsigned char* end, R_xlen_t *len) {
+    assert(ptr != NULL);
+    assert(end != NULL);
+    assert(ptr <= end);
+    assert(len != NULL);
+
+    *len += 1;
+    if(end - ptr < 1) {
+        return (unsigned char*)end;
     }
-    return 1;
+    *ptr = (unsigned char)tag;
+    return ptr + 1;
 }
 
 static R_xlen_t write_nbt_payload(SEXP r_value, unsigned char** ptr,
@@ -837,15 +840,18 @@ static R_xlen_t write_nbt_payload(SEXP r_value, unsigned char** ptr,
     return_nbt_error0();
 }
 
-R_xlen_t write_nbt_value(SEXP r_value, unsigned char** ptr, const unsigned char* end) {
+R_xlen_t write_nbt_value(SEXP r_value, unsigned char* ptr, R_xlen_t n,
+                         nbt_format_t fmt) {
     PROTECT(r_value);
-    int tag = Rf_asInteger(get_list_element(r_value, "tag"));
+    int type = Rf_asInteger(get_list_element(r_value, "type"));
     SEXP r_name = get_list_element(r_value, "name");
     SEXP r_payload;
 
     size_t len = 0;
+
     len += write_nbt_tag(tag, ptr, end);
-    len += write_nbt_character_payload(r_name, ptr, end, 1, false);
+    len += write_nbt_character_payload(r_name, ptr + len, n - len, 1,
+        false, fmt);
     if(tag == TAG_LIST) {
         r_payload = r_value;
     } else {
@@ -857,19 +863,23 @@ R_xlen_t write_nbt_value(SEXP r_value, unsigned char** ptr, const unsigned char*
     return len;
 }
 
-R_xlen_t write_nbt_values(SEXP r_value, unsigned char** ptr, const unsigned char* end) {
+R_xlen_t write_nbt_values(SEXP r_value, unsigned char* ptr, R_xlen_t n,
+                          nbt_format_t fmt) {
     // validate data
     if(TYPEOF(r_value) != VECSXP) {
         return_nbt_error0();
     }
     PROTECT(r_value);
-    R_xlen_t len = 0;
-
+    R_xlen_t totlen = 0;
     for(R_xlen_t i = 0; i < XLENGTH(r_value); ++i) {
-        len += write_nbt_value(VECTOR_ELT(r_value, i), ptr, end);
+        R_xlen_t len = write_nbt_value(VECTOR_ELT(r_value, i), ptr, n, fmt);
+        totlen += len;
+        len = (len > n) ? n : len;
+        ptr += len;
+        n -= len;
     }
     UNPROTECT(1);
-    return len;
+    return totlen;
 }
 
 SEXP attribute_visible R_read_nbt(SEXP r_value, SEXP r_format) {
@@ -887,26 +897,22 @@ SEXP attribute_visible R_read_nbt(SEXP r_value, SEXP r_format) {
     return read_nbt_values(&p, buffer+len, fmt);
 }
 
-SEXP attribute_visible R_write_nbt(SEXP r_value) {
-    // stack-based buffer
-    unsigned char buffer[8192];
-
+SEXP attribute_visible R_write_nbt(SEXP r_value, SEXP r_format) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
     }
+    nbt_format_t fmt = Rf_asInteger(r_format);
 
-    unsigned char *p = buffer;
-    
-    // try to write the nbt data with the stack
-    // fall back to a heap allocation if needed
-    R_xlen_t len = write_nbt_values(r_value, &p, p+8192);
+    // Try to write the nbt data with the stack and fall back to the heap
+    // if needed.
+    unsigned char buffer[8192];
+    R_xlen_t len = write_nbt_values(r_value, buffer, sizeof(buffer), fmt);
     SEXP ret = PROTECT(Rf_allocVector(RAWSXP, len));
-    if(len <= 8192 && p-buffer == len) {
+    if(len <= 8192) {
         memcpy(RAW(ret), buffer, len);
     } else {
-        p = RAW(ret);
-        R_xlen_t len2 = write_nbt_values(r_value, &p, RAW(ret)+len);
-        if(len2 != len || p-RAW(ret) != len2) {
+        R_xlen_t len2 = write_nbt_values(r_value, RAW(ret), XLENGTH(ret), fmt);
+        if(len2 != len) {
             return_nbt_error();
         }
     }
