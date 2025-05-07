@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "binary.h"
 
@@ -118,6 +119,16 @@ unsigned char* encode_double_b(double val, unsigned char* ptr, ptrdiff_t *k) {
 }
 
 static
+size_t encode_length_v(uint64_t val) {
+    size_t n = 0;
+    do {
+        val = val >> 7;
+        ++n;
+    } while (val);
+    return n;
+}
+
+static
 unsigned char* encode_ulong_v(uint64_t val, unsigned char* ptr, ptrdiff_t *k) {
     size_t n = 0;
     do {
@@ -132,6 +143,7 @@ unsigned char* encode_ulong_v(uint64_t val, unsigned char* ptr, ptrdiff_t *k) {
     return ptr + n;
 }
 
+
 static
 unsigned char* encode_ushort_v(uint16_t val, unsigned char* ptr, ptrdiff_t *k) {
     return encode_ulong_v(val, ptr, k);
@@ -140,6 +152,30 @@ unsigned char* encode_ushort_v(uint16_t val, unsigned char* ptr, ptrdiff_t *k) {
 static
 unsigned char* encode_uint_v(uint32_t val, unsigned char* ptr, ptrdiff_t *k) {
     return encode_ulong_v(val, ptr, k);
+}
+
+static
+size_t encode_ushort_length_approx(uint16_t val, size_t n, char fmt) {
+    if(fmt == 'v' || fmt == 'V') {
+        return n >= 3 ? 3 : encode_length_v(val);
+    }
+    return sizeof(val);
+}
+
+static
+size_t encode_uint_length_approx(uint32_t val, size_t n, char fmt) {
+    if(fmt == 'v' || fmt == 'V') {
+        return n >= 5 ? 5 : encode_length_v(val);
+    }
+    return sizeof(val);
+}
+
+static
+size_t encode_ulong_length_approx(uint64_t val, size_t n, char fmt) {
+    if(fmt == 'v' || fmt == 'V') {
+        return n >= 10 ? 10 : encode_length_v(val);
+    }
+    return sizeof(val);
 }
 
 unsigned char* encode_ubyte(uint8_t val, unsigned char* ptr, size_t n,
@@ -160,37 +196,17 @@ unsigned char* encode_ushort(uint16_t val, unsigned char* ptr, size_t n,
     assert(ptr != NULL);
     assert(k != NULL);
 
-    if(fmt == 'v' || fmt == 'V') {
-        if(n < 3) {
-            // use a buffer to measure how much space we need
-            unsigned char buffer[3];
-            unsigned char *p = encode_ushort_v(val, buffer, k);
-            size_t z = p - buffer;
-            if(n < z) {
-                return ptr + n;
-            }
-            memcpy(ptr, buffer, z);
-            return ptr + z;
-        }
-        return encode_ushort_v(val, ptr, k);
-    }
-    *k += sizeof(val);
-    if(n < sizeof(val)) {
+    size_t z = encode_ushort_length_approx(val, n, fmt);
+    if(n < z) {
+        *k += z;
         return ptr + n;
     }
-#ifdef WORDS_BIGENDIAN
-    if(fmt == 'l' || fmt == 'L') {
-        return encode_ushort_l(val, ptr, k);
-    } else {
+    if(fmt == 'v' || fmt == 'V') {
+        return encode_ushort_v(val, ptr, k);
+    } else if(fmt == 'b' || fmt == 'B') {
         return encode_ushort_b(val, ptr, k);
     }
-#else
-    if(fmt == 'b' || fmt == 'B') {
-        return encode_ushort_b(val, ptr, k);
-    } else {
-        return encode_ushort_l(val, ptr, k);
-    }
-#endif
+    return encode_ushort_l(val, ptr, k);
 }
 
 unsigned char* encode_uint(uint32_t val, unsigned char* ptr, size_t n,
@@ -198,37 +214,17 @@ unsigned char* encode_uint(uint32_t val, unsigned char* ptr, size_t n,
     assert(ptr != NULL);
     assert(k != NULL);
 
-    if(fmt == 'v' || fmt == 'V') {
-        if(n < 5) {
-            // use a buffer to measure how much space we need
-            unsigned char buffer[5];
-            unsigned char *p = encode_uint_v(val, buffer, k);
-            size_t z = p - buffer;
-            if(n < z) {
-                return ptr + n;
-            }
-            memcpy(ptr, buffer, z);
-            return ptr + z;
-        }
-        return encode_uint_v(val, ptr, k);
-    }
-    *k += sizeof(val);
-    if(n < sizeof(val)) {
+    size_t z = encode_uint_length_approx(val, n, fmt);
+    if(n < z) {
+        *k += z;
         return ptr + n;
     }
-#ifdef WORDS_BIGENDIAN
-    if(fmt == 'l' || fmt == 'L') {
-        return encode_uint_l(val, ptr, k);
-    } else {
+    if(fmt == 'v' || fmt == 'V') {
+        return encode_uint_v(val, ptr, k);
+    } else if(fmt == 'b' || fmt == 'B') {
         return encode_uint_b(val, ptr, k);
     }
-#else
-    if(fmt == 'b' || fmt == 'B') {
-        return encode_uint_b(val, ptr, k);
-    } else {
-        return encode_uint_l(val, ptr, k);
-    }
-#endif
+    return encode_uint_l(val, ptr, k);
 }
 
 unsigned char* encode_ulong(uint64_t val, unsigned char* ptr, size_t n,
@@ -236,37 +232,17 @@ unsigned char* encode_ulong(uint64_t val, unsigned char* ptr, size_t n,
     assert(ptr != NULL);
     assert(k != NULL);
 
-    if(fmt == 'v' || fmt == 'V') {
-        if(n < 10) {
-            // use a buffer to measure how much space we need
-            unsigned char buffer[10];
-            unsigned char *p = encode_ulong_v(val, buffer, k);
-            size_t z = p - buffer;
-            if(n < z) {
-                return ptr + n;
-            }
-            memcpy(ptr, buffer, z);
-            return ptr + z;
-        }
-        return encode_ulong_v(val, ptr, k);
-    }
-    *k += sizeof(val);
-    if(n < sizeof(val)) {
+    size_t z = encode_ulong_length_approx(val, n, fmt);
+    if(n < z) {
+        *k += z;
         return ptr + n;
     }
-#ifdef WORDS_BIGENDIAN
-    if(fmt == 'l' || fmt == 'L') {
-        return encode_ulong_l(val, ptr, k);
-    } else {
+    if(fmt == 'v' || fmt == 'V') {
+        return encode_ulong_v(val, ptr, k);
+    } else if(fmt == 'b' || fmt == 'B') {
         return encode_ulong_b(val, ptr, k);
     }
-#else
-    if(fmt == 'b' || fmt == 'B') {
-        return encode_ulong_b(val, ptr, k);
-    } else {
-        return encode_ulong_l(val, ptr, k);
-    }
-#endif
+    return encode_ulong_l(val, ptr, k);
 }
 
 unsigned char* encode_float(float val, unsigned char* ptr, size_t n,
@@ -274,47 +250,29 @@ unsigned char* encode_float(float val, unsigned char* ptr, size_t n,
     assert(ptr != NULL);
     assert(k != NULL);
 
-    *k += sizeof(val);
     if(n < sizeof(val)) {
+        *k += sizeof(val);
         return ptr + n;
     }
-#ifdef WORDS_BIGENDIAN
-    if(fmt == 'l' || fmt == 'L') {
-        return encode_float_l(val, ptr, k);
-    } else {
-        return encode_float_b(val, ptr, k);
-    }
-#else
     if(fmt == 'b' || fmt == 'B') {
         return encode_float_b(val, ptr, k);
-    } else {
-        return encode_float_l(val, ptr, k);
     }
-#endif
+    return encode_float_l(val, ptr, k);
 }
 
 unsigned char* encode_double(double val, unsigned char* ptr, size_t n,
     char fmt, ptrdiff_t *k) {
     assert(ptr != NULL);
     assert(k != NULL);
-    
-    *k += sizeof(val);
+
     if(n < sizeof(val)) {
+        *k += sizeof(val);
         return ptr + n;
     }
-#ifdef WORDS_BIGENDIAN
-    if(fmt == 'l' || fmt == 'L') {
-        return encode_double_l(val, ptr, k);
-    } else {
-        return encode_double_b(val, ptr, k);
-    }
-#else
     if(fmt == 'b' || fmt == 'B') {
         return encode_double_b(val, ptr, k);
-    } else {
-        return encode_double_l(val, ptr, k);
     }
-#endif
+    return encode_double_l(val, ptr, k);
 }
 
 unsigned char* encode_sbyte(int8_t val, unsigned char* ptr, size_t n,

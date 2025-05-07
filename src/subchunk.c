@@ -242,6 +242,7 @@ SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP 
         return_subchunk_error();
     }
     SEXP r_retv = PROTECT(Rf_allocVector(VECSXP, 2*num_layers));
+    SEXP r_fmt = PROTECT(Rf_ScalarInteger(FMT_LE));
     for(R_xlen_t i=0; i < num_layers; ++i) {
         SEXP r_layer = VECTOR_ELT(r_values, i);
         SEXP r_pal = VECTOR_ELT(r_palettes, i);
@@ -251,8 +252,9 @@ SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP 
         // Write the palette ids using persistent storage
         SET_VECTOR_ELT(r_retv, 2*i, write_subchunk_palette_ids(r_layer, true, XLENGTH(r_pal)));
         // write palette
-        SET_VECTOR_ELT(r_retv, 2*i+1, R_write_nbt(r_pal));
+        SET_VECTOR_ELT(r_retv, 2*i+1, R_write_nbt(r_pal, r_fmt));
     }
+    UNPROTECT(1);
 
     int version = Rf_asInteger(r_version);
     int offset = Rf_asInteger(r_offset);
