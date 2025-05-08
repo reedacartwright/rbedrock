@@ -237,11 +237,13 @@ nbt_byte_array_list <- function(x) {
 
 validate_nbt_byte_array_list <- function(x) {
     lapply(x, validate_nbt_byte_array)
+    x
 }
 
 new_nbt_byte_array_list <- function(x) {
     stopifnot(is.list(x))
-    structure(x, class = c("rbedrock_nbt_byte_array_list",
+    structure(x, class = c("rbedrock_nbt_byte_array_list", 
+                           "rbedrock_nbt_numeric_list",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value",
                            "list"))
 }
@@ -406,11 +408,13 @@ nbt_int_array_list <- function(x) {
 
 validate_nbt_int_array_list <- function(x) {
     lapply(x, validate_nbt_int_array)
+    x
 }
 
 new_nbt_int_array_list <- function(x) {
     stopifnot(is.list(x))
     structure(x, class = c("rbedrock_nbt_int_array_list",
+                           "rbedrock_nbt_numeric_list",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value",
                            "list"))
 }
@@ -632,6 +636,7 @@ nbt_long_array_list <- function(x) {
 
 validate_nbt_long_array_list <- function(x) {
     lapply(x, validate_nbt_long_array)
+    x
 }
 
 new_nbt_long_array_list <- function(x) {
@@ -687,7 +692,7 @@ rac_cast.rbedrock_nbt_string <- function(x, to, ...) {
 #' @rdname nbt
 #' @export
 nbt_raw_string <- function(x) {
-    validate_nbt_string(new_nbt_string_raw(as.raw(x)))
+    validate_nbt_string(new_nbt_raw_string(as.raw(x)))
 }
 
 validate_nbt_raw_string <- function(x) {
@@ -696,7 +701,7 @@ validate_nbt_raw_string <- function(x) {
 
 new_nbt_raw_string <- function(x) {
     stopifnot(is.raw(x))
-    structure(x, class = c("rbedrock_nbt_string_raw", "rbedrock_nbt_value"))
+    structure(x, class = c("rbedrock_nbt_raw_string", "rbedrock_nbt_value"))
 }
 
 #' @export
@@ -722,6 +727,7 @@ validate_nbt_string_list <- validate_nbt_string
 new_nbt_string_list <- function(x) {
     stopifnot(is.character(x))
     structure(x, class = c("rbedrock_nbt_string_list",
+                           "rbedrock_nbt_string",
                            "rbedrock_nbt_list_value",
                            "rbedrock_nbt_value"))
 }
@@ -766,7 +772,7 @@ format.rbedrock_nbt_raw_string_list <- function(x, ...) {
 
 #' @export
 rac_cast.rbedrock_nbt_raw_string_list <- function(x, to, ...) {
-    nbt_string_list(x)
+    nbt_raw_string_list(x)
 }
 
 # ---- nbt_numeric -------------------------------------------------------------
@@ -819,6 +825,7 @@ nbt_compound_list <- function(x) {
 
 validate_nbt_compound_list <- function(x) {
     lapply(x, validate_nbt_compound)
+    x
 }
 
 new_nbt_compound_list <- function(x) {

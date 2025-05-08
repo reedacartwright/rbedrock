@@ -86,7 +86,7 @@ test_that("read_rnbt() can read doubles", {
 
 test_that("read_rnbt() can read byte arrays", {
     rnbt_val <- list(
-        list(name = "8val", type = 7L, value = 10:17),
+        list(name = "8val", type = 7L, value = 10:17*1),
         list(name = "1val", type = 7L, value = 20)
     )
     rawval_args <- list(b = 7L, "8val", 8L, b = 10:17,
@@ -117,7 +117,7 @@ test_that("read_rnbt() can read strings", {
 
 test_that("read_rnbt() can read int arrays", {
     rnbt_val <- list(
-        list(name = "8val", type = 11L, value = 10:17),
+        list(name = "8val", type = 11L, value = 10:17*1),
         list(name = "1val", type = 11L, value = 20)
     )
     rawval_args <- list(b = 11L, "8val", 8L, i = 10:17,
@@ -186,7 +186,7 @@ test_that("read_rnbt() can read empty list values", {
 
 test_that("read_rnbt() can read lists of bytes", {
     rnbt_val <- list(
-        list(name = "a", type = 101L, value = 1:2),
+        list(name = "a", type = 101L, value = 1:2*1),
         list(name = "b", type = 101L, value = -3)
     )
     rawval_args <- list(b = 9L, "a", b = 1L, 2L, b = 1:2,
@@ -200,7 +200,7 @@ test_that("read_rnbt() can read lists of bytes", {
 
 test_that("read_rnbt() can read lists of shorts", {
     rnbt_val <- list(
-        list(name = "a", type = 102L, value = 1:2),
+        list(name = "a", type = 102L, value = 1:2*1),
         list(name = "b", type = 102L, value = -3)
     )
     rawval_args <- list(b = 9L, "a", b = 2L, 2L, s = 1:2,
@@ -214,7 +214,7 @@ test_that("read_rnbt() can read lists of shorts", {
 
 test_that("read_rnbt() can read lists of ints", {
     rnbt_val <- list(
-        list(name = "a", type = 103L, value = 1:2),
+        list(name = "a", type = 103L, value = 1:2*1),
         list(name = "b", type = 103L, value = -3)
     )
     rawval_args <- list(b = 9L, "a", b = 3L, 2L, i = 1:2,
@@ -242,7 +242,7 @@ test_that("read_rnbt() can read lists of longs", {
 
 test_that("read_rnbt() can read lists of floats", {
     rnbt_val <- list(
-        list(name = "a", type = 105L, value = 1:2),
+        list(name = "a", type = 105L, value = 1:2*1),
         list(name = "b", type = 105L, value = -3)
     )
     rawval_args <- list(b = 9L, "a", b = 5L, 2L, f = 1:2,
@@ -256,7 +256,7 @@ test_that("read_rnbt() can read lists of floats", {
 
 test_that("read_rnbt() can read lists of doubles", {
     rnbt_val <- list(
-        list(name = "a", type = 106L, value = 1:2),
+        list(name = "a", type = 106L, value = 1:2*1),
         list(name = "b", type = 106L, value = -3)
     )
     rawval_args <- list(b = 9L, "a", b = 6L, 2L, d = 1:2,
@@ -270,7 +270,7 @@ test_that("read_rnbt() can read lists of doubles", {
 
 test_that("read_rnbt() can read lists of byte arrays", {
     rnbt_val <- list(
-        list(name = "a", type = 107L, value = list(1:2, -3))
+        list(name = "a", type = 107L, value = list(c(1, 2), -3))
     )
     rawval_args <- list(b = 9L, "a", b = 7L, 2L,
                         2, b = 1:2, 1, b = -3)
@@ -300,7 +300,7 @@ test_that("read_rnbt() can read lists of strings", {
 
 test_that("read_rnbt() can read lists of int arrays", {
     rnbt_val <- list(
-        list(name = "a", type = 111L, value = list(1:2, -3))
+        list(name = "a", type = 111L, value = list(c(1, 2), -3))
     )
     rawval_args <- list(b = 9L, "a", b = 11L, 2L,
                         2, i = 1:2, 1, i = -3)
@@ -347,7 +347,7 @@ test_that("read_rnbt() can read lists of lists", {
     rnbt_val <- list(
         list(name = "lstlst", type = 109L, value = list(
             list(type = 101, value = 1),
-            list(type = 102, value = -1:0)
+            list(type = 102, value = c(-1, 0))
         ))
     )
     rawval_args <- list(b = 9, "lstlst", b = 9, 2,

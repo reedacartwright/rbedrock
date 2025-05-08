@@ -137,56 +137,143 @@ rnbt_name <- function(x) {
 #' @keywords internal
 #' @export
 to_rnbt <- function(x) {
+    to_rnbt_impl(x)
+}
+
+to_rnbt_impl <- function(x) {
     n <- names(x) %||% rep("", length(x))
-    names(x) <- NULL
     ret <- vector("list", length(x))
     for (i in seq_along(ret)) {
-        ret[[i]] <- c(list(name = n[[i]]), to_rnbt_payload(x[[i]]))
+        ret[[i]] <- list(name = n[[i]],
+                         type = to_rnbt_type(x[[i]]),
+                         value = to_rnbt_value(x[[i]]))
     }
     ret
 }
 
-#' @rdname rnbt
-#' @keywords internal
-#' @export
-to_rnbt_payload <- function(x) {
-    UseMethod("to_rnbt_payload")
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt <- function(x) {
-    list(tag = get_nbt_tag(x), value = payload(x))
-}
-
-#' @export
-to_rnbt_payload.rbedrock_nbt_compound <- function(x) {
-    list(tag = 10L, value = to_rnbt(x))
-}
-
-to_rnbt_list <- function(x, tag) {
-    if (tag == 9L) {
-        lapply(x, function(y) {
-            value <- payload(y)
-            type <- attr(x, "type", exact = TRUE)
-            if (is.recursive(value)) {
-                value <- to_rnbt_list(value, type)
-            }
-            list(value = value, type = type)
-        })
-
-    } else if (tag == 10L) {
-        lapply(x, to_rnbt)
-    } else {
-        stop("Malformed rnbt data.")
+to_rnbt_type <- function(x) {
+    for(cls in class(x)) {
+        type <- to_rnbt_type_impl(cls)
+        if(!is.null(type)) {
+            return(type)
+        }
     }
+    msg <- sprintf("Unable to identify rnbt type for object of class <%s>.",
+        class(x)[1])
+    stop(msg, call. = FALSE)
+}
+
+to_rnbt_type_impl <- function(x) {
+    switch(as.character(x),
+        "rbedrock_nbt_byte" = 1L,
+        "rbedrock_nbt_byte_array" = 7L,
+        "rbedrock_nbt_byte_array_list" = 107L, 
+        "rbedrock_nbt_byte_list" = 101L,
+        "rbedrock_nbt_compound" = 10L,
+        "rbedrock_nbt_compound_list" = 110L, 
+        "rbedrock_nbt_double" = 6L,
+        "rbedrock_nbt_double_list" = 106L,
+        "rbedrock_nbt_empty_list" = 100L, 
+        "rbedrock_nbt_float" = 5L,
+        "rbedrock_nbt_float_list" = 105L,
+        "rbedrock_nbt_int" = 3L, 
+        "rbedrock_nbt_int_array" = 11L,
+        "rbedrock_nbt_int_array_list" = 111L,
+        "rbedrock_nbt_int_list" = 103L, 
+        "rbedrock_nbt_long" = 4L,
+        "rbedrock_nbt_long_array" = 12L,
+        "rbedrock_nbt_long_array_list" = 112L, 
+        "rbedrock_nbt_long_list" = 104L,
+        "rbedrock_nbt_nested_list" = 109L,
+        "rbedrock_nbt_raw_string" = 58L, 
+        "rbedrock_nbt_raw_string_list" = 158L,
+        "rbedrock_nbt_short" = 2L,
+        "rbedrock_nbt_short_list" = 102L, 
+        "rbedrock_nbt_string" = 8L,
+        "rbedrock_nbt_string_list" = 108L,
+        NULL
+    )
 }
 
 #' @export
-to_rnbt_payload.rbedrock_nbt_list <- function(x) {
-    type <- attr(x, "type", exact = TRUE)
-    value <- payload(x)
-    if (type != 0L && is.recursive(value)) {
-        value <- to_rnbt_list(x, type)
-    }
-    list(tag = 9L, value = value, type = type)
+to_rnbt_value <- function(x, ...) {
+    UseMethod("to_rnbt_value")
+}
+
+#' @export
+to_rnbt_value.default <- function(x, ...) {
+    msg <- sprintf("Unable to identify rnbt value for object of class <%s>.",
+        class(x)[1])
+    stop(msg)
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_value <- function(x, ...) {
+    # NOTE: We should not get here on well-formed data
+    msg <- sprintf("Rnbt value for `nbt_value` of class <%s> not implemented.",
+        class(x)[1])
+    stop(msg) 
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_numeric <- function(x, ...) {
+    as.double(rac_data(x))
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_int64 <- function(x, ...) {
+    as.character(rac_data(x))
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_string <- function(x, ...) {
+    as.character(rac_data(x))
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_raw_string <- function(x, ...) {
+    as.raw(rac_data(x))
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_raw_string <- function(x, ...) {
+    as.raw(rac_data(x))
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_raw_string_list <- function(x, ...) {
+    lapply(rac_data(x), as.raw)
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_empty_list <- function(x, ...) {
+    list()
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_compound <- function(x, ...) {
+    to_rnbt_impl(rac_data(x))
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_compound_list <- function(x, ...) {
+    lapply(rac_data(x), to_rnbt_impl)
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_numeric_list <- function(x, ...) {
+    lapply(rac_data(x), as.double)
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_long_array_list <- function(x, ...) {
+    lapply(rac_data(x), as.character)
+}
+
+#' @export
+to_rnbt_value.rbedrock_nbt_nested_list <- function(x, ...) {
+    lapply(rac_data(x), function(y) {
+        list(type = to_rnbt_type(y),
+            value = to_rnbt_value(y))
+    })
 }

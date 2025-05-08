@@ -6,18 +6,15 @@
 \alias{write_rnbt}
 \alias{from_rnbt}
 \alias{to_rnbt}
-\alias{to_rnbt_payload}
 \title{Raw Named Binary Tag Format}
 \usage{
 read_rnbt(rawvalue, format = c("little", "big", "network", "network_big"))
 
-write_rnbt(x)
+write_rnbt(x, format = c("little", "big", "network", "network_big"))
 
 from_rnbt(x)
 
 to_rnbt(x)
-
-to_rnbt_payload(x)
 }
 \arguments{
 \item{rawvalue}{A \code{raw} vector}
