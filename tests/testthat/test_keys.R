@@ -111,7 +111,7 @@ test_that("chrkeys_to_rawkeys signals errors", {
     expect_error(chrkeys_to_rawkeys(long_string1), "exceeded buffer space")
     expect_error(chrkeys_to_rawkeys(long_string2), "exceeded buffer space")
     expect_error(
-        .Call(Cchrkeys_to_rawkeys, list("a", "b")),
+        .Call(R_chrkeys_to_rawkeys, list("a", "b")),
         "not a vector of strings"
     )
 })

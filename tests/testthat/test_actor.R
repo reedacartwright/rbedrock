@@ -88,13 +88,13 @@ test_that("get_actors_value() returns a list of NBT data.", {
     expect_type(dat, "list")
     expect_named(dat, c("actor:000000010000000A", "actor:000000010000000B",
                         "actor:000000010000000C"))
-    expect_true(all(sapply(dat, is_nbt)))
+    expect_true(all(sapply(dat, is_nbt_value)))
 
     dat <- get_actors_value("acdig:0:0:0", db = db)
     expect_type(dat, "list")
     expect_named(dat, c("actor:000000010000000A", "actor:000000010000000B",
                         "actor:000000010000000C"))
-    expect_true(all(sapply(dat, is_nbt)))
+    expect_true(all(sapply(dat, is_nbt_value)))
 
     expect_null(get_actors_value("acdig:1:0:1", db = db))
     expect_equal(get_actors_value("acdig:1:0:0", db = db),
@@ -119,8 +119,8 @@ test_that("get_actors_data() returns a list of lists of NBT data.", {
                              "actor:0000000100000010"))
     expect_length(dat[[3]], 0L)
 
-    expect_true(all(sapply(dat[[1]], is_nbt)))
-    expect_true(all(sapply(dat[[2]], is_nbt)))
+    expect_true(all(sapply(dat[[1]], is_nbt_value)))
+    expect_true(all(sapply(dat[[2]], is_nbt_value)))
 
     dat2 <- get_actors_data(c("acdig:0:0:0", "acdig:-7:-2:0",
                               "acdig:1:0:0", "acdig:1:0:1"), db = db)

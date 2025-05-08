@@ -213,9 +213,10 @@ put_actors_value_impl <- function(value, dig_key, db) {
     put_data(dat, db = db)
 }
 
+#' @useDynLib rbedrock R_rbedrock_actor_make_storagekeys
 make_storagekeys <- function(ids) {
     vec_assert(ids, character())
-    .Call(rbedrock_actor_make_storagekeys, ids)
+    .Call(R_rbedrock_actor_make_storagekeys, ids)
 }
 
 is_acdig_key <- function(keys) {

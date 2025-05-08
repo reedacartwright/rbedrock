@@ -15,22 +15,22 @@ blocks_str <- function(x, names_only = FALSE) {
 }
 
 blocks_str_impl <- function(x, names_only = FALSE) {
-    block_name <- payload(x$name)
-    states <- payload(x$states)
+    block_name <- as.character(x[["name", exact = TRUE]])
+    states <- x[["states", exact = TRUE]]
     if (length(states) == 0L || isTRUE(names_only)) {
         return(block_name)
     }
     states_str <- character(length(states))
     for (i in seq_along(states)) {
         x <- states[[i]]
-        xtag <- get_nbt_tag(x)
+        xtag <- to_rnbt_type(x)
         if (!(xtag %in% c(1, 3, 8))) {
             msg <- sprintf(
                 "block State '%s' has NBT tag '%s'. Possible loss of information when converting to a string.", # nolint
                 names(states)[i], xtag)
             warning(msg, call. = FALSE)
         }
-        states_str[[i]] <- as.character(payload(x))
+        states_str[[i]] <- as.character(x)
     }
     states <- paste(names(states), states_str,
                     sep = "=", collapse = "@")
@@ -57,7 +57,7 @@ blocks_nbt_impl <- function(x) {
         names(s) <- regmatches(s, regexpr("^[^=]+", s))
         # convert to nbt
         v <- lapply(s, block_state_nbt)
-        states <- nbt_compound(!!!v)
+        states <- do.call(nbt_compound, v)
     } else {
         states <- nbt_compound()
     }

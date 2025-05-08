@@ -100,7 +100,7 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
 
     write_leveldat(dat, dirpath)
 
-    levelname <- vec_cast(dat$LevelName, character())
+    levelname <- as.character(dat$LevelName)
     writeLines(levelname, file_path(dirpath, "levelname.txt"))
 
     msg <- paste0("Success: Minecraft world created at '", dirpath, "'.")
@@ -182,7 +182,7 @@ import_world <- function(file, id = NULL, ..., worlds_dir = worlds_dir_path()) {
 
     write_leveldat(dat, dirpath)
 
-    levelname <- vec_cast(dat$LevelName, character())
+    levelname <- as.character(dat$LevelName)
     writeLines(levelname, normalize_path(dirpath, "levelname.txt"))
 
     msg <- paste0("Success: '", file, "' imported to '", dirpath, "'.")

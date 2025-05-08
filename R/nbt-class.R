@@ -8,45 +8,56 @@
 #' - `unnbt()` recursively strips NBT metadata from an NBT value.
 #'
 #' @param x An nbt payload.
+#' @param ... NBT objects, possibly named.
 #'
 #' @name nbt
 NULL
 
-# ---- nbt generics ------------------------------------------------------------
+# ---- nbt_value ---------------------------------------------------------------
 
-# ---- nbt ---------------------------------------------------------------------
+is_nbt_value <- function(x) {
+    inherits(x, "rbedrock_nbt_value")
+}
+
+nbt_value_or_cast <- function(x, to) {
+    if (is_nbt_value(x)) x else rac_cast(x, to)
+}
+
+is_nbt_list_value <- function(x) {
+    inherits(x, "rbedrock_nbt_list_value")
+}
+
+is_nbt_compound <- function(x) {
+    inherits(x, "rbedrock_nbt_compound")
+}
+
+all_nbt_values <- function(x) {
+    all(vapply(x, is_nbt_value, FALSE, USE.NAMES = FALSE))
+}
+
+# ---- nbt list_of -------------------------------------------------------------
 
 # Use something like lobstr::tree to display NBT data
 
 #' @export
-print.rbedrock_nbt <- function(x, ...) {
+print.rbedrock_nbt_list_of <- function(x, ...) {
     cat("NBT formatted data...\n")
     x
 }
 
 #' @rdname nbt
 #' @export
-nbt <- function(...) {
+nbt_list_of <- function(...) {
     lst <- list(...)
-    validate_nbt(new_nbt(lst))
+    validate_nbt_list_of(new_nbt_list_of(lst))
 }
 
-#' @rdname nbt
-#' @export
-unnbt <- function(x) {
-    if (is.recursive(x)) {
-        rapply(x, rac_data, how = "list")
-    } else {
-        rac_data(x)
-    }
-}
-
-new_nbt <- function(x) {
+new_nbt_list_of <- function(x) {
     stopifnot(is.list(x))
-    structure(x, class = c("rbedrock_nbt", "list"))
+    structure(x, class = c("rbedrock_nbt_list_of", "list"))
 }
 
-validate_nbt <- function(x) {
+validate_nbt_list_of <- function(x) {
     if (!all(vapply(x, is_nbt_value, FALSE))) {
         stop("`x` contains non-NBT elements.", call. = FALSE)
     }
@@ -54,7 +65,7 @@ validate_nbt <- function(x) {
 }
 
 #' @export
-`[<-.rbedrock_nbt` <- function(x, i, value) {
+`[<-.rbedrock_nbt_list_of` <- function(x, i, value) {
     if (is.logical(i)) {
         i <- which(i)
     }
@@ -71,7 +82,7 @@ validate_nbt <- function(x) {
 }
 
 #' @export
-`[[<-.rbedrock_nbt` <- function(x, i, value) {
+`[[<-.rbedrock_nbt_list_of` <- function(x, i, value) {
     if (is.null(value)) {
         x[i] <- list(value)
         return(x)
@@ -81,9 +92,27 @@ validate_nbt <- function(x) {
 }
 
 #' @export
-`$<-.rbedrock_nbt` <- function(x, i, value) {
+`$<-.rbedrock_nbt_list_of` <- function(x, i, value) {
     value <- nbt_value_or_cast(value, x[[i, exact = TRUE]])
     NextMethod()
+}
+
+# ---- unnbt -------------------------------------------------------------------
+
+#' @rdname nbt
+#' @export
+unnbt <- function(x) {
+    if (is.recursive(x)) {
+        rapply(x, unnbt_impl, how = "list")
+    } else {
+        unnbt_impl(x)
+    }
+}
+
+unnbt_impl <- function(x) {
+    cls <- oldClass(x)
+    cls <- cls[grep("^rbedrock_nbt_", cls, invert = TRUE)]
+    structure(rac_data(x), class = cls)
 }
 
 # ---- nbt_compound [10] -------------------------------------------------------
@@ -119,31 +148,13 @@ rac_cast.rbedrock_nbt_compound <- function(x, to, ...) {
 }
 
 #' @export
-`[<-.rbedrock_nbt_compound` <- `[<-.rbedrock_nbt`
+`[<-.rbedrock_nbt_compound` <- `[<-.rbedrock_nbt_list_of`
 
 #' @export
-`[[<-.rbedrock_nbt_compound` <- `[[<-.rbedrock_nbt`
+`[[<-.rbedrock_nbt_compound` <- `[[<-.rbedrock_nbt_list_of`
 
 #' @export
-`$<-.rbedrock_nbt_compound` <- `$<-.rbedrock_nbt`
-
-# ---- nbt_value ---------------------------------------------------------------
-
-is_nbt_value <- function(x) {
-    inherits(x, "rbedrock_nbt_value")
-}
-
-nbt_value_or_cast <- function(x, to) {
-    if (is_nbt_value(x)) x else rac_cast(x, to)
-}
-
-is_nbt_list_value <- function(x) {
-    inherits(x, "rbedrock_nbt_list_value")
-}
-
-is_nbt_compound <- function(x) {
-    inherits(x, "rbedrock_nbt_compound")
-}
+`$<-.rbedrock_nbt_compound` <- `$<-.rbedrock_nbt_list_of`
 
 # ---- nbt_byte [1] ------------------------------------------------------------
 
@@ -242,7 +253,7 @@ validate_nbt_byte_array_list <- function(x) {
 
 new_nbt_byte_array_list <- function(x) {
     stopifnot(is.list(x))
-    structure(x, class = c("rbedrock_nbt_byte_array_list", 
+    structure(x, class = c("rbedrock_nbt_byte_array_list",
                            "rbedrock_nbt_numeric_list",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value",
                            "list"))
@@ -345,8 +356,8 @@ format.rbedrock_nbt_int <- function(x, ...) {
 
 
 #' @export
-rac_cast.rbedrock_nbt_short <- function(x, to, ...) {
-    nbt_short(x)
+rac_cast.rbedrock_nbt_int <- function(x, to, ...) {
+    nbt_int(x)
 }
 
 # ---- nbt_int_array [11] ------------------------------------------------------
@@ -741,8 +752,6 @@ format.rbedrock_nbt_string_list <- function(x, ...) {
 rac_cast.rbedrock_nbt_string_list <- function(x, to, ...) {
     nbt_string_list(x)
 }
-
-# 
 
 # ---- nbt_raw_string_list [158] -----------------------------------------------
 

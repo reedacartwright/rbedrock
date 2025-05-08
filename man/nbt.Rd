@@ -2,6 +2,7 @@
 % Please edit documentation in R/nbt-class.R
 \name{nbt}
 \alias{nbt}
+\alias{nbt_list_of}
 \alias{unnbt}
 \alias{nbt_compound}
 \alias{nbt_byte}
@@ -31,7 +32,7 @@
 \alias{nbt_nested_list}
 \title{Create an NBT value}
 \usage{
-nbt(...)
+nbt_list_of(...)
 
 unnbt(x)
 
@@ -88,6 +89,8 @@ nbt_compound_list(x)
 nbt_nested_list(x)
 }
 \arguments{
+\item{...}{NBT objects, possibly named.}
+
 \item{x}{An nbt payload.}
 }
 \description{

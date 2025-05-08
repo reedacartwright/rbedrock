@@ -27,7 +27,8 @@
 #' @param rawvalue A `raw` vector
 #' @param rawdata A list of `raw` vectors
 #' @param simplify If TRUE, simplifies a list containing a single unnamed
-#'        `nbtnode`.
+#'        nbt value.
+#' @inheritParams rnbt
 #' @export
 get_nbt_data <- function(keys, db = default_db(), readoptions = NULL,
                          simplify = TRUE) {
@@ -59,10 +60,14 @@ put_nbt_value <- function(value, key, db = default_db(), writeoptions = NULL) {
 
 #' @rdname get_nbt_data
 #' @export
-read_nbt <- function(rawvalue, simplify = TRUE) {
-    res <- read_rnbt(rawvalue)
-    res <- from_rnbt(res)
-    if (isTRUE(simplify) && length(res) == 1L && is.null(attributes(res))) {
+read_nbt <- function(rawvalue,
+                     format = c("little", "big", "network", "network_big"),
+                     simplify = TRUE) {
+
+    format <- match.arg(format)
+    rnbt <- read_rnbt(rawvalue, format = format)
+    res <- from_rnbt(rnbt)
+    if (isTRUE(simplify) && length(res) == 1L && is.null(names(res))) {
         res <- res[[1]]
     }
     res
@@ -70,22 +75,31 @@ read_nbt <- function(rawvalue, simplify = TRUE) {
 
 #' @rdname get_nbt_data
 #' @export
-read_nbt_data <- function(rawdata, simplify = TRUE) {
-    lapply(rawdata, read_nbt, simplify = simplify)
+read_nbt_data <- function(rawdata,
+                          format = c("little", "big", "network", "network_big"),
+                          simplify = TRUE) {
+    format <- match.arg(format)
+    lapply(rawdata, read_nbt, format = format, simplify = simplify)
 }
 
 #' @rdname get_nbt_data
 #' @export
-write_nbt <- function(value) {
-    if (is_nbt(value)) {
+write_nbt <- function(value,
+                      format = c("little", "big", "network", "network_big")) {
+    format <- match.arg(format)
+
+    if (is_nbt_value(value)) {
         value <- list(value)
     }
-    value <- to_rnbt(value)
-    .Call(Cwrite_nbt, value)
+    rnbt <- to_rnbt(value)
+    write_rnbt(rnbt, format)
 }
 
 #' @rdname get_nbt_data
 #' @export
-write_nbt_data <- function(values) {
-    lapply(values, write_nbt)
+write_nbt_data <- function(values,
+                           format = c("little", "big", "network",
+                                      "network_big")) {
+    format <- match.arg(format)
+    lapply(values, write_nbt, format = format)
 }

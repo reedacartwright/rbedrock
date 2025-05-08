@@ -12,9 +12,9 @@ test_that("get_entity_data() returns specific Entity data", {
     expect_vector(dat, list(), 3L)
     expect_named(dat, keys)
 
-    expect_true(all(sapply(dat[[1]], is_nbt)))
+    expect_true(all(sapply(dat[[1]], is_nbt_value)))
     expect_null(dat[[2]])
-    expect_true(all(sapply(dat[[3]], is_nbt)))
+    expect_true(all(sapply(dat[[3]], is_nbt_value)))
 })
 
 test_that("put_entity_data() writes Entity data", {

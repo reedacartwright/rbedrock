@@ -1,5 +1,7 @@
 #define R_NO_REMAP
 
+#include <R_ext/Visibility.h>
+
 #include "nbt.h"
 #include "support.h"
 
@@ -162,7 +164,7 @@ SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t pale
     return r_ret;
 }
 
-SEXP read_subchunk_blocks(SEXP r_value) {
+SEXP attribute_visible R_read_subchunk_blocks(SEXP r_value) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
     }
@@ -236,7 +238,7 @@ SEXP read_subchunk_blocks(SEXP r_value) {
     return r_ret;
 }
 
-SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
+SEXP attribute_visible R_write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
     R_xlen_t num_layers = XLENGTH(r_values);
     if(XLENGTH(r_palettes) != num_layers) {
         return_subchunk_error();
@@ -284,7 +286,7 @@ SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP 
     return r_ret;
 }
 
-SEXP read_chunk_biomes(SEXP r_value) {
+SEXP attribute_visible R_read_chunk_biomes(SEXP r_value) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
     }
@@ -331,7 +333,7 @@ SEXP read_chunk_biomes(SEXP r_value) {
     return Rf_PairToVectorList(CDR(r_ret));
 }
 
-SEXP write_chunk_biomes(SEXP r_values, SEXP r_palettes) {
+SEXP attribute_visible R_write_chunk_biomes(SEXP r_values, SEXP r_palettes) {
     R_xlen_t num_subchunks = XLENGTH(r_values);
     if(XLENGTH(r_palettes) != num_subchunks) {
         return_subchunk_error();

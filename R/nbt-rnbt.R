@@ -45,7 +45,8 @@ write_rnbt <- function(x,
 #' @rdname rnbt
 #' @export
 from_rnbt <- function(x) {
-    from_rnbt_impl(x)
+    x <- from_rnbt_impl(x)
+    if (is.null(x)) x else new_nbt_list_of(x)
 }
 
 from_rnbt_impl <- function(x) {
@@ -70,7 +71,7 @@ rnbt_value <- function(x) {
     if (type == 109L) {
         value <- lapply(value, rnbt_value)
         new_nbt_nested_list(value)
-    } else if(type == 110L) {
+    } else if (type == 110L) {
         value <- lapply(value, from_rnbt_impl)
         new_nbt_compound_list(value)
     } else if (type == 10L) {
@@ -152,14 +153,14 @@ to_rnbt_impl <- function(x) {
 }
 
 to_rnbt_type <- function(x) {
-    for(cls in class(x)) {
+    for (cls in class(x)) {
         type <- to_rnbt_type_impl(cls)
-        if(!is.null(type)) {
+        if (!is.null(type)) {
             return(type)
         }
     }
     msg <- sprintf("Unable to identify rnbt type for object of class <%s>.",
-        class(x)[1])
+                   class(x)[1])
     stop(msg, call. = FALSE)
 }
 
@@ -167,34 +168,41 @@ to_rnbt_type_impl <- function(x) {
     switch(as.character(x),
         "rbedrock_nbt_byte" = 1L,
         "rbedrock_nbt_byte_array" = 7L,
-        "rbedrock_nbt_byte_array_list" = 107L, 
+        "rbedrock_nbt_byte_array_list" = 107L,
         "rbedrock_nbt_byte_list" = 101L,
         "rbedrock_nbt_compound" = 10L,
-        "rbedrock_nbt_compound_list" = 110L, 
+        "rbedrock_nbt_compound_list" = 110L,
         "rbedrock_nbt_double" = 6L,
         "rbedrock_nbt_double_list" = 106L,
-        "rbedrock_nbt_empty_list" = 100L, 
+        "rbedrock_nbt_empty_list" = 100L,
         "rbedrock_nbt_float" = 5L,
         "rbedrock_nbt_float_list" = 105L,
-        "rbedrock_nbt_int" = 3L, 
+        "rbedrock_nbt_int" = 3L,
         "rbedrock_nbt_int_array" = 11L,
         "rbedrock_nbt_int_array_list" = 111L,
-        "rbedrock_nbt_int_list" = 103L, 
+        "rbedrock_nbt_int_list" = 103L,
         "rbedrock_nbt_long" = 4L,
         "rbedrock_nbt_long_array" = 12L,
-        "rbedrock_nbt_long_array_list" = 112L, 
+        "rbedrock_nbt_long_array_list" = 112L,
         "rbedrock_nbt_long_list" = 104L,
         "rbedrock_nbt_nested_list" = 109L,
-        "rbedrock_nbt_raw_string" = 58L, 
+        "rbedrock_nbt_raw_string" = 58L,
         "rbedrock_nbt_raw_string_list" = 158L,
         "rbedrock_nbt_short" = 2L,
-        "rbedrock_nbt_short_list" = 102L, 
+        "rbedrock_nbt_short_list" = 102L,
         "rbedrock_nbt_string" = 8L,
         "rbedrock_nbt_string_list" = 108L,
         NULL
     )
 }
 
+#' Convert an nbt value to an rnbt value
+#'
+#' This is a helper function used to convert from nbt values to rnbt data.
+#'
+#' @param x Value to cast
+#' @param ... Currently unused.
+#' @keywords internal
 #' @export
 to_rnbt_value <- function(x, ...) {
     UseMethod("to_rnbt_value")
@@ -203,7 +211,7 @@ to_rnbt_value <- function(x, ...) {
 #' @export
 to_rnbt_value.default <- function(x, ...) {
     msg <- sprintf("Unable to identify rnbt value for object of class <%s>.",
-        class(x)[1])
+                   class(x)[1])
     stop(msg)
 }
 
@@ -211,8 +219,8 @@ to_rnbt_value.default <- function(x, ...) {
 to_rnbt_value.rbedrock_nbt_value <- function(x, ...) {
     # NOTE: We should not get here on well-formed data
     msg <- sprintf("Rnbt value for `nbt_value` of class <%s> not implemented.",
-        class(x)[1])
-    stop(msg) 
+                   class(x)[1])
+    stop(msg)
 }
 
 #' @export
@@ -274,6 +282,6 @@ to_rnbt_value.rbedrock_nbt_long_array_list <- function(x, ...) {
 to_rnbt_value.rbedrock_nbt_nested_list <- function(x, ...) {
     lapply(rac_data(x), function(y) {
         list(type = to_rnbt_type(y),
-            value = to_rnbt_value(y))
+             value = to_rnbt_value(y))
     })
 }

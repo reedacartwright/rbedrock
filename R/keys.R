@@ -14,10 +14,11 @@
 #'         `chrkeys_to_rawkeys_1()` returns a raw vector.
 #'
 #' @keywords internal
+#' @useDynLib rbedrock R_chrkeys_to_rawkeys
 #' @export
 chrkeys_to_rawkeys <- function(keys) {
     keys <- vec_cast(keys, character())
-    .Call(Cchrkeys_to_rawkeys, keys)
+    .Call(R_chrkeys_to_rawkeys, keys)
 }
 
 #' @rdname chrkeys_to_rawkeys
@@ -27,16 +28,17 @@ chrkeys_to_rawkeys_1 <- function(keys) {
 }
 
 #' @rdname chrkeys_to_rawkeys
+#' @useDynLib rbedrock R_rawkeys_to_chrkeys
 #' @export
 rawkeys_to_chrkeys <- function(keys) {
     if (is.raw(keys)) {
         keys <- list(keys)
     }
-    .Call(Crawkeys_to_chrkeys, keys)
+    .Call(R_rawkeys_to_chrkeys, keys)
 }
 
-.process_key_args <- function(x, z, d, tag, subtag,
-                              stop_if_filtered = FALSE) {
+process_key_args <- function(x, z, d, tag, subtag,
+                             stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
     if (missing(z) && is.character(x)) {
         # if tag exists, we are going to filter on data type
@@ -50,7 +52,7 @@ rawkeys_to_chrkeys <- function(keys) {
     create_chunk_keys(x, z, d, tag, subtag)
 }
 
-.process_key_args_prefix <- function(x, z, d, stop_if_filtered = FALSE) {
+process_key_args_prefix <- function(x, z, d, stop_if_filtered = FALSE) {
     # is z is missing then x should contain keys as strings
     if (missing(z) && is.character(x)) {
         x <- get_stem_from_chunk_key(x)
@@ -65,7 +67,7 @@ rawkeys_to_chrkeys <- function(keys) {
     paste("chunk", args[[1]], args[[2]], args[[3]], sep = ":")
 }
 
-.create_rawkey_prefix <- function(prefix) {
+create_rawkey_prefix <- function(prefix) {
     if (is.null(prefix)) {
         return(NULL)
     }
@@ -87,6 +89,3 @@ rawkeys_to_chrkeys <- function(keys) {
     }
     chrkeys_to_rawkeys_1(prefix)
 }
-
-# TODO: retire .create_rawkey_prefix
-create_rawkey_prefix <- .create_rawkey_prefix

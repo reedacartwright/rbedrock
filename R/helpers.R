@@ -23,7 +23,7 @@ as_raw <- function(...) {
 
 as_raw_le <- function(...) {
     lst <- list(...)
-    if(is.null(names(lst)) && length(lst) == 1 && is.list(lst[[1]])) {
+    if (is.null(names(lst)) && length(lst) == 1 && is.list(lst[[1]])) {
         lst <- lst[[1]]
     }
     nn <- names(lst) %||% rep("", length(lst))
@@ -56,7 +56,7 @@ as_raw_le <- function(...) {
 
 as_raw_be <- function(...) {
     lst <- list(...)
-    if(is.null(names(lst)) && length(lst) == 1 && is.list(lst[[1]])) {
+    if (is.null(names(lst)) && length(lst) == 1 && is.list(lst[[1]])) {
         lst <- lst[[1]]
     }
     nn <- names(lst) %||% rep("", length(lst))
@@ -120,7 +120,7 @@ as_raw_varint_1 <- function(x) {
 
 as_raw_lv <- function(...) {
     lst <- list(...)
-    if(is.null(names(lst)) && length(lst) == 1 && is.list(lst[[1]])) {
+    if (is.null(names(lst)) && length(lst) == 1 && is.list(lst[[1]])) {
         lst <- lst[[1]]
     }
     nn <- names(lst) %||% rep("", length(lst))
@@ -147,6 +147,8 @@ as_raw_lv <- function(...) {
     })
     unlist(r)
 }
+
+# ---- nbt helpers -------------------------------------------------------------
 
 as_double <- function(x) {
     suppressWarnings(as.double(x))
@@ -208,6 +210,16 @@ rac_assign <- function(x, i, value) {
     x
 }
 
+
+#' Cast a value to a specific type
+#'
+#' This is a helper function used (mostly) for modifying NBT values.
+#'
+#' @param x Value to cast
+#' @param to Type to cast to
+#' @param ... Currently unused.
+#' @param x_arg Argument name for `x`, used in error messages.
+#' @keywords internal
 #' @export
 rac_cast <- function(x, to, ..., x_arg = "x") {
     UseMethod("rac_cast", to)

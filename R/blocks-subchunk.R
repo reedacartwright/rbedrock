@@ -122,6 +122,7 @@ put_subchunk_blocks_data <- function(values, x, z, dimension, subchunk,
 }
 
 #' @rdname SubChunkBlocks
+#' @useDynLib rbedrock R_read_subchunk_blocks
 #' @export
 read_subchunk_blocks_value <- function(rawvalue,
                                        subchunk_position = NA_integer_) {
@@ -129,7 +130,7 @@ read_subchunk_blocks_value <- function(rawvalue,
         return(NULL)
     }
     vec_assert(rawvalue, raw())
-    x <- .Call(Cread_subchunk_blocks, rawvalue)
+    x <- .Call(R_read_subchunk_blocks, rawvalue)
     for (i in seq_along(x)) {
         x[[i]]$values <- aperm(x[[i]]$values, c(1, 3, 2))
         x[[i]]$palette <- from_rnbt(x[[i]]$palette)
@@ -142,13 +143,14 @@ read_subchunk_blocks_value <- function(rawvalue,
 }
 
 #' @rdname SubChunkBlocks
+#' @useDynLib rbedrock R_write_subchunk_blocks
 #' @export
 write_subchunk_blocks_value <- function(value, subchunk_position,
                                         version = 9L) {
-    if (is_null(value)) {
+    if (is.null(value)) {
         return(NULL)
     }
-    if (!is_list(value)) {
+    if (!is.list(value)) {
         stop("subchunk blocks value must be a list.")
     }
     version <- as.integer(version)
@@ -175,13 +177,13 @@ write_subchunk_blocks_value <- function(value, subchunk_position,
     })
     palettes <- lapply(value, function(x) {
         x <- x[["palette", exact = TRUE]]
-        if (is.null(x) || !all_nbt(x)) {
+        if (is.null(x) || !all_nbt_values(x)) {
             stop("subchunk block value is malformed.")
         }
         to_rnbt(x)
     })
 
-    .Call(Cwrite_subchunk_blocks, values, palettes, version, subchunk_position)
+    .Call(R_write_subchunk_blocks, values, palettes, version, subchunk_position)
 }
 
 #' @rdname SubChunkBlocks

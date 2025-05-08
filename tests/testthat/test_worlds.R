@@ -1,5 +1,7 @@
 test_that("create_world creates a world that can be loaded", {
-    worlds_dir <- tempdir(TRUE)
+    worlds_dir <- tempfile("worlds_dir_")
+
+    dir.create(worlds_dir, showWarnings = FALSE)
 
     dbpath <- expect_message(create_world(
         id = "test",
@@ -30,5 +32,6 @@ test_that("create_world creates a world that can be loaded", {
     # can the DB be opened
     db <- expect_silent(bedrockdb(dbpath))
     close(db, compact = FALSE)
-    fs::dir_delete(dbpath)
+
+    unlink(worlds_dir, recursive = TRUE)
 })
