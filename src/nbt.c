@@ -585,14 +585,13 @@ unsigned char* write_nbt_payload_numeric(SEXP r_value, unsigned char* ptr,
     unsigned char* const end, nbt_type_t type, nbt_format_t fmt,
     R_xlen_t *len) {
 
+    r_value = PROTECT(Rf_coerceVector(r_value, REALSXP));
+
     // validate data
-    if(type_has_length(type)) {
-        if(!Rf_isReal(r_value)) {
-            return_nbt_error0();
-        }
-    } else {
-        if(!IS_SCALAR(r_value, REALSXP)) {
-            return_nbt_error0();
+    if(!type_has_length(type)) {
+        if(XLENGTH(r_value) != 1) {
+            return_nbt_error_msg0("Payload of rnbt type %d does not a scalar.",
+                type);
         }
     }
     if(type_has_length(type)) {
@@ -635,6 +634,8 @@ unsigned char* write_nbt_payload_numeric(SEXP r_value, unsigned char* ptr,
             break;
         };
     }
+
+    UNPROTECT(1);
     return ptr;
 }
 
@@ -672,13 +673,13 @@ unsigned char* write_nbt_payload_integer64(SEXP r_value, unsigned char* ptr,
 }
 
 static
-unsigned char* write_nbt_payload_character_impl(const char *val, size_t n,
-    unsigned char* ptr, unsigned char* const end, nbt_format_t fmt,
-    R_xlen_t *len) {
+unsigned char* write_nbt_payload_character_impl(const char *val,
+    unsigned short n, unsigned char* ptr, unsigned char* const end,
+    nbt_format_t fmt, R_xlen_t *len) {
     char dfmt = get_binary_format(TYPE_STRING, fmt);
 
     ptr = encode_ushort(n, ptr, end - ptr, dfmt, len);
-    len += n;
+    *len += n;
     if(end - ptr < n) {
         return end;
     }
@@ -829,8 +830,6 @@ unsigned char* write_nbt_payload_nested_list(SEXP r_value, unsigned char* ptr,
     return ptr;
 }
 
-
-
 static unsigned char* write_nbt_payload(SEXP r_value, unsigned char* ptr,
     unsigned char* const end, nbt_type_t type, nbt_format_t fmt,
     R_xlen_t* len) {
@@ -973,6 +972,6 @@ SEXP attribute_visible R_write_nbt(SEXP r_value, SEXP r_format) {
             return_nbt_error();
         }
     }
-    UNPROTECT(3);
+    UNPROTECT(1);
     return ret;
 }

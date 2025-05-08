@@ -23,23 +23,26 @@ as_raw <- function(...) {
 
 as_raw_le <- function(...) {
     lst <- list(...)
+    if(is.null(names(lst)) && length(lst) == 1 && is.list(lst[[1]])) {
+        lst <- lst[[1]]
+    }
     nn <- names(lst) %||% rep("", length(lst))
     r <- lapply(seq_along(lst), function(i) {
         n <- nn[[i]]
         v <- lst[[i]]
         if (n == "b") {
             writeBin(as.integer(v), raw(), size = 1, endian = "little")
-        } else if (n == "s") {
+        } else if (n == "s" || n == "us") {
             writeBin(as.integer(v), raw(), size = 2, endian = "little")
-        } else if (n == "i") {
+        } else if (n == "i" || n == "ui") {
             writeBin(as.integer(v), raw(), size = 4, endian = "little")
+        } else if (n == "l" || n == "ul") {
+            writeBin(unclass(bit64::as.integer64(v)), raw(), size = 8,
+                     endian = "little")
         } else if (n == "f") {
             writeBin(as.double(v), raw(), size = 4, endian = "little")
         } else if (n == "d") {
             writeBin(as.double(v), raw(), size = 8, endian = "little")
-        } else if (n == "l") {
-            writeBin(unclass(bit64::as.integer64(v)), raw(), size = 8,
-                     endian = "little")
         } else if (is.character(v)) {
             k <- nchar(v, type = "bytes")
             k <- writeBin(k, raw(), size = 2, endian = "little")
@@ -53,6 +56,9 @@ as_raw_le <- function(...) {
 
 as_raw_be <- function(...) {
     lst <- list(...)
+    if(is.null(names(lst)) && length(lst) == 1 && is.list(lst[[1]])) {
+        lst <- lst[[1]]
+    }
     nn <- names(lst) %||% rep("", length(lst))
     r <- lapply(seq_along(lst), function(i) {
         n <- nn[[i]]
@@ -60,17 +66,17 @@ as_raw_be <- function(...) {
 
         if (n == "b") {
             writeBin(as.integer(v), raw(), size = 1, endian = "big")
-        } else if (n == "s") {
+        } else if (n == "s" || n == "us") {
             writeBin(as.integer(v), raw(), size = 2, endian = "big")
-        } else if (n == "i") {
+        } else if (n == "i" || n == "ui") {
             writeBin(as.integer(v), raw(), size = 4, endian = "big")
+        } else if (n == "l" || n == "ul") {
+            writeBin(unclass(bit64::as.integer64(v)), raw(), size = 8,
+                     endian = "big")
         } else if (n == "f") {
             writeBin(as.double(v), raw(), size = 4, endian = "big")
         } else if (n == "d") {
             writeBin(as.double(v), raw(), size = 8, endian = "big")
-        } else if (n == "l") {
-            writeBin(unclass(bit64::as.integer64(v)), raw(), size = 8,
-                     endian = "big")
         } else if (is.character(v)) {
             k <- nchar(v, type = "bytes")
             k <- writeBin(k, raw(), size = 2, endian = "big")
@@ -87,6 +93,11 @@ as_raw_varint_s <- function(x) {
     cls <- class(x)
     x <- ifelse(x < 0, -2 * x - 1, 2 * x)
     class(x) <- cls
+    unlist(lapply(x, as_raw_varint_1))
+}
+
+as_raw_varint_u <- function(x) {
+    x <- bit64::as.integer64(x)
     unlist(lapply(x, as_raw_varint_1))
 }
 
@@ -109,6 +120,9 @@ as_raw_varint_1 <- function(x) {
 
 as_raw_lv <- function(...) {
     lst <- list(...)
+    if(is.null(names(lst)) && length(lst) == 1 && is.list(lst[[1]])) {
+        lst <- lst[[1]]
+    }
     nn <- names(lst) %||% rep("", length(lst))
     r <- lapply(seq_along(lst), function(i) {
         n <- nn[[i]]
@@ -117,6 +131,8 @@ as_raw_lv <- function(...) {
             writeBin(as.integer(v), raw(), size = 1, endian = "little")
         } else if (n %in% c("s", "i", "l")) {
             as_raw_varint_s(v)
+        } else if (n %in% c("us", "ui", "ul")) {
+            as_raw_varint_u(v)
         } else if (n == "f") {
             writeBin(as.double(v), raw(), size = 4, endian = "little")
         } else if (n == "d") {

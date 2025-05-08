@@ -139,7 +139,7 @@ unsigned char* encode_ulong_v(uint64_t val, unsigned char* ptr, ptrdiff_t *k) {
         }
         ptr[n++] = b;
     } while (val);
-    *k += sizeof(val);
+    *k += n;
     return ptr + n;
 }
 
