@@ -92,7 +92,7 @@ new_nbt_value_impl <- function(x, type) {
         new_nbt_long_array_list(lapply(x, new_nbt_long_array))
     }
     do_new_nbt_raw_string_list <- function(x) {
-        new_nbt_raw_string_list(lapply(x, new_nbt_raw_string))        
+        new_nbt_raw_string_list(lapply(x, new_nbt_raw_string))
     }
 
     ret <- switch(as.character(type),

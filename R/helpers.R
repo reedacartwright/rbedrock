@@ -181,15 +181,21 @@ rac_recycle <- function(x, size) {
     }
 }
 
+rac_index <- function(x, i, ...) {
+    i <- if (missing(i)) TRUE else i
+    rac_slice(x, i)
+}
+
 rac_slice <- function(x, i) {
     if (is.logical(i)) {
-        i <- which(i)
+        i <- which(rep(i, length.out = length(x)))
     }
     stopifnot(is.numeric(i) || is.character(i))
     if (is.null(x)) {
         return(NULL)
     }
-    out <- x[i, drop = FALSE]
+    out <- rac_data(x)
+    out <- out[i, drop = FALSE]
     class(out) <- oldClass(x)
     out
 }
@@ -236,18 +242,26 @@ rac_data <- function(x) {
     unclass(x)
 }
 
+#' Object type as a string
+#'
+#' `rac_type_full()` displays the fill type of the object.
+#' `rac_type_abbr()` provides an abbreviated description.
+#'
+#' @param x An object.
+#'
 #' @keywords internal
 #' @export
-rac_type_str <- function(x) {
-    UseMethod("rac_type_str", x)
+rac_type_full <- function(x) {
+    UseMethod("rac_type_full", x)
 }
 
 #' @export
-rac_type_str.default <- function(x) {
+rac_type_full.default <- function(x) {
     class(x)[1]
 }
 
 #' @keywords internal
+#' @rdname rac_type_full
 #' @export
 rac_type_abbr <- function(x) {
     UseMethod("rac_type_abbr", x)
@@ -257,4 +271,3 @@ rac_type_abbr <- function(x) {
 rac_type_abbr.default <- function(x) {
     if (is.recursive(x)) "obj" else "val"
 }
-

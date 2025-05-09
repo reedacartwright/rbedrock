@@ -21,6 +21,11 @@ validate_nbt_list_of <- function(x) {
 }
 
 #' @export
+`[.rbedrock_nbt_list_of` <- function(x, i, ...) {
+    rac_index(x, i, ...)
+}
+
+#' @export
 `[<-.rbedrock_nbt_list_of` <- function(x, i, value) {
     if (is.logical(i)) {
         i <- which(i)
@@ -58,7 +63,7 @@ validate_nbt_list_of <- function(x) {
 #' @export
 print.rbedrock_nbt_list_of <- function(x, style = NULL, ...) {
     # collect options
-    opts <- list( style = style )
+    opts <- list(style = style)
 
     cat("NBT DATA\n")
     nbt_tree(x, opts = opts)
@@ -67,7 +72,7 @@ print.rbedrock_nbt_list_of <- function(x, style = NULL, ...) {
 
 make_type_str <- function(x, x_id = NULL, val_lab = NULL) {
     s <- if (is.null(x_id) && is.null(val_lab)) {
-        rac_type_str(x) 
+        rac_type_full(x)
     } else {
         rac_type_abbr(x)
     }
@@ -89,8 +94,8 @@ nbt_tree <- function(x, x_id = NULL, branch_hist = character(0L), opts) {
     val_lab <- NULL
     if (is.atomic(x)) {
         val_lab <- format(x)
-        if(length(val_lab) > 1) {
-            val_lab <- paste(val_lab, collapse=", ")
+        if (length(val_lab) > 1) {
+            val_lab <- paste(val_lab, collapse = ", ")
             val_lab <- paste0("[ ", val_lab, " ]")
         }
     }
@@ -98,31 +103,28 @@ nbt_tree <- function(x, x_id = NULL, branch_hist = character(0L), opts) {
     label <- paste0(x_id,
                     make_type_str(x, x_id, val_lab),
                     if (!is.null(val_lab)) ": ",
-                    val_lab
-                   )
+                    val_lab)
     cat(
         paste(branch_chars, collapse = ""),
         label,
         "\n",
         sep = ""
     )
-    if(is.list(x)) {
+    if (is.list(x)) {
         children <- rac_data(x)
         n_children <- length(children)
         child_names <- names(children)
-        for(i in seq_along(children)) {
+        for (i in seq_along(children)) {
             id <- child_names[i]
-            child_type <- if(i < n_children) "child" else "last"
+            child_type <- if (i < n_children) "child" else "last"
             Recall(x = children[[i]],
-                   x_id = id,
-                   branch_hist = c(branch_hist, child_type),
-                   opts = opts
-                   )
+                x_id = id,
+                branch_hist = c(branch_hist, child_type),
+                opts = opts
+            )
         }
     }
 }
-
-
 
 is_utf8_output <- function() {
     opt <- getOption("cli.unicode", NULL)
@@ -281,59 +283,59 @@ format.rbedrock_nbt_string_list <- format.rbedrock_nbt_string
 #---- Pretty type information --------------------------------------------------
 
 #' @export
-rac_type_str.rbedrock_nbt_byte <- function(x) "byte"
+rac_type_full.rbedrock_nbt_byte <- function(x) "byte"
 #' @export
-rac_type_str.rbedrock_nbt_short <- function(x) "short"
+rac_type_full.rbedrock_nbt_short <- function(x) "short"
 #' @export
-rac_type_str.rbedrock_nbt_int <- function(x) "int"
+rac_type_full.rbedrock_nbt_int <- function(x) "int"
 #' @export
-rac_type_str.rbedrock_nbt_long <- function(x) "long"
+rac_type_full.rbedrock_nbt_long <- function(x) "long"
 #' @export
-rac_type_str.rbedrock_nbt_float <- function(x) "float"
+rac_type_full.rbedrock_nbt_float <- function(x) "float"
 #' @export
-rac_type_str.rbedrock_nbt_double <- function(x) "double"
+rac_type_full.rbedrock_nbt_double <- function(x) "double"
 #' @export
-rac_type_str.rbedrock_nbt_byte_array <- function(x) "byte_array"
+rac_type_full.rbedrock_nbt_byte_array <- function(x) "byte_array"
 #' @export
-rac_type_str.rbedrock_nbt_string <- function(x) "string"
+rac_type_full.rbedrock_nbt_string <- function(x) "string"
 #' @export
-rac_type_str.rbedrock_nbt_compound <- function(x) "compound"
+rac_type_full.rbedrock_nbt_compound <- function(x) "compound"
 #' @export
-rac_type_str.rbedrock_nbt_int_array <- function(x) "int_array"
+rac_type_full.rbedrock_nbt_int_array <- function(x) "int_array"
 #' @export
-rac_type_str.rbedrock_nbt_long_array <- function(x) "long_array"
+rac_type_full.rbedrock_nbt_long_array <- function(x) "long_array"
 #' @export
-rac_type_str.rbedrock_nbt_raw_string <- function(x) "raw_string"
+rac_type_full.rbedrock_nbt_raw_string <- function(x) "raw_string"
 #' @export
-rac_type_str.rbedrock_nbt_empty_list <- function(x) "list-empty"
+rac_type_full.rbedrock_nbt_empty_list <- function(x) "list-empty"
 #' @export
-rac_type_str.rbedrock_nbt_byte_list <- function(x) "list-bytes"
+rac_type_full.rbedrock_nbt_byte_list <- function(x) "list-bytes"
 #' @export
-rac_type_str.rbedrock_nbt_short_list <- function(x) "list-short"
+rac_type_full.rbedrock_nbt_short_list <- function(x) "list-short"
 #' @export
-rac_type_str.rbedrock_nbt_int_list <- function(x) "list-int"
+rac_type_full.rbedrock_nbt_int_list <- function(x) "list-int"
 #' @export
-rac_type_str.rbedrock_nbt_long_list <- function(x) "list-long"
+rac_type_full.rbedrock_nbt_long_list <- function(x) "list-long"
 #' @export
-rac_type_str.rbedrock_nbt_float_list <- function(x) "list-float"
+rac_type_full.rbedrock_nbt_float_list <- function(x) "list-float"
 #' @export
-rac_type_str.rbedrock_nbt_double_list <- function(x) "list-double"
+rac_type_full.rbedrock_nbt_double_list <- function(x) "list-double"
 #' @export
-rac_type_str.rbedrock_nbt_byte_array_list <- function(x) "list-byte_array"
+rac_type_full.rbedrock_nbt_byte_array_list <- function(x) "list-byte_array"
 #' @export
-rac_type_str.rbedrock_nbt_string_list <- function(x) "list-string"
+rac_type_full.rbedrock_nbt_string_list <- function(x) "list-string"
 #' @export
-rac_type_str.rbedrock_nbt_compound_list <- function(x) "list-compound"
+rac_type_full.rbedrock_nbt_compound_list <- function(x) "list-compound"
 #' @export
-rac_type_str.rbedrock_nbt_int_array_list <- function(x) "list-int_array"
+rac_type_full.rbedrock_nbt_int_array_list <- function(x) "list-int_array"
 #' @export
-rac_type_str.rbedrock_nbt_long_array_list <- function(x) "list-long_array"
+rac_type_full.rbedrock_nbt_long_array_list <- function(x) "list-long_array"
 #' @export
-rac_type_str.rbedrock_nbt_raw_string_list <- function(x) "list-raw_string"
+rac_type_full.rbedrock_nbt_raw_string_list <- function(x) "list-raw_string"
 #' @export
-rac_type_str.rbedrock_nbt_nested_list <- function(x) "list-list"
+rac_type_full.rbedrock_nbt_nested_list <- function(x) "list-list"
 #' @export
-rac_type_str.rbedrock_nbt_list_of <- function(x) "list"
+rac_type_full.rbedrock_nbt_list_of <- function(x) "list"
 
 #' @export
 rac_type_abbr.rbedrock_nbt_byte <- function(x) "byte"
@@ -389,4 +391,3 @@ rac_type_abbr.rbedrock_nbt_raw_string_list <- function(x) "l-raw"
 rac_type_abbr.rbedrock_nbt_nested_list <- function(x) "l-lst"
 #' @export
 rac_type_abbr.rbedrock_nbt_list_of <- function(x) "list"
-
