@@ -235,3 +235,26 @@ rac_cast.default <- function(x, to, ..., x_arg = "x") {
 rac_data <- function(x) {
     unclass(x)
 }
+
+#' @keywords internal
+#' @export
+rac_type_str <- function(x) {
+    UseMethod("rac_type_str", x)
+}
+
+#' @export
+rac_type_str.default <- function(x) {
+    class(x)[1]
+}
+
+#' @keywords internal
+#' @export
+rac_type_abbr <- function(x) {
+    UseMethod("rac_type_abbr", x)
+}
+
+#' @export
+rac_type_abbr.default <- function(x) {
+    if (is.recursive(x)) "obj" else "val"
+}
+

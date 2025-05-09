@@ -65,23 +65,36 @@ from_rnbt_impl <- function(x) {
 }
 
 rnbt_value <- function(x) {
-    type <- x[["type", exact = TRUE]]
     value <- x[["value", exact = TRUE]]
+    type <- x[["type", exact = TRUE]]
 
-    if (type == 109L) {
-        value <- lapply(value, rnbt_value)
-        new_nbt_nested_list(value)
-    } else if (type == 110L) {
-        value <- lapply(value, from_rnbt_impl)
-        new_nbt_compound_list(value)
-    } else if (type == 10L) {
-        new_nbt_compound(from_rnbt_impl(value))
-    } else {
-        new_nbt_value_impl(value, type)
-    }
+    new_nbt_value_impl(value, type)
 }
 
 new_nbt_value_impl <- function(x, type) {
+    do_new_nbt_compound <- function(x) {
+        new_nbt_compound(from_rnbt_impl(x))
+    }
+    do_new_nbt_nested_list <- function(x) {
+        new_nbt_nested_list(lapply(x, rnbt_value))
+    }
+    do_new_nbt_compound_list <- function(x) {
+        x <- lapply(x, from_rnbt_impl)
+        new_nbt_compound_list(lapply(x, new_nbt_compound))
+    }
+    do_new_nbt_byte_array_list <- function(x) {
+        new_nbt_byte_array_list(lapply(x, new_nbt_byte_array))
+    }
+    do_new_nbt_int_array_list <- function(x) {
+        new_nbt_int_array_list(lapply(x, new_nbt_int_array))
+    }
+    do_new_nbt_long_array_list <- function(x) {
+        new_nbt_long_array_list(lapply(x, new_nbt_long_array))
+    }
+    do_new_nbt_raw_string_list <- function(x) {
+        new_nbt_raw_string_list(lapply(x, new_nbt_raw_string))        
+    }
+
     ret <- switch(as.character(type),
         "0" = NULL,
         "1" = new_nbt_byte(x),
@@ -93,7 +106,7 @@ new_nbt_value_impl <- function(x, type) {
         "7" = new_nbt_byte_array(x),
         "8" = new_nbt_string(x),
         "9" = NULL,
-        "10" = new_nbt_compound(x),
+        "10" = do_new_nbt_compound(x),
         "11" = new_nbt_int_array(x),
         "12" = new_nbt_long_array(x),
         "58" = new_nbt_raw_string(x),
@@ -104,13 +117,13 @@ new_nbt_value_impl <- function(x, type) {
         "104" = new_nbt_long_list(x),
         "105" = new_nbt_float_list(x),
         "106" = new_nbt_double_list(x),
-        "107" = new_nbt_byte_array_list(x),
+        "107" = do_new_nbt_byte_array_list(x),
         "108" = new_nbt_string_list(x),
-        "109" = new_nbt_nested_list(x),
-        "110" = new_nbt_compound_list(x),
-        "111" = new_nbt_int_array_list(x),
-        "112" = new_nbt_long_array_list(x),
-        "158" = new_nbt_raw_string_list(x),
+        "109" = do_new_nbt_nested_list(x),
+        "110" = do_new_nbt_compound_list(x),
+        "111" = do_new_nbt_int_array_list(x),
+        "112" = do_new_nbt_long_array_list(x),
+        "158" = do_new_nbt_raw_string_list(x),
         NULL
     )
     stopifnot(!is.null(ret))

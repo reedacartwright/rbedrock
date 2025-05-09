@@ -35,68 +35,6 @@ all_nbt_values <- function(x) {
     all(vapply(x, is_nbt_value, FALSE, USE.NAMES = FALSE))
 }
 
-# ---- nbt list_of -------------------------------------------------------------
-
-# Use something like lobstr::tree to display NBT data
-
-#' @export
-print.rbedrock_nbt_list_of <- function(x, ...) {
-    cat("NBT formatted data...\n")
-    x
-}
-
-#' @rdname nbt
-#' @export
-nbt_list_of <- function(...) {
-    lst <- list(...)
-    validate_nbt_list_of(new_nbt_list_of(lst))
-}
-
-new_nbt_list_of <- function(x) {
-    stopifnot(is.list(x))
-    structure(x, class = c("rbedrock_nbt_list_of", "list"))
-}
-
-validate_nbt_list_of <- function(x) {
-    if (!all(vapply(x, is_nbt_value, FALSE))) {
-        stop("`x` contains non-NBT elements.", call. = FALSE)
-    }
-    x
-}
-
-#' @export
-`[<-.rbedrock_nbt_list_of` <- function(x, i, value) {
-    if (is.logical(i)) {
-        i <- which(i)
-    }
-    stopifnot(is.numeric(i) || is.character(i))
-    if (is_nbt_value(value)) {
-        value <- list(value)
-    }
-    value <- rac_recycle(value, length(i))
-    force(x)
-    value <- lapply(seq_along(value), function(j) {
-        nbt_value_or_cast(rac_slice(value, j), x[[i[j], exact = TRUE]])
-    })
-    NextMethod()
-}
-
-#' @export
-`[[<-.rbedrock_nbt_list_of` <- function(x, i, value) {
-    if (is.null(value)) {
-        x[i] <- list(value)
-        return(x)
-    }
-    value <- nbt_value_or_cast(value, x[[i, exact = TRUE]])
-    NextMethod()
-}
-
-#' @export
-`$<-.rbedrock_nbt_list_of` <- function(x, i, value) {
-    value <- nbt_value_or_cast(value, x[[i, exact = TRUE]])
-    NextMethod()
-}
-
 # ---- unnbt -------------------------------------------------------------------
 
 #' @rdname nbt
@@ -127,34 +65,20 @@ nbt_compound <- function(...) {
 new_nbt_compound <- function(x) {
     stopifnot(is.list(x))
     structure(x, class = c("rbedrock_nbt_compound", "rbedrock_nbt_value",
-                           "list"))
+                           "rbedrock_nbt_list_of", "list"))
 }
 
 validate_nbt_compound <- function(x) {
-    if (!all(vapply(x, is_nbt_value, FALSE))) {
+    if (!all_nbt_values(x)) {
         stop("`x` contains non-NBT elements.", call. = FALSE)
     }
     x
 }
 
 #' @export
-format.rbedrock_nbt_compound <- function(x, ...) {
-    NextMethod()
-}
-
-#' @export
 rac_cast.rbedrock_nbt_compound <- function(x, to, ...) {
     nbt_compound(x)
 }
-
-#' @export
-`[<-.rbedrock_nbt_compound` <- `[<-.rbedrock_nbt_list_of`
-
-#' @export
-`[[<-.rbedrock_nbt_compound` <- `[[<-.rbedrock_nbt_list_of`
-
-#' @export
-`$<-.rbedrock_nbt_compound` <- `$<-.rbedrock_nbt_list_of`
 
 # ---- nbt_byte [1] ------------------------------------------------------------
 
@@ -180,11 +104,6 @@ new_nbt_byte <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_byte <- function(x, ...) {
-    NextMethod(suffix = "b")
-}
-
-#' @export
 rac_cast.rbedrock_nbt_byte <- function(x, to, ...) {
     nbt_byte(x)
 }
@@ -204,9 +123,6 @@ new_nbt_byte_array <- function(x) {
     structure(x, class = c("rbedrock_nbt_byte_array", "rbedrock_nbt_numeric",
                            "rbedrock_nbt_value"))
 }
-
-#' @export
-format.rbedrock_nbt_byte_array <- format.rbedrock_nbt_byte
 
 #' @export
 rac_cast.rbedrock_nbt_byte_array <- function(x, to, ...) {
@@ -229,8 +145,7 @@ new_nbt_byte_list <- function(x) {
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value"))
 }
 
-#' @export
-format.rbedrock_nbt_byte_list <- format.rbedrock_nbt_byte
+
 
 #' @export
 rac_cast.rbedrock_nbt_byte_list <- function(x, to, ...) {
@@ -257,11 +172,6 @@ new_nbt_byte_array_list <- function(x) {
                            "rbedrock_nbt_numeric_list",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value",
                            "list"))
-}
-
-#' @export
-format.rbedrock_nbt_byte_array_list <- function(x, ...) {
-    NextMethod()
 }
 
 #' @export
@@ -293,11 +203,6 @@ new_nbt_short <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_short <- function(x, ...) {
-    NextMethod(suffix = "s")
-}
-
-#' @export
 rac_cast.rbedrock_nbt_short <- function(x, to, ...) {
     nbt_short(x)
 }
@@ -317,9 +222,6 @@ new_nbt_short_list <- function(x) {
     structure(x, class = c("rbedrock_nbt_short_list", "rbedrock_nbt_numeric",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value"))
 }
-
-#' @export
-format.rbedrock_nbt_short_list <- format.rbedrock_nbt_short
 
 #' @export
 rac_cast.rbedrock_nbt_short_list <- function(x, to, ...) {
@@ -350,12 +252,6 @@ new_nbt_int <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_int <- function(x, ...) {
-    NextMethod(suffix = "")
-}
-
-
-#' @export
 rac_cast.rbedrock_nbt_int <- function(x, to, ...) {
     nbt_int(x)
 }
@@ -377,9 +273,6 @@ new_nbt_int_array <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_int_array <- format.rbedrock_nbt_int
-
-#' @export
 rac_cast.rbedrock_nbt_int_array <- function(x, to, ...) {
     nbt_int_array(x)
 }
@@ -399,9 +292,6 @@ new_nbt_int_list <- function(x) {
     structure(x, class = c("rbedrock_nbt_int_list", "rbedrock_nbt_numeric",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value"))
 }
-
-#' @export
-format.rbedrock_nbt_int_list <- format.rbedrock_nbt_int
 
 #' @export
 rac_cast.rbedrock_nbt_int_list <- function(x, to, ...) {
@@ -428,11 +318,6 @@ new_nbt_int_array_list <- function(x) {
                            "rbedrock_nbt_numeric_list",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value",
                            "list"))
-}
-
-#' @export
-format.rbedrock_nbt_int_array_list <- function(x, ...) {
-    NextMethod()
 }
 
 #' @export
@@ -464,12 +349,6 @@ new_nbt_float <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_float <- function(x, ...) {
-    out <- NextMethod(suffix = "0f", flag = "#")
-    sub("(\\.[0-9]*[1-9])0+f$", "\\1f", out) # fixes trailing zeros
-}
-
-#' @export
 rac_cast.rbedrock_nbt_float <- function(x, to, ...) {
     nbt_float(x)
 }
@@ -489,9 +368,6 @@ new_nbt_float_list <- function(x) {
     structure(x, class = c("rbedrock_nbt_float_list", "rbedrock_nbt_numeric",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value"))
 }
-
-#' @export
-format.rbedrock_nbt_float_list <- format.rbedrock_nbt_float
 
 #' @export
 rac_cast.rbedrock_nbt_float_list <- function(x, to, ...) {
@@ -521,12 +397,6 @@ new_nbt_double <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_double <- function(x, ...) {
-    out <- NextMethod(suffix = "0", flag = "#")
-    sub("(\\.[0-9]*[1-9])0+$", "\\1", out) # fix trailing zeros
-}
-
-#' @export
 rac_cast.rbedrock_nbt_double <- function(x, to, ...) {
     nbt_double(x)
 }
@@ -546,9 +416,6 @@ new_nbt_double_list <- function(x) {
     structure(x, class = c("rbedrock_nbt_double_list", "rbedrock_nbt_numeric",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value"))
 }
-
-#' @export
-format.rbedrock_nbt_double_list <- format.rbedrock_nbt_double
 
 #' @export
 rac_cast.rbedrock_nbt_double_list <- function(x, to, ...) {
@@ -579,11 +446,6 @@ new_nbt_long <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_long <- function(x, ...) {
-    NextMethod(suffix = "")
-}
-
-#' @export
 rac_cast.rbedrock_nbt_long <- function(x, to, ...) {
     nbt_long(x)
 }
@@ -605,9 +467,6 @@ new_nbt_long_array <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_long_array <- format.rbedrock_nbt_long
-
-#' @export
 rac_cast.rbedrock_nbt_long_array <- function(x, to, ...) {
     nbt_long_array(x)
 }
@@ -627,9 +486,6 @@ new_nbt_long_list <- function(x) {
     structure(x, class = c("rbedrock_nbt_long_list", "rbedrock_nbt_int64",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value"))
 }
-
-#' @export
-format.rbedrock_nbt_long_list <- format.rbedrock_nbt_long
 
 #' @export
 rac_cast.rbedrock_nbt_long_list <- function(x, to, ...) {
@@ -655,11 +511,6 @@ new_nbt_long_array_list <- function(x) {
     structure(x, class = c("rbedrock_nbt_long_array_list",
                            "rbedrock_nbt_list_value", "rbedrock_nbt_value",
                            "list"))
-}
-
-#' @export
-format.rbedrock_nbt_long_array_list <- function(x, ...) {
-    NextMethod()
 }
 
 #' @export
@@ -689,11 +540,6 @@ new_nbt_string <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_string <- function(x, ...) {
-    NextMethod()
-}
-
-#' @export
 rac_cast.rbedrock_nbt_string <- function(x, to, ...) {
     nbt_string(x)
 }
@@ -713,11 +559,6 @@ validate_nbt_raw_string <- function(x) {
 new_nbt_raw_string <- function(x) {
     stopifnot(is.raw(x))
     structure(x, class = c("rbedrock_nbt_raw_string", "rbedrock_nbt_value"))
-}
-
-#' @export
-format.rbedrock_nbt_raw_string <- function(x, ...) {
-    NextMethod()
 }
 
 #' @export
@@ -741,11 +582,6 @@ new_nbt_string_list <- function(x) {
                            "rbedrock_nbt_string",
                            "rbedrock_nbt_list_value",
                            "rbedrock_nbt_value"))
-}
-
-#' @export
-format.rbedrock_nbt_string_list <- function(x, ...) {
-    NextMethod()
 }
 
 #' @export
@@ -775,23 +611,8 @@ new_nbt_raw_string_list <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_raw_string_list <- function(x, ...) {
-    NextMethod()
-}
-
-#' @export
 rac_cast.rbedrock_nbt_raw_string_list <- function(x, to, ...) {
     nbt_raw_string_list(x)
-}
-
-# ---- nbt_numeric -------------------------------------------------------------
-
-#' @export
-format.rbedrock_nbt_numeric <- function(x, suffix = "", ...) {
-    out <- formatC(unclass(x), ...)
-    out[is.na(x)] <- NA
-    out[!is.na(x)] <- paste0(out[!is.na(x)], suffix)
-    out
 }
 
 # ---- nbt_empty_list [100] ----------------------------------------------------
@@ -810,11 +631,6 @@ new_nbt_empty_list <- function(x) {
     stopifnot(is.list(x) && length(x) == 0)
     structure(x, class = c("rbedrock_nbt_empty_list", "rbedrock_nbt_list_value",
                            "rbedrock_nbt_value"))
-}
-
-#' @export
-format.rbedrock_empty_list <- function(x, ...) {
-    NextMethod()
 }
 
 #' @export
@@ -845,11 +661,6 @@ new_nbt_compound_list <- function(x) {
 }
 
 #' @export
-format.rbedrock_nbt_compound_list <- function(x, ...) {
-    NextMethod()
-}
-
-#' @export
 rac_cast.rbedrock_nbt_compound_list <- function(x, to, ...) {
     nbt_compound_list(x)
 }
@@ -873,11 +684,6 @@ new_nbt_nested_list <- function(x) {
     stopifnot(is.list(x))
     structure(x, class = c("rbedrock_nbt_nested_list",
                            "rbedrock_nbt_value", "list"))
-}
-
-#' @export
-format.rbedrock_nbt_nested_list <- function(x, ...) {
-    NextMethod()
 }
 
 #' @export

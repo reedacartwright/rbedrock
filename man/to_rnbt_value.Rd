@@ -12,6 +12,6 @@ to_rnbt_value(x, ...)
 \item{...}{Currently unused.}
 }
 \description{
-This is a helper function used to convert from nbt values to rnbt data
+This is a helper function used to convert from nbt values to rnbt data.
 }
 \keyword{internal}
