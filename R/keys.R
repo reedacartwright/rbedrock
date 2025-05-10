@@ -17,7 +17,6 @@
 #' @useDynLib rbedrock R_chrkeys_to_rawkeys
 #' @export
 chrkeys_to_rawkeys <- function(keys) {
-    keys <- vec_cast(keys, character())
     .Call(R_chrkeys_to_rawkeys, keys)
 }
 
@@ -62,7 +61,7 @@ process_key_args_prefix <- function(x, z, d, stop_if_filtered = FALSE) {
         }
         return(x[b])
     }
-    args <- vec_recycle_common(x, z, d)
+    args <- rac_recycle_common(list(x, z, d))
 
     paste("chunk", args[[1]], args[[2]], args[[3]], sep = ":")
 }
@@ -71,7 +70,7 @@ create_rawkey_prefix <- function(prefix) {
     if (is.null(prefix)) {
         return(NULL)
     }
-    vec_assert(prefix, character(), 1L)
+    stopifnot(is.character(prefix) && length(prefix) == 1L)
 
     if (is_chunk_key(prefix)) {
         # Chunk-key prefixes must be either a valid key or a valid key prefix

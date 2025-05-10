@@ -129,7 +129,7 @@ read_subchunk_blocks_value <- function(rawvalue,
     if (is.null(rawvalue)) {
         return(NULL)
     }
-    vec_assert(rawvalue, raw())
+    stopifnot(is.raw(rawvalue))
     x <- .Call(R_read_subchunk_blocks, rawvalue)
     for (i in seq_along(x)) {
         x[[i]]$values <- aperm(x[[i]]$values, c(1, 3, 2))

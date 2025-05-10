@@ -71,10 +71,10 @@ read_hsa_value_impl <- function(rawvalue) {
         return(NULL)
     }
     sz <- readBin(rawvalue, integer(), n = 1L, size = 4L, endian = "little")
-    vec_assert(rawvalue, raw(), sz * 25L + 4)
+
+    stopifnot(is.raw(rawvalue) && length(rawvalue) == sz * 25L + 4)
 
     rawvalue <- rawvalue[-c(1:4)]
-    stopifnot(length(rawvalue) == sz * 25L)
     mat <- matrix(0L, nrow = sz, ncol = 7)
     for (i in 1:sz) {
         aabb <- readBin(rawvalue, integer(), n = 6, size = 4, endian = "little")

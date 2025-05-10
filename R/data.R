@@ -106,7 +106,7 @@ put_data <- function(values, keys, db = default_db(), writeoptions = NULL) {
         keys <- names(values)
     }
     # recycle values as needed
-    values <- vec_recycle(values, length(keys))
+    values <- rac_recycle(values, length(keys))
     # convert keys and call mput
     rawkeys <- chrkeys_to_rawkeys(keys)
     db$mput(rawkeys, values, writeoptions)

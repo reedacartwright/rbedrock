@@ -30,8 +30,7 @@ Imports:
     rappdirs,
     rlang,
     utils,
-    digest,
-    vctrs
+    digest
 Suggests:
     zip,
     testthat,

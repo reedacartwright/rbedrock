@@ -19,7 +19,7 @@ put_acdig_data(values, x, z, dimension, db = default_db())
 
 put_acdig_value(value, x, z, dimension, db = default_db())
 
-read_acdig_value(rawdata)
+read_acdig_value(rawvalue)
 
 write_acdig_value(value)
 
@@ -36,7 +36,7 @@ If \code{x} is missing, the names of \code{values} will be taken as the keys.}
 
 \item{value}{A character vector.}
 
-\item{rawdata}{A raw vector.}
+\item{rawvalue}{A raw vector.}
 }
 \value{
 \code{get_acdig_values()} returns a vector of actor keys.

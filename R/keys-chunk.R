@@ -22,7 +22,7 @@ NULL
 #' parse_chunk_keys("chunk:0:0:0:47:1")
 #' @export
 parse_chunk_keys <- function(keys) {
-    vec_assert(keys, character())
+    stopifnot(is.character(keys))
     m <- extract_chunk_key_components(keys)
 
     tibble::tibble(key = keys,
@@ -55,7 +55,7 @@ create_chunk_keys <- function(x, z, dimension, tag, subtag) {
     if (missing(subtag)) {
         subtag <- NA_character_
     }
-    args <- vec_recycle_common(x, z, dimension, tag, subtag)
+    args <- rac_recycle_common(list(x, z, dimension, tag, subtag))
     tag <- ifelse(is.na(args[[5]]), as.character(args[[4]]),
                   paste(args[[4]], args[[5]], sep = ":"))
     paste("chunk", args[[1]], args[[2]], args[[3]], tag, sep = ":")
@@ -129,14 +129,14 @@ chunk_origins <- function(keys) {
 #' @export
 #' @rdname chunk_keys
 chunk_tag_str <- function(tags) {
-    tags <- vec_cast(tags, integer())
+    tags <- as.integer(tags)
     .CHUNK_TAGS_INV[tags]
 }
 
 #' @export
 #' @rdname chunk_keys
 chunk_tag_int <- function(tags) {
-    tags <- vec_cast(tags, character())
+    tags <- as.character(tags)
     unname(.CHUNK_TAGS[tags])
 }
 
@@ -196,9 +196,9 @@ get_stem_from_chunk_key <- function(keys) {
 }
 
 check_chunk_key_tag <- function(keys, tag, subtag, silent = FALSE) {
-    vec_assert(tag, size = 1)
+    stopifnot(length(tag) == 1L)
     if (!missing(subtag)) {
-        vec_assert(subtag, size = 1)
+        stopifnot(length(subtag) == 1L)
         m <- extract_chunk_key_components(keys, 4:5)
         b <- (m[, 1] == tag) & (m[, 2] == subtag)
     } else {

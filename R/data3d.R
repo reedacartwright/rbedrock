@@ -62,7 +62,7 @@ read_data3d_value <- function(rawvalue) {
     if (is.null(rawvalue)) {
         return(NULL)
     }
-    vec_assert(rawvalue, raw())
+    stopifnot(is.raw(rawvalue))
     height_map <- readBin(rawvalue[1:512], integer(), n = 256L, size = 2L,
                           endian = "little", signed = TRUE)
     dim(height_map) <- c(16L, 16L)
@@ -148,7 +148,7 @@ write_data3d_value <- function(value) {
     height_map <- as.integer(height_map)
     biome_map <- as.integer(biome_map)
 
-    height_map <- vec_recycle(height_map, 256, x_arg = "height_map")
+    height_map <- rac_recycle(height_map, 256)
     biome_map <- reshape_biome_map(biome_map)
 
     # identify y levels with repetitive biomes
@@ -165,7 +165,7 @@ write_data3d_value <- function(value) {
     for (i in 1:mm) {
         j <- (1:16) + (i - 1) * 16
         id <- c(biome_map[, , j])
-        palette_list[[i]] <- vec_unique(id)
+        palette_list[[i]] <- unique(id)
         values_list[[i]] <- match(id, palette_list[[i]])
     }
 

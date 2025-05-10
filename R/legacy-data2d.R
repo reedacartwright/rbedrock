@@ -66,7 +66,7 @@ read_data2d_value <- function(rawvalue) {
     if (is.null(rawvalue)) {
         return(NULL)
     }
-    vec_assert(rawvalue, raw(), 768L)
+    stopifnot(is.raw(rawvalue) && length(rawvalue) == 768L)
 
     h <- readBin(rawvalue[1L:512L], integer(), n = 256L, size = 2L,
                  endian = "little", signed = TRUE)
@@ -91,8 +91,8 @@ write_data2d_value <- function(value) {
     height_map <- as.integer(height_map)
     biome_map <- as.integer(biome_map)
 
-    height_map <- vec_recycle(height_map, 256, x_arg = "height_map")
-    biome_map <- vec_recycle(biome_map, 256, x_arg = "biome_map")
+    height_map <- rac_recycle(height_map, 256)
+    biome_map <- rac_recycle(biome_map, 256)
 
     h <- writeBin(height_map, raw(), size = 2L, endian = "little")
     b <- writeBin(biome_map, raw(), size = 1L, endian = "little")

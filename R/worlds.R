@@ -134,7 +134,7 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
 #' @export
 export_world <- function(id, file, worlds_dir = worlds_dir_path(),
                          replace = FALSE) {
-    vec_assert(file, character(), 1L)
+    stopifnot(is.character(file) && length(file) == 1L)
     file <- normalize_path(file)
     dirpath <- fixup_path(id, worlds_dir, verify = TRUE)
 
@@ -201,8 +201,8 @@ get_world_path <- function(id, worlds_dir = worlds_dir_path()) {
 }
 
 fixup_path <- function(id, worlds_dir = worlds_dir_path(), verify = FALSE) {
-    vec_assert(id, size = 1L)
-    path <- vec_cast(id, character())
+    stopifnot(length(id) == 1L)
+    path <- as.character(id)
 
     # if path is absolute, or it already exists don't append it to worlds_dir
     if (is_abs_path(path) || path_exists(path)) {

@@ -72,7 +72,7 @@ read_checksums_value <- function(rawvalue, key) {
         return(NULL)
     }
     sz <- readBin(rawvalue, integer(), n = 1L, size = 4L, endian = "little")
-    vec_assert(rawvalue, raw(), sz * 11 + 4)
+    stopifnot(is.raw(rawvalue) && length(rawvalue) == sz * 11 + 4)
     if (sz == 0) {
         return(character())
     }

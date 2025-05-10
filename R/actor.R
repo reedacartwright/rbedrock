@@ -25,7 +25,7 @@ NULL
 #' @param value A character vector.
 #' @param values A list of character vectors.
 #' If `x` is missing, the names of `values` will be taken as the keys.
-#' @param rawdata A raw vector.
+#' @param rawvalue A raw vector.
 #'
 #' @return `get_acdig_values()` returns a vector of actor keys.
 #' `get_acdig_data()` returns a named list of the of the values
@@ -80,16 +80,16 @@ put_acdig_value <- function(value, x, z, dimension, db = default_db()) {
 
 #' @rdname ActorDigest
 #' @export
-read_acdig_value <- function(rawdata) {
-    if (is.null(rawdata)) {
+read_acdig_value <- function(rawvalue) {
+    if (is.null(rawvalue)) {
         return(NULL)
     }
-    vec_assert(rawdata, raw())
-    if ((length(rawdata) %% 8) != 0) {
-        abort(paste0("Invalid actor digest data. ",
-                     "Length of rawdata must be a multiple of 8."))
+    stopifnot(is.raw(rawvalue))
+    if ((length(rawvalue) %% 8) != 0) {
+        stop(paste0("Invalid actor digest data. ",
+                    "Length of rawdata must be a multiple of 8."))
     }
-    m <- matrix(rawdata, nrow = 8)
+    m <- matrix(rawvalue, nrow = 8)
     if (ncol(m) == 0) {
         character()
     } else {
@@ -103,10 +103,10 @@ write_acdig_value <- function(value) {
     if (is.null(value)) {
         return(NULL)
     }
-    vec_assert(value, character())
+    stopifnot(is.character(value))
     b <- is_valid_actor_key(value)
     if (!isTRUE(all(b))) {
-        abort("Invalid actor key.")
+        stop("Invalid actor key.")
     }
     val <- substr(value, 7, nchar(value))
     val <- strsplit(val, character(0L))
@@ -119,7 +119,7 @@ write_acdig_value <- function(value) {
 #' @rdname ActorDigest
 #' @export
 create_acdig_keys <- function(x, z, dimension) {
-    args <- vec_recycle_common(x, z, dimension)
+    args <- rac_recycle_common(list(x, z, dimension))
     paste("acdig", args[[1]], args[[2]], args[[3]], sep = ":")
 }
 
@@ -203,7 +203,7 @@ put_actors_value_impl <- function(value, dig_key, db) {
         obj
     }
     nbt_dat <- lapply(storage_keys, nbt_storage_key)
-    value <- modifyList(value, nbt_dat)
+    value <- utils::modifyList(value, nbt_dat)
 
     dat <- write_nbt_data(value)
     names(dat) <- actor_keys
@@ -215,7 +215,7 @@ put_actors_value_impl <- function(value, dig_key, db) {
 
 #' @useDynLib rbedrock R_rbedrock_actor_make_storagekeys
 make_storagekeys <- function(ids) {
-    vec_assert(ids, character())
+    stopifnot(is.character(ids))
     .Call(R_rbedrock_actor_make_storagekeys, ids)
 }
 
@@ -245,7 +245,10 @@ process_acdig_key_args <- function(x, z, d, values = NULL,
         # if z is not missing, create keys from x, z, and d
         x <- create_acdig_keys(x, z, d)
     }
-    vec_assert(x, character(), size = if (isTRUE(assert_scalar)) 1L else NULL)
+    stopifnot(is.character(x))
+    if (isTRUE(assert_scalar)) {
+        stopifnot(length(x) == 1L)
+    }
     if (isTRUE(assert_validity) && !isTRUE(all(is_valid_acdig_key(x)))) {
         abort("Invalid acdig key.")
     }

@@ -42,8 +42,8 @@ test_that("get_value returns a single, raw value", {
 
 test_that("get_value requires a scalar character argument", {
     expect_null(get_value(NULL, db = db))
-    expect_error(get_value(1L, db = db), class = "vctrs_error_cast")
-    expect_error(get_value(as.raw(1L), db = db), class = "vctrs_error_cast")
+    expect_error(get_value(1L, db = db))
+    expect_error(get_value(as.raw(1L), db = db))
 })
 
 test_that("get_data() returns a list of raw values", {
@@ -102,12 +102,8 @@ test_that("put_value() writes data into the db", {
 
 test_that("put_value throws errors are incorrect arguments", {
     expect_silent(put_value(raw(1L), NULL, db = db))
-    expect_error(put_value(raw(1L), 1L, db = db),
-        class = "vctrs_error_cast"
-    )
-    expect_error(put_value(raw(1L), as.raw(1L), db = db),
-        class = "vctrs_error_cast"
-    )
+    expect_error(put_value(raw(1L), 1L, db = db))
+    expect_error(put_value(raw(1L), as.raw(1L), db = db))
     expect_error(put_value("hello Error", "plain:Test%02", db = db),
                  "expected raw")
 })

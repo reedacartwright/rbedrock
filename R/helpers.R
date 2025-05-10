@@ -27,7 +27,8 @@ path_exists <- function(...) {
 }
 
 is_abs_path <- function(...) {
-    grepl("^(/|[A-Za-z]:)", normalize_path(...))
+    path <- file_path(...)
+    grepl("^([~/\\]|[A-Za-z]:)", path)
 }
 
 # ---- Test Helpers ------------------------------------------------------------
@@ -194,6 +195,31 @@ rac_recycle <- function(x, size) {
     } else {
         stop("Incompatible lengths: ", n_x, ", ", size, call. = FALSE)
     }
+}
+
+rac_recycle_common <- function(xs, size = NULL) {
+    sizes <- vapply(xs, length, 0L)
+    n <- unique(sizes)
+    if (length(n) == 1 && is.null(size)) {
+        return(xs)
+    }
+    n <- setdiff(n, 1L)
+    ns <- length(n)
+    if (ns == 0) {
+        if (is.null(size)) {
+            return(xs)
+        }
+    } else if (ns == 1) {
+        size <- size %||% n
+        if (n != size) {
+            stop("Inputs can't be recycled to `size`.", call. = FALSE)
+        }
+    } else {
+        stop("Inputs can't be recycled to a common size.", call. = FALSE)
+    }
+    to_recycle <- sizes == 1L
+    xs[to_recycle] <- lapply(xs[to_recycle], rac_slice, i = rep(1L, size))
+    xs
 }
 
 rac_index <- function(x, i, ...) {
