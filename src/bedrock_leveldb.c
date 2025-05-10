@@ -598,7 +598,7 @@ SEXP attribute_visible R_bedrock_leveldb_writebatch_mput(SEXP r_writebatch, SEXP
         Rf_error("Expected a character vector or list for 'value'");
     }
     if(XLENGTH(r_value) != num_key) {
-        Rf_error("Expected %d values but received %ld", num_key,
+        Rf_error("Expected %d values but received %" R_PRIdXLEN_T, num_key,
                  XLENGTH(r_value));
     }
     for(R_len_t i = 0; i < num_key; ++i) {
