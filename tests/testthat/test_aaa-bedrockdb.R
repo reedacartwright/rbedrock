@@ -5,7 +5,7 @@ test_that("bedrockdb can open and close a database", {
     close(db)
     expect_false(db$is_open())
     # clean up
-    fs::dir_delete(dbpath)
+    unlink(dbpath, recursive = TRUE)
 })
 
 test_that("create_unique_ids works", {

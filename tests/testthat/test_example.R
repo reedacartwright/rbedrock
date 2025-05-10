@@ -13,5 +13,5 @@ test_that("opening an example world works", {
     db <- expect_silent(bedrockdb(dbpath))
     close(db, compact = FALSE)
     # clean up
-    fs::dir_delete(dbpath)
+    unlink(dbpath, recursive = TRUE)
 })

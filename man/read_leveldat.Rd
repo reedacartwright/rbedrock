@@ -5,16 +5,14 @@
 \alias{write_leveldat}
 \title{Read and write data from a world's level.dat file.}
 \usage{
-read_leveldat(path, old = FALSE)
+read_leveldat(path)
 
-write_leveldat(object, path, old = FALSE, version = 8L)
+write_leveldat(object, path, version = 8L)
 }
 \arguments{
 \item{path}{The path to a world folder. If the path does not exist, it is
 assumed to be the base name of a world folder in the local minecraftWorlds
 directory.}
-
-\item{old}{Read/write to 'level.dat_old' instead.}
 
 \item{object}{NBT data to be written to level.dat.}
 

@@ -34,4 +34,4 @@ test_that("write_data2d_value() creates Data2d data.", {
 })
 
 close(db)
-fs::dir_delete(dbpath)
+unlink(dbpath, recursive = TRUE)

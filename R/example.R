@@ -13,10 +13,10 @@
 
 rbedrock_example <- function(path = NULL) {
     if (is.null(path)) {
-        extdata <- fs::path_package("rbedrock", "extdata")
-        basename(fs::dir_ls(extdata))
+        extdata <- system.file("extdata", package = "rbedrock", mustWork = TRUE)
+        basename(list.files(extdata))
     } else {
-        fs::path_package("rbedrock", "extdata", path)
+        system.file("extdata", path, package = "rbedrock", mustWork = TRUE)
     }
 }
 

@@ -40,18 +40,22 @@ worlds_dir_path <- function(force_default = FALSE) {
 #' @rdname minecraft_worlds
 #' @export
 list_worlds <- function(worlds_dir = worlds_dir_path()) {
-    out <- fs::dir_map(worlds_dir, function(f) {
+    dirs <- list.files(worlds_dir, full.names = TRUE)
+    out <- vector("list", length(dirs))
+    for (i in seq_along(dirs)) {
+        f <- dirs[[i]]
         #skip directories that do not contain a level.dat
-        if (!fs::file_exists(normalize_path(f, "level.dat"))) {
-            return(NULL)
+        if (!file_exists(normalize_path(f, "level.dat"))) {
+            next
         }
         dat <- unnbt(read_leveldat(f))
         levelname <- dat$LevelName
         lastplayed <- as.POSIXct(as.numeric(dat$LastPlayed),
                                  origin = "1970-01-01 00:00:00")
         id <- basename(f)
-        data.frame(id = id, levelname = levelname, last_opened = lastplayed)
-    }, type = "directory")
+        out[[i]] <- data.frame(id = id, levelname = levelname,
+                               last_opened = lastplayed)
+    }
     out <- do.call(rbind, out)
     out <- out[order(out$last_opened, decreasing = TRUE), , drop = FALSE]
     tibble::as_tibble(out)
@@ -79,13 +83,13 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
     params$RandomSeed <- params$RandomSeed %||% nbt_random_seed()
     params$LastPlayed <- nbt_now()
 
-    if (fs::file_exists(dirpath)) {
+    if (file_exists(dirpath)) {
         stop(paste0("Cannot create '", dirpath, "': it already exists."))
     }
 
     # create world directory and db directory
     dbpath <- normalize_path(dirpath, "db")
-    fs::dir_create(dbpath)
+    dir.create(dbpath, recursive = TRUE)
 
     # create db and close
     db <- bedrock_leveldb_open(dbpath, create_if_missing = TRUE)
@@ -134,9 +138,9 @@ export_world <- function(id, file, worlds_dir = worlds_dir_path(),
     file <- normalize_path(file)
     dirpath <- fixup_path(id, worlds_dir, verify = TRUE)
 
-    if (fs::file_exists(file)) {
-        if (isTRUE(replace) && fs::is_file(file)) {
-            fs::file_delete(file)
+    if (path_exists(file)) {
+        if (isTRUE(replace) && file_exists(file)) {
+            file.remove(file)
         } else {
             msg <- paste0("Cannot create '", file, "': it already exists.")
             stop(msg)
@@ -145,7 +149,7 @@ export_world <- function(id, file, worlds_dir = worlds_dir_path(),
 
     wd <- setwd(dirpath)
     on.exit(setwd(wd))
-    f <- fs::dir_ls()
+    f <- list.files()
 
     if (is_installed("zip")) {
         ret <- zip::zipr(file, f)
@@ -201,7 +205,7 @@ fixup_path <- function(id, worlds_dir = worlds_dir_path(), verify = FALSE) {
     path <- vec_cast(id, character())
 
     # if path is absolute, or it already exists don't append it to worlds_dir
-    if (fs::is_absolute_path(path) || fs::file_exists(path)) {
+    if (is_abs_path(path) || path_exists(path)) {
         # if path doesn't exist, normalize_path won't work right. Normalize
         # its directory instead.
         dir <- dirname(path)
@@ -210,9 +214,9 @@ fixup_path <- function(id, worlds_dir = worlds_dir_path(), verify = FALSE) {
     } else {
         path <- file_path(normalize_path(worlds_dir), path)
     }
-    if (verify && fs::is_dir(path)) {
+    if (verify && dir_exists(path)) {
         f <- c("db", "level.dat", "levelname.txt")
-        if (!all(fs::file_exists(file_path(path, f)))) {
+        if (!all(path_exists(path, f))) {
             msg <- paste0("Folder '", path,
                           "' does not contain Minecraft data.")
             stop(msg)
@@ -227,7 +231,7 @@ fixup_or_create_path <- function(id = NULL, worlds_dir = worlds_dir_path()) {
         repeat {
             path <- fixup_path(rand_world_id(), worlds_dir)
             # check for collisions
-            if (!fs::file_exists(path)) {
+            if (!path_exists(path)) {
                 return(path)
             }
         }

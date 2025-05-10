@@ -138,7 +138,7 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list( # nolint: object_name_li
     },
     close = function(error_if_closed = FALSE) {
         if (self$leveldat_is_dirty) {
-            write_leveldat(self$leveldat, fs::path_dir(self$path))
+            write_leveldat(self$leveldat, dirname(self$path))
         }
         ret <- bedrock_leveldb_close(self$db, error_if_closed)
         invisible(ret)

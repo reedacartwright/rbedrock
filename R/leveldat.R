@@ -3,7 +3,6 @@
 #' @param path The path to a world folder. If the path does not exist, it is
 #'   assumed to be the base name of a world folder in the local minecraftWorlds
 #'   directory.
-#' @param old  Read/write to 'level.dat_old' instead.
 #' @param object NBT data to be written to level.dat.
 #' @param version The level.dat format version for the file header.
 #'
@@ -19,15 +18,14 @@
 #' write_leveldat(dat, dbpath)
 #'
 #' @export
-read_leveldat <- function(path, old = FALSE) {
+read_leveldat <- function(path) {
     if (is_bedrockdb(path)) {
-        path <- fs::path_dir(path$path)
+        path <- dirname(path$path)
     }
     path <- fixup_path(path, verify = TRUE)
     # if path is a directory append filename
-    if (fs::is_dir(path)) {
-        path <- file_path(path,
-                          if (isFALSE(old)) "level.dat" else "level.dat_old")
+    if (dir_exists(path)) {
+        path <- file_path(path, "level.dat")
     }
     rawval <- read_file_raw(path)
 
@@ -40,15 +38,14 @@ read_leveldat <- function(path, old = FALSE) {
 
 #' @export
 #' @rdname read_leveldat
-write_leveldat <- function(object, path, old = FALSE, version = 8L) {
+write_leveldat <- function(object, path, version = 8L) {
     if (is_bedrockdb(path)) {
-        path <- fs::path_dir(path$path)
+        path <- dirname(path$path)
     }
     path <- fixup_path(path)
     # if path is a directory append filename
-    if (fs::is_dir(path)) {
-        path <- file_path(path,
-                          if (isFALSE(old)) "level.dat" else "level.dat_old")
+    if (dir_exists(path)) {
+        path <- file_path(path, "level.dat")
     }
     dat <- write_nbt(object)
     len <- length(dat)

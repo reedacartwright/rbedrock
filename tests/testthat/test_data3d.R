@@ -43,4 +43,4 @@ test_that("Writing Data3D recycles values", {
 })
 
 close(db)
-fs::dir_delete(dbpath)
+unlink(dbpath, recursive = TRUE)

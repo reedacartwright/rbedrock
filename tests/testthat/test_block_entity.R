@@ -99,4 +99,4 @@ test_that("put_block_entity_value() writes BlockEnties data", {
 
 # clean up
 close(db)
-fs::dir_delete(dbpath)
+unlink(dbpath, recursive = TRUE)

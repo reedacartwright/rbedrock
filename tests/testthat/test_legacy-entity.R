@@ -35,4 +35,4 @@ test_that("put_entity_data() returns false for non Entity keys", {
 
 # clean up
 close(db)
-fs::dir_delete(dbpath)
+unlink(dbpath, recursive = TRUE)

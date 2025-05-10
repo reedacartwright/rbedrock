@@ -159,4 +159,4 @@ test_that("delete_values removes data from the db", {
 
 # clean up
 close(db)
-fs::dir_delete(dbpath)
+unlink(dbpath, recursive = TRUE)

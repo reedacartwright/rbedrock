@@ -14,6 +14,21 @@ normalize_path <- function(...) {
     normalizePath(file_path(...), winslash = "/", mustWork = FALSE)
 }
 
+dir_exists <- function(...) {
+    utils::file_test("-d", file_path(...))
+}
+
+file_exists <- function(...) {
+    utils::file_test("-f", file_path(...))
+}
+
+path_exists <- function(...) {
+    file.exists(file_path(...))
+}
+
+is_abs_path <- function(...) {
+    grepl("^(/|[A-Za-z]:)", normalize_path(...))
+}
 
 # ---- Test Helpers ------------------------------------------------------------
 

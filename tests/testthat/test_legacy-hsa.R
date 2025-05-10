@@ -81,4 +81,4 @@ test_that("put_hsa_value() can write HSA data.", {
 
 # clean up
 close(db)
-fs::dir_delete(dbpath)
+unlink(dbpath, recursive = TRUE)

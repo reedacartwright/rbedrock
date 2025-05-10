@@ -35,4 +35,4 @@ test_that("put_finalized_state_value() updates database", {
 
 # clean up
 close(db)
-fs::dir_delete(dbpath)
+unlink(dbpath, recursive = TRUE)

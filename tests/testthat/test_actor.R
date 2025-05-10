@@ -180,4 +180,4 @@ test_that("put_actors_value() writes actors data.", {
 })
 
 close(db)
-fs::dir_delete(dbpath)
+unlink(dbpath, recursive = TRUE)

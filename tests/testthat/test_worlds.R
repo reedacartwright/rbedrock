@@ -19,7 +19,7 @@ test_that("create_world creates a world that can be loaded", {
     expect_equal(dbpath, normalize_path(worlds_dir, "test"))
 
     # test that all the values have been properly set
-    dat <- read_leveldat(dbpath, old = FALSE)
+    dat <- read_leveldat(dbpath)
     expect_equal(dat$LevelName, nbt_string("test"))
     expect_equal(dat$RandomSeed, nbt_long(1234L))
     expect_equal(dat$showcoordinates, nbt_byte(TRUE))
