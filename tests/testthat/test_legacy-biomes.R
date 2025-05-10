@@ -1,10 +1,6 @@
 dbpath <- rbedrock_example_world("example1.mcworld")
 db <- bedrockdb(dbpath)
 
-as_raw <- function(...) {
-    as.raw(c(...))
-}
-
 test_that("put_legacy_biomes_value() accepts integers", {
     set.seed(102032)
     put_legacy_biomes_value(1L, 32, 3, 0, db = db)

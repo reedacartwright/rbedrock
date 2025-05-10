@@ -1,10 +1,6 @@
 dbpath <- rbedrock_example_world("example1.mcworld")
 db <- bedrockdb(dbpath)
 
-as_raw <- function(...) {
-    as.raw(c(...))
-}
-
 test_that("Data2D is chunk tag 45", {
     expect_equal(chunk_tag_int("Data2D"), 45L)
     expect_equal(chunk_tag_str(45L), "Data2D")

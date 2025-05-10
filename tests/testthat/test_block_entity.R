@@ -12,19 +12,20 @@ test_that("get_block_entity_data() returns specific BlockEntity data", {
     expect_vector(dat, list(), 3L)
     expect_named(dat, keys)
 
-    expect_true(all(sapply(dat[[1]], is_nbt)))
+    expect_true(all(sapply(dat[[1]], is_nbt_value)))
     expect_null(dat[[2]])
-    expect_true(all(sapply(dat[[3]], is_nbt)))
+    expect_true(all(sapply(dat[[3]], is_nbt_value)))
 })
 
 test_that("get_block_entity_value() returns one BlockEntity data", {
     key <- "chunk:37:13:0:49"
     dat <- get_block_entity_value(key, db = db)
-    expect_vector(dat, list(), 3L)
+    expect_length(dat, 3L)
+    expect_s3_class(dat, "rbedrock_nbt_list_of")
     expect_named(dat, NULL)
-    expect_true(is_nbt(dat[[1]]))
-    expect_true(is_nbt(dat[[2]]))
-    expect_true(is_nbt(dat[[3]]))
+    expect_true(is_nbt_value(dat[[1]]))
+    expect_true(is_nbt_value(dat[[2]]))
+    expect_true(is_nbt_value(dat[[3]]))
 
     dat2 <- get_block_entity_value(c(
         "chunk:37:13:0:49",

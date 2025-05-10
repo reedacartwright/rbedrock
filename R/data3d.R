@@ -56,6 +56,7 @@ put_data3d_data <- function(values, x, z, dimension, db = default_db()) {
 }
 
 #' @rdname Data3D
+#' @useDynLib rbedrock R_read_chunk_biomes
 #' @export
 read_data3d_value <- function(rawvalue) {
     if (is.null(rawvalue)) {
@@ -66,7 +67,7 @@ read_data3d_value <- function(rawvalue) {
                           endian = "little", signed = TRUE)
     dim(height_map) <- c(16L, 16L)
 
-    b <- .Call(Cread_chunk_biomes, rawvalue[-(1:512)])
+    b <- .Call(R_read_chunk_biomes, rawvalue[-(1:512)])
     # Validate Biome Data
     if (length(b) == 0 || is.null(b[[1]])) {
         abort("Value does not contain at least one subchunk of biome data.")
@@ -138,6 +139,7 @@ reshape_biome_map <- function(value) {
 }
 
 #' @rdname Data3D
+#' @useDynLib rbedrock R_write_chunk_biomes
 #' @export
 write_data3d_value <- function(value) {
     height_map <- value[["height_map", exact = TRUE]]
@@ -168,6 +170,6 @@ write_data3d_value <- function(value) {
     }
 
     h <- writeBin(height_map, raw(), size = 2L, endian = "little")
-    b <- .Call(Cwrite_chunk_biomes, values_list, palette_list)
+    b <- .Call(R_write_chunk_biomes, values_list, palette_list)
     c(h, b)
 }

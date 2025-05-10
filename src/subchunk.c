@@ -1,5 +1,7 @@
 #define R_NO_REMAP
 
+#include <R_ext/Visibility.h>
+
 #include "nbt.h"
 #include "support.h"
 
@@ -162,7 +164,7 @@ SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t pale
     return r_ret;
 }
 
-SEXP read_subchunk_blocks(SEXP r_value) {
+SEXP attribute_visible R_read_subchunk_blocks(SEXP r_value) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
     }
@@ -212,7 +214,7 @@ SEXP read_subchunk_blocks(SEXP r_value) {
             if(p >= end) {
                 return_subchunk_error();
             }
-            r_val = PROTECT(read_nbt_value(&p, end));
+            r_val = PROTECT(read_nbt_value(&p, end, FMT_LE));
             if(Rf_isNull(r_val)) {
                 // We should not encounter a 0 tag in this context
                 return_nbt_error_tag(0);
@@ -236,12 +238,13 @@ SEXP read_subchunk_blocks(SEXP r_value) {
     return r_ret;
 }
 
-SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
+SEXP attribute_visible R_write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
     R_xlen_t num_layers = XLENGTH(r_values);
     if(XLENGTH(r_palettes) != num_layers) {
         return_subchunk_error();
     }
     SEXP r_retv = PROTECT(Rf_allocVector(VECSXP, 2*num_layers));
+    SEXP r_fmt = PROTECT(Rf_ScalarInteger(FMT_LE));
     for(R_xlen_t i=0; i < num_layers; ++i) {
         SEXP r_layer = VECTOR_ELT(r_values, i);
         SEXP r_pal = VECTOR_ELT(r_palettes, i);
@@ -251,8 +254,9 @@ SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP 
         // Write the palette ids using persistent storage
         SET_VECTOR_ELT(r_retv, 2*i, write_subchunk_palette_ids(r_layer, true, XLENGTH(r_pal)));
         // write palette
-        SET_VECTOR_ELT(r_retv, 2*i+1, write_nbt(r_pal));
+        SET_VECTOR_ELT(r_retv, 2*i+1, R_write_nbt(r_pal, r_fmt));
     }
+    UNPROTECT(1);
 
     int version = Rf_asInteger(r_version);
     int offset = Rf_asInteger(r_offset);
@@ -282,7 +286,7 @@ SEXP write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP 
     return r_ret;
 }
 
-SEXP read_chunk_biomes(SEXP r_value) {
+SEXP attribute_visible R_read_chunk_biomes(SEXP r_value) {
     if(Rf_isNull(r_value)) {
         return R_NilValue;
     }
@@ -329,7 +333,7 @@ SEXP read_chunk_biomes(SEXP r_value) {
     return Rf_PairToVectorList(CDR(r_ret));
 }
 
-SEXP write_chunk_biomes(SEXP r_values, SEXP r_palettes) {
+SEXP attribute_visible R_write_chunk_biomes(SEXP r_values, SEXP r_palettes) {
     R_xlen_t num_subchunks = XLENGTH(r_values);
     if(XLENGTH(r_palettes) != num_subchunks) {
         return_subchunk_error();

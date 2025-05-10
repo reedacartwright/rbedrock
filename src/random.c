@@ -10,11 +10,13 @@
  * Source: https://github.com/cslarsen/mersenne-twister
  */
 
+#define R_NO_REMAP
+#include <R_ext/Visibility.h>
+
+#include <stdint.h>
+#include <string.h>
 
 #include "random.h"
-
-
-#include <stdio.h>
 
 static void mcpe_random_seed_impl(uint32_t value);
 
@@ -104,14 +106,14 @@ static void mcpe_random_seed_impl(uint32_t value) {
     }  
 }
 
-SEXP mcpe_random_seed(SEXP r_seed) {
+SEXP attribute_visible R_mcpe_random_seed(SEXP r_seed) {
     mcpe_random_seed_impl(Rf_asInteger(r_seed));
     return R_NilValue;
 }
 
 // returns g_state as a raw vector
 // can set it as well
-SEXP mcpe_random_state(SEXP r_state) {
+SEXP attribute_visible R_mcpe_random_state(SEXP r_state) {
     SEXP ret = PROTECT(Rf_allocVector(RAWSXP, sizeof(g_state)));
     memcpy(RAW(ret), &g_state, sizeof(g_state));
     if(!Rf_isNull(r_state)) {
@@ -126,7 +128,7 @@ SEXP mcpe_random_state(SEXP r_state) {
 }
 
 // fill a numeric vector with unsigned integers
-SEXP mcpe_random_get_uint(SEXP r_n, SEXP r_max) {
+SEXP attribute_visible R_mcpe_random_get_uint(SEXP r_n, SEXP r_max) {
     size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(REALSXP, num));
     double *p = REAL(ret);
@@ -148,7 +150,7 @@ SEXP mcpe_random_get_uint(SEXP r_n, SEXP r_max) {
 
 
 // fill a numeric vector with integers
-SEXP mcpe_random_get_int(SEXP r_n, SEXP r_min, SEXP r_max) {
+SEXP attribute_visible R_mcpe_random_get_int(SEXP r_n, SEXP r_min, SEXP r_max) {
     size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(INTSXP, num));
     int *p = INTEGER(ret);
@@ -183,7 +185,7 @@ SEXP mcpe_random_get_int(SEXP r_n, SEXP r_min, SEXP r_max) {
     return ret;
 }
 
-SEXP mcpe_random_get_double(SEXP r_n) {
+SEXP attribute_visible R_mcpe_random_get_double(SEXP r_n) {
     size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(REALSXP, num));
     double *p = REAL(ret);
@@ -195,7 +197,7 @@ SEXP mcpe_random_get_double(SEXP r_n) {
 }
 
 // fill a numeric vector with floats
-SEXP mcpe_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max) {
+SEXP attribute_visible R_mcpe_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max) {
     size_t num = Rf_asInteger(r_n);
     SEXP ret = PROTECT(Rf_allocVector(REALSXP, num));
     double *p = REAL(ret);
@@ -220,7 +222,7 @@ SEXP mcpe_random_get_float(SEXP r_n, SEXP r_min, SEXP r_max) {
     return ret;
 }
 
-SEXP mcpe_random_create_seed(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt, SEXP r_type) {
+SEXP attribute_visible R_mcpe_random_create_seed(SEXP r_x, SEXP r_z, SEXP r_a, SEXP r_b, SEXP r_salt, SEXP r_type) {
     unsigned int x = Rf_asInteger(r_x);
     unsigned int z = Rf_asInteger(r_z);
     unsigned int a = Rf_asInteger(r_a);

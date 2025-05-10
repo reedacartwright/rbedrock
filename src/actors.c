@@ -22,10 +22,17 @@
 
 #define R_NO_REMAP
 
-#include "actors.h"
-#include "stdint.h"
+#include <R_ext/Visibility.h>
 
-SEXP rbedrock_actor_make_uniqueids(SEXP low_counter, SEXP high_counter) {
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include "actors.h"
+
+SEXP attribute_visible R_rbedrock_actor_make_uniqueids(SEXP low_counter,
+        SEXP high_counter) {
     if(XLENGTH(low_counter) != XLENGTH(high_counter)) {
         Rf_error("arguments do not have the same length");
     }
@@ -46,7 +53,7 @@ SEXP rbedrock_actor_make_uniqueids(SEXP low_counter, SEXP high_counter) {
     return result;
 }
 
-SEXP rbedrock_actor_make_storagekeys(SEXP ids) {
+SEXP attribute_visible R_rbedrock_actor_make_storagekeys(SEXP ids) {
     if(TYPEOF(ids) != STRSXP) {
         Rf_error("argument is not an character");
     }
@@ -92,7 +99,7 @@ SEXP rbedrock_actor_make_storagekeys(SEXP ids) {
 # the game is closed. (Don't ask me why it is negative. Mojang reasons.)
 #
 # Each actor has a UniqueID, and the ActorStorageKey is based on the UniqueID.
-# The high 32-bits are the negative of  UniqueID's "worldStartCount" (so a
+# The high 32-bits are the negative of UniqueID's "worldStartCount" (so a
 # positive number) and the low 32-bits are the low 32bits of the UniqueID.
 #
 # So if you are injecting mobs into a game save, you need to mimic this UniqueID

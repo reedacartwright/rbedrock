@@ -45,16 +45,16 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
         if (!fs::file_exists(normalize_path(f, "level.dat"))) {
             return(NULL)
         }
-        dat <- read_leveldat(f)
-        levelname <- payload(dat$LevelName)
-        lastplayed <- as.POSIXct(as.numeric(payload(dat$LastPlayed)),
+        dat <- unnbt(read_leveldat(f))
+        levelname <- dat$LevelName
+        lastplayed <- as.POSIXct(as.numeric(dat$LastPlayed),
                                  origin = "1970-01-01 00:00:00")
-        id <- file_path(f)
+        id <- basename(f)
         data.frame(id = id, levelname = levelname, last_opened = lastplayed)
     }, type = "directory")
     out <- do.call(rbind, out)
     out <- out[order(out$last_opened, decreasing = TRUE), , drop = FALSE]
-    out
+    tibble::as_tibble(out)
 }
 
 #' @description
@@ -100,7 +100,7 @@ create_world <- function(id = NULL, ..., worlds_dir = worlds_dir_path()) {
 
     write_leveldat(dat, dirpath)
 
-    levelname <- vec_cast(dat$LevelName, character())
+    levelname <- as.character(dat$LevelName)
     writeLines(levelname, file_path(dirpath, "levelname.txt"))
 
     msg <- paste0("Success: Minecraft world created at '", dirpath, "'.")
@@ -182,7 +182,7 @@ import_world <- function(file, id = NULL, ..., worlds_dir = worlds_dir_path()) {
 
     write_leveldat(dat, dirpath)
 
-    levelname <- vec_cast(dat$LevelName, character())
+    levelname <- as.character(dat$LevelName)
     writeLines(levelname, normalize_path(dirpath, "levelname.txt"))
 
     msg <- paste0("Success: '", file, "' imported to '", dirpath, "'.")

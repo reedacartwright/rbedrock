@@ -22,10 +22,11 @@ NULL
 #' @param value a scalar integer
 #'
 #' @rdname bedrock_random
+#' @useDynLib rbedrock R_mcpe_random_seed
 #' @export
 bedrock_random_seed <- function(value) {
     value <- as.integer(value)
-    .Call(Cmcpe_random_seed, value)
+    .Call(R_mcpe_random_seed, value)
 }
 
 #' @description
@@ -35,9 +36,10 @@ bedrock_random_seed <- function(value) {
 #' @param new_state a raw vector
 #'
 #' @rdname bedrock_random
+#' @useDynLib rbedrock R_mcpe_random_state
 #' @export
 bedrock_random_state <- function(new_state = NULL) {
-    invisible(.Call(Cmcpe_random_state, new_state))
+    invisible(.Call(R_mcpe_random_state, new_state))
 }
 
 #' @description
@@ -50,6 +52,7 @@ bedrock_random_state <- function(new_state = NULL) {
 #' the default range is used.
 #'
 #' @rdname bedrock_random
+#' @useDynLib rbedrock R_mcpe_random_get_uint
 #' @export
 
 bedrock_random_get_uint <- function(n, max) {
@@ -57,7 +60,7 @@ bedrock_random_get_uint <- function(n, max) {
     if (missing(max)) {
         max <- NULL
     }
-    .Call(Cmcpe_random_get_uint, n, max)
+    .Call(R_mcpe_random_get_uint, n, max)
 }
 
 #' @description
@@ -65,6 +68,7 @@ bedrock_random_get_uint <- function(n, max) {
 #' Default range is `[0, 2^31-1]`.
 #
 #' @rdname bedrock_random
+#' @useDynLib rbedrock R_mcpe_random_get_int
 #' @export
 bedrock_random_get_int <- function(n, min, max) {
     n <- as.integer(n)
@@ -80,7 +84,7 @@ bedrock_random_get_int <- function(n, min, max) {
         }
     }
 
-    .Call(Cmcpe_random_get_int, n, min, max)
+    .Call(R_mcpe_random_get_int, n, min, max)
 }
 
 #' @description
@@ -88,6 +92,7 @@ bedrock_random_get_int <- function(n, min, max) {
 #' Default range is `[0.0, 1.0)`.
 #
 #' @rdname bedrock_random
+#' @useDynLib rbedrock R_mcpe_random_get_float
 #' @export
 bedrock_random_get_float <- function(n, min, max) {
     n <- as.integer(n)
@@ -103,7 +108,7 @@ bedrock_random_get_float <- function(n, min, max) {
         }
     }
 
-    .Call(Cmcpe_random_get_float, n, min, max)
+    .Call(R_mcpe_random_get_float, n, min, max)
 }
 
 #' @description
@@ -111,10 +116,11 @@ bedrock_random_get_float <- function(n, min, max) {
 #' Default range is `[0.0, 1.0)`.
 #'
 #' @rdname bedrock_random
+#' @useDynLib rbedrock R_mcpe_random_get_double
 #' @export
 bedrock_random_get_double <- function(n) {
     n <- as.integer(n)
-    .Call(Cmcpe_random_get_double, n)
+    .Call(R_mcpe_random_get_double, n)
 }
 
 #' Random Number Seeds for Minecraft
@@ -140,6 +146,7 @@ bedrock_random_get_double <- function(n) {
 #'   bedrock_random_get_uint(1,10) == 0
 #' })
 #'
+#' @useDynLib rbedrock R_mcpe_random_create_seed
 #' @export
 bedrock_random_create_seed <- function(x, z, a, b, salt, type) {
     x <- as.integer(x)
@@ -148,5 +155,5 @@ bedrock_random_create_seed <- function(x, z, a, b, salt, type) {
     b <- as.integer(b)
     salt <- as.integer(salt)
     type <- as.integer(type)
-    .Call(Cmcpe_random_create_seed, x, z, a, b, salt, type)
+    .Call(R_mcpe_random_create_seed, x, z, a, b, salt, type)
 }
