@@ -15,3 +15,6 @@
 ^\.lintr$
 ^CRAN-SUBMISSION$
 ^data-raw$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

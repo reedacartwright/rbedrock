@@ -15,6 +15,7 @@ rbedrock is currently under development.
 Useful links:
 \itemize{
   \item \url{https://github.com/reedacartwright/rbedrock}
+  \item \url{https://reedacartwright.github.io/rbedrock/}
   \item Report bugs at \url{https://github.com/reedacartwright/rbedrock/issues}
 }
 

@@ -79,3 +79,4 @@ vignettes/*.pdf
 # local files
 *.sublime-workspace
 /check/
+docs

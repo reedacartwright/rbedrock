@@ -36,5 +36,5 @@ Suggests:
     testthat,
     jsonlite,
     covr
-URL: https://github.com/reedacartwright/rbedrock
+URL: https://github.com/reedacartwright/rbedrock, https://reedacartwright.github.io/rbedrock/
 BugReports: https://github.com/reedacartwright/rbedrock/issues
