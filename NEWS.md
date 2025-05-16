@@ -11,6 +11,11 @@
   - `get_entity_*` and `put_entity_*`
   - etc.
 * BREAKING: Removed multiple `*_values()` alias functions.
+* BREAKING: Updated API for working with NBT and rNBT values.
+  - New data structures and functions better support NBT's concept of list values
+  - Removed the reliance of the vctrs package. It was too much for what we need.
+* FEATURE: Print NBT data using a tree structure.
+* Relax the requirements on chunk keys and change how "chunk" keys and "plain" keys are detected. Raw keys of lengths 9, 10, 13, and 14 will be considered "plain" keys if they consist of only printable characters.
 
 # RBedrock 0.3.3
 
