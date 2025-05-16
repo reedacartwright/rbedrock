@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #define CHRKEY_PREFIX_CHUNK "chunk:"
 #define CHRKEY_PREFIX_PLAIN "plain:"
@@ -37,13 +38,6 @@
 
 #define RAWKEY_PREFIX_ACTOR "actorprefix"
 #define RAWKEY_PREFIX_ACTOR_DIGEST_KEYS "digp"
-
-#define CHUNK_KEY_TAG_MIN 33
-#define CHUNK_KEY_TAG_MAX 96
-#define CHUNK_KEY_TAG_EXTRA 118
-#define CHUNK_KEY_DIM_MAX 2
-#define CHUNK_KEY_SUBCHUNK_MIN -32
-#define CHUNK_KEY_SUBCHUNK_MAX 31
 
 enum KEY_TYPE {
     PLAIN = 0,        // plain:~local_player
@@ -98,7 +92,9 @@ static size_t str_to_int(const char *str, size_t len, int *out) {
     unsigned int u;
     if(str[0] == '-') {
         ret = str_to_uint(str+1, len-1, &u);
-        ret += 1;
+        if(ret != 0) {
+            ret += 1;
+        }
         val = -u;
     } else {
         ret = str_to_uint(str, len, &u);
@@ -210,7 +206,7 @@ static size_t percent_decode(const char *key, size_t key_len, unsigned char *buf
 
 // decode a prefix in the format of x:z:d
 //  returns how many bytes from key were read.
-size_t decode_chunk_prefix(const char *key, size_t key_len, int *x, int *z, unsigned int *dimension) {
+size_t decode_chunk_prefix(const char *key, size_t key_len, int *x, int *z, int *dimension) {
     size_t sz = 0;
     size_t i = 0;
 
@@ -229,13 +225,9 @@ size_t decode_chunk_prefix(const char *key, size_t key_len, int *x, int *z, unsi
     }
     i += 1;
     // decode dimension
-    sz = str_to_uint(key+i, key_len-i, dimension);
+    sz = str_to_int(key+i, key_len-i, dimension);
     i += sz;
     if(sz == 0) {
-        return 0;
-    }
-    // validate dimension
-    if(*dimension > CHUNK_KEY_DIM_MAX) {
         return 0;
     }
     return i;
@@ -248,7 +240,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
     unsigned int u = 0;
     int d = 0;
     int x = 0, z = 0;
-    unsigned int dimension = 0;
+    int dimension = 0;
     signed char tag = 0;
     signed char subtag = 0;
     bool has_subtag = false;
@@ -284,14 +276,6 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
         subtag = (signed char)d;
         has_subtag = true;
     }
-    // Validate values
-    if(tag < CHUNK_KEY_TAG_MIN) {
-        return 0;
-    } else if(tag > CHUNK_KEY_TAG_MAX && tag < CHUNK_KEY_TAG_EXTRA) {
-        return 0;
-    } else if(subtag < CHUNK_KEY_SUBCHUNK_MIN || subtag > CHUNK_KEY_SUBCHUNK_MAX) {
-        return 0;
-    }
 
     // Check buffer space
     size_t decode_len = 8+4*(dimension != 0)+1+(has_subtag);
@@ -304,7 +288,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
     i += 4;
     memcpy(buffer+i,&z,4);
     i += 4;
-    if(dimension > 0) {
+    if(dimension != 0) {
         memcpy(buffer+i,&dimension,4);
         i += 4;
     }
@@ -320,7 +304,7 @@ size_t chunkkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
 // if buffer is too small, it returns the number of bytes that would be written
 size_t digkey_decode(const char *key, size_t key_len, unsigned char *buffer, size_t buffer_len) {
     int x = 0, z = 0;
-    unsigned int dimension = 0;
+    int dimension = 0;
 
     // decode prefix
     size_t sz = decode_chunk_prefix(key, key_len, &x, &z, &dimension);
@@ -344,7 +328,7 @@ size_t digkey_decode(const char *key, size_t key_len, unsigned char *buffer, siz
     memcpy(buffer+i,&z,4);
     i += 4;
     // dimension
-    if(dimension > 0) {
+    if(dimension != 0) {
         memcpy(buffer+i,&dimension,4);
         /* i += 4; */
     }
@@ -390,7 +374,7 @@ size_t actorkey_decode(const char *key, size_t key_len, unsigned char *buffer, s
 // Returns the total length of the encoding (minus terminating null), even if all
 // characters were not written.
 size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, size_t buffer_len) {
-    unsigned int dimension = 0;
+    int dimension = 0;
     int x = 0;
     int z = 0;
     signed char tag = 0;
@@ -429,11 +413,15 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
     }
     // validate data
     if(key_type == CHUNK) {
-        if(tag < CHUNK_KEY_TAG_MIN) {
-            key_type = PLAIN;
-        } else if(tag > CHUNK_KEY_TAG_MAX && tag < CHUNK_KEY_TAG_EXTRA) {
-            key_type = PLAIN;
-        } else if(subtag < CHUNK_KEY_SUBCHUNK_MIN || subtag > CHUNK_KEY_SUBCHUNK_MAX) {
+        // If a "chunk" key contains only printable characters, mark it as
+        // a plain key.
+        size_t i = 0;
+        for(; i < key_len; ++i) {
+            if(!isprint(key[i])) {
+                break;
+            }
+        }
+        if(i == key_len) {
             key_type = PLAIN;
         }
     } else if(key_type == ACTOR_DIGEST_KEYS) {
@@ -460,22 +448,18 @@ size_t rawkey_to_chrkey(const unsigned char *key, size_t key_len, char *buffer, 
         memcpy(&z, p + 4, 4);
         if(len >= 12) {
             memcpy(&dimension, p + 8, 4);
-            // validate dimension
-            if(dimension > CHUNK_KEY_DIM_MAX) {
-                key_type = PLAIN;
-            }
         }
     }
 
     if(key_type == CHUNK && has_subtag) {
-        return snprintf(buffer, buffer_len, CHRKEY_PREFIX_CHUNK "%d:%d:%u:%u:%d", x, z, dimension,
+        return snprintf(buffer, buffer_len, CHRKEY_PREFIX_CHUNK "%d:%d:%d:%u:%d", x, z, dimension,
             (unsigned int)tag, (int)subtag);
     } else if(key_type == CHUNK) {
-        return snprintf(buffer, buffer_len, CHRKEY_PREFIX_CHUNK "%d:%d:%u:%u", x, z, dimension,
+        return snprintf(buffer, buffer_len, CHRKEY_PREFIX_CHUNK "%d:%d:%d:%u", x, z, dimension,
             (unsigned int)tag);
     } else if(key_type == ACTOR_DIGEST_KEYS) {
         return snprintf(buffer, buffer_len,
-                CHRKEY_PREFIX_ACTOR_DIGEST_KEYS "%d:%d:%u", x, z, dimension);
+                CHRKEY_PREFIX_ACTOR_DIGEST_KEYS "%d:%d:%d", x, z, dimension);
     } else if(key_type == ACTOR) {
         key = key + strlen(RAWKEY_PREFIX_ACTOR);
         size_t prefix_len = strlen(CHRKEY_PREFIX_ACTOR);

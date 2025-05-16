@@ -65,44 +65,49 @@ test_that("chrkeys_to_rawkeys supports chunk keys", {
     )
 })
 
-test_that("chrkeys_to_rawkeys treats invalid chunk keys as strings", {
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:128"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0:128")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:-1:44"))
-    expect_equal(val, list(charToRaw("chunk:0:0:-1:44")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:3:44"))
-    expect_equal(val, list(charToRaw("chunk:0:0:3:44")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:47:-40"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0:47:-40")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:47:40"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0:47:40")))
+test_that("chrkeys_to_rawkeys() accepts well-formed, but invalid chunk keys", {
+    val <- expect_silent(chrkeys_to_rawkeys_1("chunk:0:0:0:128"))
+    expect_equal(val, as.raw(c(0, 0, 0, 0, 0, 0, 0, 0, 128)))
+    val <- expect_silent(chrkeys_to_rawkeys_1("chunk:0:0:-1:44"))
+    expect_equal(val, as.raw(c(0, 0, 0, 0, 0, 0, 0, 0,
+                               0xff, 0xff, 0xff, 0xff, 44)))
+    val <- expect_silent(chrkeys_to_rawkeys_1("chunk:0:0:3:44"))
+    expect_equal(val, as.raw(c(0, 0, 0, 0, 0, 0, 0, 0,
+                               3, 0, 0, 0, 44)))
+    val <- expect_silent(chrkeys_to_rawkeys_1("chunk:0:0:0:47:-40"))
+    expect_equal(val, as.raw(c(0, 0, 0, 0, 0, 0, 0, 0, 47, 0xd8)))
+    val <- expect_silent(chrkeys_to_rawkeys_1("chunk:0:0:0:47:40"))
+    expect_equal(val, as.raw(c(0, 0, 0, 0, 0, 0, 0, 0, 47, 40)))
 
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:0a"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0:0a")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:0:-"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0:0:-")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:0:"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0:0:")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:0"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0:0")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0:"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0:")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:"))
-    expect_equal(val, list(charToRaw("chunk:0:0:")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0"))
-    expect_equal(val, list(charToRaw("chunk:0:0")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:"))
-    expect_equal(val, list(charToRaw("chunk:0:")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0"))
-    expect_equal(val, list(charToRaw("chunk:0")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:"))
-    expect_equal(val, list(charToRaw("chunk:")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:a:0:0"))
-    expect_equal(val, list(charToRaw("chunk:0:a:0:0")))
-    expect_warning(val <- chrkeys_to_rawkeys("chunk:0:0:0a:0"))
-    expect_equal(val, list(charToRaw("chunk:0:0:0a:0")))
+    val <- expect_silent(chrkeys_to_rawkeys_1("chunk:0:0:0:0"))
+    expect_equal(val, as.raw(c(0, 0, 0, 0, 0, 0, 0, 0, 0)))
+})
+
+test_that("chrkeys_to_rawkeys treats invalid chunk keys as strings", {
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0:0:0:0a"))
+    expect_equal(val, charToRaw("chunk:0:0:0:0a"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0:0:0:0:-"))
+    expect_equal(val, charToRaw("chunk:0:0:0:0:-"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0:0:0:0:"))
+    expect_equal(val, charToRaw("chunk:0:0:0:0:"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0:0:0:"))
+    expect_equal(val, charToRaw("chunk:0:0:0:"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0:0:0"))
+    expect_equal(val, charToRaw("chunk:0:0:0"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0:0:"))
+    expect_equal(val, charToRaw("chunk:0:0:"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0:0"))
+    expect_equal(val, charToRaw("chunk:0:0"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0:"))
+    expect_equal(val, charToRaw("chunk:0:"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0"))
+    expect_equal(val, charToRaw("chunk:0"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:"))
+    expect_equal(val, charToRaw("chunk:"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0:a:0:0"))
+    expect_equal(val, charToRaw("chunk:0:a:0:0"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("chunk:0:0:0a:0"))
+    expect_equal(val, charToRaw("chunk:0:0:0a:0"))
 })
 
 test_that("chrkeys_to_rawkeys signals errors", {
@@ -144,20 +149,20 @@ test_that("chrkeys_to_rawkeys supports actor digest keys keys", {
 })
 
 test_that("chrkeys_to_rawkeys treats invalid actor digest keys as strings", {
-    expect_warning(val <- chrkeys_to_rawkeys("acdig:-1:1:1:a"))
-    expect_equal(val, list(charToRaw("acdig:-1:1:1:a")))
-    expect_warning(val <- chrkeys_to_rawkeys("acdig:-1:1:1:"))
-    expect_equal(val, list(charToRaw("acdig:-1:1:1:")))
-    expect_warning(val <- chrkeys_to_rawkeys("acdig:-1:1:"))
-    expect_equal(val, list(charToRaw("acdig:-1:1:")))
-    expect_warning(val <- chrkeys_to_rawkeys("acdig:-1:1"))
-    expect_equal(val, list(charToRaw("acdig:-1:1")))
-    expect_warning(val <- chrkeys_to_rawkeys("acdig:-1:"))
-    expect_equal(val, list(charToRaw("acdig:-1:")))
-    expect_warning(val <- chrkeys_to_rawkeys("acdig:-1"))
-    expect_equal(val, list(charToRaw("acdig:-1")))
-    expect_warning(val <- chrkeys_to_rawkeys("acdig:"))
-    expect_equal(val, list(charToRaw("acdig:")))
+    val <- expect_warning(chrkeys_to_rawkeys_1("acdig:-1:1:1:a"))
+    expect_equal(val, charToRaw("acdig:-1:1:1:a"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("acdig:-1:1:1:"))
+    expect_equal(val, charToRaw("acdig:-1:1:1:"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("acdig:-1:1:"))
+    expect_equal(val, charToRaw("acdig:-1:1:"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("acdig:-1:1"))
+    expect_equal(val, charToRaw("acdig:-1:1"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("acdig:-1:"))
+    expect_equal(val, charToRaw("acdig:-1:"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("acdig:-1"))
+    expect_equal(val, charToRaw("acdig:-1"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("acdig:"))
+    expect_equal(val, charToRaw("acdig:"))
 })
 
 test_that("chrkeys_to_rawkeys supports actor keys", {
@@ -181,14 +186,14 @@ test_that("chrkeys_to_rawkeys supports actor keys", {
 })
 
 test_that("chrkeys_to_rawkeys treats invalid actor keys as strings", {
-    expect_warning(val <- chrkeys_to_rawkeys("actor:0123456789abcdefg"))
-    expect_equal(val, list(charToRaw("actor:0123456789abcdefg")))
-    expect_warning(val <- chrkeys_to_rawkeys("actor:0123456789"))
-    expect_equal(val, list(charToRaw("actor:0123456789")))
-    expect_warning(val <- chrkeys_to_rawkeys("actor:100000:-100001:0"))
-    expect_equal(val, list(charToRaw("actor:100000:-100001:0")))
-    expect_warning(val <- chrkeys_to_rawkeys("actor:local_player"))
-    expect_equal(val, list(charToRaw("actor:local_player")))
+    val <- expect_warning(chrkeys_to_rawkeys_1("actor:0123456789abcdefg"))
+    expect_equal(val, charToRaw("actor:0123456789abcdefg"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("actor:0123456789"))
+    expect_equal(val, charToRaw("actor:0123456789"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("actor:100000:-100001:0"))
+    expect_equal(val, charToRaw("actor:100000:-100001:0"))
+    val <- expect_warning(chrkeys_to_rawkeys_1("actor:local_player"))
+    expect_equal(val, charToRaw("actor:local_player"))
 })
 
 test_that("rawkeys_to_chrkeys supports plain strings", {
@@ -264,35 +269,56 @@ test_that("rawkeys_to_chrkeys supports chunk keys", {
     )
 })
 
-test_that("rawkeys_to_chrkeys treats invalid chunk keys as plain keys", {
+test_that("rawkeys_to_chrkeys accepts invalid but well-formed chunk keys", {
     expect_equal(
         rawkeys_to_chrkeys(as.raw(c(
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0
         ))),
-        "plain:%00%00%00%00%00%00%00%00%00%00%00%00%00%00"
+        "chunk:0:0:0:0:0"
     )
     expect_equal(
         rawkeys_to_chrkeys(as.raw(c(
             0, 0, 0, 0, 0, 0, 0, 0,
             3, 0, 0, 0, 44, 0
         ))),
-        "plain:%00%00%00%00%00%00%00%00%03%00%00%00,%00"
+        "chunk:0:0:3:44:0"
     )
     expect_equal(
         rawkeys_to_chrkeys(as.raw(c(
             0, 0, 0, 0, 0, 0, 0, 0,
             1, 0, 0, 0, 0, 0
         ))),
-        "plain:%00%00%00%00%00%00%00%00%01%00%00%00%00%00"
+        "chunk:0:0:1:0:0"
     )
     expect_equal(
         rawkeys_to_chrkeys(as.raw(c(
             0, 0, 0, 0, 0, 0, 0, 0,
             1, 0, 0, 0, 44, 32
         ))),
-        "plain:%00%00%00%00%00%00%00%00%01%00%00%00,%20"
+        "chunk:0:0:1:44:32"
     )
+})
+
+test_that("rawkeys_to_chrkeys() creates plain keys from printable chunk keys", {
+    # chunk keys have lengths of 9, 10, 13, and 14
+    rawkeys <- list(charToRaw("123456789"),
+                    charToRaw("1234567890"),
+                    charToRaw("1234567890123"),
+                    charToRaw("12345678901234"))
+    expect_equal(rawkeys_to_chrkeys(rawkeys),
+                 c("plain:123456789", "plain:1234567890",
+                   "plain:1234567890123", "plain:12345678901234"))
+
+    rawkeys <- chrkeys_to_rawkeys(
+        c("chunk:875770417:943142453:0:57",
+          "chunk:875770417:943142453:0:57:48",
+          "chunk:875770417:943142453:842084409:51",
+          "chunk:875770417:943142453:842084409:51:52")
+    )
+    expect_equal(rawkeys_to_chrkeys(rawkeys),
+                 c("plain:123456789", "plain:1234567890",
+                   "plain:1234567890123", "plain:12345678901234"))
 })
 
 test_that("rawkeys_to_chrkeys supports actor keys", {
