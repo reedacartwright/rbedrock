@@ -1,4 +1,4 @@
-linters: linters_with_defaults(indentation_linter(indent = 4L))
+linters: linters_with_defaults(indentation_linter(indent = 2L))
 encoding: "UTF-8"
 exclusions: list(
 	"R/import-standalone-defer.R"
