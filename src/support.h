@@ -25,6 +25,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef FRAGMITES_SUPPORT_H
+#define FRAGMITES_SUPPORT_H
+
 #include <R.h>
 #include <Rinternals.h>
 #include <stdbool.h>
@@ -46,3 +49,5 @@ void grow_stretchy_list(SEXP l, SEXP s);
 SEXP create_stretchy_list_with_name(SEXP s, SEXP tag);
 void grow_stretchy_list_with_name(SEXP l, SEXP s, SEXP tag);
 SEXP get_list_element(SEXP r_value, const char *name);
+
+#endif

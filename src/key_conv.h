@@ -20,8 +20,13 @@
 # SOFTWARE.
 */
 
+#ifndef FRAGMITES_KEY_CONV_H
+#define FRAGMITES_KEY_CONV_H
+
 #include <R.h>
 #include <Rinternals.h>
 
 SEXP rawkeys_to_chrkeys(SEXP r_keys);
 SEXP chrkeys_to_rawkeys(SEXP r_keys);
+
+#endif

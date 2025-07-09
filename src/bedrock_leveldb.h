@@ -25,6 +25,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef FRAGMITES_BEDROCK_LEVELDB_H
+#define FRAGMITES_BEDROCK_LEVELDB_H
+
 #include <R.h>
 #include <Rinternals.h>
 
@@ -102,3 +105,5 @@ SEXP R_bedrock_leveldb_version(void);
 SEXP bedrock_leveldb_tag(SEXP r_db);
 void bedrock_leveldb_init(void);
 void bedrock_leveldb_cleanup(void);
+
+#endif

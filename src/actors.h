@@ -20,7 +20,12 @@
 # SOFTWARE.
 */
 
+#ifndef FRAGMITES_ACTORS_H
+#define FRAGMITES_ACTORS_H
+
 #include <Rinternals.h>
 
 SEXP R_rbedrock_actor_make_uniqueids(SEXP low_counter, SEXP high_counter);
 SEXP R_rbedrock_actor_make_storagekeys(SEXP ids);
+
+#endif
