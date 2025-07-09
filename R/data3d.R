@@ -30,14 +30,14 @@ NULL
 #' @rdname Data3D
 #' @export
 get_data3d_value <- function(x, z, dimension, db = default_db()) {
-    value <- get_chunk_value(x, z, dimension, tag = 45L, db = db)
+    value <- get_chunk_value(x, z, dimension, tag = 43L, db = db)
     read_data3d_value(value)
 }
 
 #' @rdname Data3D
 #' @export
 get_data3d_data <- function(x, z, dimension, db = default_db()) {
-    dat <- get_chunk_data(x, z, dimension, tag = 45L, db = db)
+    dat <- get_chunk_data(x, z, dimension, tag = 43L, db = db)
     lapply(dat, read_data3d_value)
 }
 
@@ -45,14 +45,14 @@ get_data3d_data <- function(x, z, dimension, db = default_db()) {
 #' @export
 put_data3d_value <- function(value, x, z, dimension, db = default_db()) {
     value <- write_data3d_value(value)
-    put_chunk_value(value, x, z, dimension, tag = 45L, db = db)
+    put_chunk_value(value, x, z, dimension, tag = 43L, db = db)
 }
 
 #' @rdname Data3D
 #' @export
 put_data3d_data <- function(values, x, z, dimension, db = default_db()) {
     values <- lapply(values, write_data3d_value)
-    put_chunk_data(values, x, z, dimension, tag = 45L, db = db)
+    put_chunk_data(values, x, z, dimension, tag = 43L, db = db)
 }
 
 #' @rdname Data3D
