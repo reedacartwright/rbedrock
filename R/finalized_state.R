@@ -35,34 +35,53 @@ raw_na <- as.raw(c(0x00, 0x00, 0x00, 0x80))
 #' @rdname FinalizedState
 #' @export
 get_finalized_state_value <- function(x, z, dimension, db = default_db()) {
-    value <- get_chunk_value(x, z, dimension, tag = 54L, db = db)
-    readBin(value %||% raw_na, integer(), n = 1L, size = 4L, endian = "little")
+  value <- get_chunk_value(x, z, dimension, tag = 54L, db = db)
+  readBin(value %||% raw_na, integer(), n = 1L, size = 4L, endian = "little")
 }
 
 #' @rdname FinalizedState
 #' @export
 get_finalized_state_data <- function(x, z, dimension, db = default_db()) {
-    dat <- get_chunk_data(x, z, dimension, tag = 54L, db = db)
-    vapply(dat, function(value) {
-        readBin(value %||% raw_na, integer(), n = 1L, size = 4L,
-                endian = "little")
-    }, integer(1L))
+  dat <- get_chunk_data(x, z, dimension, tag = 54L, db = db)
+  vapply(
+    dat,
+    function(value) {
+      readBin(
+        value %||% raw_na,
+        integer(),
+        n = 1L,
+        size = 4L,
+        endian = "little"
+      )
+    },
+    integer(1L)
+  )
 }
 
 #' @rdname FinalizedState
 #' @export
-put_finalized_state_value <- function(value, x, z, dimension,
-                                      db = default_db()) {
-    value <- writeBin(as.integer(value), raw(), size = 4L, endian = "little")
-    put_chunk_value(value, x, z, dimension, tag = 54L, db = db)
+put_finalized_state_value <- function(
+  value,
+  x,
+  z,
+  dimension,
+  db = default_db()
+) {
+  value <- writeBin(as.integer(value), raw(), size = 4L, endian = "little")
+  put_chunk_value(value, x, z, dimension, tag = 54L, db = db)
 }
 
 #' @rdname FinalizedState
 #' @export
-put_finalized_state_data <- function(values, x, z, dimension,
-                                     db = default_db()) {
-    values <- lapply(as.list(values), function(value) {
-        writeBin(as.integer(value), raw(), size = 4L, endian = "little")
-    })
-    put_chunk_data(values, x, z, dimension, tag = 54L, db = db)
+put_finalized_state_data <- function(
+  values,
+  x,
+  z,
+  dimension,
+  db = default_db()
+) {
+  values <- lapply(as.list(values), function(value) {
+    writeBin(as.integer(value), raw(), size = 4L, endian = "little")
+  })
+  put_chunk_data(values, x, z, dimension, tag = 54L, db = db)
 }

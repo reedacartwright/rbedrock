@@ -20,23 +20,23 @@ NULL
 #' @rdname RandomTicks
 #' @export
 get_random_ticks_data <- function(x, z, dimension, db = default_db()) {
-    get_chunk_nbt_data(x, z, dimension, tag = 59L, db = db)
+  get_chunk_nbt_data(x, z, dimension, tag = 59L, db = db)
 }
 
 #' @rdname RandomTicks
 #' @export
 get_random_ticks_value <- function(x, z, dimension, db = default_db()) {
-    get_chunk_nbt_value(x, z, dimension, tag = 59L, db = db)
+  get_chunk_nbt_value(x, z, dimension, tag = 59L, db = db)
 }
 
 #' @rdname RandomTicks
 #' @export
 put_random_ticks_data <- function(values, x, z, dimension, db = default_db()) {
-    put_chunk_nbt_data(values, x, z, dimension, tag = 59L, db = db)
+  put_chunk_nbt_data(values, x, z, dimension, tag = 59L, db = db)
 }
 
 #' @rdname RandomTicks
 #' @export
 put_random_ticks_value <- function(value, x, z, dimension, db = default_db()) {
-    put_chunk_nbt_value(value, x, z, dimension, tag = 59L, db = db)
+  put_chunk_nbt_value(value, x, z, dimension, tag = 59L, db = db)
 }

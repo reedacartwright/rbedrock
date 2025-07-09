@@ -29,27 +29,27 @@ NULL
 #' @rdname ChunkVersion
 #' @export
 get_chunk_version_value <- function(x, z, dimension, db = default_db()) {
-    val <- get_chunk_value(x, z, dimension, tag = 44L, db = db)
-    as.integer(val %||% NA_integer_)
+  val <- get_chunk_value(x, z, dimension, tag = 44L, db = db)
+  as.integer(val %||% NA_integer_)
 }
 
 #' @rdname ChunkVersion
 #' @export
 get_chunk_version_data <- function(x, z, dimension, db = default_db()) {
-    dat <- get_chunk_data(x, z, dimension, tag = 44L, db = db)
-    vapply(dat, function(val) as.integer(val %||% NA_integer_), integer(1L))
+  dat <- get_chunk_data(x, z, dimension, tag = 44L, db = db)
+  vapply(dat, function(val) as.integer(val %||% NA_integer_), integer(1L))
 }
 
 #' @rdname ChunkVersion
 #' @export
 put_chunk_version_value <- function(value, x, z, dimension, db = default_db()) {
-    value <- as.raw(value)
-    put_chunk_value(value, x, z, dimension, tag = 44L, db = db)
+  value <- as.raw(value)
+  put_chunk_value(value, x, z, dimension, tag = 44L, db = db)
 }
 
 #' @rdname ChunkVersion
 #' @export
 put_chunk_version_data <- function(values, x, z, dimension, db = default_db()) {
-    values <- lapply(as.list(values), as.raw)
-    put_chunk_data(values, x, z, dimension, tag = 44L, db = db)
+  values <- lapply(as.list(values), as.raw)
+  put_chunk_data(values, x, z, dimension, tag = 44L, db = db)
 }

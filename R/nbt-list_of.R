@@ -4,150 +4,153 @@
 #'
 #' @export
 nbt_list_of <- function(...) {
-    lst <- list(...)
-    validate_nbt_list_of(new_nbt_list_of(lst))
+  lst <- list(...)
+  validate_nbt_list_of(new_nbt_list_of(lst))
 }
 
 new_nbt_list_of <- function(x) {
-    stopifnot(is.list(x))
-    structure(x, class = c("rbedrock_nbt_list_of", "list"))
+  stopifnot(is.list(x))
+  structure(x, class = c("rbedrock_nbt_list_of", "list"))
 }
 
 validate_nbt_list_of <- function(x) {
-    if (!all_nbt_values(x)) {
-        stop("`x` contains non-NBT elements.", call. = FALSE)
-    }
-    x
+  if (!all_nbt_values(x)) {
+    stop("`x` contains non-NBT elements.", call. = FALSE)
+  }
+  x
 }
 
 #' @export
 `[.rbedrock_nbt_list_of` <- function(x, i, ...) {
-    rac_index(x, i, ...)
+  rac_index(x, i, ...)
 }
 
 #' @export
 `[<-.rbedrock_nbt_list_of` <- function(x, i, value) {
-    if (is.logical(i)) {
-        i <- which(i)
-    }
-    stopifnot(is.numeric(i) || is.character(i))
-    if (is_nbt_value(value)) {
-        value <- list(value)
-    }
-    value <- rac_recycle(value, length(i))
-    force(x)
-    value <- lapply(seq_along(value), function(j) {
-        nbt_value_or_cast(rac_slice(value, j), x[[i[j], exact = TRUE]])
-    })
-    NextMethod()
+  if (is.logical(i)) {
+    i <- which(i)
+  }
+  stopifnot(is.numeric(i) || is.character(i))
+  if (is_nbt_value(value)) {
+    value <- list(value)
+  }
+  value <- rac_recycle(value, length(i))
+  force(x)
+  value <- lapply(seq_along(value), function(j) {
+    nbt_value_or_cast(rac_slice(value, j), x[[i[j], exact = TRUE]])
+  })
+  NextMethod()
 }
 
 #' @export
 `[[<-.rbedrock_nbt_list_of` <- function(x, i, value) {
-    if (is.null(value)) {
-        x[i] <- list(value)
-        return(x)
-    }
-    value <- nbt_value_or_cast(value, x[[i, exact = TRUE]])
-    NextMethod()
+  if (is.null(value)) {
+    x[i] <- list(value)
+    return(x)
+  }
+  value <- nbt_value_or_cast(value, x[[i, exact = TRUE]])
+  NextMethod()
 }
 
 #' @export
 `$<-.rbedrock_nbt_list_of` <- function(x, i, value) {
-    value <- nbt_value_or_cast(value, x[[i, exact = TRUE]])
-    NextMethod()
+  value <- nbt_value_or_cast(value, x[[i, exact = TRUE]])
+  NextMethod()
 }
 
 # Implement tree-drawing code inspired by lobstr, cli, and rlang
 
 #' @export
 print.rbedrock_nbt_list_of <- function(x, style = NULL, ...) {
-    # collect options
-    opts <- list(style = style)
+  # collect options
+  opts <- list(style = style)
 
-    cat("NBT DATA\n")
-    nbt_tree(x, opts = opts)
-    x
+  cat("NBT DATA\n")
+  nbt_tree(x, opts = opts)
+  x
 }
 
 make_type_str <- function(x, x_id = NULL, val_lab = NULL) {
-    s <- if (is.null(x_id) && is.null(val_lab)) {
-        rac_type_full(x)
-    } else {
-        rac_type_abbr(x)
-    }
-    paste0("<", s, ">")
+  s <- if (is.null(x_id) && is.null(val_lab)) {
+    rac_type_full(x)
+  } else {
+    rac_type_abbr(x)
+  }
+  paste0("<", s, ">")
 }
 
 nbt_tree <- function(x, x_id = NULL, branch_hist = character(0L), opts) {
-    style <- opts$style %||% box_chars()
+  style <- opts$style %||% box_chars()
 
-    depth <- length(branch_hist)
-    branch_chars <- rep_len("  ", depth)
-    branch_chars[branch_hist == "child"] <- paste0(style$v, " ")
+  depth <- length(branch_hist)
+  branch_chars <- rep_len("  ", depth)
+  branch_chars[branch_hist == "child"] <- paste0(style$v, " ")
 
-    if (depth > 0L) {
-        step <- if (branch_hist[depth] == "last") style$l else style$j
-        branch_chars[depth] <- paste0(step, style$h)
+  if (depth > 0L) {
+    step <- if (branch_hist[depth] == "last") style$l else style$j
+    branch_chars[depth] <- paste0(step, style$h)
+  }
+
+  val_lab <- NULL
+  if (is.atomic(x)) {
+    val_lab <- format(x)
+    if (length(val_lab) > 1) {
+      val_lab <- paste(val_lab, collapse = ", ")
+      val_lab <- paste0("[ ", val_lab, " ]")
     }
+  }
 
-    val_lab <- NULL
-    if (is.atomic(x)) {
-        val_lab <- format(x)
-        if (length(val_lab) > 1) {
-            val_lab <- paste(val_lab, collapse = ", ")
-            val_lab <- paste0("[ ", val_lab, " ]")
-        }
+  label <- paste0(
+    x_id,
+    make_type_str(x, x_id, val_lab),
+    if (!is.null(val_lab)) ": ",
+    val_lab
+  )
+  cat(
+    paste(branch_chars, collapse = ""),
+    label,
+    "\n",
+    sep = ""
+  )
+  if (is.list(x)) {
+    children <- rac_data(x)
+    n_children <- length(children)
+    child_names <- names(children)
+    for (i in seq_along(children)) {
+      id <- child_names[i]
+      child_type <- if (i < n_children) "child" else "last"
+      Recall(
+        x = children[[i]],
+        x_id = id,
+        branch_hist = c(branch_hist, child_type),
+        opts = opts
+      )
     }
-
-    label <- paste0(x_id,
-                    make_type_str(x, x_id, val_lab),
-                    if (!is.null(val_lab)) ": ",
-                    val_lab)
-    cat(
-        paste(branch_chars, collapse = ""),
-        label,
-        "\n",
-        sep = ""
-    )
-    if (is.list(x)) {
-        children <- rac_data(x)
-        n_children <- length(children)
-        child_names <- names(children)
-        for (i in seq_along(children)) {
-            id <- child_names[i]
-            child_type <- if (i < n_children) "child" else "last"
-            Recall(x = children[[i]],
-                x_id = id,
-                branch_hist = c(branch_hist, child_type),
-                opts = opts
-            )
-        }
-    }
+  }
 }
 
 is_utf8_output <- function() {
-    opt <- getOption("cli.unicode", NULL)
-    opt <- opt %||% l10n_info()[["UTF-8", exact = TRUE]]
-    isTRUE(opt)
+  opt <- getOption("cli.unicode", NULL)
+  opt <- opt %||% l10n_info()[["UTF-8", exact = TRUE]]
+  isTRUE(opt)
 }
 
 box_chars <- function() {
-    if (is_utf8_output()) {
-        list(
-            "h" = "\u2500", # horizontal
-            "v" = "\u2502", # vertical
-            "l" = "\u2514", # leaf
-            "j" = "\u251C" # junction
-        )
-    } else {
-        list(
-            "h" = "-", # horizontal
-            "v" = "|", # vertical
-            "l" = "\\", # leaf
-            "j" = "+" # junction
-        )
-    }
+  if (is_utf8_output()) {
+    list(
+      "h" = "\u2500", # horizontal
+      "v" = "\u2502", # vertical
+      "l" = "\u2514", # leaf
+      "j" = "\u251C" # junction
+    )
+  } else {
+    list(
+      "h" = "-", # horizontal
+      "v" = "|", # vertical
+      "l" = "\\", # leaf
+      "j" = "+" # junction
+    )
+  }
 }
 
 #---- Formatting nbt values ----------------------------------------------------
@@ -156,96 +159,96 @@ box_chars <- function() {
 
 #' @export
 format.rbedrock_nbt_numeric <- function(x, suffix = "", ...) {
-    out <- formatC(unclass(x), ...)
-    out[is.na(x)] <- NA
-    out[!is.na(x)] <- paste0(out[!is.na(x)], suffix)
-    out
+  out <- formatC(unclass(x), ...)
+  out[is.na(x)] <- NA
+  out[!is.na(x)] <- paste0(out[!is.na(x)], suffix)
+  out
 }
 
 #' @export
 format.rbedrock_nbt_byte <- function(x, ...) {
-    NextMethod(suffix = "b")
+  NextMethod(suffix = "b")
 }
 
 #' @export
 format.rbedrock_nbt_short <- function(x, ...) {
-    NextMethod(suffix = "s")
+  NextMethod(suffix = "s")
 }
 
 #' @export
 format.rbedrock_nbt_int <- function(x, ...) {
-    NextMethod(suffix = "")
+  NextMethod(suffix = "")
 }
 
 #' @export
 format.rbedrock_nbt_float <- function(x, ...) {
-    out <- NextMethod(suffix = "0f", flag = "#")
-    sub("(\\.[0-9]*[1-9])0+f$", "\\1f", out) # fixes trailing zeros
+  out <- NextMethod(suffix = "0f", flag = "#")
+  sub("(\\.[0-9]*[1-9])0+f$", "\\1f", out) # fixes trailing zeros
 }
 
 #' @export
 format.rbedrock_nbt_double <- function(x, ...) {
-    out <- NextMethod(suffix = "0", flag = "#")
-    sub("(\\.[0-9]*[1-9])0+$", "\\1", out) # fix trailing zeros
+  out <- NextMethod(suffix = "0", flag = "#")
+  sub("(\\.[0-9]*[1-9])0+$", "\\1", out) # fix trailing zeros
 }
 
 #### nbt string values ####
 
 #' @export
 format.rbedrock_nbt_long <- function(x, ...) {
-    NextMethod(suffix = "")
+  NextMethod(suffix = "")
 }
 
 #' @export
 format.rbedrock_nbt_string <- function(x, ...) {
-    NextMethod()
+  NextMethod()
 }
 
 #' @export
 format.rbedrock_nbt_raw_string <- function(x, ...) {
-    NextMethod()
+  NextMethod()
 }
 
 #### nbt special lists ####
 
 #' @export
 format.rbedrock_empty_list <- function(x, ...) {
-    NextMethod()
+  NextMethod()
 }
 
 #' @export
 format.rbedrock_nbt_compound <- function(x, ...) {
-    NextMethod()
+  NextMethod()
 }
 
 #' @export
 format.rbedrock_nbt_nested_list <- function(x, ...) {
-    NextMethod()
+  NextMethod()
 }
 
 #' @export
 format.rbedrock_nbt_byte_array_list <- function(x, ...) {
-    NextMethod()
+  NextMethod()
 }
 
 #' @export
 format.rbedrock_nbt_int_array_list <- function(x, ...) {
-    NextMethod()
+  NextMethod()
 }
 
 #' @export
 format.rbedrock_nbt_long_array_list <- function(x, ...) {
-    NextMethod()
+  NextMethod()
 }
 
 #' @export
 format.rbedrock_nbt_raw_string_list <- function(x, ...) {
-    NextMethod()
+  NextMethod()
 }
 
 #' @export
 format.rbedrock_nbt_compound_list <- function(x, ...) {
-    NextMethod()
+  NextMethod()
 }
 
 #### nbt aliases ####

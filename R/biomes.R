@@ -26,59 +26,81 @@ NULL
 
 #' @rdname Biomes
 #' @export
-get_biomes_value <- function(x, z, dimension, db = default_db(),
-                             return_names = TRUE) {
-    val <- get_data3d_value(x, z, dimension, db = db)
-    get_biomes_impl(val, return_names = return_names)
+get_biomes_value <- function(
+  x,
+  z,
+  dimension,
+  db = default_db(),
+  return_names = TRUE
+) {
+  val <- get_data3d_value(x, z, dimension, db = db)
+  get_biomes_impl(val, return_names = return_names)
 }
 
 #' @rdname Biomes
 #' @export
-get_biomes_data <- function(x, z, dimension, db = default_db(),
-                            return_names = TRUE) {
-    dat <- get_data3d_data(x, z, dimension, db = db)
-    lapply(dat, get_biomes_impl, return_names = return_names)
+get_biomes_data <- function(
+  x,
+  z,
+  dimension,
+  db = default_db(),
+  return_names = TRUE
+) {
+  dat <- get_data3d_data(x, z, dimension, db = db)
+  lapply(dat, get_biomes_impl, return_names = return_names)
 }
 
 #' @rdname Biomes
 #' @export
-put_biomes_value <- function(value, x, z, dimension, db = default_db(),
-                             missing_height = 0L) {
+put_biomes_value <- function(
+  value,
+  x,
+  z,
+  dimension,
+  db = default_db(),
+  missing_height = 0L
+) {
+  if (is.character(value)) {
+    value <- biome_id(value)
+    value[is.na(value)] <- 0
+  }
+  new_value <- get_data3d_value(x, z, dimension, db = db)
+  new_value$biome_map <- value
+  put_data3d_value(new_value, x, z, dimension, db = db)
+}
+
+#' @rdname Biomes
+#' @export
+put_biomes_data <- function(
+  values,
+  x,
+  z,
+  dimension,
+  db = default_db(),
+  missing_height = 0L
+) {
+  keys <- process_chunk_key_args(x, z, dimension, tag = 45L, values = values)
+  new_data <- get_data3d_data(keys, db = db)
+  for (i in seq_along(new_data)) {
+    if (is.null(new_data[[i]])) {
+      new_data[[i]] <- list(height_map = missing_height)
+    }
+    value <- values[[i]]
     if (is.character(value)) {
-        value <- biome_id(value)
-        value[is.na(value)] <- 0
+      value <- biome_id(value)
+      value[is.na(value)] <- 0
     }
-    new_value <- get_data3d_value(x, z, dimension, db = db)
-    new_value$biome_map <- value
-    put_data3d_value(new_value, x, z, dimension, db = db)
-}
-
-#' @rdname Biomes
-#' @export
-put_biomes_data <- function(values, x, z, dimension, db = default_db(),
-                            missing_height = 0L) {
-    keys <- process_chunk_key_args(x, z, dimension, tag = 45L, values = values)
-    new_data <- get_data3d_data(keys, db = db)
-    for (i in seq_along(new_data)) {
-        if (is.null(new_data[[i]])) {
-            new_data[[i]] <- list(height_map = missing_height)
-        }
-        value <- values[[i]]
-        if (is.character(value)) {
-            value <- biome_id(value)
-            value[is.na(value)] <- 0
-        }
-        new_data[[i]]$biome_map <- value
-    }
-    put_data3d_data(new_data, x, z, dimension, db = db)
+    new_data[[i]]$biome_map <- value
+  }
+  put_data3d_data(new_data, x, z, dimension, db = db)
 }
 
 get_biomes_impl <- function(x, return_names) {
-    biome_map <- x[["biome_map", exact = TRUE]]
-    if (!is.null(biome_map) && isTRUE(return_names)) {
-        biome_map[] <- biome_name(biome_map)
-    }
-    biome_map
+  biome_map <- x[["biome_map", exact = TRUE]]
+  if (!is.null(biome_map) && isTRUE(return_names)) {
+    biome_map[] <- biome_name(biome_map)
+  }
+  biome_map
 }
 
 #' Bedrock biome data
@@ -107,11 +129,11 @@ globalVariables("biome_df")
 #' @rdname Biomes
 #' @export
 biome_id <- function(value) {
-    biome_df$bedrock_id[match(value, biome_df$bedrock_name)]
+  biome_df$bedrock_id[match(value, biome_df$bedrock_name)]
 }
 
 #' @rdname Biomes
 #' @export
 biome_name <- function(value) {
-    biome_df$bedrock_name[match(value, biome_df$bedrock_id)]
+  biome_df$bedrock_name[match(value, biome_df$bedrock_id)]
 }

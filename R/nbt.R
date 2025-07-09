@@ -30,76 +30,90 @@
 #'        nbt value.
 #' @inheritParams rnbt
 #' @export
-get_nbt_data <- function(keys, db = default_db(), readoptions = NULL,
-                         simplify = TRUE) {
-    dat <- get_data(keys, db = db, readoptions = readoptions)
-    read_nbt_data(dat, simplify = simplify)
+get_nbt_data <- function(
+  keys,
+  db = default_db(),
+  readoptions = NULL,
+  simplify = TRUE
+) {
+  dat <- get_data(keys, db = db, readoptions = readoptions)
+  read_nbt_data(dat, simplify = simplify)
 }
 
 #' @rdname get_nbt_data
 #' @export
-get_nbt_value <- function(key, db = default_db(), readoptions = NULL,
-                          simplify = TRUE) {
-    dat <- get_value(key, db = db, readoptions = readoptions)
-    read_nbt(dat, simplify = simplify)
+get_nbt_value <- function(
+  key,
+  db = default_db(),
+  readoptions = NULL,
+  simplify = TRUE
+) {
+  dat <- get_value(key, db = db, readoptions = readoptions)
+  read_nbt(dat, simplify = simplify)
 }
 
 #' @rdname get_nbt_data
 #' @export
 put_nbt_data <- function(values, keys, db = default_db(), writeoptions = NULL) {
-    dat <- write_nbt_data(values)
-    put_data(dat, keys, db = db, writeoptions = writeoptions)
+  dat <- write_nbt_data(values)
+  put_data(dat, keys, db = db, writeoptions = writeoptions)
 }
 
 #' @rdname get_nbt_data
 #' @export
 put_nbt_value <- function(value, key, db = default_db(), writeoptions = NULL) {
-    dat <- write_nbt(value)
-    put_value(dat, key, db = db, writeoptions = writeoptions)
+  dat <- write_nbt(value)
+  put_value(dat, key, db = db, writeoptions = writeoptions)
 }
 
 #' @rdname get_nbt_data
 #' @export
-read_nbt <- function(rawvalue,
-                     format = c("little", "big", "network", "network_big"),
-                     simplify = TRUE) {
-
-    format <- match.arg(format)
-    rnbt <- read_rnbt(rawvalue, format = format)
-    res <- from_rnbt(rnbt)
-    if (isTRUE(simplify) && length(res) == 1L && is.null(names(res))) {
-        res <- res[[1]]
-    }
-    res
+read_nbt <- function(
+  rawvalue,
+  format = c("little", "big", "network", "network_big"),
+  simplify = TRUE
+) {
+  format <- match.arg(format)
+  rnbt <- read_rnbt(rawvalue, format = format)
+  res <- from_rnbt(rnbt)
+  if (isTRUE(simplify) && length(res) == 1L && is.null(names(res))) {
+    res <- res[[1]]
+  }
+  res
 }
 
 #' @rdname get_nbt_data
 #' @export
-read_nbt_data <- function(rawdata,
-                          format = c("little", "big", "network", "network_big"),
-                          simplify = TRUE) {
-    format <- match.arg(format)
-    lapply(rawdata, read_nbt, format = format, simplify = simplify)
+read_nbt_data <- function(
+  rawdata,
+  format = c("little", "big", "network", "network_big"),
+  simplify = TRUE
+) {
+  format <- match.arg(format)
+  lapply(rawdata, read_nbt, format = format, simplify = simplify)
 }
 
 #' @rdname get_nbt_data
 #' @export
-write_nbt <- function(value,
-                      format = c("little", "big", "network", "network_big")) {
-    format <- match.arg(format)
+write_nbt <- function(
+  value,
+  format = c("little", "big", "network", "network_big")
+) {
+  format <- match.arg(format)
 
-    if (is_nbt_value(value)) {
-        value <- list(value)
-    }
-    rnbt <- to_rnbt(value)
-    write_rnbt(rnbt, format)
+  if (is_nbt_value(value)) {
+    value <- list(value)
+  }
+  rnbt <- to_rnbt(value)
+  write_rnbt(rnbt, format)
 }
 
 #' @rdname get_nbt_data
 #' @export
-write_nbt_data <- function(values,
-                           format = c("little", "big", "network",
-                                      "network_big")) {
-    format <- match.arg(format)
-    lapply(values, write_nbt, format = format)
+write_nbt_data <- function(
+  values,
+  format = c("little", "big", "network", "network_big")
+) {
+  format <- match.arg(format)
+  lapply(values, write_nbt, format = format)
 }

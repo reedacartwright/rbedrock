@@ -12,19 +12,19 @@
 #' rbedrock_example_world("example1.mcworld")
 
 rbedrock_example <- function(path = NULL) {
-    if (is.null(path)) {
-        extdata <- system.file("extdata", package = "rbedrock", mustWork = TRUE)
-        basename(list.files(extdata))
-    } else {
-        system.file("extdata", path, package = "rbedrock", mustWork = TRUE)
-    }
+  if (is.null(path)) {
+    extdata <- system.file("extdata", package = "rbedrock", mustWork = TRUE)
+    basename(list.files(extdata))
+  } else {
+    system.file("extdata", path, package = "rbedrock", mustWork = TRUE)
+  }
 }
 
 #' @export
 #' @rdname rbedrock_example
 rbedrock_example_world <- function(path) {
-    path <- rbedrock_example(path)
-    destdir <- tempfile("world")
-    path <- suppressMessages(import_world(path, destdir))
-    normalize_path(path)
+  path <- rbedrock_example(path)
+  destdir <- tempfile("world")
+  path <- suppressMessages(import_world(path, destdir))
+  normalize_path(path)
 }

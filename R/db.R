@@ -45,63 +45,66 @@ the$db_is_user_set <- FALSE
 #'
 #' @export
 default_db <- function(db, check = TRUE) {
-    # evaluating db might update the$db, so we will save it first thing
-    db_old <- the$db
-    if (missing(db)) {
-        db <- the$db
-        assert_open_db(db, check)
+  # evaluating db might update the$db, so we will save it first thing
+  db_old <- the$db
+  if (missing(db)) {
+    db <- the$db
+    assert_open_db(db, check)
+  } else {
+    if (!is.null(db)) {
+      assert_open_db(db, check)
+      the$db_is_user_set <- TRUE
     } else {
-        if (!is.null(db)) {
-            assert_open_db(db, check)
-            the$db_is_user_set <- TRUE
-        } else {
-            the$db_is_user_set <- FALSE
-        }
-        the$db <- db
-        db <- db_old
+      the$db_is_user_set <- FALSE
     }
-    invisible(db)
+    the$db <- db
+    db <- db_old
+  }
+  invisible(db)
 }
 
 assert_open_db <- function(db, check = TRUE, arg = "db") {
-    if (!isFALSE(check) && (!is_bedrockdb(db) || !db$is_open())) {
-        msg <- sprintf("`%s` is not an open bedrockdb connection.", arg)
-        stop(msg, call. = FALSE)
-    }
-    invisible(TRUE)
+  if (!isFALSE(check) && (!is_bedrockdb(db) || !db$is_open())) {
+    msg <- sprintf("`%s` is not an open bedrockdb connection.", arg)
+    stop(msg, call. = FALSE)
+  }
+  invisible(TRUE)
 }
 
 #' @rdname default_db
 #' @export
 with_db <- function(db, code, close = is.character(db)) {
-    # evaluating db might update the$db, so we will save it first thing
-    old_db <- the$db
-    force(close) # evaluate close before updating db
-    if (is.character(db)) {
-        db <- bedrockdb(db)
-    }
-    default_db(db)
-    on.exit({
-        default_db(old_db)
-        if (isTRUE(close)) close(db)
-    })
-    force(code)
+  # evaluating db might update the$db, so we will save it first thing
+  old_db <- the$db
+  force(close) # evaluate close before updating db
+  if (is.character(db)) {
+    db <- bedrockdb(db)
+  }
+  default_db(db)
+  on.exit({
+    default_db(old_db)
+    if (isTRUE(close)) close(db)
+  })
+  force(code)
 }
 
 #' @rdname default_db
 #' @export
-local_db <- function(db, .local_envir = parent.frame(),
-                     close = is.character(db)) {
-    # evaluating db might update the$db, so we will save it first thing
-    old_db <- the$db
-    force(close) # evaluate close before updating db
-    if (is.character(db)) {
-        db <- bedrockdb(db)
-    }
-    default_db(db)
-    defer(envir = .local_envir, {
-        default_db(old_db)
-        if (isTRUE(close)) close(db)
-    })
-    invisible(db)
+local_db <- function(
+  db,
+  .local_envir = parent.frame(),
+  close = is.character(db)
+) {
+  # evaluating db might update the$db, so we will save it first thing
+  old_db <- the$db
+  force(close) # evaluate close before updating db
+  if (is.character(db)) {
+    db <- bedrockdb(db)
+  }
+  default_db(db)
+  defer(envir = .local_envir, {
+    default_db(old_db)
+    if (isTRUE(close)) close(db)
+  })
+  invisible(db)
 }

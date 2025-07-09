@@ -35,67 +35,79 @@ NULL
 #' @rdname Data2D
 #' @export
 get_data2d_data <- function(x, z, dimension, db = default_db()) {
-    dat <- get_chunk_data(x, z, dimension, tag = 45L, db = db)
-    lapply(dat, read_data2d_value)
+  dat <- get_chunk_data(x, z, dimension, tag = 45L, db = db)
+  lapply(dat, read_data2d_value)
 }
 
 #' @rdname Data2D
 #' @export
 get_data2d_value <- function(x, z, dimension, db = default_db()) {
-    val <- get_chunk_value(x, z, dimension, tag = 45L, db = db)
-    read_data2d_value(val)
+  val <- get_chunk_value(x, z, dimension, tag = 45L, db = db)
+  read_data2d_value(val)
 }
 
 #' @rdname Data2D
 #' @export
 put_data2d_data <- function(values, x, z, dimension, db = default_db()) {
-    values <- lapply(values, write_data2d_value)
-    put_chunk_data(values, x, z, dimension, tag = 45L, db = db)
+  values <- lapply(values, write_data2d_value)
+  put_chunk_data(values, x, z, dimension, tag = 45L, db = db)
 }
 
 #' @rdname Data2D
 #' @export
 put_data2d_value <- function(value, x, z, dimension, db = default_db()) {
-    value <- write_data2d_value(value)
-    put_chunk_value(value, x, z, dimension, tag = 45L, db = db)
+  value <- write_data2d_value(value)
+  put_chunk_value(value, x, z, dimension, tag = 45L, db = db)
 }
 
 #' @rdname Data2D
 #' @export
 read_data2d_value <- function(rawvalue) {
-    if (is.null(rawvalue)) {
-        return(NULL)
-    }
-    stopifnot(is.raw(rawvalue) && length(rawvalue) == 768L)
+  if (is.null(rawvalue)) {
+    return(NULL)
+  }
+  stopifnot(is.raw(rawvalue) && length(rawvalue) == 768L)
 
-    h <- readBin(rawvalue[1L:512L], integer(), n = 256L, size = 2L,
-                 endian = "little", signed = TRUE)
-    b <- readBin(rawvalue[513L:768L], integer(), n = 256L, size = 1L,
-                 endian = "little", signed = FALSE)
-    dim(h) <- c(16L, 16L)
-    dim(b) <- c(16L, 16L)
+  h <- readBin(
+    rawvalue[1L:512L],
+    integer(),
+    n = 256L,
+    size = 2L,
+    endian = "little",
+    signed = TRUE
+  )
+  b <- readBin(
+    rawvalue[513L:768L],
+    integer(),
+    n = 256L,
+    size = 1L,
+    endian = "little",
+    signed = FALSE
+  )
+  dim(h) <- c(16L, 16L)
+  dim(b) <- c(16L, 16L)
 
-    list(height_map = h, biome_map = b)
+  list(height_map = h, biome_map = b)
 }
 
 #' @rdname Data2D
 #' @export
 write_data2d_value <- function(value) {
-    if (is.null(value)) {
-        return(NULL)
-    }
+  if (is.null(value)) {
+    return(NULL)
+  }
 
-    height_map <- value[["height_map", exact = TRUE]]
-    biome_map <- value[["biome_map", exact = TRUE]]
+  height_map <- value[["height_map", exact = TRUE]]
+  biome_map <- value[["biome_map", exact = TRUE]]
 
-    height_map <- as.integer(height_map)
-    biome_map <- as.integer(biome_map)
+  height_map <- as.integer(height_map)
+  biome_map <- as.integer(biome_map)
 
-    height_map <- rac_recycle(height_map, 256)
-    biome_map <- rac_recycle(biome_map, 256)
+  height_map <- rac_recycle(height_map, 256)
+  biome_map <- rac_recycle(biome_map, 256)
 
-    h <- writeBin(height_map, raw(), size = 2L, endian = "little")
-    b <- writeBin(biome_map, raw(), size = 1L, endian = "little")
+  h <- writeBin(height_map, raw(), size = 2L, endian = "little")
+  b <- writeBin(biome_map, raw(), size = 1L, endian = "little")
 
-    c(h, b)
+  c(h, b)
 }

@@ -18,8 +18,10 @@ v <- numeric_version(gsub("_+", ".", v))
 java_latest <- n[which(v == max(v))]
 
 # Download data from latest version
-url <- sprintf("https://raw.githubusercontent.com/gentlegiantJGC/PyMCTranslate/refs/heads/master/PyMCTranslate/json/versions/%s/__biome_data__.json", # nolint
-               c(bedrock_latest, java_latest))
+url <- sprintf(
+  "https://raw.githubusercontent.com/gentlegiantJGC/PyMCTranslate/refs/heads/master/PyMCTranslate/json/versions/%s/__biome_data__.json", # nolint
+  c(bedrock_latest, java_latest)
+)
 biome_data <- jsonlite::fromJSON(url[[1]])
 biome_name <- sub("^minecraft:", "", names(biome_data$int_map))
 biome_id <- unlist(biome_data$int_map, use.names = FALSE)
@@ -46,11 +48,13 @@ m1 <- match(univ_name, cu_biomes)
 m2 <- match(java_name, cu_biomes)
 m <- ifelse(is.na(m1), m2, m1)
 
-biome_df <- tibble::tibble(bedrock_id = biome_id,
-                           bedrock_name = biome_name,
-                           java_name = java_name,
-                           universal_name = univ_name,
-                           color = cu_colors[m])
+biome_df <- tibble::tibble(
+  bedrock_id = biome_id,
+  bedrock_name = biome_name,
+  java_name = java_name,
+  universal_name = univ_name,
+  color = cu_colors[m]
+)
 
 biome_df <- biome_df[order(biome_df$bedrock_id), ]
 

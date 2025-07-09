@@ -32,29 +32,39 @@ NULL
 #' @rdname LegacyChunkVersion
 #' @export
 get_legacy_chunk_version_value <- function(x, z, dimension, db = default_db()) {
-    val <- get_chunk_value(x, z, dimension, tag = 118L, db = db)
-    as.integer(val %||% NA_integer_)
+  val <- get_chunk_value(x, z, dimension, tag = 118L, db = db)
+  as.integer(val %||% NA_integer_)
 }
 
 #' @rdname LegacyChunkVersion
 #' @export
 get_legacy_chunk_version_data <- function(x, z, dimension, db = default_db()) {
-    dat <- get_chunk_data(x, z, dimension, tag = 118L, db = db)
-    vapply(dat, function(val) as.integer(val %||% NA_integer_), integer(1L))
+  dat <- get_chunk_data(x, z, dimension, tag = 118L, db = db)
+  vapply(dat, function(val) as.integer(val %||% NA_integer_), integer(1L))
 }
 
 #' @rdname LegacyChunkVersion
 #' @export
-put_legacy_chunk_version_value <- function(value, x, z, dimension,
-                                           db = default_db()) {
-    value <- as.raw(value)
-    put_chunk_value(value, x, z, dimension, tag = 118L, db = db)
+put_legacy_chunk_version_value <- function(
+  value,
+  x,
+  z,
+  dimension,
+  db = default_db()
+) {
+  value <- as.raw(value)
+  put_chunk_value(value, x, z, dimension, tag = 118L, db = db)
 }
 
 #' @rdname LegacyChunkVersion
 #' @export
-put_legacy_chunk_version_data <- function(values, x, z, dimension,
-                                          db = default_db()) {
-    values <- lapply(as.list(values), as.raw)
-    put_chunk_data(values, x, z, dimension, tag = 118L, db = db)
+put_legacy_chunk_version_data <- function(
+  values,
+  x,
+  z,
+  dimension,
+  db = default_db()
+) {
+  values <- lapply(as.list(values), as.raw)
+  put_chunk_data(values, x, z, dimension, tag = 118L, db = db)
 }

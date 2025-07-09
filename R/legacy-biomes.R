@@ -31,49 +31,71 @@ NULL
 
 #' @rdname LegacyBiomes
 #' @export
-get_legacy_biomes_value <- function(x, z, dimension, db = default_db(),
-                                    return_names = TRUE) {
-    val <- get_data2d_value(x, z, dimension, db = db)
-    get_biomes_impl(val, return_names = return_names)
+get_legacy_biomes_value <- function(
+  x,
+  z,
+  dimension,
+  db = default_db(),
+  return_names = TRUE
+) {
+  val <- get_data2d_value(x, z, dimension, db = db)
+  get_biomes_impl(val, return_names = return_names)
 }
 
 #' @rdname LegacyBiomes
 #' @export
-get_legacy_biomes_data <- function(x, z, dimension, db = default_db(),
-                                   return_names = TRUE) {
-    dat <- get_data2d_data(x, z, dimension, db = db)
-    lapply(dat, get_biomes_impl, return_names = return_names)
+get_legacy_biomes_data <- function(
+  x,
+  z,
+  dimension,
+  db = default_db(),
+  return_names = TRUE
+) {
+  dat <- get_data2d_data(x, z, dimension, db = db)
+  lapply(dat, get_biomes_impl, return_names = return_names)
 }
 
 #' @rdname LegacyBiomes
 #' @export
-put_legacy_biomes_value <- function(value, x, z, dimension, db = default_db(),
-                                    missing_height = 0L) {
+put_legacy_biomes_value <- function(
+  value,
+  x,
+  z,
+  dimension,
+  db = default_db(),
+  missing_height = 0L
+) {
+  if (is.character(value)) {
+    value <- biome_id(value)
+    value[is.na(value)] <- 0
+  }
+  new_value <- get_data2d_value(x, z, dimension, db = db)
+  new_value$biome_map <- value
+  put_data2d_value(new_value, x, z, dimension, db = db)
+}
+
+#' @rdname LegacyBiomes
+#' @export
+put_legacy_biomes_data <- function(
+  values,
+  x,
+  z,
+  dimension,
+  db = default_db(),
+  missing_height = 0L
+) {
+  keys <- process_chunk_key_args(x, z, dimension, tag = 45L, values = values)
+  new_data <- get_data2d_data(keys, db = db)
+  for (i in seq_along(new_data)) {
+    if (is.null(new_data[[i]])) {
+      new_data[[i]] <- list(height_map = missing_height)
+    }
+    value <- values[[i]]
     if (is.character(value)) {
-        value <- biome_id(value)
-        value[is.na(value)] <- 0
+      value <- biome_id(value)
+      value[is.na(value)] <- 0
     }
-    new_value <- get_data2d_value(x, z, dimension, db = db)
-    new_value$biome_map <- value
-    put_data2d_value(new_value, x, z, dimension, db = db)
-}
-
-#' @rdname LegacyBiomes
-#' @export
-put_legacy_biomes_data <- function(values, x, z, dimension, db = default_db(),
-                                   missing_height = 0L) {
-    keys <- process_chunk_key_args(x, z, dimension, tag = 45L, values = values)
-    new_data <- get_data2d_data(keys, db = db)
-    for (i in seq_along(new_data)) {
-        if (is.null(new_data[[i]])) {
-            new_data[[i]] <- list(height_map = missing_height)
-        }
-        value <- values[[i]]
-        if (is.character(value)) {
-            value <- biome_id(value)
-            value[is.na(value)] <- 0
-        }
-        new_data[[i]]$biome_map <- value
-    }
-    put_data2d_data(new_data, x, z, dimension, db = db)
+    new_data[[i]]$biome_map <- value
+  }
+  put_data2d_data(new_data, x, z, dimension, db = db)
 }

@@ -25,23 +25,23 @@ NULL
 #' @rdname Entity
 #' @export
 get_entity_data <- function(x, z, dimension, db = default_db()) {
-    get_chunk_nbt_data(x, z, dimension, tag = 50L, db = db)
+  get_chunk_nbt_data(x, z, dimension, tag = 50L, db = db)
 }
 
 #' @rdname Entity
 #' @export
 get_entity_value <- function(x, z, dimension, db = default_db()) {
-    get_chunk_nbt_value(x, z, dimension, tag = 50L, db = db)
+  get_chunk_nbt_value(x, z, dimension, tag = 50L, db = db)
 }
 
 #' @rdname Entity
 #' @export
 put_entity_data <- function(values, x, z, dimension, db = default_db()) {
-    put_chunk_nbt_data(values, x, z, dimension, tag = 50L, db = db)
+  put_chunk_nbt_data(values, x, z, dimension, tag = 50L, db = db)
 }
 
 #' @rdname Entity
 #' @export
 put_entity_value <- function(value, x, z, dimension, db = default_db()) {
-    put_chunk_nbt_value(value, x, z, dimension, tag = 50L, db = db)
+  put_chunk_nbt_value(value, x, z, dimension, tag = 50L, db = db)
 }

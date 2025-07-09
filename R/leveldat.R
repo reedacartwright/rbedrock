@@ -19,38 +19,38 @@
 #'
 #' @export
 read_leveldat <- function(path) {
-    if (is_bedrockdb(path)) {
-        path <- dirname(path$path)
-    }
-    path <- fixup_path(path, verify = TRUE)
-    # if path is a directory append filename
-    if (dir_exists(path)) {
-        path <- file_path(path, "level.dat")
-    }
-    rawval <- read_file_raw(path)
+  if (is_bedrockdb(path)) {
+    path <- dirname(path$path)
+  }
+  path <- fixup_path(path, verify = TRUE)
+  # if path is a directory append filename
+  if (dir_exists(path)) {
+    path <- file_path(path, "level.dat")
+  }
+  rawval <- read_file_raw(path)
 
-    # remove the first 8 bytes
-    rawval <- rawval[-(1:8)]
+  # remove the first 8 bytes
+  rawval <- rawval[-(1:8)]
 
-    dat <- read_nbt(rawval)
-    dat
+  dat <- read_nbt(rawval)
+  dat
 }
 
 #' @export
 #' @rdname read_leveldat
 write_leveldat <- function(object, path, version = 8L) {
-    if (is_bedrockdb(path)) {
-        path <- dirname(path$path)
-    }
-    path <- fixup_path(path)
-    # if path is a directory append filename
-    if (dir_exists(path)) {
-        path <- file_path(path, "level.dat")
-    }
-    dat <- write_nbt(object)
-    len <- length(dat)
-    rawval <- writeBin(c(version, len), raw(), size = 4L, endian = "little")
-    rawval <- c(rawval, dat)
+  if (is_bedrockdb(path)) {
+    path <- dirname(path$path)
+  }
+  path <- fixup_path(path)
+  # if path is a directory append filename
+  if (dir_exists(path)) {
+    path <- file_path(path, "level.dat")
+  }
+  dat <- write_nbt(object)
+  len <- length(dat)
+  rawval <- writeBin(c(version, len), raw(), size = 4L, endian = "little")
+  rawval <- c(rawval, dat)
 
-    write_file_raw(rawval, path)
+  write_file_raw(rawval, path)
 }

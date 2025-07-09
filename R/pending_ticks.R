@@ -20,23 +20,23 @@ NULL
 #' @rdname PendingTicks
 #' @export
 get_pending_ticks_data <- function(x, z, dimension, db = default_db()) {
-    get_chunk_nbt_data(x, z, dimension, tag = 51L, db = db)
+  get_chunk_nbt_data(x, z, dimension, tag = 51L, db = db)
 }
 
 #' @rdname PendingTicks
 #' @export
 get_pending_ticks_value <- function(x, z, dimension, db = default_db()) {
-    get_chunk_nbt_value(x, z, dimension, tag = 51L, db = db)
+  get_chunk_nbt_value(x, z, dimension, tag = 51L, db = db)
 }
 
 #' @rdname PendingTicks
 #' @export
 put_pending_ticks_data <- function(values, x, z, dimension, db = default_db()) {
-    put_chunk_nbt_data(values, x, z, dimension, tag = 51L, db = db)
+  put_chunk_nbt_data(values, x, z, dimension, tag = 51L, db = db)
 }
 
 #' @rdname PendingTicks
 #' @export
 put_pending_ticks_value <- function(value, x, z, dimension, db = default_db()) {
-    put_chunk_nbt_value(value, x, z, dimension, tag = 51L, db = db)
+  put_chunk_nbt_value(value, x, z, dimension, tag = 51L, db = db)
 }

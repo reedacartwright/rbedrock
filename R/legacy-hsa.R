@@ -41,68 +41,68 @@ NULL
 #' @rdname HardcodedSpawnArea
 #' @export
 get_hsa_value <- function(x, z, dimension, db = default_db()) {
-    value <- get_chunk_value(x, z, dimension, tag = 57L, db = db)
-    read_hsa_value_impl(value)
+  value <- get_chunk_value(x, z, dimension, tag = 57L, db = db)
+  read_hsa_value_impl(value)
 }
 
 #' @rdname HardcodedSpawnArea
 #' @export
 get_hsa_data <- function(x, z, dimension, db = default_db()) {
-    dat <- get_chunk_data(x, z, dimension, tag = 57L, db = db)
-    lapply(dat, read_hsa_value_impl)
+  dat <- get_chunk_data(x, z, dimension, tag = 57L, db = db)
+  lapply(dat, read_hsa_value_impl)
 }
 
 #' @rdname HardcodedSpawnArea
 #' @export
 put_hsa_value <- function(value, x, z, dimension, db = default_db()) {
-    value <- write_hsa_value_impl(value)
-    put_chunk_value(value, x, z, dimension, tag = 57L, db = db)
+  value <- write_hsa_value_impl(value)
+  put_chunk_value(value, x, z, dimension, tag = 57L, db = db)
 }
 
 #' @rdname HardcodedSpawnArea
 #' @export
 put_hsa_data <- function(values, x, z, dimension, db = default_db()) {
-    values <- lapply(values, write_hsa_value_impl)
-    put_chunk_data(values, x, z, dimension, tag = 57L, db = db)
+  values <- lapply(values, write_hsa_value_impl)
+  put_chunk_data(values, x, z, dimension, tag = 57L, db = db)
 }
 
 read_hsa_value_impl <- function(rawvalue) {
-    if (is.null(rawvalue)) {
-        return(NULL)
-    }
-    sz <- readBin(rawvalue, integer(), n = 1L, size = 4L, endian = "little")
+  if (is.null(rawvalue)) {
+    return(NULL)
+  }
+  sz <- readBin(rawvalue, integer(), n = 1L, size = 4L, endian = "little")
 
-    stopifnot(is.raw(rawvalue) && length(rawvalue) == sz * 25L + 4)
+  stopifnot(is.raw(rawvalue) && length(rawvalue) == sz * 25L + 4)
 
-    rawvalue <- rawvalue[-c(1:4)]
-    mat <- matrix(0L, nrow = sz, ncol = 7)
-    for (i in 1:sz) {
-        aabb <- readBin(rawvalue, integer(), n = 6, size = 4, endian = "little")
-        tag <- as.raw(rawvalue[25])
-        mat[i, ] <- c(aabb, tag)
-        rawvalue <- rawvalue[-c(1:25)]
-    }
-    colnames(mat) <- c("x1", "y1", "z1", "x2", "y2", "z2", "tag")
+  rawvalue <- rawvalue[-c(1:4)]
+  mat <- matrix(0L, nrow = sz, ncol = 7)
+  for (i in 1:sz) {
+    aabb <- readBin(rawvalue, integer(), n = 6, size = 4, endian = "little")
+    tag <- as.raw(rawvalue[25])
+    mat[i, ] <- c(aabb, tag)
+    rawvalue <- rawvalue[-c(1:25)]
+  }
+  colnames(mat) <- c("x1", "y1", "z1", "x2", "y2", "z2", "tag")
 
-    # nolint start
-    # Document how HSS are calculated for posterity
-    # hsa$xspot <- (hsa$x1 + hsa$x2 + 1L) %/% 2L
-    # hsa$yspot <- pmax.int(hsa$y1, hsa$y2) -
-    #     ifelse(hsa$tag %in% .HSA_LIST[c(2, 5)], 4L, 1L)
-    # hsa$zspot <- (hsa$z1 + hsa$z2 + 1L) %/% 2L
-    # nolint end
-    mat
+  # nolint start
+  # Document how HSS are calculated for posterity
+  # hsa$xspot <- (hsa$x1 + hsa$x2 + 1L) %/% 2L
+  # hsa$yspot <- pmax.int(hsa$y1, hsa$y2) -
+  #     ifelse(hsa$tag %in% .HSA_LIST[c(2, 5)], 4L, 1L)
+  # hsa$zspot <- (hsa$z1 + hsa$z2 + 1L) %/% 2L
+  # nolint end
+  mat
 }
 
 write_hsa_value_impl <- function(value) {
-    len <- nrow(value)
-    ret <- raw(4L + 25L * len)
-    ret[1:4] <- writeBin(as.integer(len), raw(), size = 4, endian = "little")
-    for (i in 1:len) {
-        pos <- i * 25L - 21L
-        n <- as.integer(value[i, ])
-        ret[pos + 1:24] <- writeBin(n[1:6], raw(), size = 4, endian = "little")
-        ret[pos + 25L] <- writeBin(n[7], raw(), size = 1, endian = "little")
-    }
-    ret
+  len <- nrow(value)
+  ret <- raw(4L + 25L * len)
+  ret[1:4] <- writeBin(as.integer(len), raw(), size = 4, endian = "little")
+  for (i in 1:len) {
+    pos <- i * 25L - 21L
+    n <- as.integer(value[i, ])
+    ret[pos + 1:24] <- writeBin(n[1:6], raw(), size = 4, endian = "little")
+    ret[pos + 25L] <- writeBin(n[7], raw(), size = 1, endian = "little")
+  }
+  ret
 }

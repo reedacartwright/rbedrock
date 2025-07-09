@@ -74,54 +74,61 @@
 #' close(db)
 #' }
 
-bedrockdb <- function(path,
-                      create_if_missing = FALSE,
-                      error_if_exists = NULL,
-                      paranoid_checks = NULL,
-                      write_buffer_size = 4194304L,
-                      max_open_files = NULL,
-                      block_size = 163840L,
-                      cache_capacity = 83886080L,
-                      bloom_filter_bits_per_key = 10L,
-                      compression_level = -1L) {
-    db <- R6_bedrockdb$new(path,
-                           create_if_missing,
-                           error_if_exists,
-                           paranoid_checks,
-                           write_buffer_size,
-                           max_open_files,
-                           block_size,
-                           cache_capacity,
-                           bloom_filter_bits_per_key,
-                           compression_level)
-    if (!the$db_is_user_set) {
-        the$db <- db
-    }
-    invisible(db)
+bedrockdb <- function(
+  path,
+  create_if_missing = FALSE,
+  error_if_exists = NULL,
+  paranoid_checks = NULL,
+  write_buffer_size = 4194304L,
+  max_open_files = NULL,
+  block_size = 163840L,
+  cache_capacity = 83886080L,
+  bloom_filter_bits_per_key = 10L,
+  compression_level = -1L
+) {
+  db <- R6_bedrockdb$new(
+    path,
+    create_if_missing,
+    error_if_exists,
+    paranoid_checks,
+    write_buffer_size,
+    max_open_files,
+    block_size,
+    cache_capacity,
+    bloom_filter_bits_per_key,
+    compression_level
+  )
+  if (!the$db_is_user_set) {
+    the$db <- db
+  }
+  invisible(db)
 }
 
 #' @export
 #' @rdname bedrockdb
 close.bedrockdb <- function(con, compact = FALSE, ...) {
-    if (isTRUE(compact)) {
-        inform("Compacting database...")
-        con$compact_range()
-    }
-    # clear default connection on close
-    if (identical(the$db, con)) {
-        the$db_is_user_set <- FALSE
-        the$db <- NULL
-    }
-    con$close(...)
+  if (isTRUE(compact)) {
+    inform("Compacting database...")
+    con$compact_range()
+  }
+  # clear default connection on close
+  if (identical(the$db, con)) {
+    the$db_is_user_set <- FALSE
+    the$db <- NULL
+  }
+  con$close(...)
 }
 
 #' @export
 #' @rdname bedrockdb
 is_bedrockdb <- function(x) {
-    inherits(x, "bedrockdb")
+  inherits(x, "bedrockdb")
 }
 
-R6_bedrockdb <- R6::R6Class("bedrockdb", public = list( # nolint: object_name_linter
+R6_bedrockdb <- R6::R6Class(
+  "bedrockdb",
+  public = list(
+    # nolint: object_name_linter
     db = NULL,
     path = NULL,
     levelname = NULL,
@@ -129,165 +136,177 @@ R6_bedrockdb <- R6::R6Class("bedrockdb", public = list( # nolint: object_name_li
     leveldat_is_dirty = FALSE,
     unique_id = NULL,
     initialize = function(path, ...) {
-        path <- normalize_path(fixup_path(path))
-        dat <- read_leveldat(path)
-        self$levelname <- unnbt(dat$LevelName)
-        self$path <- file_path(path, "db")
-        self$db <- bedrock_leveldb_open(self$path, ...)
-        self$leveldat <- dat
+      path <- normalize_path(fixup_path(path))
+      dat <- read_leveldat(path)
+      self$levelname <- unnbt(dat$LevelName)
+      self$path <- file_path(path, "db")
+      self$db <- bedrock_leveldb_open(self$path, ...)
+      self$leveldat <- dat
     },
     close = function(error_if_closed = FALSE) {
-        if (self$leveldat_is_dirty) {
-            write_leveldat(self$leveldat, dirname(self$path))
-        }
-        ret <- bedrock_leveldb_close(self$db, error_if_closed)
-        invisible(ret)
+      if (self$leveldat_is_dirty) {
+        write_leveldat(self$leveldat, dirname(self$path))
+      }
+      ret <- bedrock_leveldb_close(self$db, error_if_closed)
+      invisible(ret)
     },
     destroy = function() {
-        self$close()
-        ret <- bedrock_leveldb_destroy(self$path)
-        invisible(ret)
+      self$close()
+      ret <- bedrock_leveldb_destroy(self$path)
+      invisible(ret)
     },
     is_open = function() {
-        bedrock_leveldb_is_open(self$db)
+      bedrock_leveldb_is_open(self$db)
     },
     property = function(name, error_if_missing = FALSE) {
-        bedrock_leveldb_property(self$db, name, error_if_missing)
+      bedrock_leveldb_property(self$db, name, error_if_missing)
     },
     get = function(key, readoptions = NULL) {
-        bedrock_leveldb_get(self$db, key, readoptions)
+      bedrock_leveldb_get(self$db, key, readoptions)
     },
     mget = function(keys, readoptions = NULL) {
-        bedrock_leveldb_mget(self$db, keys, readoptions)
+      bedrock_leveldb_mget(self$db, keys, readoptions)
     },
     mget_prefix = function(starts_with, readoptions = NULL) {
-        bedrock_leveldb_mget_prefix(self$db, starts_with, readoptions)
+      bedrock_leveldb_mget_prefix(self$db, starts_with, readoptions)
     },
     put = function(key, value, writeoptions = NULL) {
-        bedrock_leveldb_put(self$db, key, value, writeoptions)
-        invisible(self)
+      bedrock_leveldb_put(self$db, key, value, writeoptions)
+      invisible(self)
     },
     mput = function(keys, values, writeoptions = NULL) {
-        bedrock_leveldb_mput(self$db, keys, values, writeoptions)
-        invisible(self)
+      bedrock_leveldb_mput(self$db, keys, values, writeoptions)
+      invisible(self)
     },
-    delete = function(keys, report = FALSE, readoptions = NULL,
-                      writeoptions = NULL) {
-        bedrock_leveldb_delete(self$db, keys, report, readoptions,
-                               writeoptions)
+    delete = function(
+      keys,
+      report = FALSE,
+      readoptions = NULL,
+      writeoptions = NULL
+    ) {
+      bedrock_leveldb_delete(self$db, keys, report, readoptions, writeoptions)
     },
     exists = function(key, readoptions = NULL) {
-        bedrock_leveldb_exists(self$db, key, readoptions)
+      bedrock_leveldb_exists(self$db, key, readoptions)
     },
     keys = function(starts_with = NULL, readoptions = NULL) {
-        bedrock_leveldb_keys(self$db, starts_with, readoptions)
+      bedrock_leveldb_keys(self$db, starts_with, readoptions)
     },
     keys_len = function(starts_with = NULL, readoptions = NULL) {
-        bedrock_leveldb_keys_len(self$db, starts_with, readoptions)
+      bedrock_leveldb_keys_len(self$db, starts_with, readoptions)
     },
     iterator = function(readoptions = NULL) {
-        R6_bedrockdb_iterator$new(self$db, readoptions)
+      R6_bedrockdb_iterator$new(self$db, readoptions)
     },
     writebatch = function() {
-        R6_bedrockdb_writebatch$new(self$db)
+      R6_bedrockdb_writebatch$new(self$db)
     },
     snapshot = function() {
-        bedrock_leveldb_snapshot(self$db)
+      bedrock_leveldb_snapshot(self$db)
     },
     approximate_sizes = function(start, limit) {
-        bedrock_leveldb_approximate_sizes(self$db, start, limit)
+      bedrock_leveldb_approximate_sizes(self$db, start, limit)
     },
     compact_range = function(start = NULL, limit = NULL) {
-        bedrock_leveldb_compact_range(self$db, start, limit)
-        invisible(self)
+      bedrock_leveldb_compact_range(self$db, start, limit)
+      invisible(self)
     },
     create_unique_ids = function(n) {
-        if (is_null(self$unique_id)) {
-            cnt <- unnbt(self$leveldat$worldStartCount) %||% 0
-            cnt <- bit64::as.integer64(cnt)
-            self$leveldat$worldStartCount <- nbt_long(cnt - 1)
-            self$leveldat_is_dirty <- TRUE
-            self$unique_id <- (cnt - 2^32) * 2^32
-        }
-        ret <- self$unique_id + seq_len(n)
-        self$unique_id <- self$unique_id + n
-        ret
+      if (is_null(self$unique_id)) {
+        cnt <- unnbt(self$leveldat$worldStartCount) %||% 0
+        cnt <- bit64::as.integer64(cnt)
+        self$leveldat$worldStartCount <- nbt_long(cnt - 1)
+        self$leveldat_is_dirty <- TRUE
+        self$unique_id <- (cnt - 2^32) * 2^32
+      }
+      ret <- self$unique_id + seq_len(n)
+      self$unique_id <- self$unique_id + n
+      ret
     }
-))
+  )
+)
 
-R6_bedrockdb_iterator <- R6::R6Class("bedrockdb_iterator", public = list(  # nolint: object_name_linter
+R6_bedrockdb_iterator <- R6::R6Class(
+  "bedrockdb_iterator",
+  public = list(
+    # nolint: object_name_linter
     it = NULL,
     initialize = function(db, readoptions) {
-        self$it <- bedrock_leveldb_iter_create(db, readoptions)
+      self$it <- bedrock_leveldb_iter_create(db, readoptions)
     },
     destroy = function(error_if_destroyed = FALSE) {
-        ret <- bedrock_leveldb_iter_destroy(self$it, error_if_destroyed)
-        invisible(ret)
+      ret <- bedrock_leveldb_iter_destroy(self$it, error_if_destroyed)
+      invisible(ret)
     },
     valid = function() {
-        bedrock_leveldb_iter_valid(self$it)
+      bedrock_leveldb_iter_valid(self$it)
     },
     seek_to_first = function() {
-        bedrock_leveldb_iter_seek_to_first(self$it)
-        invisible(self)
+      bedrock_leveldb_iter_seek_to_first(self$it)
+      invisible(self)
     },
     seek_to_last = function() {
-        bedrock_leveldb_iter_seek_to_last(self$it)
-        invisible(self)
+      bedrock_leveldb_iter_seek_to_last(self$it)
+      invisible(self)
     },
     seek = function(key) {
-        bedrock_leveldb_iter_seek(self$it, key)
-        invisible(self)
+      bedrock_leveldb_iter_seek(self$it, key)
+      invisible(self)
     },
     move_next = function(error_if_invalid = FALSE) {
-        bedrock_leveldb_iter_next(self$it, error_if_invalid)
-        invisible(self)
+      bedrock_leveldb_iter_next(self$it, error_if_invalid)
+      invisible(self)
     },
     move_prev = function(error_if_invalid = FALSE) {
-        bedrock_leveldb_iter_prev(self$it, error_if_invalid)
-        invisible(self)
+      bedrock_leveldb_iter_prev(self$it, error_if_invalid)
+      invisible(self)
     },
     key = function(error_if_invalid = FALSE) {
-        bedrock_leveldb_iter_key(self$it, error_if_invalid)
+      bedrock_leveldb_iter_key(self$it, error_if_invalid)
     },
     value = function(error_if_invalid = FALSE) {
-        bedrock_leveldb_iter_value(self$it, error_if_invalid)
+      bedrock_leveldb_iter_value(self$it, error_if_invalid)
     }
-))
+  )
+)
 
-R6_bedrockdb_writebatch <- R6::R6Class("bedrockdb_writebatch", public = list(  # nolint: object_name_linter
+R6_bedrockdb_writebatch <- R6::R6Class(
+  "bedrockdb_writebatch",
+  public = list(
+    # nolint: object_name_linter
     ptr = NULL,
     db = NULL,
     initialize = function(db) {
-        self$db <- db
-        self$ptr <- bedrock_leveldb_writebatch_create()
+      self$db <- db
+      self$ptr <- bedrock_leveldb_writebatch_create()
     },
     destroy = function(error_if_destroyed = FALSE) {
-        ret <- bedrock_leveldb_writebatch_destroy(self$ptr, error_if_destroyed)
-        invisible(ret)
+      ret <- bedrock_leveldb_writebatch_destroy(self$ptr, error_if_destroyed)
+      invisible(ret)
     },
     clear = function() {
-        bedrock_leveldb_writebatch_clear(self$ptr)
-        invisible(self)
+      bedrock_leveldb_writebatch_clear(self$ptr)
+      invisible(self)
     },
     put = function(key, value) {
-        bedrock_leveldb_writebatch_put(self$ptr, key, value)
-        invisible(self)
+      bedrock_leveldb_writebatch_put(self$ptr, key, value)
+      invisible(self)
     },
     mput = function(keys, values) {
-        bedrock_leveldb_writebatch_mput(self$ptr, keys, values)
-        invisible(self)
+      bedrock_leveldb_writebatch_mput(self$ptr, keys, values)
+      invisible(self)
     },
     delete = function(key) {
-        bedrock_leveldb_writebatch_delete(self$ptr, key)
-        invisible(self)
+      bedrock_leveldb_writebatch_delete(self$ptr, key)
+      invisible(self)
     },
     mdelete = function(keys) {
-        bedrock_leveldb_writebatch_mdelete(self$ptr, keys)
-        invisible(self)
+      bedrock_leveldb_writebatch_mdelete(self$ptr, keys)
+      invisible(self)
     },
     write = function(writeoptions = NULL) {
-        bedrock_leveldb_write(self$db, self$ptr, writeoptions)
-        invisible(self)
+      bedrock_leveldb_write(self$db, self$ptr, writeoptions)
+      invisible(self)
     }
-))
+  )
+)

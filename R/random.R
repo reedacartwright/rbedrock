@@ -25,8 +25,8 @@ NULL
 #' @useDynLib rbedrock R_mcpe_random_seed
 #' @export
 bedrock_random_seed <- function(value) {
-    value <- as.integer(value)
-    .Call(R_mcpe_random_seed, value)
+  value <- as.integer(value)
+  .Call(R_mcpe_random_seed, value)
 }
 
 #' @description
@@ -39,7 +39,7 @@ bedrock_random_seed <- function(value) {
 #' @useDynLib rbedrock R_mcpe_random_state
 #' @export
 bedrock_random_state <- function(new_state = NULL) {
-    invisible(.Call(R_mcpe_random_state, new_state))
+  invisible(.Call(R_mcpe_random_state, new_state))
 }
 
 #' @description
@@ -56,11 +56,11 @@ bedrock_random_state <- function(new_state = NULL) {
 #' @export
 
 bedrock_random_get_uint <- function(n, max) {
-    n <- as.integer(n)
-    if (missing(max)) {
-        max <- NULL
-    }
-    .Call(R_mcpe_random_get_uint, n, max)
+  n <- as.integer(n)
+  if (missing(max)) {
+    max <- NULL
+  }
+  .Call(R_mcpe_random_get_uint, n, max)
 }
 
 #' @description
@@ -71,20 +71,20 @@ bedrock_random_get_uint <- function(n, max) {
 #' @useDynLib rbedrock R_mcpe_random_get_int
 #' @export
 bedrock_random_get_int <- function(n, min, max) {
-    n <- as.integer(n)
-    if (!missing(min) && missing(max)) {
-        max <- min
-        min <- NULL
-    } else {
-        if (missing(min)) {
-            min <- NULL
-        }
-        if (missing(max)) {
-            max <- NULL
-        }
+  n <- as.integer(n)
+  if (!missing(min) && missing(max)) {
+    max <- min
+    min <- NULL
+  } else {
+    if (missing(min)) {
+      min <- NULL
     }
+    if (missing(max)) {
+      max <- NULL
+    }
+  }
 
-    .Call(R_mcpe_random_get_int, n, min, max)
+  .Call(R_mcpe_random_get_int, n, min, max)
 }
 
 #' @description
@@ -95,20 +95,20 @@ bedrock_random_get_int <- function(n, min, max) {
 #' @useDynLib rbedrock R_mcpe_random_get_float
 #' @export
 bedrock_random_get_float <- function(n, min, max) {
-    n <- as.integer(n)
-    if (!missing(min) && missing(max)) {
-        max <- min
-        min <- NULL
-    } else {
-        if (missing(min)) {
-            min <- NULL
-        }
-        if (missing(max)) {
-            max <- NULL
-        }
+  n <- as.integer(n)
+  if (!missing(min) && missing(max)) {
+    max <- min
+    min <- NULL
+  } else {
+    if (missing(min)) {
+      min <- NULL
     }
+    if (missing(max)) {
+      max <- NULL
+    }
+  }
 
-    .Call(R_mcpe_random_get_float, n, min, max)
+  .Call(R_mcpe_random_get_float, n, min, max)
 }
 
 #' @description
@@ -119,8 +119,8 @@ bedrock_random_get_float <- function(n, min, max) {
 #' @useDynLib rbedrock R_mcpe_random_get_double
 #' @export
 bedrock_random_get_double <- function(n) {
-    n <- as.integer(n)
-    .Call(R_mcpe_random_get_double, n)
+  n <- as.integer(n)
+  .Call(R_mcpe_random_get_double, n)
 }
 
 #' Random Number Seeds for Minecraft
@@ -149,11 +149,11 @@ bedrock_random_get_double <- function(n) {
 #' @useDynLib rbedrock R_mcpe_random_create_seed
 #' @export
 bedrock_random_create_seed <- function(x, z, a, b, salt, type) {
-    x <- as.integer(x)
-    z <- as.integer(z)
-    a <- as.integer(a)
-    b <- as.integer(b)
-    salt <- as.integer(salt)
-    type <- as.integer(type)
-    .Call(R_mcpe_random_create_seed, x, z, a, b, salt, type)
+  x <- as.integer(x)
+  z <- as.integer(z)
+  a <- as.integer(a)
+  b <- as.integer(b)
+  salt <- as.integer(salt)
+  type <- as.integer(type)
+  .Call(R_mcpe_random_create_seed, x, z, a, b, salt, type)
 }
