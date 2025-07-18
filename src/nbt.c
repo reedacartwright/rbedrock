@@ -526,7 +526,7 @@ SEXP read_nbt_value(const unsigned char** ptr, const unsigned char* end,
         type = TYPE_LIST_OF_RAW_STRING;
     }
     const char *names[] = {"name", "type", "value", ""};
-    SEXP r_ret = PROTECT(Rf_mkNamed(VECSXP, names));        
+    SEXP r_ret = PROTECT(Rf_mkNamed(VECSXP, names));
     SET_VECTOR_ELT(r_ret, 0, r_name);
     SET_VECTOR_ELT(r_ret, 1, Rf_ScalarInteger(type));
     SET_VECTOR_ELT(r_ret, 2, r_payload);
@@ -951,6 +951,33 @@ SEXP attribute_visible R_read_nbt(SEXP r_value, SEXP r_format) {
     const unsigned char *buffer = RAW(r_value);
     const unsigned char *p = buffer;
     return read_nbt_values(&p, buffer+len, fmt);
+}
+
+SEXP attribute_visible R_read_nbt_once(SEXP r_value, SEXP r_format) {
+    if(Rf_isNull(r_value)) {
+        return R_NilValue;
+    }
+    if(TYPEOF(r_value) != RAWSXP) {
+        error_return("Argument is not a raw type.");
+    }
+    nbt_format_t fmt = Rf_asInteger(r_format);
+
+    size_t len = XLENGTH(r_value);
+    const unsigned char *buffer = RAW(r_value);
+    const unsigned char *p = buffer;
+    SEXP r_val = PROTECT(read_nbt_value(&p, buffer+len, fmt));
+    if(Rf_isNull(r_val)) {
+        // We should not encounter a 0 tag in this context
+        return_nbt_error_tag(0);
+    }
+    size_t len_read = p - buffer;
+
+    const char *names[] = {"value", "size", ""};
+    SEXP r_ret = PROTECT(Rf_mkNamed(VECSXP, names));
+    SET_VECTOR_ELT(r_ret, 0, r_val);
+    SET_VECTOR_ELT(r_ret, 1, Rf_ScalarInteger(len_read));
+    UNPROTECT(2);
+    return r_ret;
 }
 
 SEXP attribute_visible R_write_nbt(SEXP r_value, SEXP r_format) {

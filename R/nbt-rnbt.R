@@ -39,6 +39,25 @@ read_rnbt <- function(
 
 #' @rdname rnbt
 #' @keywords internal
+#' @export
+#' @useDynLib rbedrock R_read_nbt_once
+read_rnbt_once <- function(
+  rawvalue,
+  format = c("little", "big", "network", "network_big")
+) {
+  format <- match.arg(format)
+  format_int <- switch(
+    format,
+    "little" = 0L,
+    "big" = 1L,
+    "network" = 2L,
+    "network_big" = 3L
+  )
+  .Call(R_read_nbt_once, rawvalue, format_int)
+}
+
+#' @rdname rnbt
+#' @keywords internal
 #' @useDynLib rbedrock R_write_nbt
 #' @export
 write_rnbt <- function(

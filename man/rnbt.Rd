@@ -3,12 +3,15 @@
 \name{rnbt}
 \alias{rnbt}
 \alias{read_rnbt}
+\alias{read_rnbt_once}
 \alias{write_rnbt}
 \alias{from_rnbt}
 \alias{to_rnbt}
 \title{Raw Named Binary Tag Format}
 \usage{
 read_rnbt(rawvalue, format = c("little", "big", "network", "network_big"))
+
+read_rnbt_once(rawvalue, format = c("little", "big", "network", "network_big"))
 
 write_rnbt(x, format = c("little", "big", "network", "network_big"))
 
