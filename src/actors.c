@@ -22,17 +22,16 @@
 
 #define R_NO_REMAP
 
-#include <R_ext/Visibility.h>
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "actors.h"
 
+#include <R_ext/Visibility.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
 SEXP attribute_visible R_rbedrock_actor_make_uniqueids(SEXP low_counter,
-        SEXP high_counter) {
+                                                       SEXP high_counter) {
     if(XLENGTH(low_counter) != XLENGTH(high_counter)) {
         Rf_error("arguments do not have the same length");
     }
@@ -44,8 +43,8 @@ SEXP attribute_visible R_rbedrock_actor_make_uniqueids(SEXP low_counter,
     unsigned char temp[8];
     // a unique id has 64-bits
     for(R_xlen_t i = 0; i < len; ++i) {
-        memcpy(temp+0, &(INTEGER(low_counter)[i]), 4);
-        memcpy(temp+4, &(INTEGER(high_counter)[i]), 4);
+        memcpy(temp + 0, &(INTEGER(low_counter)[i]), 4);
+        memcpy(temp + 4, &(INTEGER(high_counter)[i]), 4);
         memcpy(&REAL(result)[i], temp, 8);
     }
     Rf_setAttrib(result, R_ClassSymbol, Rf_mkString("integer64"));
@@ -60,20 +59,20 @@ SEXP attribute_visible R_rbedrock_actor_make_storagekeys(SEXP ids) {
     R_xlen_t len = XLENGTH(ids);
     SEXP result = PROTECT(Rf_allocVector(VECSXP, len));
     const char *str = NULL;
-    char * strend = NULL;
+    char *strend = NULL;
     for(R_xlen_t i = 0; i < len; ++i) {
         str = Rf_translateCharUTF8(STRING_ELT(ids, i));
         // str is in signed format. Use strtoll to convert it,
         // then cast it to unsigned number.
         uint64_t u = (uint64_t)strtoll(str, &strend, 10);
         if(*strend != '\0') {
-            Rf_error("Malformed data: at %s, line %d.", 
-                __FILE__, __LINE__ );
+            Rf_error("Malformed data: at %s, line %d.", __FILE__, __LINE__);
             return R_NilValue;
         }
         uint64_t lo = (uint32_t)u;
-        u = 2*lo - u; // negate the upper 32-bit of u while keeping the lower bits unchanged
-        u = __builtin_bswap64(u); // probably not 100% portable
+        u = 2 * lo - u;  // negate the upper 32-bit of u while keeping the lower
+                         // bits unchanged
+        u = __builtin_bswap64(u);  // probably not 100% portable
 
         // store result
         SET_VECTOR_ELT(result, i, Rf_allocVector(RAWSXP, 8));

@@ -26,12 +26,14 @@
 #include <Rinternals.h>
 
 SEXP R_read_subchunk_blocks(SEXP r_value);
-SEXP R_write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset);
+SEXP R_write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version,
+                             SEXP r_offset);
 
 SEXP R_read_chunk_biomes(SEXP r_value);
 SEXP R_write_chunk_biomes(SEXP r_values, SEXP r_palettes);
 
-SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char *end,
-    bool *nbt_palette, int *palette_size);
+SEXP read_subchunk_palette_ids(const unsigned char **buffer,
+                               const unsigned char *end, bool *nbt_palette,
+                               int *palette_size);
 
 #endif

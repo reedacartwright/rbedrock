@@ -26,15 +26,15 @@
 
 #include <R_ext/Rdynload.h>
 #include <R_ext/Visibility.h>
-#include <Rversion.h>
 #include <Rinternals.h>
+#include <Rversion.h>
 
+#include "actors.h"
 #include "bedrock_leveldb.h"
 #include "key_conv.h"
 #include "nbt.h"
-#include "subchunk.h"
 #include "random.h"
-#include "actors.h"
+#include "subchunk.h"
 
 // for testing:
 SEXP bedrock_leveldb_test_cleanup(void) {
@@ -61,7 +61,5 @@ void attribute_visible R_init_rbedrock(DllInfo *info) {
 
 // This can't be easily tested
 // # nocov start
-void R_unload_rbedrock(DllInfo *info) {
-    bedrock_leveldb_cleanup();
-}
+void R_unload_rbedrock(DllInfo *info) { bedrock_leveldb_cleanup(); }
 // # nocov end

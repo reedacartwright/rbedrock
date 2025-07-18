@@ -18,10 +18,11 @@ void rbedrock_init_blocks(void) {
 // https://gist.github.com/Tomcc/a96af509e275b1af483b25c543cfbf37
 // [version:byte][num_storages:byte][block storage1]...[blockStorageN]
 
-SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char *end,
-    bool *is_persistent, int *palette_size) {
+SEXP read_subchunk_palette_ids(const unsigned char **buffer,
+                               const unsigned char *end, bool *is_persistent,
+                               int *palette_size) {
     const unsigned char *p = *buffer;
-    if(end-p < 1) {
+    if(end - p < 1) {
         return_subchunk_error();
     }
     int flags = p[0];
@@ -37,14 +38,15 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
         return R_NilValue;
     }
 
-    SEXP r_blocks = PROTECT(Rf_alloc3DArray(INTSXP, 16,16,16));
+    SEXP r_blocks = PROTECT(Rf_alloc3DArray(INTSXP, 16, 16, 16));
 
     // calculate storage structure.
     if(bits_per_block > 0) {
-        int blocks_per_word = 32 / bits_per_block; // floor using integer math
-        int word_count = (4095 / blocks_per_word)+1; // ceiling using integer math
-        int mask = (1 << bits_per_block)-1;
-        if(end-p < 4*word_count) {
+        int blocks_per_word = 32 / bits_per_block;  // floor using integer math
+        int word_count =
+            (4095 / blocks_per_word) + 1;  // ceiling using integer math
+        int mask = (1 << bits_per_block) - 1;
+        if(end - p < 4 * word_count) {
             return_subchunk_error();
         }
         // read palette ids
@@ -61,7 +63,7 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
                 unsigned int x = (u >> 8) & 0xf;
                 unsigned int z = (u >> 4) & 0xf;
                 unsigned int y = u & 0xf;
-                unsigned int pos = x + 16*z + 256*y;
+                unsigned int pos = x + 16 * z + 256 * y;
                 // store block id
                 v[pos] = (temp & mask) + 1;
                 temp = temp >> bits_per_block;
@@ -69,7 +71,7 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
             }
         }
         // read NBT palette data
-        if(end-p < 4) {
+        if(end - p < 4) {
             return_subchunk_error();
         }
         memcpy(palette_size, p, 4);
@@ -77,7 +79,7 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
     } else {
         // Handle special case of bits_per_block == 0
         int *v = INTEGER(r_blocks);
-        for(int u=0; u < 4096; ++u) {
+        for(int u = 0; u < 4096; ++u) {
             v[u] = 1;
         }
         *palette_size = 1;
@@ -88,8 +90,8 @@ SEXP read_subchunk_palette_ids(const unsigned char **buffer, const unsigned char
 }
 
 static int calc_bits_per_block(int sz) {
-    const int p[8] = {1,2,3,4,5,6,8,16};
-    const int z[8] = {2,4,8,16,32,64,256,65536};
+    const int p[8] = {1, 2, 3, 4, 5, 6, 8, 16};
+    const int z[8] = {2, 4, 8, 16, 32, 64, 256, 65536};
 
     int i;
     for(i = 0; i < 7 && z[i] < sz; ++i) {
@@ -98,7 +100,8 @@ static int calc_bits_per_block(int sz) {
     return p[i];
 }
 
-SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t palette_size) {
+SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent,
+                                R_xlen_t palette_size) {
     SEXP r_ret;
     // Handle special case of palette_size == 0
     if(palette_size == 0 || Rf_isNull(r_values)) {
@@ -115,7 +118,7 @@ SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t pale
     // Check Length
     if(XLENGTH(r_values) != 4096) {
         return_subchunk_error();
-    }  
+    }
     // Handle special case of palette_size == 1
     if(palette_size == 1) {
         r_ret = PROTECT(Rf_allocVector(RAWSXP, 1));
@@ -127,12 +130,13 @@ SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t pale
 
     // Calculate which palette type we need to use
     int bits_per_block = calc_bits_per_block(palette_size);
-    int blocks_per_word = 32 / bits_per_block; // floor using integer math
-    int word_count = (4095 / blocks_per_word)+1; // ceiling using integer math
-    int mask = (1 << bits_per_block)-1;
+    int blocks_per_word = 32 / bits_per_block;  // floor using integer math
+    int word_count =
+        (4095 / blocks_per_word) + 1;  // ceiling using integer math
+    int mask = (1 << bits_per_block) - 1;
 
     // Allocate space
-    r_ret = PROTECT(Rf_allocVector(RAWSXP, 5+word_count*4));
+    r_ret = PROTECT(Rf_allocVector(RAWSXP, 5 + word_count * 4));
     unsigned char *buffer = RAW(r_ret);
     *buffer = (bits_per_block << 1) | (is_persistent ? 0 : 1);
     buffer += 1;
@@ -149,10 +153,10 @@ SEXP write_subchunk_palette_ids(SEXP r_values, bool is_persistent, R_xlen_t pale
             unsigned int x = (u >> 8) & 0xf;
             unsigned int y = u & 0xf;
             unsigned int z = (u >> 4) & 0xf;
-            unsigned int pos = x + 16*z + 256*y;
+            unsigned int pos = x + 16 * z + 256 * y;
             // store block id
-            unsigned int id = v[pos]-1;
-            temp |= (id & mask) << k*bits_per_block;
+            unsigned int id = v[pos] - 1;
+            temp |= (id & mask) << k * bits_per_block;
             u += 1;
         }
         memcpy(buffer, &temp, 4);
@@ -175,9 +179,9 @@ SEXP attribute_visible R_read_subchunk_blocks(SEXP r_value) {
     size_t len = XLENGTH(r_value);
     const unsigned char *buffer = RAW(r_value);
     const unsigned char *p = buffer;
-    const unsigned char *end = buffer+len;
+    const unsigned char *end = buffer + len;
 
-    if(end-p < 3) {
+    if(end - p < 3) {
         return_subchunk_error();
     }
     int version = p[0];
@@ -199,7 +203,8 @@ SEXP attribute_visible R_read_subchunk_blocks(SEXP r_value) {
     for(int i = 0; i < num_layers; ++i) {
         bool is_persistent;
         int palette_size;
-        SEXP r_blocks = PROTECT(read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
+        SEXP r_blocks = PROTECT(
+            read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
         if(Rf_isNull(r_blocks)) {
             error_return("Subchunk has an empty block palette.")
         }
@@ -221,7 +226,7 @@ SEXP attribute_visible R_read_subchunk_blocks(SEXP r_value) {
             }
             SET_VECTOR_ELT(r_palette, j, r_val);
             UNPROTECT(1);
-        }      
+        }
         // construct a list to hold this layer
         const char *names[] = {"values", "palette", ""};
         SEXP r_layer = PROTECT(Rf_mkNamed(VECSXP, names));
@@ -231,30 +236,35 @@ SEXP attribute_visible R_read_subchunk_blocks(SEXP r_value) {
         UNPROTECT(3);
     }
     if(p != end) {
-        Rf_error("Malformed NBT data: %d bytes were read out of %d bytes total", (int)(end-p), (int)len);
+        Rf_error("Malformed NBT data: %d bytes were read out of %d bytes total",
+                 (int)(end - p), (int)len);
         return R_NilValue;
     }
     UNPROTECT(1);
     return r_ret;
 }
 
-SEXP attribute_visible R_write_subchunk_blocks(SEXP r_values, SEXP r_palettes, SEXP r_version, SEXP r_offset) {
+SEXP attribute_visible R_write_subchunk_blocks(SEXP r_values, SEXP r_palettes,
+                                               SEXP r_version, SEXP r_offset) {
     R_xlen_t num_layers = XLENGTH(r_values);
     if(XLENGTH(r_palettes) != num_layers) {
         return_subchunk_error();
     }
-    SEXP r_retv = PROTECT(Rf_allocVector(VECSXP, 2*num_layers));
+    SEXP r_retv = PROTECT(Rf_allocVector(VECSXP, 2 * num_layers));
     SEXP r_fmt = PROTECT(Rf_ScalarInteger(FMT_LE));
-    for(R_xlen_t i=0; i < num_layers; ++i) {
+    for(R_xlen_t i = 0; i < num_layers; ++i) {
         SEXP r_layer = VECTOR_ELT(r_values, i);
         SEXP r_pal = VECTOR_ELT(r_palettes, i);
-        if(!Rf_isInteger(r_layer) || XLENGTH(r_layer) != 4096 || Rf_isNull(r_pal)) {
+        if(!Rf_isInteger(r_layer) || XLENGTH(r_layer) != 4096 ||
+           Rf_isNull(r_pal)) {
             return_subchunk_error();
         }
         // Write the palette ids using persistent storage
-        SET_VECTOR_ELT(r_retv, 2*i, write_subchunk_palette_ids(r_layer, true, XLENGTH(r_pal)));
+        SET_VECTOR_ELT(
+            r_retv, 2 * i,
+            write_subchunk_palette_ids(r_layer, true, XLENGTH(r_pal)));
         // write palette
-        SET_VECTOR_ELT(r_retv, 2*i+1, R_write_nbt(r_pal, r_fmt));
+        SET_VECTOR_ELT(r_retv, 2 * i + 1, R_write_nbt(r_pal, r_fmt));
     }
     UNPROTECT(1);
 
@@ -298,12 +308,13 @@ SEXP attribute_visible R_read_chunk_biomes(SEXP r_value) {
     size_t len = XLENGTH(r_value);
     const unsigned char *buffer = RAW(r_value);
     const unsigned char *p = buffer;
-    const unsigned char *end = buffer+len;
-    
+    const unsigned char *end = buffer + len;
+
     while(p < end) {
         bool is_persistent;
         int palette_size;
-        SEXP r_values = PROTECT(read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
+        SEXP r_values = PROTECT(
+            read_subchunk_palette_ids(&p, end, &is_persistent, &palette_size));
         if(Rf_isNull(r_values)) {
             // add to stretchy list a NULL
             grow_stretchy_list(r_ret, R_NilValue);
@@ -318,12 +329,12 @@ SEXP attribute_visible R_read_chunk_biomes(SEXP r_value) {
             // Biomes are stored as runtime IDs. Toss error otherwise.
             error_return("Biome palette does not have runtime ids.");
         }
-        if(end - p < palette_size*sizeof(int)) {
+        if(end - p < palette_size * sizeof(int)) {
             return_subchunk_error();
         }
         SEXP r_palette = PROTECT(Rf_allocVector(INTSXP, palette_size));
-        memcpy(INTEGER(r_palette), p, palette_size*sizeof(int));
-        p += palette_size*sizeof(int);
+        memcpy(INTEGER(r_palette), p, palette_size * sizeof(int));
+        p += palette_size * sizeof(int);
         SET_VECTOR_ELT(r_val, 1, r_palette);
         // add to stretchy list
         grow_stretchy_list(r_ret, r_val);
@@ -338,32 +349,34 @@ SEXP attribute_visible R_write_chunk_biomes(SEXP r_values, SEXP r_palettes) {
     if(XLENGTH(r_palettes) != num_subchunks) {
         return_subchunk_error();
     }
-    SEXP r_retv = PROTECT(Rf_allocVector(VECSXP, 2*num_subchunks));
-    for(R_xlen_t i=0; i < num_subchunks; ++i) {
+    SEXP r_retv = PROTECT(Rf_allocVector(VECSXP, 2 * num_subchunks));
+    for(R_xlen_t i = 0; i < num_subchunks; ++i) {
         SEXP r_val = VECTOR_ELT(r_values, i);
         SEXP r_pal = VECTOR_ELT(r_palettes, i);
         // Write the palette ids using runtime storage
-        SET_VECTOR_ELT(r_retv, 2*i,
+        SET_VECTOR_ELT(
+            r_retv, 2 * i,
             write_subchunk_palette_ids(r_val, false, XLENGTH(r_pal)));
         // write palette
         if(!Rf_isInteger(r_pal)) {
             return_subchunk_error();
         }
-        SEXP r_buffer = PROTECT(Rf_allocVector(RAWSXP, sizeof(int)*XLENGTH(r_pal)));
-        memcpy(RAW(r_buffer), INTEGER(r_pal), sizeof(int)*XLENGTH(r_pal));
+        SEXP r_buffer =
+            PROTECT(Rf_allocVector(RAWSXP, sizeof(int) * XLENGTH(r_pal)));
+        memcpy(RAW(r_buffer), INTEGER(r_pal), sizeof(int) * XLENGTH(r_pal));
         UNPROTECT(1);
-        SET_VECTOR_ELT(r_retv, 2*i+1, r_buffer);
+        SET_VECTOR_ELT(r_retv, 2 * i + 1, r_buffer);
     }
 
     // Calculate total size of our return vector
     R_xlen_t total_size = 0;
-    for(R_xlen_t i=0; i < XLENGTH(r_retv); ++i) {
+    for(R_xlen_t i = 0; i < XLENGTH(r_retv); ++i) {
         total_size += XLENGTH(VECTOR_ELT(r_retv, i));
     }
     // Concatenate everything together and return
     SEXP r_ret = PROTECT(Rf_allocVector(RAWSXP, total_size));
     unsigned char *buffer = RAW(r_ret);
-    for(R_xlen_t i=0; i < XLENGTH(r_retv); ++i) {
+    for(R_xlen_t i = 0; i < XLENGTH(r_retv); ++i) {
         SEXP r_val = VECTOR_ELT(r_retv, i);
         memcpy(buffer, RAW(r_val), XLENGTH(r_val));
         buffer += XLENGTH(r_val);

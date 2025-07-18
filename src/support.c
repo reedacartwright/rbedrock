@@ -29,7 +29,8 @@
 
 R_len_t get_data(SEXP data, const char **data_contents, const char *name);
 R_len_t get_keys_len(SEXP keys);
-void get_keys_data(R_len_t len, SEXP keys, const char **data, R_len_t *data_len);
+void get_keys_data(R_len_t len, SEXP keys, const char **data,
+                   R_len_t *data_len);
 
 R_len_t get_key(SEXP key, const char **key_data) {
     return get_data(key, key_data, "key");
@@ -66,7 +67,7 @@ R_len_t get_starts_with(SEXP starts_with, const char **starts_with_data) {
 
 R_len_t get_data(SEXP data, const char **data_contents, const char *name) {
     if(TYPEOF(data) != RAWSXP) {
-        Rf_error("Invalid data type for %s; expected raw", name);        
+        Rf_error("Invalid data type for %s; expected raw", name);
     }
     *data_contents = (const char *)RAW(data);
     return length(data);
@@ -76,7 +77,8 @@ R_len_t get_keys_len(SEXP keys) {
     return TYPEOF(keys) == RAWSXP ? 1 : length(keys);
 }
 
-void get_keys_data(R_len_t len, SEXP keys, const char **data, R_len_t *data_len) {
+void get_keys_data(R_len_t len, SEXP keys, const char **data,
+                   R_len_t *data_len) {
     if(TYPEOF(keys) == RAWSXP) {
         data[0] = (char *)RAW(keys);
         data_len[0] = length(keys);
