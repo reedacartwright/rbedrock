@@ -78,13 +78,14 @@ class PosixLogger final : public Logger {
       assert(buffer_offset < buffer_size);
 
       // Print the message into the buffer.
-      std::va_list arguments_copy;
-      va_copy(arguments_copy, arguments);
-      buffer_offset +=
-          std::vsnprintf(buffer + buffer_offset, buffer_size - buffer_offset,
-                         format, arguments_copy);
-      va_end(arguments_copy);
-
+      if (format != NULL) {
+        std::va_list arguments_copy;
+        va_copy(arguments_copy, arguments);
+        buffer_offset +=
+            std::vsnprintf(buffer + buffer_offset, buffer_size - buffer_offset,
+                           format, arguments_copy);
+        va_end(arguments_copy);
+      }
       // The code below may append a newline at the end of the buffer, which
       // requires an extra character.
       if (buffer_offset >= buffer_size - 1) {
