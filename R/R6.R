@@ -125,7 +125,9 @@ is_bedrockdb <- function(x) {
   inherits(x, "bedrockdb")
 }
 
-R6_bedrockdb <- R6::R6Class( # nolint: object_name_linter
+# nolint start: object_name_linter
+R6_bedrockdb <- R6::R6Class(
+# nolint end
   "bedrockdb",
   public = list(
     db = NULL,
@@ -225,7 +227,9 @@ R6_bedrockdb <- R6::R6Class( # nolint: object_name_linter
   )
 )
 
-R6_bedrockdb_iterator <- R6::R6Class( # nolint: object_name_linter
+# nolint start: object_name_linter
+R6_bedrockdb_iterator <- R6::R6Class(
+# nolint end
   "bedrockdb_iterator",
   public = list(
     it = NULL,
@@ -267,8 +271,9 @@ R6_bedrockdb_iterator <- R6::R6Class( # nolint: object_name_linter
     }
   )
 )
-
-R6_bedrockdb_writebatch <- R6::R6Class( # nolint: object_name_linter
+# nolint start: object_name_linter
+R6_bedrockdb_writebatch <- R6::R6Class(
+# nolint end
   "bedrockdb_writebatch",
   public = list(
     ptr = NULL,

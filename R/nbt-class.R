@@ -393,14 +393,16 @@ nbt_float <- function(x) {
 
 validate_nbt_float <- function(x) {
   p <- unclass(x)
+  # nolint start: indentation linter
   if (
     any(
       is.na(p) |
         (is.finite(p) &&
-           (p > 3.4028234663852886e+38 |
-              p < -3.4028234663852886e+38))
+          (p > 3.4028234663852886e+38 |
+            p < -3.4028234663852886e+38))
     )
   ) {
+  # nolint end
     stop("`x` cannot be coerced into a float", call. = FALSE)
   }
   x

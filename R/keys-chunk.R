@@ -226,6 +226,8 @@ is_valid_chunk_key_prefix <- function(x) {
   grepl("^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+$", x)
 }
 
-is_valid_chunk_key_prefix_with_tag <- function(x) { # nolint: object_length_linter
+# nolint start: object_length_linter
+is_valid_chunk_key_prefix_with_tag <- function(x) {
   grepl("^chunk:-?[0-9]+:-?[0-9]+:-?[0-9]+:-?[0-9]+$", x)
 }
+# nolint end

@@ -93,7 +93,7 @@ block_state_nbt <- function(prop) {
     v <- suppressWarnings(as.integer(v))
     if (is.na(v)) {
       msg <- sprintf(
-        "block state '%s' could not be converted to an integer. Possible loss of information.",  # nolint
+        "block state '%s' could not be converted to an integer. Possible loss of information.", # nolint
         prop
       )
       warning(msg, call. = FALSE)
