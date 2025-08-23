@@ -1,7 +1,5 @@
 # rbedrock 0.4.0
 
-# RBedrock (development)
-
 ## Breaking Changes
 
 * This release includes a new API for reading and writing from the world

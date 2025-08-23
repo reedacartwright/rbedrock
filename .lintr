@@ -2,5 +2,6 @@ linters: linters_with_defaults(indentation_linter(indent = 2L),
                                commas_linter = NULL)
 encoding: "UTF-8"
 exclusions: list(
-	"R/import-standalone-defer.R"
+	"R/import-standalone-defer.R",
+    "tests/spelling.R"
   )
