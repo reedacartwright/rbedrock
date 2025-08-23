@@ -33,7 +33,57 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.4.0" id="rbedrock-040">rbedrock 0.4.0<a class="anchor" aria-label="anchor" href="#rbedrock-040"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.4.0" id="rbedrock-040">rbedrock 0.4.0<a class="anchor" aria-label="anchor" href="#rbedrock-040"></a></h2><p class="text-muted">CRAN release: 2025-08-23</p>
+<div class="section level3">
+<h3 id="breaking-changes-0-4-0">Breaking Changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-4-0"></a></h3>
+<ul><li>
+<p>This release includes a new API for reading and writing from the world database. The new API is designed to better support pipes and use a common database connection across functions. Most functions associated with reading and writing values to a world database were impacted. Consider the process of getting a set of values from a common prefix.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bedrockdb.html">bedrockdb</a></span><span class="op">(</span><span class="va">dbpath</span><span class="op">)</span></span>
+<span><span class="co"># Previous API</span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="va">db</span>, starts_with <span class="op">=</span> <span class="va">prefix</span><span class="op">)</span></span>
+<span><span class="co"># New API</span></span>
+<span><span class="co">#   - automatically uses db</span></span>
+<span><span class="co">#   - prefixes created with helper function</span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data.html">get_data</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_data.html">starts_with</a></span><span class="op">(</span><span class="va">prefix</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Previous API</span></span>
+<span><span class="fu"><a href="../reference/put_data.html">put_data</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">dat</span><span class="op">)</span></span>
+<span><span class="co"># New API</span></span>
+<span><span class="fu"><a href="../reference/put_data.html">put_data</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Previous API</span></span>
+<span><span class="fu">put_values</span><span class="op">(</span><span class="va">db</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span>, <span class="va">dat</span><span class="op">)</span></span>
+<span><span class="co"># New API</span></span>
+<span><span class="fu"><a href="../reference/put_data.html">put_data</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</li>
+<li><p>As part of the new API, the <code>get_values()</code>, <code>set_values()</code>, and related <code>_values()</code> functions were removed.</p></li>
+<li>
+<p>The API for working NBT and rNBT values has been reimagined.</p>
+<ul><li>NBT lists are now treated as vectors where ever possible.</li>
+<li>NBT longs are now stored as strings to protect against data loss.</li>
+<li>NBT integers are now stored as doubles to protect against data loss.</li>
+</ul></li>
+<li><p>New <code>get_blocks_*</code> and <code>put_blocks_*</code> functions have replaced <code>get_chunk_blocks_*</code> and <code>put_chunk_blocks_*</code>. The new functions work per chunk and always return blocks as a 16 x 384 x 16 array, regardless of the dimension.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-4-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-4-0"></a></h3>
+<ul><li>New <code><a href="../reference/default_db.html">default_db()</a></code> function to get/set a default db connection.</li>
+<li>New <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> etc. commands for printing NBT using a tree structure.</li>
+<li>New <code><a href="../reference/default_db.html">with_db()</a></code> and <code><a href="../reference/default_db.html">local_db()</a></code> for temporarily changing the default db connection.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="miscellaneous-fixes-and-features-0-4-0">Miscellaneous Fixes and Features<a class="anchor" aria-label="anchor" href="#miscellaneous-fixes-and-features-0-4-0"></a></h3>
+<ul><li>New pkgdown-based website for rbedrock.</li>
+<li>The requirements for a key to be interpreted as a chunk key has been relaxed. Now any raw key of length 9, 10, 13, or 14 will be considered a chunk key if it contains at least one non-printable character. Collisions between plain and chunk keys can still occur, but they are not likely in this scheme.</li>
+<li>New <code><a href="../reference/Biomes.html">biome_name()</a></code> function for converting from a numeric id to biome name.</li>
+<li>New <code><a href="../reference/rnbt.html">read_rnbt_once()</a></code> function to parse NBT data that is mixed in with non NBT data. It returns a single NBT value along with how may bytes the value was.</li>
+<li>New <code><a href="../reference/blocks_str.html">blocks_nbt()</a></code> and <code><a href="../reference/blocks_str.html">blocks_str()</a></code> functions to convert block data between NBT and string representations.</li>
+<li>
+<code><a href="../reference/spawning_area.html">spawning_area()</a></code> no longer requires a chunk to be withing 96 blocks of a player.</li>
+<li>Vendored LevelDB library is now built with exceptions enabled to avoid libcxx including <code>abort()</code> calls if exceptions are not enabled.</li>
+<li>The following dependencies were removed stringr, dplyr, purrr, magrittr, reader, vctrs, tidyr, and fs.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.3" id="rbedrock-033">RBedrock 0.3.3<a class="anchor" aria-label="anchor" href="#rbedrock-033"></a></h2><p class="text-muted">CRAN release: 2025-03-25</p>
