@@ -1,15 +1,16 @@
 ## Submission
 
-- CRAN errors identified as of 2025-03-25 have been fixed.
+- CRAN errors identified as of 2025-08-22 have been fixed.
 
 ## Test environments
 
-* Arch Linux - R 4.4.2 (Local Install)
+* Arch Linux - R 4.5.1 (Local Install)
 * Windows-Latest - Release (GitHub Actions)
 * MacOS-Latest - Release (GitHub Actions)
 * Ubuntu-Latest - Release (GitHub Actions)
 * Ubuntu-Latest - Devel (GitHub Actions)
 * Ubuntu-Latest - Oldrel-1 (Github Actions)
+* rhub::rhub_check()
 * devtools::check_win_release()
 * devtools::check_win_devel()
 * devtools::check_mac_release()
