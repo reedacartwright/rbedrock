@@ -1,21 +1,70 @@
 # RBedrock (development)
 
-* Add `default_db()` to get/set a default db connection.
-* BREAKING: Updated API of multiple functions to use `default_db()`
-  and generally put values before keys in argument order.
-  - `get_keys()`, `get_data()`, `get_value()`, `has_values()`
-  - `put_data()`, `put_value()`, `delete_values()`
-  - `get_block_entity_*` and `put_block_entity_*`
-  - `get_chunk_version_*` and `put_chunk_version_*`
-  - `get_finalized_state_*` and `put_finalized_state_*`
-  - `get_entity_*` and `put_entity_*`
-  - etc.
-* BREAKING: Removed multiple `*_values()` alias functions.
-* BREAKING: Updated API for working with NBT and rNBT values.
-  - New data structures and functions better support NBT's concept of list values
-  - Removed the reliance of the vctrs package. It was too much for what we need.
-* FEATURE: Print NBT data using a tree structure.
-* Relax the requirements on chunk keys and change how "chunk" keys and "plain" keys are detected. Raw keys of lengths 9, 10, 13, and 14 will be considered "plain" keys if they consist of only printable characters.
+## Breaking Changes
+
+* This release includes a new API for reading and writing from the world
+  database. The new API is designed to better support pipes and use a common
+  database connection across functions. Most functions associated with reading
+  and writing values to a world database were impacted. Consider the process of
+  getting a set of values from a common prefix.
+  
+  ```R
+  db <- bedrockdb(dbpath)
+  # Previous API
+  dat <- get_data(db, starts_with = prefix)
+  # New API
+  #   - automatically uses db
+  #   - prefixes created with helper function
+  dat <- get_data(starts_with(prefix))
+
+  # Previous API
+  put_data(db, dat)
+  # New API
+  put_data(dat)
+
+  # Previous API
+  put_values(db, names(dat), dat)
+  # New API
+  put_data(dat, names(dat))
+  ```
+* As part of the new API, the `get_values()`, `set_values()`, and related
+  `_values()` functions were removed.
+
+* The API for working NBT and rNBT values has been reimagined.
+  - NBT lists are now treated as vectors where ever possible.
+  - NBT longs are now stored as strings to protect against data loss.
+  - NBT integers are now stored as doubles to protect against data loss.
+* New `get_blocks_*` and `put_blocks_*` functions have replaced
+  `get_chunk_blocks_*` and `put_chunk_blocks_*`. The new functions work per
+  chunk and always return blocks as a 16 x 384 x 16 array, regardless of the
+  dimension. 
+
+## New Features
+
+* New `default_db()` function to get/set a default db connection.
+* New `print()` etc. commands for printing NBT using a tree structure.
+* New `with_db()` and `local_db()` for temporarily changing the default db
+  connection.
+
+## Miscellaneous Fixes and Features
+
+* New pkgdown-based website for rbedrock.
+* The requirements for a key to be interpreted as a chunk key has been relaxed.
+  Now any raw key of length 9, 10, 13, or 14 will be considered a chunk key
+  if it contains at least one non-printable character. Collisions between
+  plain and chunk keys can still occur, but they are not likely in this scheme.
+* New `biome_name()` function for converting from a numeric id to biome name.
+* New `read_rnbt_once()` function to parse NBT data that is mixed in with non
+  NBT data. It returns a single NBT value along with how may bytes the value
+  was.
+* New `blocks_nbt()` and `blocks_str()` functions to convert block data between
+  NBT and string representations.
+* `spawning_area()` no longer requires a chunk to be withing 96 blocks of a
+  player.
+* Vendored LevelDB library is now built with exceptions enabled to avoid libcxx
+  including `abort()` calls if exceptions are not enabled.
+* The following dependencies were removed stringr, dplyr, purrr, magrittr,
+  reader, vctrs, tidyr, and fs.
 
 # RBedrock 0.3.3
 
