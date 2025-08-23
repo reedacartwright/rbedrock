@@ -1,5 +1,6 @@
 ## Submission
 
+- This resubmission that fixes the NOTEs reported by the previous submission.
 - CRAN errors identified as of 2025-08-22 have been fixed.
 
 ## Test environments
