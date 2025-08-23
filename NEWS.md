@@ -1,3 +1,5 @@
+# rbedrock 0.4.0
+
 # RBedrock (development)
 
 ## Breaking Changes
