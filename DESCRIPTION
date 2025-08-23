@@ -32,6 +32,7 @@ Imports:
     utils,
     digest
 Suggests:
+    spelling,
     zip,
     testthat,
     jsonlite,
