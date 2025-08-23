@@ -125,10 +125,9 @@ is_bedrockdb <- function(x) {
   inherits(x, "bedrockdb")
 }
 
-R6_bedrockdb <- R6::R6Class(
+R6_bedrockdb <- R6::R6Class( # nolint: object_name_linter
   "bedrockdb",
   public = list(
-    # nolint: object_name_linter
     db = NULL,
     path = NULL,
     levelname = NULL,
@@ -226,10 +225,9 @@ R6_bedrockdb <- R6::R6Class(
   )
 )
 
-R6_bedrockdb_iterator <- R6::R6Class(
+R6_bedrockdb_iterator <- R6::R6Class( # nolint: object_name_linter
   "bedrockdb_iterator",
   public = list(
-    # nolint: object_name_linter
     it = NULL,
     initialize = function(db, readoptions) {
       self$it <- bedrock_leveldb_iter_create(db, readoptions)
@@ -270,10 +268,9 @@ R6_bedrockdb_iterator <- R6::R6Class(
   )
 )
 
-R6_bedrockdb_writebatch <- R6::R6Class(
+R6_bedrockdb_writebatch <- R6::R6Class( # nolint: object_name_linter
   "bedrockdb_writebatch",
   public = list(
-    # nolint: object_name_linter
     ptr = NULL,
     db = NULL,
     initialize = function(db) {

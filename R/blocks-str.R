@@ -81,9 +81,9 @@ block_state_nbt <- function(prop) {
   type <- vanilla_block_property_type_list[n]
   if (is.na(type)) {
     msg <- sprintf(
-      "unknown block state '%s' converted to a string. Possible loss of information.",
+      "unknown block state '%s' converted to a string. Possible loss of information.", # nolint
       prop
-    ) # nolint
+    )
     warning(msg, call. = FALSE)
     nbt_string(v)
   } else if (type == "str") {
@@ -93,9 +93,9 @@ block_state_nbt <- function(prop) {
     v <- suppressWarnings(as.integer(v))
     if (is.na(v)) {
       msg <- sprintf(
-        "block state '%s' could not be converted to an integer. Possible loss of information.",
+        "block state '%s' could not be converted to an integer. Possible loss of information.",  # nolint
         prop
-      ) # nolint
+      )
       warning(msg, call. = FALSE)
     }
     if (type == "bit") {

@@ -397,8 +397,8 @@ validate_nbt_float <- function(x) {
     any(
       is.na(p) |
         (is.finite(p) &&
-          (p > 3.4028234663852886e+38 |
-            p < -3.4028234663852886e+38))
+           (p > 3.4028234663852886e+38 |
+              p < -3.4028234663852886e+38))
     )
   ) {
     stop("`x` cannot be coerced into a float", call. = FALSE)

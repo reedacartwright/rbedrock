@@ -30,7 +30,7 @@ test_that("get_blocks_data() loads multiple value", {
 test_that("put_blocks_value() saves one value", {
   expected_val <- array("minecraft:air", c(16L, 384L, 16L))
   expected_val[10, , ] <- "minecraft:white_wool"
-  expected_val[,, 11] <- "minecraft:red_wool"
+  expected_val[, , 11] <- "minecraft:red_wool"
   expected_val[, 128, ] <- "minecraft:blue_wool"
 
   # Overworld
