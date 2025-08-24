@@ -349,6 +349,9 @@ SEXP attribute_visible R_write_chunk_biomes(SEXP r_values, SEXP r_palettes) {
     if(XLENGTH(r_palettes) != num_subchunks) {
         return_subchunk_error();
     }
+    if(num_subchunks == 0) {
+        return Rf_allocVector(RAWSXP, 0);
+    }
     SEXP r_retv = PROTECT(Rf_allocVector(VECSXP, 2 * num_subchunks));
     for(R_xlen_t i = 0; i < num_subchunks; ++i) {
         SEXP r_val = VECTOR_ELT(r_values, i);
