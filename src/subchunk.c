@@ -366,7 +366,10 @@ SEXP attribute_visible R_write_chunk_biomes(SEXP r_values, SEXP r_palettes) {
         }
         SEXP r_buffer =
             PROTECT(Rf_allocVector(RAWSXP, sizeof(int) * XLENGTH(r_pal)));
-        memcpy(RAW(r_buffer), INTEGER(r_pal), sizeof(int) * XLENGTH(r_pal));
+        if(XLENGTH(r_pal) > 0) {
+            memcpy(RAW(r_buffer), DATAPTR_RO(r_pal),
+                sizeof(int) * XLENGTH(r_pal));
+        }
         UNPROTECT(1);
         SET_VECTOR_ELT(r_retv, 2 * i + 1, r_buffer);
     }
