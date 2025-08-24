@@ -1,6 +1,6 @@
 Package: rbedrock
 Title: Analysis and Manipulation of Data from Minecraft Bedrock Edition
-Version: 0.4.1
+Version: 0.4.1.9000
 Authors@R: c(
     person("Reed", "Cartwright",
            role = c("aut", "cre"),
