@@ -1,5 +1,7 @@
 # rbedrock (development version)
 
+* Undefined behavior identified by the M1-San system was fixed.
+
 # rbedrock 0.4.0
 
 ## Breaking Changes
