@@ -19,7 +19,7 @@ java_latest <- n[which(v == max(v))]
 
 # Download data from latest version
 url <- sprintf(
-  "https://raw.githubusercontent.com/gentlegiantJGC/PyMCTranslate/refs/heads/master/PyMCTranslate/json/versions/%s/__biome_data__.json", # nolint
+  "https://raw.githubusercontent.com/gentlegiantJGC/PyMCTranslate/refs/heads/main/PyMCTranslate/json/versions/%s/__biome_data__.json", # nolint
   c(bedrock_latest, java_latest)
 )
 biome_data <- jsonlite::fromJSON(url[[1]])
