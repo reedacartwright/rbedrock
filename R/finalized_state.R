@@ -23,7 +23,7 @@
 #' @param values A (named) vector of FinalizedState values. If `x` is
 #' missing, the names of `values` will be taken as the keys.
 #'
-#' @return `get_finalized_state_value()` returns a ChunkVersion data
+#' @return `get_finalized_state_value()` returns a FinalizedState data
 #' value. `get_finalized_state_data()` returns a named vector of
 #' FinalizedState data values.
 #'

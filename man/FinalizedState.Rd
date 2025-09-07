@@ -28,7 +28,7 @@ put_finalized_state_data(values, x, z, dimension, db = default_db())
 missing, the names of \code{values} will be taken as the keys.}
 }
 \value{
-\code{get_finalized_state_value()} returns a ChunkVersion data
+\code{get_finalized_state_value()} returns a FinalizedState data
 value. \code{get_finalized_state_data()} returns a named vector of
 FinalizedState data values.
 }
