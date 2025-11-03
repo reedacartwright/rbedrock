@@ -63,7 +63,7 @@ test_that("update_checksums_data() throws an error if filtering", {
 })
 
 helper_checksum_impl <- function(x) {
-  digest::digest(x, algo = "xxhash64", serialize = FALSE, raw = TRUE)
+  digest::digest(x, algo = "xxhash64", serialize = FALSE, raw = FALSE)
 }
 
 helper_checksum_as_raw <- function(x) {
