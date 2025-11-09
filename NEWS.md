@@ -1,5 +1,9 @@
 # rbedrock (development version)
 
+* Vanilla data was updated on 2025-11-09.
+* Legacy checksum support was updated for compatibility with the most recent
+  version of `digest.` (@eddelbuettel #14)
+
 # rbedrock 0.4.1
 
 * Undefined behavior identified by the M1-San system was fixed.
