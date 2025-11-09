@@ -2,6 +2,12 @@
 
 ## rbedrock (development version)
 
+- Vanilla data was updated on 2025-11-09.
+- Legacy checksum support was updated for compatibility with the most
+  recent version of `digest.`
+  ([@eddelbuettel](https://github.com/eddelbuettel)
+  [\#14](https://github.com/reedacartwright/rbedrock/issues/14))
+
 ## rbedrock 0.4.1
 
 CRAN release: 2025-08-24

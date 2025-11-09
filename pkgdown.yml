@@ -2,7 +2,7 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles: {}
-last_built: 2025-11-09T21:03Z
+last_built: 2025-11-09T21:26Z
 urls:
   reference: https://reedacartwright.github.io/rbedrock/reference
   article: https://reedacartwright.github.io/rbedrock/articles
