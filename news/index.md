@@ -1,6 +1,6 @@
 # Changelog
 
-## rbedrock (development version)
+## rbedrock 0.4.2
 
 - Vanilla data was updated on 2025-11-09.
 - Legacy checksum support was updated for compatibility with the most
