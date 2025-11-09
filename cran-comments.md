@@ -1,7 +1,8 @@
 ## Submission
 
-- This submission fixes an undefined behavior identified by CRAN on 2024-08-24.
-- CRAN errors identified as of 2025-08-24 have been fixed.
+- This submission fixes a reverse dependency error caused by an upcoming update
+  to the `digest` package.
+- No CRAN errors identified as of 2025-11-09.
 
 ## Test environments
 
@@ -11,18 +12,9 @@
 * Ubuntu-Latest - Release (GitHub Actions)
 * Ubuntu-Latest - Devel (GitHub Actions)
 * Ubuntu-Latest - Oldrel-1 (Github Actions)
-* rhub::rhub_check()
-* devtools::check_win_release()
 * devtools::check_win_devel()
-* devtools::check_mac_release()
+* rhub::rhub_check(platforms = rhub::rhub_platforms()$name)
 
 ## R CMD check results
 
-0 errors | 0 warnings | 2 notes
-
-- "GNU make is a SystemRequirements."
-  * This is listed as a system requirement because on some systems the CMake
-    configuration of a dependent library creates a GNU make file.
-- installed size is big
-  * The package contains a dependent library and on some systems this library
-    is large when compiled.
+0 errors | 0 warnings | 0 notes
