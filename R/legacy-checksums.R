@@ -136,6 +136,6 @@ checksum_impl_raw <- function(x) {
 
 checksum_impl <- function(x) {
   # this matches the algorithm used in BDS
-  y <- digest::digest(x, algo = "xxhash64", serialize = FALSE, raw = TRUE)
+  y <- digest::digest(x, algo = "xxhash64", serialize = FALSE, raw = FALSE)
   checksum_impl_raw(y)
 }
