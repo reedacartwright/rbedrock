@@ -1,7 +1,12 @@
 # rbedrock (development version)
 
-* Renamed `starts_with()` to `begins_with()` to prevent name conflicts with
+* `starts_with()` was renamed to `begins_with()` to prevent name conflicts with
   tidyverse.
+* Plain keys are now assumed to be unprefixed. This eliminates the warning
+  message when using unprefixed plain keys. The "plain:" prefix is still
+  recognized by `chrkeys_to_rawkeys()` however `rawkeys_to_chrkeys()` doesn't
+  use it anymore. Percent encoding of plain keys now encodes `:` in order to
+  prevent collisions.
 
 # rbedrock 0.4.2
 

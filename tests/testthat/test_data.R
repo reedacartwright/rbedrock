@@ -18,14 +18,14 @@ test_that("get_keys returns all keys", {
 
 test_that("get_keys returns all keys with a prefix", {
   keys <- get_keys(db = db)
-  pre_str <- get_keys("plain:VILLAGE", db = db)
-  expect_equal(pre_str, grep("^plain:VILLAGE", keys, value = TRUE))
+  pre_str <- get_keys("VILLAGE", db = db)
+  expect_equal(pre_str, grep("^VILLAGE", keys, value = TRUE))
   pre_chunk <- get_keys("chunk:37:6:0", db = db)
   expect_equal(pre_chunk, grep("^chunk:37:6:0", keys, value = TRUE))
 
   # works with default_db() too
   pre_str <- get_keys("plain:VILLAGE")
-  expect_equal(pre_str, grep("^plain:VILLAGE", keys, value = TRUE))
+  expect_equal(pre_str, grep("^VILLAGE", keys, value = TRUE))
 })
 
 test_that("get_value returns a single, raw value", {
@@ -131,8 +131,8 @@ test_that("get_data() returns a list of raw values", {
 
 test_that("get_data() returns all keys with a prefix", {
   keys <- get_keys(db = db)
-  pre_str <- get_data(key_prefix("plain:VILLAGE"), db = db)
-  expect_equal(names(pre_str), grep("^plain:VILLAGE", keys, value = TRUE))
+  pre_str <- get_data(key_prefix("VILLAGE"), db = db)
+  expect_equal(names(pre_str), grep("^VILLAGE", keys, value = TRUE))
   pre_chunk <- get_data(key_prefix("chunk:37:6:0"), db = db)
   expect_equal(names(pre_chunk), grep("^chunk:37:6:0", keys, value = TRUE))
   pre_chunk <- get_data(key_prefix("chunk:37:6:0:47"), db = db)

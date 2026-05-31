@@ -267,51 +267,55 @@ test_that("chrkeys_to_rawkeys treats invalid actor keys as strings", {
 test_that("rawkeys_to_chrkeys supports plain strings", {
   expect_equal(
     rawkeys_to_chrkeys(charToRaw("test_string")),
-    "plain:test_string"
+    "test_string"
+  )
+  expect_equal(
+    rawkeys_to_chrkeys(charToRaw("test:string")),
+    "test%3Astring"
   )
   expect_equal(
     rawkeys_to_chrkeys(charToRaw("test\u0a_string")),
-    "plain:test%0A_string"
+    "test%0A_string"
   )
   expect_equal(
     rawkeys_to_chrkeys(list(
       charToRaw("test_string1"),
       charToRaw("test_string2")
     )),
-    c("plain:test_string1", "plain:test_string2")
+    c("test_string1", "test_string2")
   )
 })
 
 test_that("rawkeys_to_chrkeys supports NA and NULL", {
   expect_equal(
     rawkeys_to_chrkeys(list(NULL, charToRaw("test"))),
-    c(NA_character_, "plain:test")
+    c(NA_character_, "test")
   )
   expect_equal(rawkeys_to_chrkeys(list()), character(0L))
-  expect_equal(rawkeys_to_chrkeys(raw(0L)), "plain:")
+  expect_equal(rawkeys_to_chrkeys(raw(0L)), "")
   expect_null(rawkeys_to_chrkeys(NULL))
 })
 
 test_that("rawkeys_to_charkeys supports percent encoding", {
   expect_equal(
     rawkeys_to_chrkeys(charToRaw("@0:0:0:0")),
-    "plain:@0:0:0:0"
+    "@0%3A0%3A0%3A0"
   )
   expect_equal(
     rawkeys_to_chrkeys(charToRaw("Hello%World")),
-    "plain:Hello%25World"
+    "Hello%25World"
   )
   expect_equal(
     rawkeys_to_chrkeys(charToRaw("Hello\x4AWorld")),
-    "plain:HelloJWorld"
+    "HelloJWorld"
   )
   expect_equal(
     rawkeys_to_chrkeys(charToRaw("Hello\x0FWorld")),
-    "plain:Hello%0FWorld"
+    "Hello%0FWorld"
   )
   expect_equal(
     rawkeys_to_chrkeys(charToRaw("Hello\x80World")),
-    "plain:Hello%80World"
+    "Hello%80World"
   )
 })
 
@@ -443,10 +447,10 @@ test_that("rawkeys_to_chrkeys() creates plain keys from printable chunk keys", {
   expect_equal(
     rawkeys_to_chrkeys(rawkeys),
     c(
-      "plain:123456789",
-      "plain:1234567890",
-      "plain:1234567890123",
-      "plain:12345678901234"
+      "123456789",
+      "1234567890",
+      "1234567890123",
+      "12345678901234"
     )
   )
 
@@ -461,10 +465,10 @@ test_that("rawkeys_to_chrkeys() creates plain keys from printable chunk keys", {
   expect_equal(
     rawkeys_to_chrkeys(rawkeys),
     c(
-      "plain:123456789",
-      "plain:1234567890",
-      "plain:1234567890123",
-      "plain:12345678901234"
+      "123456789",
+      "1234567890",
+      "1234567890123",
+      "12345678901234"
     )
   )
 })
@@ -485,11 +489,11 @@ test_that("rawkeys_to_chrkeys treats invalid actor keys as plain keys", {
   prefix <- charToRaw("actorprefix")
   expect_equal(
     rawkeys_to_chrkeys(c(prefix, as.raw(c(0, 0, 0, 0, 0, 0, 0)))),
-    "plain:actorprefix%00%00%00%00%00%00%00"
+    "actorprefix%00%00%00%00%00%00%00"
   )
   expect_equal(
     rawkeys_to_chrkeys(c(prefix, as.raw(c(110, 0, 0, 0, 0, 107, 0, 0, 0)))),
-    "plain:actorprefixn%00%00%00%00k%00%00%00"
+    "actorprefixn%00%00%00%00k%00%00%00"
   )
 })
 
@@ -525,7 +529,7 @@ test_that("rawkeys_to_chrkeys treats invalid actor digest keys as plain keys", {
   prefix <- charToRaw("digp")
   expect_equal(
     rawkeys_to_chrkeys(c(prefix, as.raw(c(0, 0, 0, 0, 0, 0, 0)))),
-    "plain:digp%00%00%00%00%00%00%00"
+    "digp%00%00%00%00%00%00%00"
   )
   expect_equal(
     rawkeys_to_chrkeys(c(
@@ -546,7 +550,7 @@ test_that("rawkeys_to_chrkeys treats invalid actor digest keys as plain keys", {
         0
       ))
     )),
-    "plain:digpn%00%00%00%FA%FF%FF%FF%01%00%00%00%00"
+    "digpn%00%00%00%FA%FF%FF%FF%01%00%00%00%00"
   )
 })
 
