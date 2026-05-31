@@ -7,6 +7,7 @@
   recognized by `chrkeys_to_rawkeys()` however `rawkeys_to_chrkeys()` doesn't
   use it anymore. Percent encoding of plain keys now encodes `:` in order to
   prevent collisions.
+* New `make_actor_keys()` function to create actor keys from UniqueIDs.
 
 # rbedrock 0.4.2
 

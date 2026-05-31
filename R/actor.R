@@ -150,12 +150,15 @@ create_acdig_keys <- function(x, z, dimension) {
 #' the actor's `UniqueID`. The actor's position and dimension are not verified
 #' to be in the chunk it is assigned to.
 #'
+#' `make_actor_keys()` creates actor keys based on UniqueIDs.
+#'
 #' @param db A bedrockdb object.
-#' @param x,z,dimension Chunk coordinates to extract data from.
-#'    `x` can also be a character vector of db keys.
+#' @param x,z,dimension Chunk coordinates to extract data from. `x` can also be
+#'  a character vector of db keys.
 #' @param value A list of nbt actors data
-#' @param values A list of character vectors.
-#' If `x` is missing, the names of `values` will be taken as the keys.
+#' @param values A list of character vectors. If `x` is missing, the names of
+#'  `values` will be taken as the keys.
+#' @param ids A vector of UniqueIDs.
 #'
 #' @seealso [ActorDigest], [Entity]
 #'
@@ -239,7 +242,7 @@ put_actors_value_impl <- function(value, dig_key, db) {
 
 #' @useDynLib rbedrock R_rbedrock_actor_make_storagekeys
 make_storagekeys <- function(ids) {
-  stopifnot(is.character(ids))
+  stopifnot(is.character(ids) || is.double(ids))
   .Call(R_rbedrock_actor_make_storagekeys, ids)
 }
 
@@ -249,6 +252,14 @@ is_acdig_key <- function(keys) {
 
 is_valid_acdig_key <- function(keys) {
   grepl(keys, pattern = "^acdig:-?[0-9]+:-?[0-9]+:[0-2]$")
+}
+
+#' @rdname Actors
+#' @export
+make_actor_keys <- function(ids) {
+  keys <- make_storagekeys(ids)
+  keys <- sapply(keys, paste0, collapse = "")
+  paste0("actor:", toupper(keys))
 }
 
 is_actor_key <- function(keys) {

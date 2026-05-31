@@ -53,21 +53,26 @@ SEXP attribute_visible R_rbedrock_actor_make_uniqueids(SEXP low_counter,
 }
 
 SEXP attribute_visible R_rbedrock_actor_make_storagekeys(SEXP ids) {
-    if(TYPEOF(ids) != STRSXP) {
-        Rf_error("argument is not an character");
+    if(TYPEOF(ids) != STRSXP && TYPEOF(ids) != REALSXP) {
+        Rf_error("argument is not a character vector or a double vector");
     }
     R_xlen_t len = XLENGTH(ids);
     SEXP result = PROTECT(Rf_allocVector(VECSXP, len));
-    const char *str = NULL;
-    char *strend = NULL;
+    const char* str = NULL;
+    char* strend = NULL;
     for(R_xlen_t i = 0; i < len; ++i) {
-        str = Rf_translateCharUTF8(STRING_ELT(ids, i));
-        // str is in signed format. Use strtoll to convert it,
-        // then cast it to unsigned number.
-        uint64_t u = (uint64_t)strtoll(str, &strend, 10);
-        if(*strend != '\0') {
-            Rf_error("Malformed data: at %s, line %d.", __FILE__, __LINE__);
-            return R_NilValue;
+        uint64_t u;
+        if(TYPEOF(ids) == STRSXP) {
+            str = Rf_translateCharUTF8(STRING_ELT(ids, i));
+            // str is in signed format. Use strtoll to convert it,
+            // then cast it to unsigned number.
+            u = (uint64_t)strtoll(str, &strend, 10);
+            if(*strend != '\0') {
+                Rf_error("Malformed data: at %s, line %d.", __FILE__, __LINE__);
+                return R_NilValue;
+            }
+        } else {
+            memcpy(&u, &REAL_RO(ids)[i], sizeof(u));
         }
         uint64_t lo = (uint32_t)u;
         u = 2 * lo - u;  // negate the upper 32-bit of u while keeping the lower
@@ -77,7 +82,7 @@ SEXP attribute_visible R_rbedrock_actor_make_storagekeys(SEXP ids) {
         // store result
         SET_VECTOR_ELT(result, i, Rf_allocVector(RAWSXP, 8));
         SEXP elt = VECTOR_ELT(result, i);
-        memcpy(RAW(elt), &u, 8);
+        memcpy(RAW(elt), &u, sizeof(u));
     }
 
     UNPROTECT(1);

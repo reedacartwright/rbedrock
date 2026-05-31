@@ -6,6 +6,7 @@
 \alias{get_actors_value}
 \alias{put_actors_data}
 \alias{put_actors_value}
+\alias{make_actor_keys}
 \title{Read and write Actor data}
 \usage{
 get_actors_data(x, z, dimension, db = default_db())
@@ -15,17 +16,21 @@ get_actors_value(x, z, dimension, db = default_db())
 put_actors_data(values, x, z, dimension, db = default_db())
 
 put_actors_value(value, x, z, dimension, db = default_db())
+
+make_actor_keys(ids)
 }
 \arguments{
-\item{x, z, dimension}{Chunk coordinates to extract data from.
-\code{x} can also be a character vector of db keys.}
+\item{x, z, dimension}{Chunk coordinates to extract data from. \code{x} can also be
+a character vector of db keys.}
 
 \item{db}{A bedrockdb object.}
 
-\item{values}{A list of character vectors.
-If \code{x} is missing, the names of \code{values} will be taken as the keys.}
+\item{values}{A list of character vectors. If \code{x} is missing, the names of
+\code{values} will be taken as the keys.}
 
 \item{value}{A list of nbt actors data}
+
+\item{ids}{A vector of UniqueIDs.}
 }
 \description{
 After 1.18.30, the nbt data of each actor is saved independently in the
@@ -42,6 +47,8 @@ Actors data into \code{db} and update the chunks' ActorDigests.
 When storing Actors data, an actor's storage key will be recalculated from
 the actor's \code{UniqueID}. The actor's position and dimension are not verified
 to be in the chunk it is assigned to.
+
+\code{make_actor_keys()} creates actor keys based on UniqueIDs.
 }
 \seealso{
 \link{ActorDigest}, \link{Entity}
