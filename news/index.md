@@ -2,7 +2,21 @@
 
 ## rbedrock (development version)
 
+- `starts_with()` was renamed to
+  [`begins_with()`](https://reedacartwright.github.io/rbedrock/reference/get_data.md)
+  to prevent name conflicts with tidyverse.
+- Plain keys are now assumed to be unprefixed. This eliminates the
+  warning message when using unprefixed plain keys. The “plain:” prefix
+  is still recognized by
+  [`chrkeys_to_rawkeys()`](https://reedacartwright.github.io/rbedrock/reference/chrkeys_to_rawkeys.md)
+  however
+  [`rawkeys_to_chrkeys()`](https://reedacartwright.github.io/rbedrock/reference/chrkeys_to_rawkeys.md)
+  doesn’t use it anymore. Percent encoding of plain keys now encodes `:`
+  in order to prevent collisions.
+
 ## rbedrock 0.4.2
+
+CRAN release: 2025-11-09
 
 - Vanilla data was updated on 2025-11-09.
 - Legacy checksum support was updated for compatibility with the most
@@ -29,6 +43,7 @@ CRAN release: 2025-08-23
   Consider the process of getting a set of values from a common prefix.
 
   ``` r
+
   db <- bedrockdb(dbpath)
   # Previous API
   dat <- get_data(db, starts_with = prefix)

@@ -12,6 +12,7 @@ If you are not already using R, you will need to install the latest
 ## Installation
 
 ``` r
+
 # The easiest way to install rbedrock is from CRAN.
 install.packages("rbedrock")
 

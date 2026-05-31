@@ -108,7 +108,7 @@
 - [`delete_values()`](https://reedacartwright.github.io/rbedrock/reference/delete_values.md)
   : Remove values from a bedrockdb.
 - [`key_prefix()`](https://reedacartwright.github.io/rbedrock/reference/get_data.md)
-  [`starts_with()`](https://reedacartwright.github.io/rbedrock/reference/get_data.md)
+  [`begins_with()`](https://reedacartwright.github.io/rbedrock/reference/get_data.md)
   [`get_data()`](https://reedacartwright.github.io/rbedrock/reference/get_data.md)
   [`get_value()`](https://reedacartwright.github.io/rbedrock/reference/get_data.md)
   [`has_values()`](https://reedacartwright.github.io/rbedrock/reference/get_data.md)

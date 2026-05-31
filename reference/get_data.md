@@ -7,7 +7,7 @@ Read values stored in a bedrockdb.
 ``` r
 key_prefix(prefix)
 
-starts_with(prefix)
+begins_with(prefix)
 
 get_data(keys, db = default_db(), readoptions = NULL)
 

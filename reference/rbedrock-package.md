@@ -22,6 +22,11 @@ Useful links:
 **Maintainer**: Reed Cartwright <racartwright@gmail.com>
 ([ORCID](https://orcid.org/0000-0002-0837-9380))
 
+Authors:
+
+- Reed Cartwright <racartwright@gmail.com>
+  ([ORCID](https://orcid.org/0000-0002-0837-9380))
+
 Other contributors:
 
 - Rich FitzJohn <rich.fitzjohn@gmail.com> \[contributor\]
