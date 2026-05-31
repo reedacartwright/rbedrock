@@ -23,6 +23,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Reed Cartwright \email{racartwright@gmail.com} (\href{https://orcid.org/0000-0002-0837-9380}{ORCID})
 
+Authors:
+\itemize{
+  \item Reed Cartwright \email{racartwright@gmail.com} (\href{https://orcid.org/0000-0002-0837-9380}{ORCID})
+}
+
 Other contributors:
 \itemize{
   \item Rich FitzJohn \email{rich.fitzjohn@gmail.com} [contributor]

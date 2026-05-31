@@ -2,7 +2,7 @@
 % Please edit documentation in R/data.R
 \name{key_prefix}
 \alias{key_prefix}
-\alias{starts_with}
+\alias{begins_with}
 \alias{get_data}
 \alias{get_value}
 \alias{has_values}
@@ -10,7 +10,7 @@
 \usage{
 key_prefix(prefix)
 
-starts_with(prefix)
+begins_with(prefix)
 
 get_data(keys, db = default_db(), readoptions = NULL)
 

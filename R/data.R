@@ -40,7 +40,7 @@ key_prefix <- function(prefix) {
 
 #' @rdname get_data
 #' @export
-starts_with <- key_prefix
+begins_with <- key_prefix
 
 is_key_prefix <- function(x) {
   inherits(x, "rbedrock_key_prefix")

@@ -17,7 +17,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-US
 LazyData: true
-RoxygenNote: 7.3.2
 SystemRequirements: cmake, zlib, GNU make
 NeedsCompilation: yes
 Roxygen: list(markdown = TRUE)
@@ -39,3 +38,4 @@ Suggests:
     covr
 URL: https://reedacartwright.github.io/rbedrock/, https://github.com/reedacartwright/rbedrock
 BugReports: https://github.com/reedacartwright/rbedrock/issues
+Config/roxygen2/version: 8.0.0

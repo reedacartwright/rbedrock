@@ -9,7 +9,7 @@
 \format{
 \subsection{vanilla_block_states_df}{
 
-A data.frame in long-format with 1131 rows and
+A data.frame in long-format with 1218 rows and
 5 columns. Block data version is
 18168865.
 

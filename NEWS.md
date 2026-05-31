@@ -1,5 +1,8 @@
 # rbedrock (development version)
 
+* Renamed `starts_with()` to `begins_with()` to prevent name conflicts with
+  tidyverse.
+
 # rbedrock 0.4.2
 
 * Vanilla data was updated on 2025-11-09.
