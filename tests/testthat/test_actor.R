@@ -93,8 +93,8 @@ test_that("put_acdig_data() writes actor digest data to db.", {
   expect_equal(dat, expected)
 })
 
-test_that("get_actors_value() returns a list of NBT data.", {
-  dat <- get_actors_value(0, 0, 0, db = db)
+test_that("get_chunk_actors_value() returns a list of NBT data.", {
+  dat <- get_chunk_actors_value(0, 0, 0, db = db)
   expect_type(dat, "list")
   expect_named(
     dat,
@@ -106,7 +106,7 @@ test_that("get_actors_value() returns a list of NBT data.", {
   )
   expect_true(all(sapply(dat, is_nbt_value)))
 
-  dat <- get_actors_value("acdig:0:0:0", db = db)
+  dat <- get_chunk_actors_value("acdig:0:0:0", db = db)
   expect_type(dat, "list")
   expect_named(
     dat,
@@ -118,15 +118,15 @@ test_that("get_actors_value() returns a list of NBT data.", {
   )
   expect_true(all(sapply(dat, is_nbt_value)))
 
-  expect_null(get_actors_value("acdig:1:0:1", db = db))
+  expect_null(get_chunk_actors_value("acdig:1:0:1", db = db))
   expect_equal(
-    get_actors_value("acdig:1:0:0", db = db),
+    get_chunk_actors_value("acdig:1:0:0", db = db),
     setNames(list(), character(0L))
   )
 })
 
 test_that("get_actors_data() returns a list of lists of NBT data.", {
-  dat <- get_actors_data(c(0, -7, 1, 1), c(0, -2, 0, 0), c(0, 0, 0, 1), db = db)
+  dat <- get_chunk_actors_data(c(0, -7, 1, 1), c(0, -2, 0, 0), c(0, 0, 0, 1), db = db)
   expect_named(
     dat,
     c(
@@ -156,7 +156,7 @@ test_that("get_actors_data() returns a list of lists of NBT data.", {
   expect_true(all(sapply(dat[[1]], is_nbt_value)))
   expect_true(all(sapply(dat[[2]], is_nbt_value)))
 
-  dat2 <- get_actors_data(
+  dat2 <- get_chunk_actors_data(
     c("acdig:0:0:0", "acdig:-7:-2:0", "acdig:1:0:0", "acdig:1:0:1"),
     db = db
   )
@@ -172,7 +172,7 @@ update_storage_key <- function(x, y) {
   x
 }
 
-test_that("put_actors_value() writes actors data.", {
+test_that("put_chunk_actors_value() writes actors data.", {
   actor_value <- get_nbt_value("actor:0000000100000011", db = db)
   actor_a <- update_storage_key(actor_value, 100L)
   actor_b <- update_storage_key(actor_value, 101L)
@@ -181,16 +181,16 @@ test_that("put_actors_value() writes actors data.", {
     "actor:0000000000000064" = actor_a,
     "actor:0000000000000065" = actor_b
   )
-  put_actors_value(actors_data, "acdig:100:0:0", db = db)
-  dat <- get_actors_value("acdig:100:0:0", db = db)
+  put_chunk_actors_value(actors_data, "acdig:100:0:0", db = db)
+  dat <- get_chunk_actors_value("acdig:100:0:0", db = db)
   expect_equal(dat, actors_data)
 
-  put_actors_value(actors_data, 100, 1, 0, db = db)
-  dat <- get_actors_value(100, 1, 0, db = db)
+  put_chunk_actors_value(actors_data, 100, 1, 0, db = db)
+  dat <- get_chunk_actors_value(100, 1, 0, db = db)
   expect_equal(dat, actors_data)
 })
 
-test_that("put_actors_value() writes actors data.", {
+test_that("put_chunk_actors_value() writes actors data.", {
   actor_value <- get_nbt_value("actor:0000000100000011", db = db)
   actor_a <- update_storage_key(actor_value, 90L)
   actor_b <- update_storage_key(actor_value, 91L)
@@ -204,18 +204,18 @@ test_that("put_actors_value() writes actors data.", {
     "acdig:201:0:0" = list("actor:000000000000005C" = actor_c)
   )
 
-  put_actors_data(actors_data, db = db)
-  dat <- get_actors_data(names(actors_data), db = db)
+  put_chunk_actors_data(actors_data, db = db)
+  dat <- get_chunk_actors_data(names(actors_data), db = db)
   expect_equal(dat, actors_data)
 
   new_names <- sub(":0:", ":1:", names(actors_data))
-  put_actors_data(actors_data, new_names, db = db)
-  dat <- get_actors_data(new_names, db = db)
+  put_chunk_actors_data(actors_data, new_names, db = db)
+  dat <- get_chunk_actors_data(new_names, db = db)
   expect_equal(dat, setNames(actors_data, new_names))
 
   new_names <- sub(":0:", ":2:", names(actors_data))
-  put_actors_data(actors_data, 200:201, 2, 0, db = db)
-  dat <- get_actors_data(new_names, db = db)
+  put_chunk_actors_data(actors_data, 200:201, 2, 0, db = db)
+  dat <- get_chunk_actors_data(new_names, db = db)
   expect_equal(dat, setNames(actors_data, new_names))
 })
 

@@ -60,5 +60,5 @@ ActorDigest data respectively.
 \code{create_acdig_keys()} creates keys for ActorDigest data.
 }
 \seealso{
-\link{Actors}, \link{Entity}
+\link{ChunkActors}
 }

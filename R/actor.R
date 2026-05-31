@@ -31,7 +31,7 @@ NULL
 #' `get_acdig_data()` returns a named list of the of the values
 #' returned by `get_acdig_value()`.
 #'
-#' @seealso [Actors], [Entity]
+#' @seealso [ChunkActors]
 #'
 #' @name ActorDigest
 NULL
@@ -134,21 +134,21 @@ create_acdig_keys <- function(x, z, dimension) {
   paste("acdig", args[[1]], args[[2]], args[[3]], sep = ":")
 }
 
-#' Read and write Actor data
+#' Read and write Actor data for a chunk
 #'
-#' After 1.18.30, the nbt data of each actor is saved independently in the
-#' database, using a key with a prefix and a 16-character storage key:
+#' The nbt data of each actor is saved independently in the database, using a
+#' key with a prefix and a 16-character storage key:
 #' 'actor:0123456789abcdef'. The keys of all actors in a chunk are saved in an
 #' [ActorDigest] record, with format acdig:x:z:dimension'.
 #'
-#' `get_actors_value()` loads Actors data for a single chunk in `db`.
-#' `get_actors_data()` loads Actors data from multiple chunks in `db`.
+#' `get_chunk_actors_value()` loads Actors data for a single chunk in `db`.
+#' `get_chunk_actors_data()` loads Actors data from multiple chunks in `db`.
 #'
-#' `put_actors_value()` and `put_actors_data()` store one/multiple chunks
-#' Actors data into `db` and update the chunks' ActorDigests.
-#' When storing Actors data, an actor's storage key will be recalculated from
-#' the actor's `UniqueID`. The actor's position and dimension are not verified
-#' to be in the chunk it is assigned to.
+#' `put_chunk_actors_value()` and `put_chunk_actors_data()` store one/multiple
+#' chunks Actors data into `db` and update the chunks' ActorDigests. When
+#' storing Actors data, an actor's storage key will be recalculated from the
+#' actor's `UniqueID`. The actor's position and dimension are not verified to
+#' be in the chunk it is assigned to.
 #'
 #' `make_actor_keys()` creates actor keys based on UniqueIDs.
 #'
@@ -160,23 +160,23 @@ create_acdig_keys <- function(x, z, dimension) {
 #'  `values` will be taken as the keys.
 #' @param ids A vector of UniqueIDs.
 #'
-#' @seealso [ActorDigest], [Entity]
+#' @seealso [ActorDigest]
 #'
-#' @name Actors
+#' @name ChunkActors
 NULL
 
-#' @rdname Actors
+#' @rdname ChunkActors
 #' @export
-get_actors_data <- function(x, z, dimension, db = default_db()) {
+get_chunk_actors_data <- function(x, z, dimension, db = default_db()) {
   keys <- get_acdig_data(x, z, dimension, db)
   lapply(keys, function(x) {
     if (is.null(x)) NULL else get_nbt_data(x, db = db)
   })
 }
 
-#' @rdname Actors
+#' @rdname ChunkActors
 #' @export
-get_actors_value <- function(x, z, dimension, db = default_db()) {
+get_chunk_actors_value <- function(x, z, dimension, db = default_db()) {
   keys <- get_acdig_value(x, z, dimension, db)
   if (is.null(keys)) {
     return(NULL)
@@ -184,9 +184,9 @@ get_actors_value <- function(x, z, dimension, db = default_db()) {
   get_nbt_data(keys, db = db)
 }
 
-#' @rdname Actors
+#' @rdname ChunkActors
 #' @export
-put_actors_data <- function(values, x, z, dimension, db = default_db()) {
+put_chunk_actors_data <- function(values, x, z, dimension, db = default_db()) {
   dig_keys <- process_acdig_key_args(
     x,
     z,
@@ -195,7 +195,7 @@ put_actors_data <- function(values, x, z, dimension, db = default_db()) {
     assert_validity = TRUE
   )
   mapply(
-    put_actors_value_impl,
+    put_chunk_actors_value_impl,
     values,
     dig_keys,
     MoreArgs = list(db = db),
@@ -203,9 +203,9 @@ put_actors_data <- function(values, x, z, dimension, db = default_db()) {
   )
 }
 
-#' @rdname Actors
+#' @rdname ChunkActors
 #' @export
-put_actors_value <- function(value, x, z, dimension, db = default_db()) {
+put_chunk_actors_value <- function(value, x, z, dimension, db = default_db()) {
   dig_key <- process_acdig_key_args(
     x,
     z,
@@ -213,10 +213,10 @@ put_actors_value <- function(value, x, z, dimension, db = default_db()) {
     assert_scalar = TRUE,
     assert_validity = TRUE
   )
-  put_actors_value_impl(value, dig_key, db)
+  put_chunk_actors_value_impl(value, dig_key, db)
 }
 
-put_actors_value_impl <- function(value, dig_key, db) {
+put_chunk_actors_value_impl <- function(value, dig_key, db) {
   ids <- vapply(value, `[[`, character(1L), "UniqueID", USE.NAMES = FALSE)
   storage_keys <- make_storagekeys(ids)
   actor_keys <- read_acdig_value(unlist(storage_keys))
@@ -254,7 +254,7 @@ is_valid_acdig_key <- function(keys) {
   grepl(keys, pattern = "^acdig:-?[0-9]+:-?[0-9]+:[0-2]$")
 }
 
-#' @rdname Actors
+#' @rdname ChunkActors
 #' @export
 make_actor_keys <- function(ids) {
   keys <- make_storagekeys(ids)
