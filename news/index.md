@@ -13,6 +13,9 @@
   [`rawkeys_to_chrkeys()`](https://reedacartwright.github.io/rbedrock/reference/chrkeys_to_rawkeys.md)
   doesn’t use it anymore. Percent encoding of plain keys now encodes `:`
   in order to prevent collisions.
+- New
+  [`make_actor_keys()`](https://reedacartwright.github.io/rbedrock/reference/Actors.md)
+  function to create actor keys from UniqueIDs.
 
 ## rbedrock 0.4.2
 

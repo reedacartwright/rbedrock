@@ -37,6 +37,7 @@
 <ul><li>
 <code>starts_with()</code> was renamed to <code><a href="../reference/get_data.html">begins_with()</a></code> to prevent name conflicts with tidyverse.</li>
 <li>Plain keys are now assumed to be unprefixed. This eliminates the warning message when using unprefixed plain keys. The “plain:” prefix is still recognized by <code><a href="../reference/chrkeys_to_rawkeys.html">chrkeys_to_rawkeys()</a></code> however <code><a href="../reference/chrkeys_to_rawkeys.html">rawkeys_to_chrkeys()</a></code> doesn’t use it anymore. Percent encoding of plain keys now encodes <code>:</code> in order to prevent collisions.</li>
+<li>New <code><a href="../reference/Actors.html">make_actor_keys()</a></code> function to create actor keys from UniqueIDs.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.2" id="rbedrock-042">rbedrock 0.4.2<a class="anchor" aria-label="anchor" href="#rbedrock-042"></a></h2><p class="text-muted">CRAN release: 2025-11-09</p>

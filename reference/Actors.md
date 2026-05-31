@@ -17,6 +17,8 @@ get_actors_value(x, z, dimension, db = default_db())
 put_actors_data(values, x, z, dimension, db = default_db())
 
 put_actors_value(value, x, z, dimension, db = default_db())
+
+make_actor_keys(ids)
 ```
 
 ## Arguments
@@ -39,6 +41,10 @@ put_actors_value(value, x, z, dimension, db = default_db())
 
   A list of nbt actors data
 
+- ids:
+
+  A vector of UniqueIDs.
+
 ## Details
 
 `get_actors_value()` loads Actors data for a single chunk in `db`.
@@ -49,6 +55,8 @@ Actors data into `db` and update the chunks' ActorDigests. When storing
 Actors data, an actor's storage key will be recalculated from the
 actor's `UniqueID`. The actor's position and dimension are not verified
 to be in the chunk it is assigned to.
+
+`make_actor_keys()` creates actor keys based on UniqueIDs.
 
 ## See also
 

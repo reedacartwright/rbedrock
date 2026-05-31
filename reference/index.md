@@ -14,6 +14,7 @@
   [`get_actors_value()`](https://reedacartwright.github.io/rbedrock/reference/Actors.md)
   [`put_actors_data()`](https://reedacartwright.github.io/rbedrock/reference/Actors.md)
   [`put_actors_value()`](https://reedacartwright.github.io/rbedrock/reference/Actors.md)
+  [`make_actor_keys()`](https://reedacartwright.github.io/rbedrock/reference/Actors.md)
   : Read and write Actor data
 - [`get_biomes_value()`](https://reedacartwright.github.io/rbedrock/reference/Biomes.md)
   [`get_biomes_data()`](https://reedacartwright.github.io/rbedrock/reference/Biomes.md)

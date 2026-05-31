@@ -54,7 +54,9 @@ database, using a key with a prefix and a 16-character storage key:
 <span></span>
 <span><span class="fu">put_actors_data</span><span class="op">(</span><span class="va">values</span>, <span class="va">x</span>, <span class="va">z</span>, <span class="va">dimension</span>, db <span class="op">=</span> <span class="fu"><a href="default_db.html">default_db</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">put_actors_value</span><span class="op">(</span><span class="va">value</span>, <span class="va">x</span>, <span class="va">z</span>, <span class="va">dimension</span>, db <span class="op">=</span> <span class="fu"><a href="default_db.html">default_db</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">put_actors_value</span><span class="op">(</span><span class="va">value</span>, <span class="va">x</span>, <span class="va">z</span>, <span class="va">dimension</span>, db <span class="op">=</span> <span class="fu"><a href="default_db.html">default_db</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">make_actor_keys</span><span class="op">(</span><span class="va">ids</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,8 +64,8 @@ database, using a key with a prefix and a 16-character storage key:
 
 
 <dl><dt id="arg-x-z-dimension">x, z, dimension<a class="anchor" aria-label="anchor" href="#arg-x-z-dimension"></a></dt>
-<dd><p>Chunk coordinates to extract data from.
-<code>x</code> can also be a character vector of db keys.</p></dd>
+<dd><p>Chunk coordinates to extract data from. <code>x</code> can also be
+a character vector of db keys.</p></dd>
 
 
 <dt id="arg-db">db<a class="anchor" aria-label="anchor" href="#arg-db"></a></dt>
@@ -71,12 +73,16 @@ database, using a key with a prefix and a 16-character storage key:
 
 
 <dt id="arg-values">values<a class="anchor" aria-label="anchor" href="#arg-values"></a></dt>
-<dd><p>A list of character vectors.
-If <code>x</code> is missing, the names of <code>values</code> will be taken as the keys.</p></dd>
+<dd><p>A list of character vectors. If <code>x</code> is missing, the names of
+<code>values</code> will be taken as the keys.</p></dd>
 
 
 <dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>
 <dd><p>A list of nbt actors data</p></dd>
+
+
+<dt id="arg-ids">ids<a class="anchor" aria-label="anchor" href="#arg-ids"></a></dt>
+<dd><p>A vector of UniqueIDs.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -88,6 +94,7 @@ Actors data into <code>db</code> and update the chunks' ActorDigests.
 When storing Actors data, an actor's storage key will be recalculated from
 the actor's <code>UniqueID</code>. The actor's position and dimension are not verified
 to be in the chunk it is assigned to.</p>
+<p><code>make_actor_keys()</code> creates actor keys based on UniqueIDs.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
