@@ -8,6 +8,7 @@
   use it anymore. Percent encoding of plain keys now encodes `:` in order to
   prevent collisions.
 * New `make_actor_keys()` function to create actor keys from UniqueIDs.
+* New `generate_uuid()` function to create random UUIDs.
 
 # rbedrock 0.4.2
 

@@ -37,3 +37,22 @@ spawning_area <- function(sim_distance, x = 0, z = 0) {
   dat$z <- dat$z + z
   tibble::as_tibble(dat)
 }
+
+#' Generate random UUIDs
+#'
+#' @param n Number of ids to generate
+#'
+#' @return A character vector containing random (version 4) UUIDs.
+#' @export
+generate_uuid <- function(n = 1L) {
+  out <- character(n)
+  for (i in seq_along(out)) {
+    hex <- sample(c(0:9, letters[1:6]), 36, replace = TRUE)
+    hex[c(9, 14, 19, 24)] <- "-"
+    hex[15] <- "4"
+    hex[20] <- sample(c("8", "9", "a", "b"), 1)
+
+    out[i] <- paste(hex, collapse = "")
+  }
+  out
+}
