@@ -2,20 +2,14 @@
 
 ## All functions
 
-- [`get_acdig_data()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
-  [`get_acdig_value()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
-  [`put_acdig_data()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
+- [`get_acdig_value()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
+  [`get_acdig_data()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
   [`put_acdig_value()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
+  [`put_acdig_data()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
   [`read_acdig_value()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
   [`write_acdig_value()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
   [`create_acdig_keys()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
   : Read and write Actor Digest Data
-- [`get_actors_data()`](https://reedacartwright.github.io/rbedrock/reference/Actors.md)
-  [`get_actors_value()`](https://reedacartwright.github.io/rbedrock/reference/Actors.md)
-  [`put_actors_data()`](https://reedacartwright.github.io/rbedrock/reference/Actors.md)
-  [`put_actors_value()`](https://reedacartwright.github.io/rbedrock/reference/Actors.md)
-  [`make_actor_keys()`](https://reedacartwright.github.io/rbedrock/reference/Actors.md)
-  : Read and write Actor data
 - [`get_biomes_value()`](https://reedacartwright.github.io/rbedrock/reference/Biomes.md)
   [`get_biomes_data()`](https://reedacartwright.github.io/rbedrock/reference/Biomes.md)
   [`put_biomes_value()`](https://reedacartwright.github.io/rbedrock/reference/Biomes.md)
@@ -33,6 +27,12 @@
   [`put_blocks_value()`](https://reedacartwright.github.io/rbedrock/reference/Blocks.md)
   [`put_blocks_data()`](https://reedacartwright.github.io/rbedrock/reference/Blocks.md)
   : Read and write Blocks data
+- [`get_chunk_actors_value()`](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
+  [`get_chunk_actors_data()`](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
+  [`put_chunk_actors_data()`](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
+  [`put_chunk_actors_value()`](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
+  [`make_actor_keys()`](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
+  : Read and write Actor data for a chunk
 - [`get_chunk_version_value()`](https://reedacartwright.github.io/rbedrock/reference/ChunkVersion.md)
   [`get_chunk_version_data()`](https://reedacartwright.github.io/rbedrock/reference/ChunkVersion.md)
   [`put_chunk_version_value()`](https://reedacartwright.github.io/rbedrock/reference/ChunkVersion.md)
@@ -108,6 +108,8 @@
   : Get/set the default db connection.
 - [`delete_values()`](https://reedacartwright.github.io/rbedrock/reference/delete_values.md)
   : Remove values from a bedrockdb.
+- [`generate_uuid()`](https://reedacartwright.github.io/rbedrock/reference/generate_uuid.md)
+  : Generate random UUIDs
 - [`key_prefix()`](https://reedacartwright.github.io/rbedrock/reference/get_data.md)
   [`begins_with()`](https://reedacartwright.github.io/rbedrock/reference/get_data.md)
   [`get_data()`](https://reedacartwright.github.io/rbedrock/reference/get_data.md)

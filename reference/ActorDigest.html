@@ -66,13 +66,13 @@ ActorDigest data respectively.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_acdig_data</span><span class="op">(</span><span class="va">x</span>, <span class="va">z</span>, <span class="va">dimension</span>, db <span class="op">=</span> <span class="fu"><a href="default_db.html">default_db</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_acdig_value</span><span class="op">(</span><span class="va">x</span>, <span class="va">z</span>, <span class="va">dimension</span>, db <span class="op">=</span> <span class="fu"><a href="default_db.html">default_db</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">get_acdig_value</span><span class="op">(</span><span class="va">x</span>, <span class="va">z</span>, <span class="va">dimension</span>, db <span class="op">=</span> <span class="fu"><a href="default_db.html">default_db</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">put_acdig_data</span><span class="op">(</span><span class="va">values</span>, <span class="va">x</span>, <span class="va">z</span>, <span class="va">dimension</span>, db <span class="op">=</span> <span class="fu"><a href="default_db.html">default_db</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">get_acdig_data</span><span class="op">(</span><span class="va">x</span>, <span class="va">z</span>, <span class="va">dimension</span>, db <span class="op">=</span> <span class="fu"><a href="default_db.html">default_db</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">put_acdig_value</span><span class="op">(</span><span class="va">value</span>, <span class="va">x</span>, <span class="va">z</span>, <span class="va">dimension</span>, db <span class="op">=</span> <span class="fu"><a href="default_db.html">default_db</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">put_acdig_data</span><span class="op">(</span><span class="va">values</span>, <span class="va">x</span>, <span class="va">z</span>, <span class="va">dimension</span>, db <span class="op">=</span> <span class="fu"><a href="default_db.html">default_db</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">read_acdig_value</span><span class="op">(</span><span class="va">rawvalue</span><span class="op">)</span></span>
 <span></span>
@@ -94,13 +94,13 @@ ActorDigest data respectively.</p>
 <dd><p>A bedrockdb object.</p></dd>
 
 
+<dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>
+<dd><p>A character vector.</p></dd>
+
+
 <dt id="arg-values">values<a class="anchor" aria-label="anchor" href="#arg-values"></a></dt>
 <dd><p>A list of character vectors.
 If <code>x</code> is missing, the names of <code>values</code> will be taken as the keys.</p></dd>
-
-
-<dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>
-<dd><p>A character vector.</p></dd>
 
 
 <dt id="arg-rawvalue">rawvalue<a class="anchor" aria-label="anchor" href="#arg-rawvalue"></a></dt>
@@ -115,7 +115,7 @@ returned by <code>get_acdig_value()</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><a href="Actors.html">Actors</a>, <a href="Entity.html">Entity</a></p></div>
+    <div class="dont-index"><p><a href="ChunkActors.html">ChunkActors</a></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

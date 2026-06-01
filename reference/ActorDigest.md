@@ -18,13 +18,13 @@ ActorDigest data respectively.
 ## Usage
 
 ``` r
-get_acdig_data(x, z, dimension, db = default_db())
-
 get_acdig_value(x, z, dimension, db = default_db())
 
-put_acdig_data(values, x, z, dimension, db = default_db())
+get_acdig_data(x, z, dimension, db = default_db())
 
 put_acdig_value(value, x, z, dimension, db = default_db())
+
+put_acdig_data(values, x, z, dimension, db = default_db())
 
 read_acdig_value(rawvalue)
 
@@ -44,14 +44,14 @@ create_acdig_keys(x, z, dimension)
 
   A bedrockdb object.
 
+- value:
+
+  A character vector.
+
 - values:
 
   A list of character vectors. If `x` is missing, the names of `values`
   will be taken as the keys.
-
-- value:
-
-  A character vector.
 
 - rawvalue:
 
@@ -65,5 +65,4 @@ returns a named list of the of the values returned by
 
 ## See also
 
-[Actors](https://reedacartwright.github.io/rbedrock/reference/Actors.md),
-[Entity](https://reedacartwright.github.io/rbedrock/reference/Entity.md)
+[ChunkActors](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)

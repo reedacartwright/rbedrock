@@ -5,11 +5,11 @@
 <url><loc>https://reedacartwright.github.io/rbedrock/index.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/news/index.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/ActorDigest.html</loc></url>
-<url><loc>https://reedacartwright.github.io/rbedrock/reference/Actors.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/Biomes.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/BlockEntity.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/Blocks.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/Checksums.html</loc></url>
+<url><loc>https://reedacartwright.github.io/rbedrock/reference/ChunkActors.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/ChunkData.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/ChunkNBTData.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/ChunkVersion.html</loc></url>
@@ -36,6 +36,7 @@
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/compact_world.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/default_db.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/delete_values.html</loc></url>
+<url><loc>https://reedacartwright.github.io/rbedrock/reference/generate_uuid.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/get_data.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/get_keys.html</loc></url>
 <url><loc>https://reedacartwright.github.io/rbedrock/reference/get_nbt_data.html</loc></url>

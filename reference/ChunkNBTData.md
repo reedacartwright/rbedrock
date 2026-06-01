@@ -10,13 +10,13 @@
 ## Usage
 
 ``` r
-get_chunk_nbt_data(x, z, dimension, tag, subtag, db)
+get_chunk_nbt_data(x, z, dimension, tag, subtag, db = default_db())
 
-get_chunk_nbt_value(x, z, dimension, tag, subtag, db)
+get_chunk_nbt_value(x, z, dimension, tag, subtag, db = default_db())
 
-put_chunk_nbt_data(values, x, z, dimension, tag, subtag, db)
+put_chunk_nbt_data(values, x, z, dimension, tag, subtag, db = default_db())
 
-put_chunk_nbt_value(value, x, z, dimension, tag, subtag, db)
+put_chunk_nbt_value(value, x, z, dimension, tag, subtag, db = default_db())
 ```
 
 ## Arguments
