@@ -73,7 +73,6 @@
 #' # do something with db ...
 #' close(db)
 #' }
-
 bedrockdb <- function(
   path,
   create_if_missing = FALSE,
@@ -104,6 +103,9 @@ bedrockdb <- function(
   invisible(db)
 }
 
+# TODO: Mongolite has a simpler way to create DB structures
+
+
 #' @export
 #' @rdname bedrockdb
 close.bedrockdb <- function(con, compact = FALSE, ...) {
@@ -127,7 +129,7 @@ is_bedrockdb <- function(x) {
 
 # nolint start: object_name_linter
 R6_bedrockdb <- R6::R6Class(
-# nolint end
+  # nolint end
   "bedrockdb",
   public = list(
     db = NULL,
@@ -179,12 +181,10 @@ R6_bedrockdb <- R6::R6Class(
       bedrock_leveldb_mput(self$db, keys, values, writeoptions)
       invisible(self)
     },
-    delete = function(
-      keys,
-      report = FALSE,
-      readoptions = NULL,
-      writeoptions = NULL
-    ) {
+    delete = function(keys,
+                      report = FALSE,
+                      readoptions = NULL,
+                      writeoptions = NULL) {
       bedrock_leveldb_delete(self$db, keys, report, readoptions, writeoptions)
     },
     exists = function(key, readoptions = NULL) {
@@ -229,7 +229,7 @@ R6_bedrockdb <- R6::R6Class(
 
 # nolint start: object_name_linter
 R6_bedrockdb_iterator <- R6::R6Class(
-# nolint end
+  # nolint end
   "bedrockdb_iterator",
   public = list(
     it = NULL,
@@ -273,7 +273,7 @@ R6_bedrockdb_iterator <- R6::R6Class(
 )
 # nolint start: object_name_linter
 R6_bedrockdb_writebatch <- R6::R6Class(
-# nolint end
+  # nolint end
   "bedrockdb_writebatch",
   public = list(
     ptr = NULL,

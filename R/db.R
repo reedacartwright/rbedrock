@@ -1,6 +1,10 @@
 the$db <- NULL
 the$db_is_user_set <- FALSE
 
+# TODO: Mongolite has examples of using weak references to keep track of things
+# TODO: Keep track of open DBs like a stack and default to the most recent one
+# unless a default_db was set.
+
 #' Get/set the default db connection.
 #'
 #' The default db is the db connection that rbedrock uses by default. It
@@ -35,7 +39,7 @@ the$db_is_user_set <- FALSE
 #' default_db(dbz) # set default
 #' default_db() # returns dbz
 #' default_db(NULL) # unset default
-#' #cleanup
+#' # cleanup
 #' close(dbz)
 #' with_db(dbpath, length(get_keys))
 #' db <- local_db(dbpath)

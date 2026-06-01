@@ -4,9 +4,6 @@
 #' they are not chunk data and use their own prefix. The key format
 #' for actor digest data is acdig:x:z:dimension.
 #'
-#' @name ActorDigest
-NULL
-
 #' @description
 #' `get_acdig_data()` and `get_acdig_value()` load ActorDigest
 #' data from `db`.  `get_acdig_value()` supports loading
@@ -227,6 +224,11 @@ put_chunk_actors_value_impl <- function(value, dig_key, db) {
   put_data(dat, db = db)
 }
 
+get_actor_value <- function(keys, db = default_db()) {
+  keys <- make_actor_keys(keys)
+  get_nbt_value(keys, db = db)
+}
+
 #' @useDynLib rbedrock R_rbedrock_actor_make_storagekeys
 make_storagekeys <- function(ids) {
   ids <- as.character(ids)
@@ -244,9 +246,12 @@ is_valid_acdig_key <- function(keys) {
 #' @rdname ChunkActors
 #' @export
 make_actor_keys <- function(ids) {
-  keys <- make_storagekeys(ids)
-  keys <- sapply(keys, paste0, collapse = "")
-  paste0("actor:", toupper(keys))
+  keys <- as.character(ids)
+  b <- !is_actor_key(keys)
+  skeys <- make_storagekeys(keys[b])
+  skeys <- sapply(skeys, paste0, collapse = "")
+  keys[b] <- paste0("actor:", toupper(skeys))
+  keys
 }
 
 is_actor_key <- function(keys) {
