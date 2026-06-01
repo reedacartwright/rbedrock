@@ -1,9 +1,5 @@
 # Read and write Actor Digest Data
 
-Actor digests store a list of all entities in a chunk; however they are
-not chunk data and use their own prefix. The key format for actor digest
-data is acdig:x:z:dimension.
-
 `get_acdig_data()` and `get_acdig_value()` load ActorDigest data from
 `db`. `get_acdig_value()` supports loading only a single value.
 
@@ -62,6 +58,12 @@ create_acdig_keys(x, z, dimension)
 `get_acdig_values()` returns a vector of actor keys. `get_acdig_data()`
 returns a named list of the of the values returned by
 `get_acdig_value()`.
+
+## Details
+
+Actor digests store a list of all entities in a chunk; however they are
+not chunk data and use their own prefix. The key format for actor digest
+data is acdig:x:z:dimension.
 
 ## See also
 

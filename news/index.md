@@ -19,6 +19,12 @@
 - New
   [`generate_uuid()`](https://reedacartwright.github.io/rbedrock/reference/generate_uuid.md)
   function to create random UUIDs.
+- [`default_db()`](https://reedacartwright.github.io/rbedrock/reference/default_db.md)
+  now defaults to the first opened db instead of the most recently
+  opened one. This not only is easier to remember but also has simpler
+  bookkeeping. The default db can still be set manually, and if the
+  current default db is closed, the next db opened will be remembered as
+  the default.
 
 ## rbedrock 0.4.2
 
