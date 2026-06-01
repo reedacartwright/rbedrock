@@ -36,34 +36,6 @@ rawkeys_to_chrkeys <- function(keys) {
   .Call(R_rawkeys_to_chrkeys, keys)
 }
 
-process_key_args <- function(x, z, d, tag, subtag, stop_if_filtered = FALSE) {
-  # is z is missing then x should contain keys as strings
-  if (missing(z) && is.character(x)) {
-    # if tag exists, we are going to filter on data type
-    if (!missing(tag)) {
-      b <- check_chunk_key_tag(x, tag, subtag, silent = !stop_if_filtered)
-      x <- x[b]
-    }
-    return(x)
-  }
-  create_chunk_keys(x, z, d, tag, subtag)
-}
-
-process_key_args_prefix <- function(x, z, d, stop_if_filtered = FALSE) {
-  # is z is missing then x should contain keys as strings
-  if (missing(z) && is.character(x)) {
-    x <- get_stem_from_chunk_key(x)
-    b <- !is.na(x)
-    if (stop_if_filtered && any(!b)) {
-      stop("Some keys passed to .process_key_arg_prefix are not chunk keys.") # nolint
-    }
-    return(x[b])
-  }
-  args <- rac_recycle_common(list(x, z, d))
-
-  paste("chunk", args[[1]], args[[2]], args[[3]], sep = ":")
-}
-
 create_rawkey_prefix <- function(prefix) {
   if (is.null(prefix)) {
     return(NULL)
@@ -74,7 +46,7 @@ create_rawkey_prefix <- function(prefix) {
     # Chunk-key prefixes must be either a valid key or a valid key prefix
     if (!is_valid_chunk_key(prefix)) {
       if (is_valid_chunk_key_prefix(prefix)) {
-        #append a dummy tag
+        # append a dummy tag
         prefix <- paste0(prefix, ":44")
         res <- chrkeys_to_rawkeys_1(prefix)
         # strip last byte
