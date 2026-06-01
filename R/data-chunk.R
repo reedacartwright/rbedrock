@@ -20,7 +20,7 @@
 NULL
 
 #' @rdname ChunkData
-get_chunk_value <- function(x, z, dimension, tag, subtag, db) {
+get_chunk_value <- function(x, z, dimension, tag, subtag, db = default_db()) {
   key <- process_chunk_key_args(x, z, dimension, tag, subtag)
   b <- check_chunk_key_args(key, tag)
   b[-1] <- FALSE
@@ -28,7 +28,7 @@ get_chunk_value <- function(x, z, dimension, tag, subtag, db) {
 }
 
 #' @rdname ChunkData
-get_chunk_data <- function(x, z, dimension, tag, subtag, db) {
+get_chunk_data <- function(x, z, dimension, tag, subtag, db = default_db()) {
   keys <- process_chunk_key_args(x, z, dimension, tag, subtag)
   b <- check_chunk_key_args(keys, tag)
   ret <- vector("list", length(keys))
@@ -38,7 +38,7 @@ get_chunk_data <- function(x, z, dimension, tag, subtag, db) {
 }
 
 #' @rdname ChunkData
-put_chunk_value <- function(value, x, z, dimension, tag, subtag, db) {
+put_chunk_value <- function(value, x, z, dimension, tag, subtag, db = default_db()) {
   key <- process_chunk_key_args(x, z, dimension, tag, subtag)
   b <- check_chunk_key_args(key, tag)
   b[-1] <- FALSE
@@ -54,7 +54,7 @@ put_chunk_value <- function(value, x, z, dimension, tag, subtag, db) {
 }
 
 #' @rdname ChunkData
-put_chunk_data <- function(values, x, z, dimension, tag, subtag, db) {
+put_chunk_data <- function(values, x, z, dimension, tag, subtag, db = default_db()) {
   keys <- process_chunk_key_args(x, z, dimension, tag, subtag, values = values)
   b <- check_chunk_key_args(keys, tag)
   put_data(values[b], keys[b], db = db)
@@ -110,25 +110,25 @@ check_chunk_key_args <- function(keys, tag) {
 NULL
 
 #' @rdname ChunkNBTData
-get_chunk_nbt_data <- function(x, z, dimension, tag, subtag, db) {
+get_chunk_nbt_data <- function(x, z, dimension, tag, subtag, db = default_db()) {
   dat <- get_chunk_data(x, z, dimension, tag, subtag, db)
   read_nbt_data(dat, simplify = FALSE)
 }
 
 #' @rdname ChunkNBTData
-get_chunk_nbt_value <- function(x, z, dimension, tag, subtag, db) {
+get_chunk_nbt_value <- function(x, z, dimension, tag, subtag, db = default_db()) {
   val <- get_chunk_value(x, z, dimension, tag, subtag, db)
   read_nbt(val, simplify = FALSE)
 }
 
 #' @rdname ChunkNBTData
-put_chunk_nbt_data <- function(values, x, z, dimension, tag, subtag, db) {
+put_chunk_nbt_data <- function(values, x, z, dimension, tag, subtag, db = default_db()) {
   values <- write_nbt_data(values)
   put_chunk_data(values, x, z, dimension, tag, subtag, db)
 }
 
 #' @rdname ChunkNBTData
-put_chunk_nbt_value <- function(value, x, z, dimension, tag, subtag, db) {
+put_chunk_nbt_value <- function(value, x, z, dimension, tag, subtag, db = default_db()) {
   value <- write_nbt(value)
   put_chunk_value(value, x, z, dimension, tag, subtag, db)
 }
