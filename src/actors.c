@@ -66,7 +66,7 @@ SEXP attribute_visible R_rbedrock_actor_make_storagekeys(SEXP ids) {
             str = Rf_translateCharUTF8(STRING_ELT(ids, i));
             // str is in signed format. Use strtoll to convert it,
             // then cast it to unsigned number.
-            u = (uint64_t)strtoll(str, &strend, 10);
+            u = (uint64_t)strtoll(str, &strend, 0);
             if(*strend != '\0') {
                 Rf_error("Malformed data: at %s, line %d.", __FILE__, __LINE__);
                 return R_NilValue;

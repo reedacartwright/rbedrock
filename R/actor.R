@@ -229,7 +229,7 @@ put_chunk_actors_value_impl <- function(value, dig_key, db) {
 
 #' @useDynLib rbedrock R_rbedrock_actor_make_storagekeys
 make_storagekeys <- function(ids) {
-  stopifnot(is.character(ids) || is.double(ids))
+  ids <- as.character(ids)
   .Call(R_rbedrock_actor_make_storagekeys, ids)
 }
 
