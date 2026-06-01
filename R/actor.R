@@ -38,53 +38,51 @@ NULL
 
 #' @rdname ActorDigest
 #' @export
-get_acdig_data <- function(x, z, dimension, db = default_db()) {
-  keys <- process_acdig_key_args(x, z, dimension)
-  good_key <- is_valid_acdig_key(keys)
-  ret <- rep(list(NULL), length(keys))
-  names(ret) <- keys
-  dat <- get_data(keys[good_key], db = db)
-  ret[names(dat)] <- lapply(dat, read_acdig_value)
-  ret
-}
-
-#' @rdname ActorDigest
-#' @export
 get_acdig_value <- function(x, z, dimension, db = default_db()) {
-  key <- process_acdig_key_args(x, z, dimension, assert_scalar = TRUE)
-  if (!is_valid_acdig_key(key)) {
-    return(NULL)
-  }
-  dat <- get_value(key, db = db)
+  key <- process_acdig_key_args(x, z, dimension)
+  b <- is_valid_acdig_key(key)
+  b[-1] <- FALSE
+  dat <- get_value(key[b], db = db)
   read_acdig_value(dat)
 }
 
 #' @rdname ActorDigest
 #' @export
-put_acdig_data <- function(values, x, z, dimension, db = default_db()) {
-  keys <- process_acdig_key_args(
-    x,
-    z,
-    dimension,
-    values = values,
-    assert_validity = TRUE
-  )
-  values <- lapply(values, write_acdig_value)
-  put_data(values, keys, db = db)
+get_acdig_data <- function(x, z, dimension, db = default_db()) {
+  keys <- process_acdig_key_args(x, z, dimension)
+  b <- is_valid_acdig_key(keys)
+  ret <- vector("list", length(keys))
+  names(ret) <- keys
+  dat <- get_data(keys[b], db = db)
+  ret[b] <- lapply(dat, read_acdig_value)
+  ret
 }
 
 #' @rdname ActorDigest
 #' @export
 put_acdig_value <- function(value, x, z, dimension, db = default_db()) {
-  key <- process_acdig_key_args(
-    x,
-    z,
-    dimension,
-    assert_scalar = TRUE,
-    assert_validity = TRUE
-  )
-  value <- write_acdig_value(value)
-  put_value(value, key, db = db)
+  key <- process_acdig_key_args(x, z, dimension)
+  b <- is_valid_acdig_key(key)
+  b[-1] <- FALSE
+  if (length(b) > 0 && b[1]) {
+    if (length(b) > 1) {
+      value <- value[[1]]
+      key <- key[[1]]
+    }
+    value <- write_acdig_value(value)
+    put_value(value, key, db = db)
+  }
+  invisible(b)
+}
+
+#' @rdname ActorDigest
+#' @export
+put_acdig_data <- function(values, x, z, dimension, db = default_db()) {
+  keys <- process_acdig_key_args(x, z, dimension, values = values)
+  b <- is_valid_acdig_key(keys)
+  values <- lapply(values[b], write_acdig_value)
+  put_data(values, keys[b], db = db)
+  invisible(b)
 }
 
 #' @rdname ActorDigest
@@ -167,33 +165,26 @@ NULL
 
 #' @rdname ChunkActors
 #' @export
+get_chunk_actors_value <- function(x, z, dimension, db = default_db()) {
+  keys <- get_acdig_value(x, z, dimension, db)
+  if (!is.null(keys)) {
+    get_nbt_data(keys, db = db)
+  }
+}
+
+#' @rdname ChunkActors
+#' @export
 get_chunk_actors_data <- function(x, z, dimension, db = default_db()) {
   keys <- get_acdig_data(x, z, dimension, db)
   lapply(keys, function(x) {
-    if (is.null(x)) NULL else get_nbt_data(x, db = db)
+    if (!is.null(x)) get_nbt_data(x, db = db)
   })
 }
 
 #' @rdname ChunkActors
 #' @export
-get_chunk_actors_value <- function(x, z, dimension, db = default_db()) {
-  keys <- get_acdig_value(x, z, dimension, db)
-  if (is.null(keys)) {
-    return(NULL)
-  }
-  get_nbt_data(keys, db = db)
-}
-
-#' @rdname ChunkActors
-#' @export
 put_chunk_actors_data <- function(values, x, z, dimension, db = default_db()) {
-  dig_keys <- process_acdig_key_args(
-    x,
-    z,
-    dimension,
-    values = values,
-    assert_validity = TRUE
-  )
+  dig_keys <- process_acdig_key_args(x, z, dimension, values = values)
   mapply(
     put_chunk_actors_value_impl,
     values,
@@ -206,13 +197,9 @@ put_chunk_actors_data <- function(values, x, z, dimension, db = default_db()) {
 #' @rdname ChunkActors
 #' @export
 put_chunk_actors_value <- function(value, x, z, dimension, db = default_db()) {
-  dig_key <- process_acdig_key_args(
-    x,
-    z,
-    dimension,
-    assert_scalar = TRUE,
-    assert_validity = TRUE
-  )
+  dig_key <- process_acdig_key_args(x, z, dimension)
+  if (length(dig_key) > 0) {}
+
   put_chunk_actors_value_impl(value, dig_key, db)
 }
 
@@ -270,27 +257,13 @@ is_valid_actor_key <- function(keys) {
   grepl(keys, pattern = "^actor:[0-9a-fA-F]{16}$")
 }
 
-process_acdig_key_args <- function(
-  x,
-  z,
-  d,
-  values = NULL,
-  assert_scalar = FALSE,
-  assert_validity = FALSE
-) {
-  if (missing(x) && is_named(values)) {
+process_acdig_key_args <- function(x, z, dimension, values = NULL) {
+  if (missing(x) && !is.null(names(values))) {
     # if x is missing use names from values
     x <- names(values)
   } else if (!missing(z)) {
     # if z is not missing, create keys from x, z, and d
-    x <- create_acdig_keys(x, z, d)
-  }
-  stopifnot(is.character(x))
-  if (isTRUE(assert_scalar)) {
-    stopifnot(length(x) == 1L)
-  }
-  if (isTRUE(assert_validity) && !isTRUE(all(is_valid_acdig_key(x)))) {
-    abort("Invalid acdig key.")
+    x <- create_acdig_keys(x, z, dimension)
   }
   x
 }

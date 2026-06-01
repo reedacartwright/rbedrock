@@ -18,7 +18,8 @@ test_that("get_acdig_value() returns a vector of actor keys.", {
   dat <- get_acdig_value("acdig:1:0:1", db = db)
   expect_null(dat)
 
-  expect_error(get_acdig_value(c("acdig:1:0:0", "acdig:0:0:0"), db = db))
+  dat <- get_acdig_value(c("acdig:1:0:0", "acdig:0:0:0"), db = db)
+  expect_equal(dat, character(0L))
   expect_null(get_acdig_value(c("acdig:0:0:0:0"), db = db))
 
   expect_error(read_acdig_value(as_raw(0, 1)))

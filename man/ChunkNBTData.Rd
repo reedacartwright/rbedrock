@@ -8,13 +8,13 @@
 \alias{put_chunk_nbt_value}
 \title{Load and store NBT chunk data}
 \usage{
-get_chunk_nbt_data(x, z, dimension, tag, subtag, db)
+get_chunk_nbt_data(x, z, dimension, tag, subtag, db = default_db())
 
-get_chunk_nbt_value(x, z, dimension, tag, subtag, db)
+get_chunk_nbt_value(x, z, dimension, tag, subtag, db = default_db())
 
-put_chunk_nbt_data(values, x, z, dimension, tag, subtag, db)
+put_chunk_nbt_data(values, x, z, dimension, tag, subtag, db = default_db())
 
-put_chunk_nbt_value(value, x, z, dimension, tag, subtag, db)
+put_chunk_nbt_value(value, x, z, dimension, tag, subtag, db = default_db())
 }
 \arguments{
 \item{x, z, dimension}{Chunk coordinates to extract data from.

@@ -2,16 +2,16 @@
 % Please edit documentation in R/actor.R
 \name{ChunkActors}
 \alias{ChunkActors}
-\alias{get_chunk_actors_data}
 \alias{get_chunk_actors_value}
+\alias{get_chunk_actors_data}
 \alias{put_chunk_actors_data}
 \alias{put_chunk_actors_value}
 \alias{make_actor_keys}
 \title{Read and write Actor data for a chunk}
 \usage{
-get_chunk_actors_data(x, z, dimension, db = default_db())
-
 get_chunk_actors_value(x, z, dimension, db = default_db())
+
+get_chunk_actors_data(x, z, dimension, db = default_db())
 
 put_chunk_actors_data(values, x, z, dimension, db = default_db())
 

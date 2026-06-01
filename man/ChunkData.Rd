@@ -8,13 +8,13 @@
 \alias{put_chunk_data}
 \title{Load and store raw chunk data}
 \usage{
-get_chunk_value(x, z, dimension, tag, subtag, db)
+get_chunk_value(x, z, dimension, tag, subtag, db = default_db())
 
-get_chunk_data(x, z, dimension, tag, subtag, db)
+get_chunk_data(x, z, dimension, tag, subtag, db = default_db())
 
-put_chunk_value(value, x, z, dimension, tag, subtag, db)
+put_chunk_value(value, x, z, dimension, tag, subtag, db = default_db())
 
-put_chunk_data(values, x, z, dimension, tag, subtag, db)
+put_chunk_data(values, x, z, dimension, tag, subtag, db = default_db())
 }
 \arguments{
 \item{x, z, dimension}{Chunk coordinates to extract data from.

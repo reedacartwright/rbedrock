@@ -2,22 +2,22 @@
 % Please edit documentation in R/actor.R
 \name{ActorDigest}
 \alias{ActorDigest}
-\alias{get_acdig_data}
 \alias{get_acdig_value}
-\alias{put_acdig_data}
+\alias{get_acdig_data}
 \alias{put_acdig_value}
+\alias{put_acdig_data}
 \alias{read_acdig_value}
 \alias{write_acdig_value}
 \alias{create_acdig_keys}
 \title{Read and write Actor Digest Data}
 \usage{
-get_acdig_data(x, z, dimension, db = default_db())
-
 get_acdig_value(x, z, dimension, db = default_db())
 
-put_acdig_data(values, x, z, dimension, db = default_db())
+get_acdig_data(x, z, dimension, db = default_db())
 
 put_acdig_value(value, x, z, dimension, db = default_db())
+
+put_acdig_data(values, x, z, dimension, db = default_db())
 
 read_acdig_value(rawvalue)
 
@@ -31,10 +31,10 @@ create_acdig_keys(x, z, dimension)
 
 \item{db}{A bedrockdb object.}
 
+\item{value}{A character vector.}
+
 \item{values}{A list of character vectors.
 If \code{x} is missing, the names of \code{values} will be taken as the keys.}
-
-\item{value}{A character vector.}
 
 \item{rawvalue}{A raw vector.}
 }
