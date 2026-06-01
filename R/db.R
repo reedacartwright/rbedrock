@@ -1,35 +1,28 @@
 the$db <- NULL
-the$db_is_user_set <- FALSE
-
-# TODO: Mongolite has examples of using weak references to keep track of things
-# TODO: Keep track of open DBs like a stack and default to the most recent one
-# unless a default_db was set.
 
 #' Get/set the default db connection.
 #'
 #' The default db is the db connection that rbedrock uses by default. It
-#' defaults to the most recently opened db, but can also be set by the user.
+#' defaults to the first opened db, but can also be set by the user.
 #'
-#' Invoking `default_db()` returns the current default connection or the most
-#' recently opened one. Invoking `default_db(db)` updates the current default
-#' and returns the previous set value. `default_db(NULL)` can be used to unset
-#' the default db and revert to the last opened one. Closing `db` will unset
-#' it as the default db as well.
+#' Invoking `default_db()` returns the current default connection. Invoking
+#' `default_db(db)` updates the current default and returns the previous set
+#' value. `default_db(NULL)` can be used to unset the default db. Closing `db`
+#' will unset it as the default db as well.
 #'
 #' `with_db()` and `local_db()` temporarily change the default db.
 #'
-#' @param db For `default_db()`, a `bedrockdb` object. For `with_db()` and
-#' `local_db()`, a path to the world db to open or an existing `bedrockdb`
-#' object.
+#' @param db For `default_db()` a path to the world db to open or an existing
+#'  `bedrockdb` object.
 #' @param code Code to execute in the temporary environment.
 #' @param check Check the validity of `db`? Set to `FALSE` to skip the check.
 #' @param close Close `db` when done? Set to `TRUE` to close db automatically.
 #' @param .local_envir The environment to use for scoping.
 #'
-#' @return For `default_db()`, the calculated value of the default db.
-#' For `default_db(db)`, the previously manually set value of `default_db()`.
-#' For `with_db(db, code)`, the result of evaluating `code` with `db` as the
-#' default `db`. For `local_db(db)`, the value of `db`.
+#' @return For `default_db()`, the calculated value of the default db. For
+#'  `default_db(db)`, the previous value of `default_db()`. For `with_db
+#'  (db, code)`, the result of evaluating `code` with `db` as the default `db`.
+#'  For `local_db(db)`, the value of `db`.
 #'
 #' @seealso [withr::with_connection]
 #'
@@ -55,11 +48,11 @@ default_db <- function(db, check = TRUE) {
     db <- the$db
     assert_open_db(db, check)
   } else {
+    if (is.character(db)) {
+      db <- bedrockdb(db)
+    }
     if (!is.null(db)) {
       assert_open_db(db, check)
-      the$db_is_user_set <- TRUE
-    } else {
-      the$db_is_user_set <- FALSE
     }
     the$db <- db
     db <- db_old
@@ -86,7 +79,7 @@ with_db <- function(db, code, close = is.character(db)) {
   }
   default_db(db)
   on.exit({
-    default_db(old_db)
+    the$db <- old_db
     if (isTRUE(close)) close(db)
   })
   force(code)
@@ -107,7 +100,7 @@ local_db <- function(
   }
   default_db(db)
   defer(envir = .local_envir, {
-    default_db(old_db)
+    the$db <- old_db
     if (isTRUE(close)) close(db)
   })
   invisible(db)

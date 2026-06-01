@@ -97,7 +97,8 @@ bedrockdb <- function(
     bloom_filter_bits_per_key,
     compression_level
   )
-  if (!the$db_is_user_set) {
+  old_db <- the$db
+  if (!is_bedrockdb(old_db) || !old_db$is_open()) {
     the$db <- db
   }
   invisible(db)
@@ -115,7 +116,6 @@ close.bedrockdb <- function(con, compact = FALSE, ...) {
   }
   # clear default connection on close
   if (identical(the$db, con)) {
-    the$db_is_user_set <- FALSE
     the$db <- NULL
   }
   con$close(...)

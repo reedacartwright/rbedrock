@@ -13,9 +13,8 @@ with_db(db, code, close = is.character(db))
 local_db(db, .local_envir = parent.frame(), close = is.character(db))
 }
 \arguments{
-\item{db}{For \code{default_db()}, a \code{bedrockdb} object. For \code{with_db()} and
-\code{local_db()}, a path to the world db to open or an existing \code{bedrockdb}
-object.}
+\item{db}{For \code{default_db()} a path to the world db to open or an existing
+\code{bedrockdb} object.}
 
 \item{check}{Check the validity of \code{db}? Set to \code{FALSE} to skip the check.}
 
@@ -26,21 +25,19 @@ object.}
 \item{.local_envir}{The environment to use for scoping.}
 }
 \value{
-For \code{default_db()}, the calculated value of the default db.
-For \code{default_db(db)}, the previously manually set value of \code{default_db()}.
-For \code{with_db(db, code)}, the result of evaluating \code{code} with \code{db} as the
-default \code{db}. For \code{local_db(db)}, the value of \code{db}.
+For \code{default_db()}, the calculated value of the default db. For
+\code{default_db(db)}, the previous value of \code{default_db()}. For \code{with_db (db, code)}, the result of evaluating \code{code} with \code{db} as the default \code{db}.
+For \code{local_db(db)}, the value of \code{db}.
 }
 \description{
 The default db is the db connection that rbedrock uses by default. It
-defaults to the most recently opened db, but can also be set by the user.
+defaults to the first opened db, but can also be set by the user.
 }
 \details{
-Invoking \code{default_db()} returns the current default connection or the most
-recently opened one. Invoking \code{default_db(db)} updates the current default
-and returns the previous set value. \code{default_db(NULL)} can be used to unset
-the default db and revert to the last opened one. Closing \code{db} will unset
-it as the default db as well.
+Invoking \code{default_db()} returns the current default connection. Invoking
+\code{default_db(db)} updates the current default and returns the previous set
+value. \code{default_db(NULL)} can be used to unset the default db. Closing \code{db}
+will unset it as the default db as well.
 
 \code{with_db()} and \code{local_db()} temporarily change the default db.
 }
@@ -50,7 +47,7 @@ dbz <- bedrockdb(dbpath)
 default_db(dbz) # set default
 default_db() # returns dbz
 default_db(NULL) # unset default
-#cleanup
+# cleanup
 close(dbz)
 with_db(dbpath, length(get_keys))
 db <- local_db(dbpath)

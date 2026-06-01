@@ -1,33 +1,36 @@
 dbpath1 <- rbedrock_example_world("example2.mcworld")
 dbpath2 <- rbedrock_example_world("example2.mcworld")
 
-test_that("default_db() returns the last opened db", {
+ye_old_db <- the$db
+the$db <- NULL
+
+test_that("default_db() returns the first opened db", {
   db1 <- bedrockdb(dbpath1)
   expect_identical(default_db(), db1)
   db2 <- bedrockdb(dbpath2)
-  expect_identical(default_db(), db2)
+  expect_identical(default_db(), db1)
 
-  # closing db1 does not change the default
-  close(db1)
-  expect_identical(default_db(), db2)
-  # closing db2 *does* change the default
+  # closing db2 does not change the default
   close(db2)
+  expect_identical(default_db(), db1)
+  # closing db1 *does* change the default
+  close(db1)
   expect_error(default_db())
   expect_null(default_db(check = FALSE))
 })
 
 test_that("default_db() gets/sets the default db", {
-  # tracks the last opened db
+  # tracks the first opened db
   db1 <- bedrockdb(dbpath1)
   expect_identical(default_db(), db1)
   db2 <- bedrockdb(dbpath2)
-  expect_identical(default_db(), db2)
-  # updates and returns last value
-  expect_identical(default_db(db1), db2)
   expect_identical(default_db(), db1)
+  # updates and returns last value
+  expect_identical(default_db(db2), db1)
+  expect_identical(default_db(), db2)
 
   # unset the default -> return the last opened db
-  expect_identical(default_db(NULL), db1)
+  expect_identical(default_db(NULL), db2)
   expect_null(default_db(check = FALSE))
 
   # updates and returns previously set value
@@ -144,5 +147,7 @@ test_that("local_db() sets the default db temporarily", {
 })
 
 # clean up
+the$db <- ye_old_db
+
 unlink(dbpath1, recursive = TRUE)
 unlink(dbpath2, recursive = TRUE)

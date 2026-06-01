@@ -9,6 +9,10 @@
   prevent collisions.
 * New `make_actor_keys()` function to create actor keys from UniqueIDs.
 * New `generate_uuid()` function to create random UUIDs.
+* `default_db()` now defaults to the first opened db instead of the most
+  recently opened one. This not only is easier to remember but also has simpler
+  bookkeeping. The default db can still be set manually, and if the current
+  default db is closed, the next db opened will be remembered as the default.
 
 # rbedrock 0.4.2
 
