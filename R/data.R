@@ -16,13 +16,13 @@ get_keys <- function(prefix = NULL, db = default_db(), readoptions = NULL) {
     db <- prefix
     prefix <- NULL
   }
-  if (!is.null(prefix)) {
+  if (!is.null(prefix) && !is.raw(prefix)) {
     prefix <- as.character(prefix)
   }
   prefix_raw <- create_rawkey_prefix(prefix)
   rawkeys <- db$keys(prefix_raw, readoptions)
   res <- rawkeys_to_chrkeys(rawkeys)
-  if (!is.null(prefix)) {
+  if (!is.null(prefix) && !is.raw(prefix)) {
     # strip "plain:" from prefix because we expect it to be missing
     prefix <- sub("^plain:", "", prefix)
     # filter out keys from the wrong dimension

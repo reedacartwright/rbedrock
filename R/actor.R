@@ -28,7 +28,7 @@
 #' `get_acdig_data()` returns a named list of the of the values
 #' returned by `get_acdig_value()`.
 #'
-#' @seealso [ChunkActors]
+#' @seealso [ChunkActors] [Actors]
 #'
 #' @name ActorDigest
 NULL
@@ -155,7 +155,7 @@ create_acdig_keys <- function(x, z, dimension) {
 #'  `values` will be taken as the keys.
 #' @param ids A vector of UniqueIDs.
 #'
-#' @seealso [ActorDigest]
+#' @seealso [ActorDigest] [Actors]
 #'
 #' @name ChunkActors
 NULL
@@ -224,9 +224,28 @@ put_chunk_actors_value_impl <- function(value, dig_key, db) {
   put_data(dat, db = db)
 }
 
+
+#' Read and write Actor data
+#'
+#' The nbt data of a actor is saved in the database, using a key with a prefix
+#' and a 16-character storage key: 'actor:0123456789abcdef'.
+#'
+#'
+#' @name Actors
+NULL
+
+#' @rdname Actors
+#' @export
 get_actor_value <- function(keys, db = default_db()) {
   keys <- make_actor_keys(keys)
   get_nbt_value(keys, db = db)
+}
+
+#' @rdname Actors
+#' @export
+get_actors_data <- function(keys, db = default_db()) {
+  keys <- make_actor_keys(keys)
+  get_nbt_data(keys, db = db)
 }
 
 #' @useDynLib rbedrock R_rbedrock_actor_make_storagekeys
@@ -243,7 +262,7 @@ is_valid_acdig_key <- function(keys) {
   grepl(keys, pattern = "^acdig:-?[0-9]+:-?[0-9]+:[0-2]$")
 }
 
-#' @rdname ChunkActors
+#' @rdname Actors
 #' @export
 make_actor_keys <- function(ids) {
   keys <- as.character(ids)
@@ -252,6 +271,12 @@ make_actor_keys <- function(ids) {
   skeys <- sapply(skeys, paste0, collapse = "")
   keys[b] <- paste0("actor:", toupper(skeys))
   keys
+}
+
+#' @rdname Actors
+#' @export
+get_actor_keys <- function(db = default_db()) {
+  get_keys(charToRaw("actorprefix"), db = db)
 }
 
 is_actor_key <- function(keys) {

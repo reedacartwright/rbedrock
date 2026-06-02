@@ -40,6 +40,9 @@ create_rawkey_prefix <- function(prefix) {
   if (is.null(prefix)) {
     return(NULL)
   }
+  if (is.raw(prefix)) {
+    return(prefix)
+  }
   stopifnot(is.character(prefix) && length(prefix) == 1L)
 
   if (is_chunk_key(prefix)) {
