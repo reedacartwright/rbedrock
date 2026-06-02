@@ -377,6 +377,12 @@ get_actor_keys <- function(db = default_db()) {
   get_keys(charToRaw("actorprefix"), db = db)
 }
 
+#' @rdname ActorDigest
+#' @export
+get_acdig_keys <- function(db = default_db()) {
+  get_keys(charToRaw("digp"), db = db)
+}
+
 is_actor_key <- function(keys) {
   startsWith(keys, "actor:")
 }

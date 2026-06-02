@@ -9,6 +9,7 @@
 \alias{read_acdig_value}
 \alias{write_acdig_value}
 \alias{create_acdig_keys}
+\alias{get_acdig_keys}
 \title{Read and write Actor Digest Data}
 \usage{
 get_acdig_value(x, z, dimension, db = default_db())
@@ -24,6 +25,8 @@ read_acdig_value(rawvalue)
 write_acdig_value(value)
 
 create_acdig_keys(x, z, dimension)
+
+get_acdig_keys(db = default_db())
 }
 \arguments{
 \item{x, z, dimension}{Chunk coordinates to extract data from.
