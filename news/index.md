@@ -14,7 +14,7 @@
   doesn’t use it anymore. Percent encoding of plain keys now encodes `:`
   in order to prevent collisions.
 - New
-  [`make_actor_keys()`](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
+  [`make_actor_keys()`](https://reedacartwright.github.io/rbedrock/reference/Actor.md)
   function to create actor keys from UniqueIDs.
 - New
   [`generate_uuid()`](https://reedacartwright.github.io/rbedrock/reference/generate_uuid.md)

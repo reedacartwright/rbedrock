@@ -2,6 +2,13 @@
 
 ## All functions
 
+- [`get_actor_value()`](https://reedacartwright.github.io/rbedrock/reference/Actor.md)
+  [`get_actor_data()`](https://reedacartwright.github.io/rbedrock/reference/Actor.md)
+  [`put_actor_value()`](https://reedacartwright.github.io/rbedrock/reference/Actor.md)
+  [`put_actor_data()`](https://reedacartwright.github.io/rbedrock/reference/Actor.md)
+  [`make_actor_keys()`](https://reedacartwright.github.io/rbedrock/reference/Actor.md)
+  [`get_actor_keys()`](https://reedacartwright.github.io/rbedrock/reference/Actor.md)
+  : Read and write Actor data
 - [`get_acdig_value()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
   [`get_acdig_data()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
   [`put_acdig_value()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
@@ -9,6 +16,7 @@
   [`read_acdig_value()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
   [`write_acdig_value()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
   [`create_acdig_keys()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
+  [`get_acdig_keys()`](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
   : Read and write Actor Digest Data
 - [`get_biomes_value()`](https://reedacartwright.github.io/rbedrock/reference/Biomes.md)
   [`get_biomes_data()`](https://reedacartwright.github.io/rbedrock/reference/Biomes.md)
@@ -31,7 +39,6 @@
   [`get_chunk_actors_data()`](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
   [`put_chunk_actors_data()`](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
   [`put_chunk_actors_value()`](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
-  [`make_actor_keys()`](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
   : Read and write Actor data for a chunk
 - [`get_chunk_version_value()`](https://reedacartwright.github.io/rbedrock/reference/ChunkVersion.md)
   [`get_chunk_version_data()`](https://reedacartwright.github.io/rbedrock/reference/ChunkVersion.md)

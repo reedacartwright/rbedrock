@@ -27,6 +27,8 @@ read_acdig_value(rawvalue)
 write_acdig_value(value)
 
 create_acdig_keys(x, z, dimension)
+
+get_acdig_keys(db = default_db())
 ```
 
 ## Arguments
@@ -68,3 +70,4 @@ data is acdig:x:z:dimension.
 ## See also
 
 [ChunkActors](https://reedacartwright.github.io/rbedrock/reference/ChunkActors.md)
+[Actor](https://reedacartwright.github.io/rbedrock/reference/Actor.md)

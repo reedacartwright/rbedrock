@@ -17,8 +17,6 @@ get_chunk_actors_data(x, z, dimension, db = default_db())
 put_chunk_actors_data(values, x, z, dimension, db = default_db())
 
 put_chunk_actors_value(value, x, z, dimension, db = default_db())
-
-make_actor_keys(ids)
 ```
 
 ## Arguments
@@ -57,8 +55,10 @@ ActorDigests. When storing Actors data, an actor's storage key will be
 recalculated from the actor's `UniqueID`. The actor's position and
 dimension are not verified to be in the chunk it is assigned to.
 
-`make_actor_keys()` creates actor keys based on UniqueIDs.
+[`make_actor_keys()`](https://reedacartwright.github.io/rbedrock/reference/Actor.md)
+creates actor keys based on UniqueIDs.
 
 ## See also
 
 [ActorDigest](https://reedacartwright.github.io/rbedrock/reference/ActorDigest.md)
+[Actor](https://reedacartwright.github.io/rbedrock/reference/Actor.md)
