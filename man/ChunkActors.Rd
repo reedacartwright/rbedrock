@@ -6,7 +6,6 @@
 \alias{get_chunk_actors_data}
 \alias{put_chunk_actors_data}
 \alias{put_chunk_actors_value}
-\alias{make_actor_keys}
 \title{Read and write Actor data for a chunk}
 \usage{
 get_chunk_actors_value(x, z, dimension, db = default_db())
@@ -16,8 +15,6 @@ get_chunk_actors_data(x, z, dimension, db = default_db())
 put_chunk_actors_data(values, x, z, dimension, db = default_db())
 
 put_chunk_actors_value(value, x, z, dimension, db = default_db())
-
-make_actor_keys(ids)
 }
 \arguments{
 \item{x, z, dimension}{Chunk coordinates to extract data from. \code{x} can also be
@@ -51,5 +48,5 @@ be in the chunk it is assigned to.
 \code{make_actor_keys()} creates actor keys based on UniqueIDs.
 }
 \seealso{
-\link{ActorDigest}
+\link{ActorDigest} \link{Actor}
 }

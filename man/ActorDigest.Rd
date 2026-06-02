@@ -61,5 +61,5 @@ they are not chunk data and use their own prefix. The key format
 for actor digest data is acdig:x:z:dimension.
 }
 \seealso{
-\link{ChunkActors}
+\link{ChunkActors} \link{Actor}
 }

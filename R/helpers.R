@@ -319,3 +319,13 @@ rac_type_abbr <- function(x) {
 rac_type_abbr.default <- function(x) {
   if (is.recursive(x)) "obj" else "val"
 }
+
+# ---- list helpers ------------------------------------------------------------
+
+compact_list <- function(x) {
+  x[as.logical(lengths(x))]
+}
+
+drop_null <- function(x) {
+  Filter(Negate(is.null), x)
+}

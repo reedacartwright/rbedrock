@@ -28,7 +28,7 @@
 #' `get_acdig_data()` returns a named list of the of the values
 #' returned by `get_acdig_value()`.
 #'
-#' @seealso [ChunkActors] [Actors]
+#' @seealso [ChunkActors] [Actor]
 #'
 #' @name ActorDigest
 NULL
@@ -155,7 +155,7 @@ create_acdig_keys <- function(x, z, dimension) {
 #'  `values` will be taken as the keys.
 #' @param ids A vector of UniqueIDs.
 #'
-#' @seealso [ActorDigest] [Actors]
+#' @seealso [ActorDigest] [Actor]
 #'
 #' @name ChunkActors
 NULL
@@ -205,14 +205,6 @@ put_chunk_actors_value_impl <- function(value, dig_key, db) {
   storage_keys <- make_storagekeys(ids)
   actor_keys <- read_acdig_value(unlist(storage_keys))
 
-  # update storage keys
-  nbt_storage_key <- function(k) {
-    obj <- nbt_raw_string(k)
-    obj <- nbt_compound(StorageKey = obj)
-    obj <- nbt_compound(EntityStorageKeyComponent = obj)
-    obj <- nbt_compound(internalComponents = obj)
-    obj
-  }
   nbt_dat <- lapply(storage_keys, nbt_storage_key)
   value <- utils::modifyList(value, nbt_dat)
 
@@ -224,28 +216,134 @@ put_chunk_actors_value_impl <- function(value, dig_key, db) {
   put_data(dat, db = db)
 }
 
+# update storage keys
+nbt_storage_key <- function(k) {
+  obj <- nbt_raw_string(k)
+  obj <- nbt_compound(StorageKey = obj)
+  obj <- nbt_compound(EntityStorageKeyComponent = obj)
+  obj <- nbt_compound(internalComponents = obj)
+  obj
+}
+
+update_storage_key <- function(value) {
+  id <- value[["UniqueID"]]
+  stopifnot(!is.null(id))
+  key <- make_storagekeys(id)[[1]]
+  nbt_dat <- nbt_storage_key(key)
+  utils::modifyList(value, nbt_dat)
+}
 
 #' Read and write Actor data
 #'
 #' The nbt data of a actor is saved in the database, using a key with a prefix
 #' and a 16-character storage key: 'actor:0123456789abcdef'.
 #'
-#'
-#' @name Actors
+#' @name Actor
 NULL
 
-#' @rdname Actors
+#' @rdname Actor
 #' @export
-get_actor_value <- function(keys, db = default_db()) {
-  keys <- make_actor_keys(keys)
-  get_nbt_value(keys, db = db)
+get_actor_value <- function(id, db = default_db()) {
+  key <- make_actor_keys(id)
+  get_nbt_value(key, db = db)
 }
 
-#' @rdname Actors
+#' @rdname Actor
 #' @export
-get_actors_data <- function(keys, db = default_db()) {
-  keys <- make_actor_keys(keys)
+get_actor_data <- function(ids, db = default_db()) {
+  keys <- make_actor_keys(ids)
   get_nbt_data(keys, db = db)
+}
+
+#' @rdname Actor
+#' @export
+put_actor_value <- function(value, dimension, db = default_db()) {
+  # Extract information
+  uid <- value[["UniqueID"]]
+  pos <- value[["Pos"]]
+  stopifnot(!is.null(uid) && !is.null(pos))
+  # Rebuild EntityStorageKey
+  value <- update_storage_key(value)
+
+  # Prepare to write data
+  uid_key <- make_actor_keys(uid)
+  values <- list(write_nbt(value))
+  keys <- uid_key
+
+  # Identify chunk that the actor is in
+  new_acdig <- create_acdig_keys(pos[1] %/% 16, pos[3] %/% 16, dimension)
+
+  old_value <- get_nbt_value(uid_key, db = db)
+  if (is.null(old_value)) {
+    # we have a new actor and need to add it to the correct chunk.
+    val <- get_acdig_value(new_acdig, db = db)
+    val <- write_acdig_value(c(val, uid_key))
+    values <- c(values, list(val))
+    keys <- c(keys, new_acdig)
+  } else {
+    # find which chunk the old one was in by searching all dimensions
+    old_pos <- old_value[["Pos"]]
+    stopifnot(!is.null(old_pos))
+    x <- old_pos[1] %/% 16
+    z <- old_pos[3] %/% 16
+    dat <- get_acdig_data(x, z, dimension = 0:2, db = db)
+    idx <- Position(function(y) uid_key %in% y, dat, nomatch = 0L)
+    # Update chunk directories if the actor has moved
+    if (idx > 0 && names(dat)[idx] != new_acdig) {
+      k <- c(names(dat)[idx], new_acdig)
+      val <- get_acdig_data(k, db = db)
+      val[[1]] <- write_acdig_value(setdiff(val[[1]], uid_key))
+      val[[2]] <- write_acdig_value(c(val[[2]], uid_key))
+      values <- c(values, val)
+      keys <- c(keys, k)
+    }
+  }
+  put_data(values, keys, db = db)
+}
+
+#' @rdname Actor
+#' @export
+put_actor_data <- function(values, dimension, db = default_db()) {
+  dimension <- rac_recycle(dimension, length(values))
+  values <- lapply(values, update_storage_key)
+
+  uids <- lapply(values, `[[`, "UniqueID")
+  uid_keys <- make_actor_keys(uids)
+  new_x <- vapply(values, function(y) y[["Pos"]][1], numeric(1L), USE.NAMES = FALSE) %/% 16
+  new_z <- vapply(values, function(y) y[["Pos"]][3], numeric(1L), USE.NAMES = FALSE) %/% 16
+  new_acdig <- create_acdig_keys(new_x, new_z, dimension)
+
+  # load all existing data
+  old_values <- get_actor_data(uid_keys, db = db)
+  old_values <- compact_list(old_values)
+  old_x <- vapply(old_values, function(y) y[["Pos"]][1], numeric(1L), USE.NAMES = FALSE) %/% 16
+  old_z <- vapply(old_values, function(y) y[["Pos"]][3], numeric(1L), USE.NAMES = FALSE) %/% 16
+  # The actor could be in any dimension
+  acdig_keys <- unique(c(
+    new_acdig,
+    create_acdig_keys(old_x, old_z, 0),
+    create_acdig_keys(old_x, old_z, 1),
+    create_acdig_keys(old_x, old_z, 2)
+  ))
+
+  # pluck actors out of their chunks
+  acdig_data <- get_acdig_data(acdig_keys, db = db)
+  acdig_data <- lapply(acdig_data, setdiff, y = uid_keys)
+
+  # add actors to their chunks
+  acdig_data2 <- split(uid_keys, new_acdig)
+  n <- names(acdig_data2)
+  acdig_data[n] <- mapply(c, acdig_data[n], acdig_data2[n], SIMPLIFY = FALSE)
+
+  # drop null elements because they represent keys that don't need to be created
+  # or updated
+  acdig_data <- drop_null(acdig_data)
+
+  # construct data set and write to db
+  keys <- c(uid_keys, names(acdig_data))
+  values <- c(write_nbt_data(values), lapply(acdig_data, write_acdig_value))
+
+  put_data(values, keys, db = db)
 }
 
 #' @useDynLib rbedrock R_rbedrock_actor_make_storagekeys
@@ -262,7 +360,7 @@ is_valid_acdig_key <- function(keys) {
   grepl(keys, pattern = "^acdig:-?[0-9]+:-?[0-9]+:[0-2]$")
 }
 
-#' @rdname Actors
+#' @rdname Actor
 #' @export
 make_actor_keys <- function(ids) {
   keys <- as.character(ids)
@@ -273,7 +371,7 @@ make_actor_keys <- function(ids) {
   keys
 }
 
-#' @rdname Actors
+#' @rdname Actor
 #' @export
 get_actor_keys <- function(db = default_db()) {
   get_keys(charToRaw("actorprefix"), db = db)
