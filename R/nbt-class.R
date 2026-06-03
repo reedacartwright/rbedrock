@@ -49,7 +49,7 @@ unnbt <- function(x) {
 
 unnbt_impl <- function(x) {
   cls <- oldClass(x)
-  cls <- cls[grep("^rbedrock_nbt_", cls, invert = TRUE)]
+  cls <- grep("^rbedrock_nbt_", cls, invert = TRUE, value = TRUE)
   structure(rac_data(x), class = cls)
 }
 
@@ -126,8 +126,8 @@ rac_cast.rbedrock_nbt_byte <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_byte_array <- function(x) {
-  validate_nbt_byte_array(new_nbt_byte_array(trunc(as_double(x))))
+nbt_byte_array <- function(x, ...) {
+  validate_nbt_byte_array(new_nbt_byte_array(trunc(as_double(c(x, ...)))))
 }
 
 validate_nbt_byte_array <- validate_nbt_byte
@@ -153,8 +153,8 @@ rac_cast.rbedrock_nbt_byte_array <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_byte_list <- function(x) {
-  validate_nbt_byte_list(new_nbt_byte_list(trunc(as_double(x))))
+nbt_byte_list <- function(x, ...) {
+  validate_nbt_byte_list(new_nbt_byte_list(trunc(as_double(c(x, ...)))))
 }
 
 validate_nbt_byte_list <- validate_nbt_byte
@@ -248,8 +248,8 @@ rac_cast.rbedrock_nbt_short <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_short_list <- function(x) {
-  validate_nbt_short_list(new_nbt_short_list(trunc(as_double(x))))
+nbt_short_list <- function(x, ...) {
+  validate_nbt_short_list(new_nbt_short_list(trunc(as_double(c(x, ...)))))
 }
 
 validate_nbt_short_list <- validate_nbt_short
@@ -305,8 +305,8 @@ rac_cast.rbedrock_nbt_int <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_int_array <- function(x) {
-  validate_nbt_int_array(new_nbt_int_array(trunc(as_double(x))))
+nbt_int_array <- function(x, ...) {
+  validate_nbt_int_array(new_nbt_int_array(trunc(as_double(c(x, ...)))))
 }
 
 validate_nbt_int_array <- validate_nbt_int
@@ -332,8 +332,8 @@ rac_cast.rbedrock_nbt_int_array <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_int_list <- function(x) {
-  validate_nbt_int_list(new_nbt_int_list(trunc(as_double(x))))
+nbt_int_list <- function(x, ...) {
+  validate_nbt_int_list(new_nbt_int_list(trunc(as_double(c(x, ...)))))
 }
 
 validate_nbt_int_list <- validate_nbt_int
@@ -435,8 +435,8 @@ rac_cast.rbedrock_nbt_float <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_float_list <- function(x) {
-  validate_nbt_float_list(new_nbt_float_list(as_double(x)))
+nbt_float_list <- function(x, ...) {
+  validate_nbt_float_list(new_nbt_float_list(as_double(c(x, ...))))
 }
 
 validate_nbt_float_list <- validate_nbt_float
@@ -496,8 +496,8 @@ rac_cast.rbedrock_nbt_double <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_double_list <- function(x) {
-  validate_nbt_double_list(new_nbt_double_list(as_double(x)))
+nbt_double_list <- function(x, ...) {
+  validate_nbt_double_list(new_nbt_double_list(as_double(c(x, ...))))
 }
 
 validate_nbt_double_list <- validate_nbt_double
@@ -553,8 +553,8 @@ rac_cast.rbedrock_nbt_long <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_long_array <- function(x) {
-  validate_nbt_long_array(new_nbt_long_array(trunc_int64(as.character(x))))
+nbt_long_array <- function(x, ...) {
+  validate_nbt_long_array(new_nbt_long_array(trunc_int64(as.character(c(x, ...)))))
 }
 
 validate_nbt_long_array <- validate_nbt_long
@@ -580,8 +580,8 @@ rac_cast.rbedrock_nbt_long_array <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_long_list <- function(x) {
-  validate_nbt_long_list(new_nbt_long_list(trunc_int64(as.character(x))))
+nbt_long_list <- function(x, ...) {
+  validate_nbt_long_list(new_nbt_long_list(trunc_int64(as.character(c(x, ...)))))
 }
 
 validate_nbt_long_list <- validate_nbt_long
@@ -688,8 +688,8 @@ rac_cast.rbedrock_nbt_raw_string <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_string_list <- function(x) {
-  validate_nbt_string_list(new_nbt_string_list(as.character(x)))
+nbt_string_list <- function(x, ...) {
+  validate_nbt_string_list(new_nbt_string_list(as.character(c(x, ...))))
 }
 
 validate_nbt_string_list <- validate_nbt_string
