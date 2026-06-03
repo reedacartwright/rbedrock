@@ -29,6 +29,7 @@
 \alias{nbt_raw_string_list}
 \alias{nbt_empty_list}
 \alias{nbt_compound_list}
+\alias{nbt_compound_list0}
 \alias{nbt_nested_list}
 \title{Create an NBT value}
 \usage{
@@ -84,7 +85,9 @@ nbt_raw_string_list(x)
 
 nbt_empty_list(x = list())
 
-nbt_compound_list(x)
+nbt_compound_list(...)
+
+nbt_compound_list0(x)
 
 nbt_nested_list(x)
 }

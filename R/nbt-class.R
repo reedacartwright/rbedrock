@@ -55,6 +55,14 @@ unnbt_impl <- function(x) {
 
 # ---- nbt_compound [10] -------------------------------------------------------
 
+# TODO: nbt_compound2 that infers class from type.
+#   - numeric -> float / float_list
+#   - logical/raw -> byte / byte_list
+#   - integer -> int / int_list
+#   - string -> string / string_list
+#   - integer string -> long / long_list unless I() is used
+#   - maybe use I() also to create _array
+
 #' @rdname nbt
 #' @export
 nbt_compound <- function(...) {
@@ -777,7 +785,14 @@ rac_cast.rbedrock_empty_list <- function(x, to, ...) {
 
 #' @rdname nbt
 #' @export
-nbt_compound_list <- function(x) {
+nbt_compound_list <- function(...) {
+  x <- lapply(list(...), nbt_compound0)
+  validate_nbt_compound_list(new_nbt_compound_list(x))
+}
+
+#' @rdname nbt
+#' @export
+nbt_compound_list0 <- function(x) {
   x <- lapply(x, nbt_compound0)
   validate_nbt_compound_list(new_nbt_compound_list(x))
 }
