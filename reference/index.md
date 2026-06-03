@@ -145,6 +145,7 @@
   : Utilities for working with Minecraft world folders.
 - [`unnbt()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
   [`nbt_compound()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
+  [`nbt_compound0()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
   [`nbt_byte()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
   [`nbt_byte_array()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
   [`nbt_byte_list()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
@@ -169,6 +170,7 @@
   [`nbt_raw_string_list()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
   [`nbt_empty_list()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
   [`nbt_compound_list()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
+  [`nbt_compound_list0()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
   [`nbt_nested_list()`](https://reedacartwright.github.io/rbedrock/reference/nbt.md)
   : Create an NBT value
 - [`nbt_list_of()`](https://reedacartwright.github.io/rbedrock/reference/nbt_list_of.md)

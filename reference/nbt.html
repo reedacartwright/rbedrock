@@ -49,39 +49,41 @@ of data held.</p>
 <span></span>
 <span><span class="fu">nbt_compound</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">nbt_compound0</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">nbt_byte</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_byte_array</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_byte_array</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_byte_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_byte_list</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_byte_array_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_short</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_short_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_short_list</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_int</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_int_array</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_int_array</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_int_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_int_list</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_int_array_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_float</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_float_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_float_list</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_double</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_double_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_double_list</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_long</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_long_array</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_long_array</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_long_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_long_list</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_long_array_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
@@ -89,13 +91,15 @@ of data held.</p>
 <span></span>
 <span><span class="fu">nbt_raw_string</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_string_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_string_list</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_raw_string_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_empty_list</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">nbt_compound_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">nbt_compound_list</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">nbt_compound_list0</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">nbt_nested_list</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
