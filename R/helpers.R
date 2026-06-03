@@ -175,7 +175,7 @@ as_double <- function(x) {
 
 is_int64 <- function(x) {
   # TODO: test the actual value as well
-  grepl("^[-+]?[1-9][0-9]*$", x)
+  grepl("^[-+]?(?:0|[1-9][0-9]*)$", x)
 }
 
 trunc_int64 <- function(x) {

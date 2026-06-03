@@ -16,7 +16,8 @@ bedrockdb(
   block_size = 163840L,
   cache_capacity = 83886080L,
   bloom_filter_bits_per_key = 10L,
-  compression_level = -1L
+  compression_level = -1L,
+  default_db = FALSE
 )
 
 \method{close}{bedrockdb}(con, compact = FALSE, ...)

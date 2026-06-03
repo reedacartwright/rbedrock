@@ -4,6 +4,7 @@
 \alias{nbt}
 \alias{unnbt}
 \alias{nbt_compound}
+\alias{nbt_compound0}
 \alias{nbt_byte}
 \alias{nbt_byte_array}
 \alias{nbt_byte_list}
@@ -34,6 +35,8 @@
 unnbt(x)
 
 nbt_compound(...)
+
+nbt_compound0(x)
 
 nbt_byte(x)
 
