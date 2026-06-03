@@ -83,7 +83,8 @@ bedrockdb <- function(
   block_size = 163840L,
   cache_capacity = 83886080L,
   bloom_filter_bits_per_key = 10L,
-  compression_level = -1L
+  compression_level = -1L,
+  default_db = FALSE
 ) {
   db <- R6_bedrockdb$new(
     path,
@@ -98,7 +99,7 @@ bedrockdb <- function(
     compression_level
   )
   old_db <- the$db
-  if (!is_bedrockdb(old_db) || !old_db$is_open()) {
+  if (isTRUE(default_db) || !is_bedrockdb(old_db) || !old_db$is_open()) {
     the$db <- db
   }
   invisible(db)
