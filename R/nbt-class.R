@@ -62,6 +62,10 @@ nbt_compound <- function(...) {
   validate_nbt_compound(new_nbt_compound(lst))
 }
 
+nbt_compound2 <- function(lst) {
+  validate_nbt_compound(new_nbt_compound(lst))
+}
+
 new_nbt_compound <- function(x) {
   stopifnot(is.list(x))
   structure(
@@ -767,12 +771,12 @@ rac_cast.rbedrock_empty_list <- function(x, to, ...) {
 }
 
 
-# ---- nbt_long_compound_list [110] --------------------------------------------
+# ---- nbt_compound_list [110] -------------------------------------------------
 
 #' @rdname nbt
 #' @export
 nbt_compound_list <- function(x) {
-  x <- lapply(x, nbt_compound)
+  x <- lapply(x, nbt_compound2)
   validate_nbt_compound_list(new_nbt_compound_list(x))
 }
 
