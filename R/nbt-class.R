@@ -69,10 +69,6 @@ nbt_compound0 <- function(x) {
 }
 
 
-nbt_compound2 <- function(...) {
-  nbt_guess_list(list(...))
-}
-
 new_nbt_compound <- function(x) {
   stopifnot(is.list(x))
   structure(
@@ -844,57 +840,4 @@ new_nbt_nested_list <- function(x) {
 #' @export
 rac_cast.rbedrock_nbt_nested_list <- function(x, to, ...) {
   nbt_nested_list(x)
-}
-
-# ---- nbt_guess ---------------------------------------------------------------
-
-nbt_guess <- function(x) {
-  if (is_nbt_value(x)) {
-    return(x)
-  }
-  asis <- inherits(x, "AsIs")
-
-  type <- if (inherits(x, "integer64")) {
-    "integer64"
-  } else {
-    typeof(x)
-  }
-  n <- length(x)
-
-  if (n != 1L || asis) {
-    switch(type,
-      logical = nbt_byte_list(x),
-      raw = nbt_raw_string(x),
-      complex = nbt_short_list(Im(x)),
-      integer = nbt_int_list(x),
-      integer64 = nbt_long_list(x),
-      double = nbt_float_list(x),
-      character = nbt_string_list(x),
-      NULL = nbt_empty_list(x),
-      list = nbt_guess_list(x),
-      stop(sprintf("type '%s' is not supported", type))
-    )
-  } else {
-    switch(type,
-      logical = nbt_byte(x),
-      raw = nbt_byte(x),
-      complex = nbt_short(Im(x)),
-      integer = nbt_int(x),
-      integer64 = nbt_long(x),
-      double = nbt_float(x),
-      character = nbt_string(x),
-      list = nbt_guess_list(x),
-      stop(sprintf("type '%s' is not supported", type))
-    )
-  }
-}
-
-nbt_guess_list <- function(x) {
-  asis <- inherits(x, "AsIs")
-  x <- lapply(x, nbt_guess)
-  if (is.null(names(x)) && !asis) {
-    nbt_compound_list0(x)
-  } else {
-    nbt_compound0(x)
-  }
 }
