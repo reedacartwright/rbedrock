@@ -26,5 +26,5 @@ rbedrock_example()
 rbedrock_example("example1.mcworld")
 #> [1] "/home/runner/work/_temp/Library/rbedrock/extdata/example1.mcworld"
 rbedrock_example_world("example1.mcworld")
-#> [1] "/tmp/Rtmp8mLpJG/world1de020fef26a"
+#> [1] "/tmp/RtmpBFTI5v/world1dd14ef92ef"
 ```
