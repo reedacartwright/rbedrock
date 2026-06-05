@@ -55,25 +55,22 @@ unnbt_impl <- function(x) {
 
 # ---- nbt_compound [10] -------------------------------------------------------
 
-# TODO: nbt_compound2 that infers class from type.
-#   - numeric -> float / float_list
-#   - logical/raw -> byte / byte_list
-#   - integer -> int / int_list
-#   - string -> string / string_list
-#   - integer string -> long / long_list unless I() is used
-#   - maybe use I() also to create _array
 
 #' @rdname nbt
 #' @export
 nbt_compound <- function(...) {
-  lst <- list(...)
-  validate_nbt_compound(new_nbt_compound(lst))
+  nbt_compound0(list(...))
 }
 
 #' @rdname nbt
 #' @export
 nbt_compound0 <- function(x) {
   validate_nbt_compound(new_nbt_compound(x))
+}
+
+
+nbt_compound2 <- function(...) {
+  nbt_guess_list(list(...))
 }
 
 new_nbt_compound <- function(x) {
@@ -810,6 +807,7 @@ new_nbt_compound_list <- function(x) {
       "rbedrock_nbt_compound_list",
       "rbedrock_nbt_list_value",
       "rbedrock_nbt_value",
+      "rbedrock_nbt_list_of",
       "list"
     )
   )
@@ -846,4 +844,57 @@ new_nbt_nested_list <- function(x) {
 #' @export
 rac_cast.rbedrock_nbt_nested_list <- function(x, to, ...) {
   nbt_nested_list(x)
+}
+
+# ---- nbt_guess ---------------------------------------------------------------
+
+nbt_guess <- function(x) {
+  if (is_nbt_value(x)) {
+    return(x)
+  }
+  asis <- inherits(x, "AsIs")
+
+  type <- if (inherits(x, "integer64")) {
+    "integer64"
+  } else {
+    typeof(x)
+  }
+  n <- length(x)
+
+  if (n != 1L || asis) {
+    switch(type,
+      logical = nbt_byte_list(x),
+      raw = nbt_raw_string(x),
+      complex = nbt_short_list(Im(x)),
+      integer = nbt_int_list(x),
+      integer64 = nbt_long_list(x),
+      double = nbt_float_list(x),
+      character = nbt_string_list(x),
+      NULL = nbt_empty_list(x),
+      list = nbt_guess_list(x),
+      stop(sprintf("type '%s' is not supported", type))
+    )
+  } else {
+    switch(type,
+      logical = nbt_byte(x),
+      raw = nbt_byte(x),
+      complex = nbt_short(Im(x)),
+      integer = nbt_int(x),
+      integer64 = nbt_long(x),
+      double = nbt_float(x),
+      character = nbt_string(x),
+      list = nbt_guess_list(x),
+      stop(sprintf("type '%s' is not supported", type))
+    )
+  }
+}
+
+nbt_guess_list <- function(x) {
+  asis <- inherits(x, "AsIs")
+  x <- lapply(x, nbt_guess)
+  if (is.null(names(x)) && !asis) {
+    nbt_compound_list0(x)
+  } else {
+    nbt_compound0(x)
+  }
 }

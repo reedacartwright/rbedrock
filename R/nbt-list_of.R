@@ -153,7 +153,7 @@ box_chars <- function() {
   }
 }
 
-#---- Formatting nbt values ----------------------------------------------------
+# ---- Formatting nbt values ---------------------------------------------------
 
 #### nbt numeric values ####
 
