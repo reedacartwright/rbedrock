@@ -17,7 +17,7 @@ bedrockdb(
   cache_capacity = 83886080L,
   bloom_filter_bits_per_key = 10L,
   compression_level = -1L,
-  default_db = FALSE
+  default = getOption("rbedrock.set_default_db")
 )
 
 \method{close}{bedrockdb}(con, compact = FALSE, ...)
@@ -46,6 +46,10 @@ directory.}
 \item{bloom_filter_bits_per_key}{Internal leveldb option}
 
 \item{compression_level}{Internal leveldb option}
+
+\item{default}{A logical specifying whether the opened db should be saved
+as the default db. If \code{NA}, the default db is updated only if the current
+default db is invalid.}
 
 \item{con}{An database object created by bedrockdb.}
 

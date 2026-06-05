@@ -50,6 +50,9 @@
 #' @param con An database object created by bedrockdb.
 #' @param ... arguments passed to or from other methods.
 #' @param x An object.
+#' @param default A logical specifying whether the opened db should be saved
+#'   as the default db. If `NA`, the default db is updated only if the current
+#'   default db is invalid.
 #'
 #' @return On success, `bedrockdb` returns an R6 class of type 'bedrockdb'.
 #'
@@ -84,7 +87,7 @@ bedrockdb <- function(
   cache_capacity = 83886080L,
   bloom_filter_bits_per_key = 10L,
   compression_level = -1L,
-  default_db = FALSE
+  default = getOption("rbedrock.set_default_db")
 ) {
   db <- R6_bedrockdb$new(
     path,
@@ -99,7 +102,10 @@ bedrockdb <- function(
     compression_level
   )
   old_db <- the$db
-  if (isTRUE(default_db) || !is_bedrockdb(old_db) || !old_db$is_open()) {
+  if (!isTRUE(default) && !isFALSE(default)) {
+    default <- !is_bedrockdb(old_db) || !old_db$is_open()
+  }
+  if (default) {
     the$db <- db
   }
   invisible(db)

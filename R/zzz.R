@@ -3,7 +3,8 @@
   opt <- options()
   opt_rbedrock <- list(
     rbedrock.worlds_dir_path = NULL,
-    rbedrock.rand_world_id = "pretty"
+    rbedrock.rand_world_id = "pretty",
+    rbedrock.set_default_db = NA
   )
   to_set <- !(names(opt_rbedrock) %in% names(opt))
   if (any(to_set)) {
