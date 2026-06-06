@@ -91,7 +91,7 @@ validate_nbt_compound <- function(x) {
 
 #' @export
 rac_cast.rbedrock_nbt_compound <- function(x, to, ...) {
-  nbt_compound(x)
+  nbt_compound0(x)
 }
 
 # ---- nbt_byte [1] ------------------------------------------------------------

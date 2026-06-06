@@ -64,6 +64,17 @@ test_that("default_db() gets/sets the default db", {
   close(db1)
 })
 
+test_that("default_db() can open a db", {
+  # Sanity Check
+  expect_null(default_db(check = FALSE))
+
+  default_db(dbpath1)
+
+  expect_true(is_bedrockdb(default_db()) && default_db()$is_open())
+  expect_equal(default_db()$path, file.path(dbpath1, "db"))
+  close(default_db(NULL))
+})
+
 test_that("with_db() sets the default db temporarily", {
   # Sanity Check
   expect_null(default_db(check = FALSE))

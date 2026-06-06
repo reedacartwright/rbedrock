@@ -109,4 +109,31 @@ test_that("read_nbt() and write_nbt() are inverses", {
   expect_equal(write_nbt(nbt_val_lv, format = "network"), rawval_lv)
 })
 
+test_that("miscellaneous nbt functions work", {
+  expect_true(is_nbt_value(nbt_byte(TRUE)))
+  expect_false(is_nbt_value(TRUE))
+  expect_true(is_nbt_list_value(nbt_empty_list()))
+  expect_false(is_nbt_list_value(nbt_byte(TRUE)))
+  expect_true(is_nbt_compound(nbt_compound(A = nbt_byte(TRUE))))
+  expect_false(is_nbt_compound(nbt_byte(TRUE)))
+
+  expect_equal(nbt_value_or_cast(nbt_byte(TRUE), nbt_byte(1)), nbt_byte(TRUE))
+  expect_equal(nbt_value_or_cast(TRUE, nbt_byte(1)), nbt_byte(TRUE))
+
+  expect_equal(
+    nbt_value_or_cast(list(A = nbt_byte(TRUE)), nbt_compound()),
+    nbt_compound(A = nbt_byte(TRUE))
+  )
+
+  expect_equal(
+    nbt_value_or_cast(TRUE, nbt_byte_array(c())),
+    nbt_byte_array(TRUE)
+  )
+
+  expect_equal(
+    nbt_value_or_cast(TRUE, nbt_byte_list(c())),
+    nbt_byte_list(TRUE)
+  )
+})
+
 # nolint end
