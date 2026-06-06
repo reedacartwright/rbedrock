@@ -309,15 +309,27 @@ put_actor_data <- function(values, dimension, db = default_db()) {
 
   uids <- lapply(values, `[[`, "UniqueID")
   uid_keys <- make_actor_keys(uids)
-  new_x <- vapply(values, function(y) y[["Pos"]][1], numeric(1L), USE.NAMES = FALSE) %/% 16
-  new_z <- vapply(values, function(y) y[["Pos"]][3], numeric(1L), USE.NAMES = FALSE) %/% 16
+  new_x <- vapply(values,
+    function(y) y[["Pos"]][1], numeric(1L),
+    USE.NAMES = FALSE
+  ) %/% 16
+  new_z <- vapply(values,
+    function(y) y[["Pos"]][3], numeric(1L),
+    USE.NAMES = FALSE
+  ) %/% 16
   new_acdig <- create_acdig_keys(new_x, new_z, dimension)
 
   # load all existing data
   old_values <- get_actor_data(uid_keys, db = db)
   old_values <- compact_list(old_values)
-  old_x <- vapply(old_values, function(y) y[["Pos"]][1], numeric(1L), USE.NAMES = FALSE) %/% 16
-  old_z <- vapply(old_values, function(y) y[["Pos"]][3], numeric(1L), USE.NAMES = FALSE) %/% 16
+  old_x <- vapply(old_values,
+    function(y) y[["Pos"]][1], numeric(1L),
+    USE.NAMES = FALSE
+  ) %/% 16
+  old_z <- vapply(old_values,
+    function(y) y[["Pos"]][3], numeric(1L),
+    USE.NAMES = FALSE
+  ) %/% 16
   # The actor could be in any dimension
   acdig_keys <- unique(c(
     new_acdig,

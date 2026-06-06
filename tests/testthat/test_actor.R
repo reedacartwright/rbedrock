@@ -127,7 +127,10 @@ test_that("get_chunk_actors_value() returns a list of NBT data.", {
 })
 
 test_that("get_actors_data() returns a list of lists of NBT data.", {
-  dat <- get_chunk_actors_data(c(0, -7, 1, 1), c(0, -2, 0, 0), c(0, 0, 0, 1), db = db)
+  dat <- get_chunk_actors_data(
+    c(0, -7, 1, 1), c(0, -2, 0, 0), c(0, 0, 0, 1),
+    db = db
+  )
   expect_named(
     dat,
     c(

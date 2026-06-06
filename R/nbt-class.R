@@ -555,7 +555,9 @@ rac_cast.rbedrock_nbt_long <- function(x, to, ...) {
 #' @rdname nbt
 #' @export
 nbt_long_array <- function(x, ...) {
-  validate_nbt_long_array(new_nbt_long_array(trunc_int64(as.character(c(x, ...)))))
+  validate_nbt_long_array(
+    new_nbt_long_array(trunc_int64(as.character(c(x, ...))))
+  )
 }
 
 validate_nbt_long_array <- validate_nbt_long
@@ -582,7 +584,9 @@ rac_cast.rbedrock_nbt_long_array <- function(x, to, ...) {
 #' @rdname nbt
 #' @export
 nbt_long_list <- function(x, ...) {
-  validate_nbt_long_list(new_nbt_long_list(trunc_int64(as.character(c(x, ...)))))
+  validate_nbt_long_list(
+    new_nbt_long_list(trunc_int64(as.character(c(x, ...))))
+  )
 }
 
 validate_nbt_long_list <- validate_nbt_long

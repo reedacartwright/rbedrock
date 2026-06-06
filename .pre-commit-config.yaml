@@ -50,6 +50,15 @@ repos:
           data/.*|
           )$
     -   id: lintr
+        args: [--load_package]
+        additional_dependencies:
+        -    R6
+        -    tibble
+        -    bit64
+        -    rappdirs
+        -    rlang
+        -    utils
+        -    digest
     -   id: readme-rmd-rendered
     -   id: parsable-R
     -   id: no-browser-statement

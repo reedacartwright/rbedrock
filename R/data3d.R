@@ -105,14 +105,14 @@ read_data3d_value <- function(rawvalue) {
   ii <- which(hasdata)
   for (i in ii) {
     bb <- b[[i]]
-    biome_map[,, 16 * (i - 1) + (1:16)] <- bb$palette[bb$values]
+    biome_map[, , 16 * (i - 1) + (1:16)] <- bb$palette[bb$values]
   }
   # Subchunks without data copy from the highest y level of
   # subchunks with data
   i <- max(ii)
   if (i < 24) {
     y <- 16 * i
-    biome_map[,, (y + 1):(16 * 24)] <- biome_map[,, y]
+    biome_map[, , (y + 1):(16 * 24)] <- biome_map[, , y]
   }
   # reshape from x,z,y to x,y,z
   biome_map <- aperm(biome_map, c(1, 3, 2))
@@ -131,11 +131,11 @@ reshape_biome_map <- function(value) {
       aperm(value, c(1, 3, 2))
     } else if (ny > 16 * 24) {
       value <- array(value, c(16, ny, 16))
-      aperm(value[,, 1:(16 * 24)], c(1, 3, 2))
+      aperm(value[, , 1:(16 * 24)], c(1, 3, 2))
     } else {
       v <- array(NA_integer_, c(16, 16, 16 * 24))
-      v[,, 1:ny] <- aperm(value, c(1, 3, 2))
-      v[,, (ny + 1):(16 * 24)] <- v[,, ny]
+      v[, , 1:ny] <- aperm(value, c(1, 3, 2))
+      v[, , (ny + 1):(16 * 24)] <- v[, , ny]
       v
     }
   } else {
@@ -158,7 +158,7 @@ write_data3d_value <- function(value) {
 
   # identify y levels with repetitive biomes
   y <- (16 * 24):2
-  o <- sapply(y, function(x) any(biome_map[,, x] != biome_map[,, x - 1]))
+  o <- sapply(y, function(x) any(biome_map[, , x] != biome_map[, , x - 1]))
   m <- match(TRUE, o)
   m <- if (is.na(m)) 1 else y[m]
   # y levels m to 384 are identical.
@@ -169,7 +169,7 @@ write_data3d_value <- function(value) {
   palette_list <- rep(list(integer(0L)), 24)
   for (i in 1:mm) {
     j <- (1:16) + (i - 1) * 16
-    id <- c(biome_map[,, j])
+    id <- c(biome_map[, , j])
     palette_list[[i]] <- unique(id)
     values_list[[i]] <- match(id, palette_list[[i]])
   }

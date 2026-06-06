@@ -10,7 +10,6 @@
 #' rbedrock_example()
 #' rbedrock_example("example1.mcworld")
 #' rbedrock_example_world("example1.mcworld")
-
 rbedrock_example <- function(path = NULL) {
   if (is.null(path)) {
     extdata <- system.file("extdata", package = "rbedrock", mustWork = TRUE)

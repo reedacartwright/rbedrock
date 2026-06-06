@@ -237,7 +237,7 @@ chunk_origin <- function(x) {
 #' @examples
 #' dbpath <- rbedrock_example_world("example1.mcworld")
 #' db <- bedrockdb(dbpath)
-#' blocks <- get_blocks_value(db, x=37, z=10, dimension=0)
+#' blocks <- get_blocks_value(db, x = 37, z = 10, dimension = 0)
 #' locate_blocks(blocks, "ore")
 #' close(db)
 #'

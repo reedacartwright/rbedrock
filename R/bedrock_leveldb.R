@@ -134,7 +134,7 @@ bedrock_leveldb_open <- function(
   ptr
 }
 
-#nolint start : object_length_linter
+# nolint start : object_length_linter
 #' @useDynLib rbedrock R_bedrock_leveldb_close
 bedrock_leveldb_close <- function(db, error_if_closed = FALSE) {
   .Call(R_bedrock_leveldb_close, db, error_if_closed)
@@ -361,7 +361,7 @@ bedrock_leveldb_version <- function() {
   class(ret) <- "numeric_version"
   ret
 }
-#nolint end
+# nolint end
 
 #' @export
 as.character.bedrock_leveldb_snapshot <- function(x, ...) {

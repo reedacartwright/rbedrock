@@ -139,11 +139,11 @@ bedrock_random_get_double <- function(n) {
 #'
 #' @examples
 #' # identify slime chunks
-#' g <- expand.grid(x=1:10, z=1:10)
-#' is_slime_chunk <- mapply(g$x, g$z, FUN = function(x,z) {
-#'   seed <- bedrock_random_create_seed(x,z,0x1f1f1f1f,1,0,type=1)
+#' g <- expand.grid(x = 1:10, z = 1:10)
+#' is_slime_chunk <- mapply(g$x, g$z, FUN = function(x, z) {
+#'   seed <- bedrock_random_create_seed(x, z, 0x1f1f1f1f, 1, 0, type = 1)
 #'   bedrock_random_seed(seed)
-#'   bedrock_random_get_uint(1,10) == 0
+#'   bedrock_random_get_uint(1, 10) == 0
 #' })
 #'
 #' @useDynLib rbedrock R_mcpe_random_create_seed

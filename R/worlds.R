@@ -45,7 +45,7 @@ list_worlds <- function(worlds_dir = worlds_dir_path()) {
   out <- vector("list", length(dirs))
   for (i in seq_along(dirs)) {
     f <- dirs[[i]]
-    #skip directories that do not contain a level.dat
+    # skip directories that do not contain a level.dat
     if (!file_exists(normalize_path(f, "level.dat"))) {
       next
     }

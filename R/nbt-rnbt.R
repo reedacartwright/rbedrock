@@ -27,8 +27,7 @@ read_rnbt <- function(
   format = c("little", "big", "network", "network_big")
 ) {
   format <- match.arg(format)
-  format_int <- switch(
-    format,
+  format_int <- switch(format,
     "little" = 0L,
     "big" = 1L,
     "network" = 2L,
@@ -46,8 +45,7 @@ read_rnbt_once <- function(
   format = c("little", "big", "network", "network_big")
 ) {
   format <- match.arg(format)
-  format_int <- switch(
-    format,
+  format_int <- switch(format,
     "little" = 0L,
     "big" = 1L,
     "network" = 2L,
@@ -65,8 +63,7 @@ write_rnbt <- function(
   format = c("little", "big", "network", "network_big")
 ) {
   format <- match.arg(format)
-  format_int <- switch(
-    format,
+  format_int <- switch(format,
     "little" = 0L,
     "big" = 1L,
     "network" = 2L,
@@ -128,8 +125,7 @@ new_nbt_value_impl <- function(x, type) {
     new_nbt_raw_string_list(lapply(x, new_nbt_raw_string))
   }
 
-  ret <- switch(
-    as.character(type),
+  ret <- switch(as.character(type),
     "0" = NULL,
     "1" = new_nbt_byte(x),
     "2" = new_nbt_short(x),
@@ -216,8 +212,7 @@ to_rnbt_type <- function(x) {
 }
 
 to_rnbt_type_impl <- function(x) {
-  switch(
-    as.character(x),
+  switch(as.character(x),
     "rbedrock_nbt_byte" = 1L,
     "rbedrock_nbt_byte_array" = 7L,
     "rbedrock_nbt_byte_array_list" = 107L,
