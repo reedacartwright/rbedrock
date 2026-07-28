@@ -59,15 +59,9 @@ unnbt_impl <- function(x) {
 #' @rdname nbt
 #' @export
 nbt_compound <- function(...) {
-  nbt_compound0(list(...))
+  dots <- collect_dots(...)
+  validate_nbt_compound(new_nbt_compound(dots))
 }
-
-#' @rdname nbt
-#' @export
-nbt_compound0 <- function(x) {
-  validate_nbt_compound(new_nbt_compound(x))
-}
-
 
 new_nbt_compound <- function(x) {
   stopifnot(is.list(x))
@@ -91,7 +85,7 @@ validate_nbt_compound <- function(x) {
 
 #' @export
 rac_cast.rbedrock_nbt_compound <- function(x, to, ...) {
-  nbt_compound0(x)
+  nbt_compound(x)
 }
 
 # ---- nbt_byte [1] ------------------------------------------------------------
@@ -783,14 +777,14 @@ rac_cast.rbedrock_empty_list <- function(x, to, ...) {
 #' @rdname nbt
 #' @export
 nbt_compound_list <- function(...) {
-  x <- lapply(list(...), nbt_compound0)
+  x <- lapply(list(...), nbt_compound)
   validate_nbt_compound_list(new_nbt_compound_list(x))
 }
 
 #' @rdname nbt
 #' @export
 nbt_compound_list0 <- function(x) {
-  x <- lapply(x, nbt_compound0)
+  x <- lapply(x, nbt_compound)
   validate_nbt_compound_list(new_nbt_compound_list(x))
 }
 

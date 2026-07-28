@@ -94,7 +94,7 @@ nbt_build_list <- function(x) {
   asis <- inherits(x, "AsIs")
   x <- lapply(x, nbt_build)
   if (!is.null(names(x)) || asis) {
-    nbt_compound0(x)
+    nbt_compound(x)
   } else {
     nbt_compound_list0(x)
   }
@@ -103,8 +103,9 @@ nbt_build_list <- function(x) {
 #' @rdname nbt_build
 #' @export
 nbt_build_compound <- function(...) {
-  x <- lapply(list(...), nbt_build)
-  nbt_compound0(x)
+  dots <- collect_dots(...)
+  x <- lapply(dots, nbt_build)
+  nbt_compound(x)
 }
 
 #' @rdname nbt

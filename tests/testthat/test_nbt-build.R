@@ -61,7 +61,7 @@ test_that("nbt_build() converts correct types", {
     nbt_compound(T = nbt_byte(TRUE), F = nbt_byte(FALSE))
   )
 
-  # unamed list to compound list
+  # unnamed list to compound list
   expect_equal(
     nbt_build(list(list(T = TRUE, F = FALSE))),
     nbt_compound_list(nbt_compound(T = nbt_byte(TRUE), F = nbt_byte(FALSE)))

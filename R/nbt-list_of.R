@@ -4,8 +4,8 @@
 #'
 #' @export
 nbt_list_of <- function(...) {
-  lst <- list(...)
-  validate_nbt_list_of(new_nbt_list_of(lst))
+  dots <- list(...)
+  validate_nbt_list_of(new_nbt_list_of(dots))
 }
 
 new_nbt_list_of <- function(x) {
