@@ -320,16 +320,6 @@ rac_type_abbr.default <- function(x) {
   if (is.recursive(x)) "obj" else "val"
 }
 
-# ---- list helpers ------------------------------------------------------------
-
-compact_list <- function(x) {
-  x[as.logical(lengths(x))]
-}
-
-drop_null <- function(x) {
-  Filter(Negate(is.null), x)
-}
-
 # ---- helpers copied from S7 --------------------------------------------------
 # Copyright (c) 2023 S7 authors. License: MIT
 # Source: https://github.com/RConsortium/S7/blob/main/R/utils.R
@@ -362,7 +352,8 @@ names2 <- function(x) {
 # Collect `...` into a named list. As a convenience, a single unnamed list is
 # spliced in so its elements become the values, making it easy to supply
 # values programmatically. All values must be named.
-collect_dots <- function(..., call = sys.call(-1)) {
+# nolint next: object_name_linter.
+collect_dots <- function(..., `_call` = sys.call(-1)) {
   args <- list(...)
 
   is_single_list <- length(args) == 1L &&
@@ -372,10 +363,36 @@ collect_dots <- function(..., call = sys.call(-1)) {
   if (is_single_list) {
     args <- args[[1L]]
     if ("" %in% names2(args)) {
-      stop2("All elements of `..1` must be named.", call = call)
+      stop2("All elements of `..1` must be named.", call = `_call`)
     }
   } else if ("" %in% names2(args)) {
-    stop2("All arguments to `...` must be named.", call = call)
+    stop2("All arguments to `...` must be named.", call = `_call`)
   }
   args
+}
+
+# End helpers from S7
+
+# ---- list helpers ------------------------------------------------------------
+
+compact_list <- function(x) {
+  x[as.logical(lengths(x))]
+}
+
+drop_null <- function(x) {
+  Filter(Negate(is.null), x)
+}
+
+# Collect `...` into a list. As a convenience the argument `_dots` can be
+# spliced in, making it easy to supply values programmatically. Values can
+# be named or unnamed.
+collect_dots_unnamed <- function(
+  ..., `_dots` = list(), # nolint: object_name_linter.
+  `_call` = sys.call(-1) # nolint: object_name_linter.
+) {
+  args <- list(...)
+  if (length(args) > 0 && length(`_dots`) > 0) {
+    stop2("Only one of `...` and `_dots` should be used.", call = `_call`)
+  }
+  if (length(args)) args else `_dots`
 }

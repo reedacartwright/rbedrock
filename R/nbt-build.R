@@ -96,7 +96,7 @@ nbt_build_list <- function(x) {
   if (!is.null(names(x)) || asis) {
     nbt_compound(x)
   } else {
-    nbt_compound_list0(x)
+    nbt_compound_list(`_dots` = x)
   }
 }
 

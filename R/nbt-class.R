@@ -777,14 +777,7 @@ rac_cast.rbedrock_empty_list <- function(x, to, ...) {
 #' @rdname nbt
 #' @export
 nbt_compound_list <- function(...) {
-  x <- lapply(list(...), nbt_compound)
-  validate_nbt_compound_list(new_nbt_compound_list(x))
-}
-
-#' @rdname nbt
-#' @export
-nbt_compound_list0 <- function(x) {
-  x <- lapply(x, nbt_compound)
+  x <- lapply(collect_dots_unnamed(...), nbt_compound)
   validate_nbt_compound_list(new_nbt_compound_list(x))
 }
 
@@ -794,7 +787,7 @@ validate_nbt_compound_list <- function(x) {
 }
 
 new_nbt_compound_list <- function(x) {
-  stopifnot(is.list(x))
+  stopifnot(is.list(x) && (is.null(names(x)) || !any(nzchar(names(x)))))
   structure(
     x,
     class = c(
