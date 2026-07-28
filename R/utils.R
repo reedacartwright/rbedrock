@@ -52,7 +52,7 @@ generate_uuid <- function(n = 1L) {
     hex[15] <- "4"
     hex[20] <- sample(c("8", "9", "a", "b"), 1)
 
-    out[i] <- paste(hex, collapse = "")
+    out[i] <- paste0(hex, collapse = "")
   }
   out
 }
