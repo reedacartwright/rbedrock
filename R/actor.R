@@ -238,6 +238,13 @@ update_storage_key <- function(value) {
 #' The nbt data of a actor is saved in the database, using a key with a prefix
 #' and a 16-character storage key: 'actor:0123456789abcdef'.
 #'
+#' @param db A bedrockdb object.
+#' @param id  A UniqueID.
+#' @param ids A vector of UniqueIDs.
+#' @param value An NBT object.
+#' @param values A list of NBT objects.
+#' @param dimension An integer.
+#'
 #' @name Actor
 NULL
 
@@ -372,7 +379,7 @@ is_valid_acdig_key <- function(keys) {
   grepl(keys, pattern = "^acdig:-?[0-9]+:-?[0-9]+:[0-2]$")
 }
 
-#' @rdname Actor
+#' @rdname ChunkActors
 #' @export
 make_actor_keys <- function(ids) {
   keys <- as.character(ids)

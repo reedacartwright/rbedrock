@@ -6,7 +6,6 @@
 \alias{get_actor_data}
 \alias{put_actor_value}
 \alias{put_actor_data}
-\alias{make_actor_keys}
 \alias{get_actor_keys}
 \title{Read and write Actor data}
 \usage{
@@ -18,9 +17,20 @@ put_actor_value(value, dimension, db = default_db())
 
 put_actor_data(values, dimension, db = default_db())
 
-make_actor_keys(ids)
-
 get_actor_keys(db = default_db())
+}
+\arguments{
+\item{id}{A UniqueID.}
+
+\item{db}{A bedrockdb object.}
+
+\item{ids}{A vector of UniqueIDs.}
+
+\item{value}{An NBT object.}
+
+\item{dimension}{An integer.}
+
+\item{values}{A list of NBT objects.}
 }
 \description{
 The nbt data of a actor is saved in the database, using a key with a prefix
