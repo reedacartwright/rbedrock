@@ -42,22 +42,22 @@ the$db <- NULL
 #'
 #' @export
 default_db <- function(db, check = TRUE) {
-  # evaluating db might update the$db, so we will save it first thing
+  # evaluating `db` might update the$db, so we will save it first thing
   db_old <- the$db
-  if (missing(db)) {
-    db <- the$db
-    assert_open_db(db, check)
-  } else {
+  if (!missing(db)) {
     if (is.character(db)) {
       db <- bedrockdb(db)
     }
     if (!is.null(db)) {
       assert_open_db(db, check)
     }
+    # update default db
     the$db <- db
-    db <- db_old
+  } else {
+    assert_open_db(db_old, check, arg = "default_db()")
   }
-  invisible(db)
+  # return to old value of default db
+  invisible(db_old)
 }
 
 assert_open_db <- function(db, check = TRUE, arg = "db") {
